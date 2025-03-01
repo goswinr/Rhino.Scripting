@@ -408,27 +408,64 @@ module AutoOpenCoerce =
 
     //-------------------views ---------------------
 
+
+    ///<summary>Attempt to get Rhino View Object from the name of the view, can be a standard or page view.</summary>
+    /// <param name="nameOrId">(string or Guid) Name or Guid the view, empty string will return the Active view</param>
+    /// <returns>a State.Doc.View Option.</returns>
+    static member TryCoerceView (nameOrId:'T) : Option<Display.RhinoView> =
+        match box nameOrId with
+        | :? Guid as g ->
+            let viewObj = State.Doc.Views.Find(g)
+            if isNull viewObj then
+                None
+            else
+                Some viewObj
+        | :? string as view ->
+            if isNull view then
+                None
+            elif view = "" then
+                Some State.Doc.Views.ActiveView
+            else
+                let allViews =
+                    State.Doc.Views.GetViewList(includeStandardViews=true, includePageViews=true)
+                    |> Array.filter (fun v-> v.MainViewport.Name = view)
+                if allViews.Length = 1 then
+                    Some allViews.[0]
+                else
+                    None
+        | _ -> None
+
+
     ///<summary>Attempt to get Rhino View Object from the name of the view, can be a standard or page view.</summary>
     ///<param name="nameOrId">(string or Guid) Name or Guid the view, empty string will return the Active view</param>
     ///<returns>a State.Doc.View object. Raises a RhinoScriptingException if coerce failed.</returns>
     static member CoerceView (nameOrId:'T) : Display.RhinoView =
         match box nameOrId with
         | :? Guid as g ->
-            let viewo = State.Doc.Views.Find(g)
-            if isNull viewo then RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceView: could not CoerceView from '%O'" g
-            else viewo
-
+            let viewObj = State.Doc.Views.Find(g)
+            if isNull viewObj then
+                RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceView: could not CoerceView from '%O'" g
+            else
+                viewObj
         | :? string as view ->
-            if isNull view then RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceView: failed on null for view name input" // or State.Doc.Views.ActiveView
-            elif view = "" then State.Doc.Views.ActiveView
+            if isNull view then
+                RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceView: failed on null for view name input" // or State.Doc.Views.ActiveView
+            elif view = "" then
+                State.Doc.Views.ActiveView
             else
                 let allViews =
                     State.Doc.Views.GetViewList(includeStandardViews=true, includePageViews=true)
                     |> Array.filter (fun v-> v.MainViewport.Name = view)
-                if allViews.Length = 1 then allViews.[0]
-                else  RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceView: could not CoerceView '%s'" view
+                if allViews.Length = 1 then
+                    allViews.[0]
+                else
+                    RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceView: could not CoerceView '%s'" view
+        | _ ->
+            RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceView: Cannot get view from %A" nameOrId
 
-        | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceView: Cannot get view from %A" nameOrId
+
+
+
 
 
     ///<summary>Attempt to get Rhino Page (or Layout) View Object from the name of the Layout.</summary>

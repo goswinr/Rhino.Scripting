@@ -25,9 +25,9 @@ type RhinoUserInteractionException (s:string) =
     static member inline Raise msg =
         Printf.kprintf (fun s -> raise (new RhinoUserInteractionException(s))) msg
 
-/// Rhino.Scripting Exception for UI thread synchronization problems
-type RhinoSyncException (s:string) =
-    inherit Exception(s)
-
-    static member inline Raise msg =
-        Printf.kprintf (fun s -> raise (new RhinoSyncException(s))) msg
+// if syncContext is null, then Eto.Forms.Application.Instance.Invoke is used.
+// Rhino.Scripting Exception for UI thread synchronization problems
+// type RhinoSyncException (s:string) =
+//     inherit Exception(s)
+//     static member inline Raise msg =
+//         Printf.kprintf (fun s -> raise (new RhinoSyncException(s))) msg

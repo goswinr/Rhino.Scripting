@@ -85,29 +85,82 @@ module AutoOpenUtility =
     ///<returns>(string) The current text in the clipboard
     /// or an empty string if the content of the clipboard is not a text</returns>
     static member ClipboardText() : string = //GET
-        if Windows.Forms.Clipboard.ContainsText() then Windows.Forms.Clipboard.GetText() else ""
+        // Eto Forms fails:
+        // https://discourse.mcneel.com/t/using-default-eto-control-over-rhino-variant/167138/8
+        // let platform = Eto.Platform.Get(Eto.Platform.Instance.GetType().AssemblyQualifiedName) // Platform.Instance is null
+        //let platform = Eto.Platform.Detect //Could not detect platform. Are you missing a platform assembly? --->  Error creating instance of platform type 'Eto.Wpf.Platform, Eto.Wpf' --->  Unable to cast object of type 'Eto.Wpf.Platform' to type 'Eto.Platform'.
+        //use _ctx = platform.Context
+        // let cl = Eto.Forms.Clipboard.Instance
+        // if isNull cl then RhinoScriptingException.Raise "RhinoScriptSyntax.ClipboardText() failed to get clipboard instance"
+        // if cl.ContainsText then cl.Text else ""
+
+        // if Windows.Forms.Clipboard.ContainsText() then Windows.Forms.Clipboard.GetText() else ""
+        // use reflection to avoid dependency on Windows.Forms
+        let clipboardType = Type.GetType "System.Windows.Forms.Clipboard, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+        match clipboardType with
+        | null ->
+            State.Warn "Could not access clipboard in RhinoScriptSyntax.ClipboardText. Could not load System.Windows.Forms.Clipboard type"
+            ""
+        | t ->
+            let containsTextMethod = t.GetMethod("ContainsText", System.Type.EmptyTypes)
+            let getTextMethod = t.GetMethod("GetText", System.Type.EmptyTypes)
+            match containsTextMethod, getTextMethod with
+            | null, _ ->
+                State.Warn "Could not access clipboard in RhinoScriptSyntax.ClipboardText. Could not find ContainsText method on Clipboard type"
+                ""
+            | _, null ->
+                State.Warn "Could not access clipboard in RhinoScriptSyntax.ClipboardText. Could not find GetText method on Clipboard type"
+                ""
+            | containsMethod, getText ->
+                let containsText = containsMethod.Invoke(null, null) :?> bool
+                if containsText then
+                    getText.Invoke(null, null) :?> string
+                else
+                    ""
 
     ///<summary>Sets a text string to the Windows clipboard.</summary>
     ///<param name="text">(string) Text to set</param>
     ///<returns>(unit) void, nothing.</returns>
     static member ClipboardText(text:string) : unit = //SET
-        System.Windows.Forms.Clipboard.SetText(text)
+        // does not work with Eto.Forms.Clipboard
+        // let cl = Eto.Forms.Clipboard.Instance
+        // if isNull cl then RhinoScriptingException.Raise "RhinoScriptSyntax.ClipboardText(text) failed to get clipboard instance"
+        // cl.Text <- text //System.InvalidOperationException: Platform instance is null. Have you created your application?
+
+        // Windows.Forms.Clipboard.SetText(text)
+        // use reflection to avoid dependency on Windows.Forms
+        let clipboardType = Type.GetType "System.Windows.Forms.Clipboard, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+        match clipboardType with
+        | null ->
+            State.Warn "Could not access clipboard in RhinoScriptSyntax.ClipboardText. Could not load System.Windows.Forms.Clipboard type"
+        | t ->
+            let setTextMethod = t.GetMethod("SetText", [| typeof<string> |])
+            match setTextMethod with
+            | null ->
+                State.Warn "Could not access clipboard in RhinoScriptSyntax.ClipboardText. Could not find SetText method on Clipboard type"
+            | setText ->
+                try
+                    let _ = setText.Invoke(null, [| text :> obj |])
+                    ()
+                with ex ->
+                    State.Warn $"Failed to set clipboard text: {ex.Message}"
+
 
 
     ///<summary>Changes the luminance of a red-green-blue value. Hue and saturation are
     ///    not affected.</summary>
     ///<param name="rgb">(Drawing.Color) Initial rgb value</param>
-    ///<param name="luma">(float) The luminance in units of 0.1 percent of the total range. A
-    ///    value of luma = 50 corresponds to 5 percent of the maximum luminance</param>
+    ///<param name="luminance">(float) The luminance in units of 0.1 percent of the total range. A
+    ///    value of luminance = 50 corresponds to 5 percent of the maximum luminance </param>
     ///<param name="isScaleRelative">(bool) Optional, default value: <c>false</c>
-    ///    If True, luma specifies how much to increment or decrement the
-    ///    current luminance. If False, luma specified the absolute luminance</param>
+    ///    If True, luminance specifies how much to increment or decrement the
+    ///    current luminance. If False, luminance specified the absolute luminance </param>
     ///<returns>(Drawing.Color) modified rgb value.</returns>
-    static member ColorAdjustLuma(rgb:Drawing.Color, luma:float, [<OPT;DEF(false)>]isScaleRelative:bool) : Drawing.Color =
+    static member ColorAdjustLuma(rgb:Drawing.Color, luminance:float, [<OPT;DEF(false)>]isScaleRelative:bool) : Drawing.Color =
         let mutable hsl = Display.ColorHSL(rgb)
-        let mutable luma = luma / 1000.0
-        if isScaleRelative then luma <- hsl.L + luma
-        hsl.L <- luma
+        let mutable luminance = luminance / 1000.0
+        if isScaleRelative then luminance <- hsl.L + luminance
+        hsl.L <- luminance
         hsl.ToArgbColor()
 
 

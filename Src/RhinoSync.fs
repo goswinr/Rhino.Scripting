@@ -45,11 +45,11 @@ type RhinoSync private () =
             try
                 // some reflection hacks because Rhinocommon does not expose a UI sync context
                 // https://discourse.mcneel.com/t/use-rhino-ui-dialogs-from-worker-threads/90130/7
-                let feshId = System.Guid("01dab273-99ae-4760-8695-3f29f4887831") // the GUID of Fesh.Rhino Plugin set in it's AssemblyInfo.fs
-                let feshRh = Rhino.PlugIns.PlugIn.Find(feshId)
+                let feshId = Guid "01dab273-99ae-4760-8695-3f29f4887831" // the GUID of Fesh.Rhino Plugin set in it's AssemblyInfo.fs see https://github.com/goswinr/Fesh.Rhino/blob/main/Src/AssemblyInfo.fs#L15
+                let feshRh = Rhino.PlugIns.PlugIn.Find feshId
                 if notNull feshRh then
                     feshAssembly <- feshRh.Assembly
-                    feshRhinoSyncModule <- feshAssembly.GetType("Fesh.Rhino.Sync")
+                    feshRhinoSyncModule <- feshAssembly.GetType "Fesh.Rhino.Sync"
             with e ->
                 log "Rhino.Scripting.dll could not get feshRhinoSyncModule from Fesh Assembly via Reflection: %A" e
 
@@ -85,12 +85,19 @@ type RhinoSync private () =
                 log "Rhino.Scripting.dll: Fesh.Rhino.Sync.syncContext failed with: %O" e
 
         else
-            // try to get just the sync context from Windows form ( that works on Mac.Mono) (WPF is not anymore referenced by this project)
-            try
-                RhinoApp.InvokeOnUiThread(new RunOnUiDelegate(fun () -> syncContext <- Windows.Forms.WindowsFormsSynchronizationContext.Current ))
-            with e ->
-                // TODO better not log anything here ??
-                log "Rhino.Scripting.dll: Fesh.Rhino.Sync.syncContext failed to init via Windows.Forms.WindowsFormsSynchronizationContext: %O" e
+            // Fesh syncContext not found via reflection,
+            // The code is not used from within Fesh.Rhino plugin
+            // let just use AsyncInvoke from Eto.Forms.Application
+            // https://pages.picoe.ca/docs/api/html/M_Eto_Forms_Application_AsyncInvoke.htm#!
+            syncContext <- null
+
+            //
+            // // try to get just the sync context from Windows form ( that works on Mac.Mono) (WPF is not anymore referenced by this project)
+            // try
+            //     RhinoApp.InvokeOnUiThread(new RunOnUiDelegate(fun () -> syncContext <- Windows.Forms.WindowsFormsSynchronizationContext.Current ))
+            // with e ->
+            //     // TODO better not log anything here ??
+            //     log "Rhino.Scripting.dll: Fesh.Rhino.Sync.syncContext failed to init via Windows.Forms.WindowsFormsSynchronizationContext: %O" e
 
 
     static let initialize = // Don't rename !!!invoked via reflection from Fesh.Rhino.
@@ -154,16 +161,19 @@ type RhinoSync private () =
         if RhinoApp.InvokeRequired then
             if initIsPending then init()
             if isNull syncContext then
-                RhinoSyncException.Raise "%s\r\n%s\r\n%s" "This code needs to run on the main UI thread."
-                        "Rhino.RhinoSync.syncContext is still null or not set up. An automatic context switch is not possible."
-                        "You are calling a function of Rhino.Scripting that need the UI thread."
+                Eto.Forms.Application.Instance.Invoke func
+
+                // RhinoSyncException.Raise "%s\r\n%s\r\n%s" "This code needs to run on the main UI thread."
+                //         "Rhino.RhinoSync.syncContext is still null or not set up. An automatic context switch is not possible."
+                //         "You are calling a function of Rhino.Scripting that need the UI thread."
                 // TODO: better would be to call https://developer.rhino3d.com/api/RhinoCommon/html/M_Rhino_RhinoApp_InvokeOnUiThread.htm and then pass in a continuation function?
                 // or somehow get the syncContext from RhinoCode or RhinoCommon or the Rhino .NET host via reflection.
                 // https://discourse.mcneel.com/t/use-rhino-ui-dialogs-from-worker-threads/90130
-            async{
-                do! Async.SwitchToContext syncContext
-                return func()
-                } |> Async.RunSynchronously
+            else
+                async{
+                    do! Async.SwitchToContext syncContext
+                    return func()
+                    } |> Async.RunSynchronously
         else
             func()
 
@@ -174,17 +184,20 @@ type RhinoSync private () =
         if RhinoApp.InvokeRequired then
             if initIsPending then init()
             if isNull syncContext then
-                RhinoSyncException.Raise "This code needs to run on the main UI thread. Rhino.RhinoSync.syncContext is still null or not set up. An automatic context switch is not possible. You are calling a function of Rhino.Scripting that need the UI thread."
+                Eto.Forms.Application.Instance.Invoke func
+
+                // RhinoSyncException.Raise "This code needs to run on the main UI thread. Rhino.RhinoSync.syncContext is still null or not set up. An automatic context switch is not possible. You are calling a function of Rhino.Scripting that need the UI thread."
                 // TODO: better would be to call https://developer.rhino3d.com/api/RhinoCommon/html/M_Rhino_RhinoApp_InvokeOnUiThread.htm and then pass in a continuation function?
                 // or somehow get the syncContext from RhinoCode or RhinoCommon or the Rhino .NET host via reflection.
                 // https://discourse.mcneel.com/t/use-rhino-ui-dialogs-from-worker-threads/90130
-            async{
-                do! Async.SwitchToContext syncContext
-                if  not redraw then RhinoDoc.ActiveDoc.Views.RedrawEnabled <- true
-                let res = func()
-                if  not redraw then RhinoDoc.ActiveDoc.Views.RedrawEnabled <- false
-                return res
-                } |> Async.RunSynchronously
+            else
+                async{
+                    do! Async.SwitchToContext syncContext
+                    if  not redraw then RhinoDoc.ActiveDoc.Views.RedrawEnabled <- true
+                    let res = func()
+                    if  not redraw then RhinoDoc.ActiveDoc.Views.RedrawEnabled <- false
+                    return res
+                    } |> Async.RunSynchronously
         else
             if not redraw then RhinoDoc.ActiveDoc.Views.RedrawEnabled <- true
             let res = func()
@@ -200,22 +213,26 @@ type RhinoSync private () =
         if RhinoApp.InvokeRequired then
             if initIsPending then init() // do first
             if isNull syncContext then
-                RhinoSyncException.Raise "This code needs to run on the main UI thread. Rhino.RhinoSync.syncContext is still null or not set up. An automatic context switch is not possible. You are calling a function of Rhino.Scripting that need the UI thread."
+                Eto.Forms.Application.Instance.Invoke func
+
+                // RhinoSyncException.Raise "This code needs to run on the main UI thread. Rhino.RhinoSync.syncContext is still null or not set up. An automatic context switch is not possible. You are calling a function of Rhino.Scripting that need the UI thread."
                 // TODO: better would be to call https://developer.rhino3d.com/api/RhinoCommon/html/M_Rhino_RhinoApp_InvokeOnUiThread.htm and then pass in a continuation function?
                 // or somehow get the syncContext from RhinoCode or RhinoCommon or the Rhino .NET host via reflection.
                 // https://discourse.mcneel.com/t/use-rhino-ui-dialogs-from-worker-threads/90130
-            async{
-                do! Async.SwitchToContext syncContext
-                let isWinVis = if isNull isEditorVisible then false else isEditorVisible.Invoke() // do after init
-                //eprintfn "Hiding Fesh async..isWinVis:%b" isWinVis
-                if isWinVis && notNull hideEditor then hideEditor.Invoke()
-                if not redraw then RhinoDoc.ActiveDoc.Views.RedrawEnabled <- true
-                RhinoApp.SetFocusToMainWindow()
-                let res = func()
-                if not redraw then RhinoDoc.ActiveDoc.Views.RedrawEnabled <- false
-                if isWinVis && notNull showEditor then showEditor.Invoke()
-                return res
-                } |> Async.RunSynchronously
+
+            else
+                async{
+                    do! Async.SwitchToContext syncContext
+                    let isWinVis = if isNull isEditorVisible then false else isEditorVisible.Invoke() // do after init
+                    //eprintfn "Hiding Fesh async..isWinVis:%b" isWinVis
+                    if isWinVis && notNull hideEditor then hideEditor.Invoke()
+                    if not redraw then RhinoDoc.ActiveDoc.Views.RedrawEnabled <- true
+                    RhinoApp.SetFocusToMainWindow()
+                    let res = func()
+                    if not redraw then RhinoDoc.ActiveDoc.Views.RedrawEnabled <- false
+                    if isWinVis && notNull showEditor then showEditor.Invoke()
+                    return res
+                    } |> Async.RunSynchronously
         else
             if initIsPending then init() // because even when we are in sync we still need to see if the Fesh window is showing or not.
             let isWinVis = if isNull isEditorVisible then false else isEditorVisible.Invoke() // do after init

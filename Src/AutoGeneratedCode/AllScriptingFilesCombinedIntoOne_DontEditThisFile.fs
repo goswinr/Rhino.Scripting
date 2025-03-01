@@ -167,7 +167,7 @@ type RhinoScriptSyntax private () =
         | :? Sphere      as b ->   State.Doc.Objects.AddSphere(b,attr)
         | :? Cylinder    as cl ->  State.Doc.Objects.AddSurface (cl.ToNurbsSurface(),attr)
         | :? Cone        as c ->   State.Doc.Objects.AddSurface (c.ToNurbsSurface(),attr)
-        | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.Add: object of type %A not implemented yet" (geo.GetType())
+        | _ -> RhinoScriptingException.Raise $"RhinoScriptSyntax.Add: object of type {geo.GetType().FullName} not implemented yet"
 
     ///<summary>Adds any geometry object (struct or class) to the Rhino document.
     ///   Works not only on any subclass of GeometryBase but also on Point3d, Line, Arc and similar structs </summary>
@@ -605,27 +605,64 @@ type RhinoScriptSyntax private () =
 
     //-------------------views ---------------------
 
+
+    ///<summary>Attempt to get Rhino View Object from the name of the view, can be a standard or page view.</summary>
+    /// <param name="nameOrId">(string or Guid) Name or Guid the view, empty string will return the Active view</param>
+    /// <returns>a State.Doc.View Option.</returns>
+    static member TryCoerceView (nameOrId:'T) : Option<Display.RhinoView> =
+        match box nameOrId with
+        | :? Guid as g ->
+            let viewObj = State.Doc.Views.Find(g)
+            if isNull viewObj then
+                None
+            else
+                Some viewObj
+        | :? string as view ->
+            if isNull view then
+                None
+            elif view = "" then
+                Some State.Doc.Views.ActiveView
+            else
+                let allViews =
+                    State.Doc.Views.GetViewList(includeStandardViews=true, includePageViews=true)
+                    |> Array.filter (fun v-> v.MainViewport.Name = view)
+                if allViews.Length = 1 then
+                    Some allViews.[0]
+                else
+                    None
+        | _ -> None
+
+
     ///<summary>Attempt to get Rhino View Object from the name of the view, can be a standard or page view.</summary>
     ///<param name="nameOrId">(string or Guid) Name or Guid the view, empty string will return the Active view</param>
     ///<returns>a State.Doc.View object. Raises a RhinoScriptingException if coerce failed.</returns>
     static member CoerceView (nameOrId:'T) : Display.RhinoView =
         match box nameOrId with
         | :? Guid as g ->
-            let viewo = State.Doc.Views.Find(g)
-            if isNull viewo then RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceView: could not CoerceView from '%O'" g
-            else viewo
-
+            let viewObj = State.Doc.Views.Find(g)
+            if isNull viewObj then
+                RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceView: could not CoerceView from '%O'" g
+            else
+                viewObj
         | :? string as view ->
-            if isNull view then RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceView: failed on null for view name input" // or State.Doc.Views.ActiveView
-            elif view = "" then State.Doc.Views.ActiveView
+            if isNull view then
+                RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceView: failed on null for view name input" // or State.Doc.Views.ActiveView
+            elif view = "" then
+                State.Doc.Views.ActiveView
             else
                 let allViews =
                     State.Doc.Views.GetViewList(includeStandardViews=true, includePageViews=true)
                     |> Array.filter (fun v-> v.MainViewport.Name = view)
-                if allViews.Length = 1 then allViews.[0]
-                else  RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceView: could not CoerceView '%s'" view
+                if allViews.Length = 1 then
+                    allViews.[0]
+                else
+                    RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceView: could not CoerceView '%s'" view
+        | _ ->
+            RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceView: Cannot get view from %A" nameOrId
 
-        | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceView: Cannot get view from %A" nameOrId
+
+
+
 
 
     ///<summary>Attempt to get Rhino Page (or Layout) View Object from the name of the Layout.</summary>
@@ -2403,8 +2440,10 @@ type RhinoScriptSyntax private () =
     ///<summary>Returns current width and height, of the screen of the primary monitor.</summary>
     ///<returns>(int * int) containing two numbers identifying the width and height in pixels.</returns>
     static member ScreenSize() : int * int =
-        let sz = System.Windows.Forms.Screen.PrimaryScreen.Bounds //  TODO: Windows Forms is supported on Mono Mac??  compile separate Assembly for Windows ???
-        sz.Width, sz.Height
+        // let sz = System.Windows.Forms.Screen.PrimaryScreen.Bounds //  TODO: Windows Forms is supported on Mono Mac??  compile separate Assembly for Windows ???
+        // sz.Width, sz.Height
+        let sz = Eto.Forms.Screen.PrimaryScreen.Bounds
+        int sz.Width, int sz.Height
 
 
     ///<summary>Returns version of the Rhino SDK supported by the executing Rhino.</summary>
@@ -17078,32 +17117,40 @@ type RhinoScriptSyntax private () =
     ///<summary>Display browse-for-folder dialog allowing the user to select a folder.</summary>
     ///<param name="folder">(string) Optional, A default folder</param>
     ///<param name="message">(string) Optional, A prompt or message</param>
+    /// <param name="title">(string) Optional, A dialog box title</param>
     ///<returns>(string) selected folder or None if selection was canceled.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
-    static member BrowseForFolder([<OPT;DEF(null:string)>]folder:string, [<OPT;DEF(null:string)>]message:string) : string =
+    static member BrowseForFolder(
+            [<OPT;DEF(null:string)>]folder:string,
+            [<OPT;DEF(null:string)>]message:string,
+            [<OPT;DEF(null:string)>]title:string) : string =
         let getKeepEditor () =
-            use dlg = new System.Windows.Forms.FolderBrowserDialog()
-            dlg.ShowNewFolderButton <- true
+            use dlg = new Eto.Forms.SelectFolderDialog()
             if notNull folder then
-                if IO.Directory.Exists(folder) then
-                    dlg.SelectedPath <-  folder
+                dlg.Directory <- folder
             if notNull message then
-                dlg.Description <- message
-            if dlg.ShowDialog() = System.Windows.Forms.DialogResult.OK then
-                dlg.SelectedPath
+                dlg.Title <- message
+            if notNull title then
+                dlg.Title <- title
+            let parentEtoWindow = null
+            if dlg.ShowDialog(parentEtoWindow) = Eto.Forms.DialogResult.Ok then
+                dlg.Directory
             else
                 RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.BrowseForFolder()"
         RhinoSync.DoSync getKeepEditor
-        // or use ETO ??
-        //let dlg = Eto.Forms.SelectFolderDialog()
-        //if notNull folder then
-        //    if not <| isinstance(folder, str) then folder <- string(folder)
-        //    let dlg.Directory = folder
-        //if notNull message then
-        //    if not <| isinstance(message, str) then message <- string(message)
-        //    let dlg.Title = message
-        //if dlg.ShowDialog(null) = Eto.Forms.DialogResult.Ok then
-        //    dlg.Directory
+
+        // use dlg = new Windows.Forms.FolderBrowserDialog()
+        // dlg.ShowNewFolderButton <- true
+        // if notNull folder then
+        //     if IO.Directory.Exists(folder) then
+        //         dlg.SelectedPath <-  folder
+        // if notNull message then
+        //     dlg.Description <- message
+        // if dlg.ShowDialog() = Windows.Forms.DialogResult.OK then
+        //     dlg.SelectedPath
+        // else
+        //     RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.BrowseForFolder()"
+
 
 
     ///<summary>Displays a list of items in a checkable-style list dialog box.</summary>
@@ -17115,15 +17162,15 @@ type RhinoScriptSyntax private () =
     static member CheckListBox( items:(string*bool) seq,
                                 [<OPT;DEF(null:string)>]message:string,
                                 [<OPT;DEF(null:string)>]title:string) :Rarr<string*bool> =
-        let checkstates = rarr { for  item in items -> snd item }
-        let itemstrs =    rarr { for item in items -> fst item}
+        let checkStates = rarr { for  item in items -> snd item }
+        let itemStrings =    rarr { for item in items -> fst item}
 
-        let newcheckstates =
-            let getKeepEditor () = UI.Dialogs.ShowCheckListBox(title, message, itemstrs, checkstates)
+        let newCheckStates =
+            let getKeepEditor () = UI.Dialogs.ShowCheckListBox(title, message, itemStrings, checkStates)
             RhinoSync.DoSync getKeepEditor
 
-        if notNull newcheckstates then
-            (Seq.zip itemstrs newcheckstates |>  Rarr.ofSeq)
+        if notNull newCheckStates then
+            (Seq.zip itemStrings newCheckStates |>  Rarr.ofSeq)
         else
             //RhinoScriptingException.Raise "RhinoScriptSyntax.CheckListBox failed.  items:'%A' message:'%A' title:'%A'" items message title
             RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.CheckListBox()"
@@ -17265,9 +17312,22 @@ type RhinoScriptSyntax private () =
     static member GetColor([<OPT;DEF(Drawing.Color())>]color:Drawing.Color) : Drawing.Color =
         let get () =
             let zero = Drawing.Color()
-            let col = ref(if color = zero then  Drawing.Color.Black else color)
-            let rc = UI.Dialogs.ShowColorDialog(col)
-            if rc then (!col) else RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetColor()"
+            let mutable col = if color = zero then Drawing.Color.Black else color
+            let colRef = &col
+            // let rc = UI.Dialogs.ShowColorDialog(col) // needs a ref to WinForms
+            // let mi = typeof<UI.Dialogs>.GetMethod("ShowColorDialog", [| typeof<byref<System.Drawing.Color>> |]) // fails
+            let methOp =
+                typeof<UI.Dialogs>.GetMethods()
+                |> Seq.tryFind ( fun m ->
+                    let ps = m.GetParameters()
+                    ps.Length=1 &&  ps[0].ParameterType.FullName = "System.Drawing.Color&"    )
+            match methOp with
+            | None -> RhinoScriptingException.Raise "RhinoScriptSyntax.GetColor: ShowColorDialog method not found"
+            | Some mi ->
+                let rc = unbox<bool> (mi.Invoke(null,[|colRef:>obj|]))
+                if not rc then  RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetColor()"
+                col
+
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -17280,13 +17340,13 @@ type RhinoScriptSyntax private () =
     static member GetCursorPos() : Point3d * Point2d * Guid * Point2d =
         let get () =   //or skip ?
             let view = State.Doc.Views.ActiveView
-            let screenpt = UI.MouseCursor.Location
-            let clientpt = view.ScreenToClient(screenpt)
+            let screenPt = UI.MouseCursor.Location
+            let clientPt = view.ScreenToClient(screenPt)
             let viewport = view.ActiveViewport
             let xf = viewport.GetTransform(DocObjects.CoordinateSystem.Screen, DocObjects.CoordinateSystem.World)
-            let worldpt = Point3d(clientpt.X, clientpt.Y, 0.0)
-            worldpt.Transform(xf)
-            worldpt, screenpt, viewport.Id, clientpt
+            let worldPt = Point3d(clientPt.X, clientPt.Y, 0.0)
+            worldPt.Transform(xf)
+            worldPt, screenPt, viewport.Id, clientPt
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -17650,9 +17710,9 @@ type RhinoScriptSyntax private () =
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetPointOnMesh(meshId:Guid, [<OPT;DEF("Pick Point On Mesh")>]message:string) : Point3d =
         let get () =
-            //let cmdrc, point = Input.RhinoGet.GetPointOnMesh(State.Doc, meshId, message, acceptNothing=false) // TODO later versions of RhinoCommon7 require this !?
-            let cmdrc, point = Input.RhinoGet.GetPointOnMesh( meshId, message, acceptNothing=false) //still Ok in earlier versions of RhinoCommon 7
-            if cmdrc = Commands.Result.Success then point
+            //let res, point = Input.RhinoGet.GetPointOnMesh(State.Doc, meshId, message, acceptNothing=false) // TODO later versions of RhinoCommon7 require this !?
+            let res, point = Input.RhinoGet.GetPointOnMesh( meshId, message, acceptNothing=false) //still Ok in earlier versions of RhinoCommon 7
+            if res = Commands.Result.Success then point
             else RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetPointOnMesh()"
 
         RhinoSync.DoSyncRedrawHideEditor get
@@ -18049,7 +18109,7 @@ type RhinoScriptSyntax private () =
     ///<param name="folder">(string) Optional, A default folder</param>
     ///<param name="filename">(string) Optional, A default file name</param>
     ///<param name="extension">(string) Optional, A default file extension</param>
-    ///<returns>(string array) Theselected file names.
+    ///<returns>(string array) The selected file names.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member OpenFileNames(    [<OPT;DEF(null:string)>]title:string,
                                     [<OPT;DEF(null:string)>]filter:string,
@@ -18084,18 +18144,48 @@ type RhinoScriptSyntax private () =
     ///<param name="view">(string) Optional, If point is specified, the view in which the point is computed.
     ///    If omitted, the active view is used</param>
     ///<returns>(int) index of the menu item picked or -1 if no menu item was picked.</returns>
-    static member PopupMenu(        items:string seq,
-                                    [<OPT;DEF(null:int seq)>]modes:int seq,
-                                    [<OPT;DEF(Point3d())>]point:Point3d,
-                                    [<OPT;DEF(null:string)>]view:string) : int =
+    static member PopupMenu(items:string seq,
+                            [<OPT;DEF(null:int seq)>]modes:int seq,
+                            [<OPT;DEF(Point3d())>]point:Point3d,
+                            [<OPT;DEF(null:string)>]view:string) : int =
         let getKeepEditor () =
-            let mutable screenpoint = Windows.Forms.Cursor.Position
-            if Point3d.Origin <> point then
-                let view = RhinoScriptSyntax.CoerceView(view)
-                let viewport = view.ActiveViewport
-                let point2d = viewport.WorldToClient(point)
-                screenpoint <- viewport.ClientToScreen(point2d)
-            UI.Dialogs.ShowContextMenu(items, screenpoint, modes)
+            let viewport =
+                match RhinoScriptSyntax.TryCoerceView(view) with
+                | Some v -> v.ActiveViewport
+                | None -> RhinoDoc.ActiveDoc.Views.ActiveView.ActiveViewport
+
+            let screenPoint =
+                if Point3d.Origin = point then // because  [<OPT;DEF(Point3d())>] gives a 0,0,0 point
+                    let cursorPoint =
+                        // Windows.Forms.Cursor.Position can not be used directly since the reference to windows.forms is removed, goodbye mono https://discourse.mcneel.com/t/rhino-for-mac-wip-goodbye-mono-hello-net-6/131925
+                        //let cursorType = Type.GetType("System.Windows.Forms.Cursor")
+                        // use reflection to avoid dependency on Windows.Forms
+                        let cursorType = Type.GetType "System.Windows.Forms.Cursor, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+                        match cursorType with
+                        | null ->
+                            State.Warn "Could not get cursor position in RhinoScriptSyntax.PopupMenu. Could not load System.Windows.Forms.Cursor type"
+                            None
+                        | t ->
+                            let positionProperty = t.GetProperty "Position"
+                            match positionProperty with
+                            | null ->
+                                State.Warn "Could not get cursor position in RhinoScriptSyntax.PopupMenu. Could not find Position property on Cursor type"
+                                None
+                            | p ->
+                                Some (p.GetValue(null) :?> Drawing.Point)
+
+                    match cursorPoint with
+                    | Some p ->
+                        p
+                    | None ->
+                        let point2d = viewport.WorldToClient(viewport.CameraTarget)
+                        viewport.ClientToScreen(point2d)
+                else
+                    let point2d = viewport.WorldToClient(point)
+                    viewport.ClientToScreen(point2d)
+
+            UI.Dialogs.ShowContextMenu(items, screenPoint, modes)
+
         RhinoSync.DoSync getKeepEditor
 
 
@@ -18120,7 +18210,7 @@ type RhinoScriptSyntax private () =
             let maximum = if maximum = 7e89 then RhinoMath.UnsetValue else maximum
 
             let rc = UI.Dialogs.ShowNumberBox(title, message, defaultValNumber, minimum, maximum)
-            if  rc then (!defaultValNumber)
+            if  rc then (defaultValNumber.Value)
             else RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.RealBox()"
 
         RhinoSync.DoSyncRedrawHideEditor get
@@ -18247,29 +18337,94 @@ type RhinoScriptSyntax private () =
     ///<returns>(string) The current text in the clipboard
     /// or an empty string if the content of the clipboard is not a text</returns>
     static member ClipboardText() : string = //GET
-        if Windows.Forms.Clipboard.ContainsText() then Windows.Forms.Clipboard.GetText() else ""
+        // if Windows.Forms.Clipboard.ContainsText() then Windows.Forms.Clipboard.GetText() else ""
+        // use reflection to avoid dependency on Windows.Forms
+        // let clipboardType = Type.GetType "System.Windows.Forms.Clipboard, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+        // match clipboardType with
+        // | null ->
+        //     State.Warn "Could not access clipboard in RhinoScriptSyntax.ClipboardText. Could not load System.Windows.Forms.Clipboard type"
+        //     ""
+        // | t ->
+        //     let containsTextMethod = t.GetMethod("ContainsText", System.Type.EmptyTypes)
+        //     let getTextMethod = t.GetMethod("GetText", System.Type.EmptyTypes)
+        //     match containsTextMethod, getTextMethod with
+        //     | null, _ ->
+        //         State.Warn "Could not access clipboard in RhinoScriptSyntax.ClipboardText. Could not find ContainsText method on Clipboard type"
+        //         ""
+        //     | _, null ->
+        //         State.Warn "Could not access clipboard in RhinoScriptSyntax.ClipboardText. Could not find GetText method on Clipboard type"
+        //         ""
+        //     | containsMethod, getText ->
+        //         let containsText = containsMethod.Invoke(null, null) :?> bool
+        //         if containsText then
+        //             getText.Invoke(null, null) :?> string
+        //         else
+        //             ""
+
+        // Eto Forms :
+        //  https://discourse.mcneel.com/t/using-default-eto-control-over-rhino-variant/167138/8
+        // create a new copy of the current platform type (Wpf or macOS)
+        let platform = Eto.Platform.Detect
+        // let platform = Eto.Platform.Get(Eto.Platform.Instance.GetType().AssemblyQualifiedName)
+        use ctx = platform.Context
+        let cl =
+            // if isNull Eto.Forms.Clipboard.Instance then
+            //     let g = Eto.Platform.Detect
+            //     g.Create()
+            //     new Eto.Forms.Clipboard()
+            // else
+                Eto.Forms.Clipboard.Instance
+        if isNull cl then RhinoScriptingException.Raise "RhinoScriptSyntax.ClipboardText() failed to get clipboard instance"
+        if cl.ContainsText then cl.Text else ""
 
     ///<summary>Sets a text string to the Windows clipboard.</summary>
     ///<param name="text">(string) Text to set</param>
     ///<returns>(unit) void, nothing.</returns>
     static member ClipboardText(text:string) : unit = //SET
-        System.Windows.Forms.Clipboard.SetText(text)
+        // Windows.Forms.Clipboard.SetText(text)
+        // use reflection to avoid dependency on Windows.Forms
+        let clipboardType = Type.GetType "System.Windows.Forms.Clipboard, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+        match clipboardType with
+        | null ->
+            State.Warn "Could not access clipboard in RhinoScriptSyntax.ClipboardText. Could not load System.Windows.Forms.Clipboard type"
+        | t ->
+            let setTextMethod = t.GetMethod("SetText", [| typeof<string> |])
+            match setTextMethod with
+            | null ->
+                State.Warn "Could not access clipboard in RhinoScriptSyntax.ClipboardText. Could not find SetText method on Clipboard type"
+            | setText ->
+                try
+                    let _ = setText.Invoke(null, [| text :> obj |])
+                    ()
+                with ex ->
+                    State.Warn $"Failed to set clipboard text: {ex.Message}"
+
+        // does not work with Eto.Forms.Clipboard
+        // let cl =
+        //     if isNull Eto.Forms.Clipboard.Instance then
+        //         let g = Eto.Platform.Detect
+        //         g.Create()
+        //         new Eto.Forms.Clipboard()
+        //     else
+        //         Eto.Forms.Clipboard.Instance
+        // if isNull cl then RhinoScriptingException.Raise "RhinoScriptSyntax.ClipboardText(text) failed to get clipboard instance"
+        // cl.Text <- text //System.InvalidOperationException: Platform instance is null. Have you created your application?
 
 
     ///<summary>Changes the luminance of a red-green-blue value. Hue and saturation are
     ///    not affected.</summary>
     ///<param name="rgb">(Drawing.Color) Initial rgb value</param>
-    ///<param name="luma">(float) The luminance in units of 0.1 percent of the total range. A
-    ///    value of luma = 50 corresponds to 5 percent of the maximum luminance</param>
+    ///<param name="luminance">(float) The luminance in units of 0.1 percent of the total range. A
+    ///    value of luminance = 50 corresponds to 5 percent of the maximum luminance </param>
     ///<param name="isScaleRelative">(bool) Optional, default value: <c>false</c>
-    ///    If True, luma specifies how much to increment or decrement the
-    ///    current luminance. If False, luma specified the absolute luminance</param>
+    ///    If True, luminance specifies how much to increment or decrement the
+    ///    current luminance. If False, luminance specified the absolute luminance </param>
     ///<returns>(Drawing.Color) modified rgb value.</returns>
-    static member ColorAdjustLuma(rgb:Drawing.Color, luma:float, [<OPT;DEF(false)>]isScaleRelative:bool) : Drawing.Color =
+    static member ColorAdjustLuma(rgb:Drawing.Color, luminance:float, [<OPT;DEF(false)>]isScaleRelative:bool) : Drawing.Color =
         let mutable hsl = Display.ColorHSL(rgb)
-        let mutable luma = luma / 1000.0
-        if isScaleRelative then luma <- hsl.L + luma
-        hsl.L <- luma
+        let mutable luminance = luminance / 1000.0
+        if isScaleRelative then luminance <- hsl.L + luminance
+        hsl.L <- luminance
         hsl.ToArgbColor()
 
 
@@ -18759,9 +18914,9 @@ type RhinoScriptSyntax private () =
     ///<returns>(unit) void, nothing.</returns>
     static member DetailScale(detailId:Guid, modelLength:float, pageLength:float) : unit = //SET
         let detail = RhinoScriptSyntax.CoerceDetailViewObject(detailId)
-        let modelunits = State.Doc.ModelUnitSystem
-        let pageunits = State.Doc.PageUnitSystem
-        if detail.DetailGeometry.SetScale(modelLength, modelunits, pageLength, pageunits) then
+        let modelUnits = State.Doc.ModelUnitSystem
+        let pageUnits = State.Doc.PageUnitSystem
+        if detail.DetailGeometry.SetScale(modelLength, modelUnits, pageLength, pageUnits) then
             detail.CommitChanges() |> ignore
             State.Doc.Views.Redraw()
         else
@@ -18804,8 +18959,8 @@ type RhinoScriptSyntax private () =
     ///<param name="view">(string) Title of the view</param>
     ///<returns>(bool) True of False indicating success or failure.</returns>
     static member IsViewCurrent(view:string) : bool =
-        let activeview = State.Doc.Views.ActiveView
-        view = activeview.MainViewport.Name
+        let activeView = State.Doc.Views.ActiveView
+        view = activeView.MainViewport.Name
 
 
     ///<summary>Checks if the specified view is maximized (enlarged so as to fill

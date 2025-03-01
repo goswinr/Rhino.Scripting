@@ -167,7 +167,7 @@ type RhinoScriptSyntax private () =
         | :? Sphere      as b ->   State.Doc.Objects.AddSphere(b,attr)
         | :? Cylinder    as cl ->  State.Doc.Objects.AddSurface (cl.ToNurbsSurface(),attr)
         | :? Cone        as c ->   State.Doc.Objects.AddSurface (c.ToNurbsSurface(),attr)
-        | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.Add: object of type %A not implemented yet" (geo.GetType())
+        | _ -> RhinoScriptingException.Raise $"RhinoScriptSyntax.Add: object of type {geo.GetType().FullName} not implemented yet"
 
     ///<summary>Adds any geometry object (struct or class) to the Rhino document.
     ///   Works not only on any subclass of GeometryBase but also on Point3d, Line, Arc and similar structs </summary>

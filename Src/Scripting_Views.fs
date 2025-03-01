@@ -176,9 +176,9 @@ module AutoOpenViews =
     ///<returns>(unit) void, nothing.</returns>
     static member DetailScale(detailId:Guid, modelLength:float, pageLength:float) : unit = //SET
         let detail = RhinoScriptSyntax.CoerceDetailViewObject(detailId)
-        let modelunits = State.Doc.ModelUnitSystem
-        let pageunits = State.Doc.PageUnitSystem
-        if detail.DetailGeometry.SetScale(modelLength, modelunits, pageLength, pageunits) then
+        let modelUnits = State.Doc.ModelUnitSystem
+        let pageUnits = State.Doc.PageUnitSystem
+        if detail.DetailGeometry.SetScale(modelLength, modelUnits, pageLength, pageUnits) then
             detail.CommitChanges() |> ignore
             State.Doc.Views.Redraw()
         else
@@ -221,8 +221,8 @@ module AutoOpenViews =
     ///<param name="view">(string) Title of the view</param>
     ///<returns>(bool) True of False indicating success or failure.</returns>
     static member IsViewCurrent(view:string) : bool =
-        let activeview = State.Doc.Views.ActiveView
-        view = activeview.MainViewport.Name
+        let activeView = State.Doc.Views.ActiveView
+        view = activeView.MainViewport.Name
 
 
     ///<summary>Checks if the specified view is maximized (enlarged so as to fill

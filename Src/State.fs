@@ -38,23 +38,23 @@ type internal State private () =
     // -------Events: --------------------
 
 
-    static let warnAboutFailedEventSetup () =
-        [
-        "***"
-        "RhinoSync.syncContext could not be set via reflection."
-        "Rhino.Scripting.dll is not loaded from main thread"
-        "it needs to set up callbacks for pressing Esc key and changing the active document."
-        "Setting up these event handlers async can trigger a fatal access violation exception"
-        "if its the first time you access the event."
-        "Try to set them up yourself on main thread"
-        "or after you have already attached a dummy handler from main thread:"
-        "   Rhino.RhinoDoc.EndOpenDocument.Add (fun args -> Doc <- args.Document)"
-        "   RhinoApp.EscapeKeyPressed.Add ( fun _  -> if not escapePressed  &&  not <| Input.RhinoGet.InGet(Doc) then escapePressed <- true)"
-        "***"
-        ]
-        |> String.concat Environment.NewLine
-        |>! RhinoApp.WriteLine
-        |> eprintfn "%s"
+    // static let warnAboutFailedEventSetup () =
+    //     [
+    //     "***"
+    //     "RhinoSync.syncContext could not be set via reflection."
+    //     "Rhino.Scripting.dll is not loaded from main thread"
+    //     "it needs to set up callbacks for pressing Esc key and changing the active document."
+    //     "Setting up these event handlers async can trigger a fatal access violation exception"
+    //     "if its the first time you access the event."
+    //     "Try to set them up yourself on main thread"
+    //     "or after you have already attached a dummy handler from main thread:"
+    //     "   Rhino.RhinoDoc.EndOpenDocument.Add (fun args -> Doc <- args.Document)"
+    //     "   RhinoApp.EscapeKeyPressed.Add ( fun _  -> if not escapePressed  &&  not <| Input.RhinoGet.InGet(Doc) then escapePressed <- true)"
+    //     "***"
+    //     ]
+    //     |> String.concat Environment.NewLine
+    //     |>! RhinoApp.WriteLine
+    //     |> eprintfn "%s"
 
 
     static let setupEventsInSync() =
@@ -75,7 +75,7 @@ type internal State private () =
                     )
                 )
         with
-            | :? RhinoSyncException -> warnAboutFailedEventSetup()
+            // | :? RhinoSyncException -> warnAboutFailedEventSetup()
             | e ->
                 //raise e
                 sprintf "%A" e
@@ -87,7 +87,7 @@ type internal State private () =
         if not Rhino.Runtime.HostUtils.RunningInRhino then
             RhinoScriptingException.Raise "RhinoScriptSyntax.State.initState Failed to find the active Rhino document, is this dll running hosted inside the Rhino process? "
         else
-            //RhinoSync.Initialize() // dont do yet, only try to get sync context when actually needed, if on UI thread this might be never.
+            //RhinoSync.Initialize() // don't do yet, only try to get sync context when actually needed, if on UI thread this might be never.
             updateDoc(RhinoDoc.ActiveDoc )  // do first
             setupEventsInSync()             // do after Doc is set up
             isRunningInRhino <- true        // do last
@@ -124,3 +124,10 @@ type internal State private () =
             commandSerialNumbers
         and set v =
             commandSerialNumbers <- v
+
+
+    /// does RhinoApp.WriteLine
+    /// and eprintfn
+    static member Warn(msg:string) =
+        RhinoApp.WriteLine msg
+        eprintfn "%s" msg

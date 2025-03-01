@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2025-02-23
+### Changed
+- Use Eto.Forms instead of Windows.Forms
+
 ## [0.8.2] - 2025-02-23
 ### Changed
 - build and deploy with GitHub Actions

@@ -25,32 +25,40 @@ module AutoOpenUserInterface =
     ///<summary>Display browse-for-folder dialog allowing the user to select a folder.</summary>
     ///<param name="folder">(string) Optional, A default folder</param>
     ///<param name="message">(string) Optional, A prompt or message</param>
+    /// <param name="title">(string) Optional, A dialog box title</param>
     ///<returns>(string) selected folder or None if selection was canceled.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
-    static member BrowseForFolder([<OPT;DEF(null:string)>]folder:string, [<OPT;DEF(null:string)>]message:string) : string =
+    static member BrowseForFolder(
+            [<OPT;DEF(null:string)>]folder:string,
+            [<OPT;DEF(null:string)>]message:string,
+            [<OPT;DEF(null:string)>]title:string) : string =
         let getKeepEditor () =
-            use dlg = new System.Windows.Forms.FolderBrowserDialog()
-            dlg.ShowNewFolderButton <- true
+            use dlg = new Eto.Forms.SelectFolderDialog()
             if notNull folder then
-                if IO.Directory.Exists(folder) then
-                    dlg.SelectedPath <-  folder
+                dlg.Directory <- folder
             if notNull message then
-                dlg.Description <- message
-            if dlg.ShowDialog() = System.Windows.Forms.DialogResult.OK then
-                dlg.SelectedPath
+                dlg.Title <- message
+            if notNull title then
+                dlg.Title <- title
+            let parentEtoWindow = null
+            if dlg.ShowDialog(parentEtoWindow) = Eto.Forms.DialogResult.Ok then
+                dlg.Directory
             else
                 RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.BrowseForFolder()"
         RhinoSync.DoSync getKeepEditor
-        // or use ETO ??
-        //let dlg = Eto.Forms.SelectFolderDialog()
-        //if notNull folder then
-        //    if not <| isinstance(folder, str) then folder <- string(folder)
-        //    let dlg.Directory = folder
-        //if notNull message then
-        //    if not <| isinstance(message, str) then message <- string(message)
-        //    let dlg.Title = message
-        //if dlg.ShowDialog(null) = Eto.Forms.DialogResult.Ok then
-        //    dlg.Directory
+
+        // use dlg = new Windows.Forms.FolderBrowserDialog()
+        // dlg.ShowNewFolderButton <- true
+        // if notNull folder then
+        //     if IO.Directory.Exists(folder) then
+        //         dlg.SelectedPath <-  folder
+        // if notNull message then
+        //     dlg.Description <- message
+        // if dlg.ShowDialog() = Windows.Forms.DialogResult.OK then
+        //     dlg.SelectedPath
+        // else
+        //     RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.BrowseForFolder()"
+
 
 
     ///<summary>Displays a list of items in a checkable-style list dialog box.</summary>
@@ -62,15 +70,15 @@ module AutoOpenUserInterface =
     static member CheckListBox( items:(string*bool) seq,
                                 [<OPT;DEF(null:string)>]message:string,
                                 [<OPT;DEF(null:string)>]title:string) :Rarr<string*bool> =
-        let checkstates = rarr { for  item in items -> snd item }
-        let itemstrs =    rarr { for item in items -> fst item}
+        let checkStates = rarr { for  item in items -> snd item }
+        let itemStrings =    rarr { for item in items -> fst item}
 
-        let newcheckstates =
-            let getKeepEditor () = UI.Dialogs.ShowCheckListBox(title, message, itemstrs, checkstates)
+        let newCheckStates =
+            let getKeepEditor () = UI.Dialogs.ShowCheckListBox(title, message, itemStrings, checkStates)
             RhinoSync.DoSync getKeepEditor
 
-        if notNull newcheckstates then
-            (Seq.zip itemstrs newcheckstates |>  Rarr.ofSeq)
+        if notNull newCheckStates then
+            (Seq.zip itemStrings newCheckStates |>  Rarr.ofSeq)
         else
             //RhinoScriptingException.Raise "RhinoScriptSyntax.CheckListBox failed.  items:'%A' message:'%A' title:'%A'" items message title
             RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.CheckListBox()"
@@ -212,9 +220,22 @@ module AutoOpenUserInterface =
     static member GetColor([<OPT;DEF(Drawing.Color())>]color:Drawing.Color) : Drawing.Color =
         let get () =
             let zero = Drawing.Color()
-            let col = ref(if color = zero then  Drawing.Color.Black else color)
-            let rc = UI.Dialogs.ShowColorDialog(col)
-            if rc then (!col) else RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetColor()"
+            let mutable col = if color = zero then Drawing.Color.Black else color
+            let colRef = &col
+            // let rc = UI.Dialogs.ShowColorDialog(col) // needs a ref to WinForms
+            // let mi = typeof<UI.Dialogs>.GetMethod("ShowColorDialog", [| typeof<byref<System.Drawing.Color>> |]) // fails
+            let methOp =
+                typeof<UI.Dialogs>.GetMethods()
+                |> Seq.tryFind ( fun m ->
+                    let ps = m.GetParameters()
+                    ps.Length=1 &&  ps[0].ParameterType.FullName = "System.Drawing.Color&"    )
+            match methOp with
+            | None -> RhinoScriptingException.Raise "RhinoScriptSyntax.GetColor: ShowColorDialog method not found"
+            | Some mi ->
+                let rc = unbox<bool> (mi.Invoke(null,[|colRef:>obj|]))
+                if not rc then  RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetColor()"
+                col
+
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -227,13 +248,13 @@ module AutoOpenUserInterface =
     static member GetCursorPos() : Point3d * Point2d * Guid * Point2d =
         let get () =   //or skip ?
             let view = State.Doc.Views.ActiveView
-            let screenpt = UI.MouseCursor.Location
-            let clientpt = view.ScreenToClient(screenpt)
+            let screenPt = UI.MouseCursor.Location
+            let clientPt = view.ScreenToClient(screenPt)
             let viewport = view.ActiveViewport
             let xf = viewport.GetTransform(DocObjects.CoordinateSystem.Screen, DocObjects.CoordinateSystem.World)
-            let worldpt = Point3d(clientpt.X, clientpt.Y, 0.0)
-            worldpt.Transform(xf)
-            worldpt, screenpt, viewport.Id, clientpt
+            let worldPt = Point3d(clientPt.X, clientPt.Y, 0.0)
+            worldPt.Transform(xf)
+            worldPt, screenPt, viewport.Id, clientPt
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -597,9 +618,9 @@ module AutoOpenUserInterface =
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetPointOnMesh(meshId:Guid, [<OPT;DEF("Pick Point On Mesh")>]message:string) : Point3d =
         let get () =
-            //let cmdrc, point = Input.RhinoGet.GetPointOnMesh(State.Doc, meshId, message, acceptNothing=false) // TODO later versions of RhinoCommon7 require this !?
-            let cmdrc, point = Input.RhinoGet.GetPointOnMesh( meshId, message, acceptNothing=false) //still Ok in earlier versions of RhinoCommon 7
-            if cmdrc = Commands.Result.Success then point
+            //let res, point = Input.RhinoGet.GetPointOnMesh(State.Doc, meshId, message, acceptNothing=false) // TODO later versions of RhinoCommon7 require this !?
+            let res, point = Input.RhinoGet.GetPointOnMesh( meshId, message, acceptNothing=false) //still Ok in earlier versions of RhinoCommon 7
+            if res = Commands.Result.Success then point
             else RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetPointOnMesh()"
 
         RhinoSync.DoSyncRedrawHideEditor get
@@ -996,7 +1017,7 @@ module AutoOpenUserInterface =
     ///<param name="folder">(string) Optional, A default folder</param>
     ///<param name="filename">(string) Optional, A default file name</param>
     ///<param name="extension">(string) Optional, A default file extension</param>
-    ///<returns>(string array) Theselected file names.
+    ///<returns>(string array) The selected file names.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member OpenFileNames(    [<OPT;DEF(null:string)>]title:string,
                                     [<OPT;DEF(null:string)>]filter:string,
@@ -1031,18 +1052,48 @@ module AutoOpenUserInterface =
     ///<param name="view">(string) Optional, If point is specified, the view in which the point is computed.
     ///    If omitted, the active view is used</param>
     ///<returns>(int) index of the menu item picked or -1 if no menu item was picked.</returns>
-    static member PopupMenu(        items:string seq,
-                                    [<OPT;DEF(null:int seq)>]modes:int seq,
-                                    [<OPT;DEF(Point3d())>]point:Point3d,
-                                    [<OPT;DEF(null:string)>]view:string) : int =
+    static member PopupMenu(items:string seq,
+                            [<OPT;DEF(null:int seq)>]modes:int seq,
+                            [<OPT;DEF(Point3d())>]point:Point3d,
+                            [<OPT;DEF(null:string)>]view:string) : int =
         let getKeepEditor () =
-            let mutable screenpoint = Windows.Forms.Cursor.Position
-            if Point3d.Origin <> point then
-                let view = RhinoScriptSyntax.CoerceView(view)
-                let viewport = view.ActiveViewport
-                let point2d = viewport.WorldToClient(point)
-                screenpoint <- viewport.ClientToScreen(point2d)
-            UI.Dialogs.ShowContextMenu(items, screenpoint, modes)
+            let viewport =
+                match RhinoScriptSyntax.TryCoerceView(view) with
+                | Some v -> v.ActiveViewport
+                | None -> RhinoDoc.ActiveDoc.Views.ActiveView.ActiveViewport
+
+            let screenPoint =
+                if Point3d.Origin = point then // because  [<OPT;DEF(Point3d())>] gives a 0,0,0 point
+                    let cursorPoint =
+                        // Windows.Forms.Cursor.Position can not be used directly since the reference to windows.forms is removed, goodbye mono https://discourse.mcneel.com/t/rhino-for-mac-wip-goodbye-mono-hello-net-6/131925
+                        //let cursorType = Type.GetType("System.Windows.Forms.Cursor")
+                        // use reflection to avoid dependency on Windows.Forms
+                        let cursorType = Type.GetType "System.Windows.Forms.Cursor, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+                        match cursorType with
+                        | null ->
+                            State.Warn "Could not get cursor position in RhinoScriptSyntax.PopupMenu. Could not load System.Windows.Forms.Cursor type"
+                            None
+                        | t ->
+                            let positionProperty = t.GetProperty "Position"
+                            match positionProperty with
+                            | null ->
+                                State.Warn "Could not get cursor position in RhinoScriptSyntax.PopupMenu. Could not find Position property on Cursor type"
+                                None
+                            | p ->
+                                Some (p.GetValue(null) :?> Drawing.Point)
+
+                    match cursorPoint with
+                    | Some p ->
+                        p
+                    | None ->
+                        let point2d = viewport.WorldToClient(viewport.CameraTarget)
+                        viewport.ClientToScreen(point2d)
+                else
+                    let point2d = viewport.WorldToClient(point)
+                    viewport.ClientToScreen(point2d)
+
+            UI.Dialogs.ShowContextMenu(items, screenPoint, modes)
+
         RhinoSync.DoSync getKeepEditor
 
 
@@ -1067,7 +1118,7 @@ module AutoOpenUserInterface =
             let maximum = if maximum = 7e89 then RhinoMath.UnsetValue else maximum
 
             let rc = UI.Dialogs.ShowNumberBox(title, message, defaultValNumber, minimum, maximum)
-            if  rc then (!defaultValNumber)
+            if  rc then (defaultValNumber.Value)
             else RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.RealBox()"
 
         RhinoSync.DoSyncRedrawHideEditor get
