@@ -2,7 +2,8 @@
 
 open Rhino
 open Rhino.Geometry
-open FsEx
+open System
+// open FsEx
 
 /// This module provides type extensions for pretty printing.
 /// It adds a 'rhObj.ToNiceString' property to many Rhino geometry objects.
@@ -48,7 +49,7 @@ module AutoOpenToNiceStringExtensions =
     type Line with
         ///Like the ToString function but with appropriate precision formatting
         member ln.ToNiceString =
-            sprintf "Geometry.Line from %s, %s, %s to %s, %s, %s" (NiceFormat.float  ln.From.X) (NiceFormat.float  ln.From.Y) (NiceFormat.float  ln.From.Z) (NiceFormat.float  ln.To.X) (NiceFormat.float  ln.To.Y) (NiceFormat.float  ln.To.Z)
+            sprintf "Rhino.Geometry.Line from %s, %s, %s to %s, %s, %s" (NiceFormat.float  ln.From.X) (NiceFormat.float  ln.From.Y) (NiceFormat.float  ln.From.Z) (NiceFormat.float  ln.To.X) (NiceFormat.float  ln.To.Y) (NiceFormat.float  ln.To.Z)
 
     type Transform with
         /// returns a string showing the Transformation Matrix in an aligned 4x4 grid
@@ -62,39 +63,45 @@ module AutoOpenToNiceStringExtensions =
                     |> Array.map String.length
                     |> Array.max
                 |]
-            str{
-                yield! "Rhino.Geometry.Transform:"
-                for i,s in Seq.indexed vs do
-                    let coli = i%4
-                    let len = cols.[coli]
-                    yield "| "
-                    yield String.padLeftWith len ' ' s
-                    if coli = 3 then yield! ""
-                //yield! sprintf "Scale x: %g ; y: %g z: %g" m.M00 m.M11 m.M22
-                }
+            let b = Text.StringBuilder()
+            b.AppendLine "Rhino.Geometry.Transform:"  |> ignore
+            for i,s in Seq.indexed vs do
+                let coli = i%4
+                let len = cols.[coli]
+                b.Append("| ")  |> ignore
+                b.Append(s.PadLeft(len,' '))  |> ignore
+                if coli = 3 then
+                    b.AppendLine() |> ignore
+            b.ToString()
+
 
     type Plane with
         /// returns a string showing the Transformation Matrix in an aligned 4x4 grid
         member p.ToNiceString =
             if not p.IsValid then "invalid Rhino.Geometry.Plane"
             else
-                str{
-                    yield! "Rhino.Geometry.Plane:"
-                    yield! sprintf "Origin X=%s Y=%s Z=%s" (NiceFormat.float  p.Origin.X)(NiceFormat.float  p.Origin.Y) (NiceFormat.float  p.Origin.Z)
-                    yield! sprintf "X-Axis X=%s Y=%s Z=%s" (NiceFormat.float  p.XAxis.X) (NiceFormat.float  p.XAxis.Y) (NiceFormat.float  p.XAxis.Z)
-                    yield! sprintf "Y-Axis X=%s Y=%s Z=%s" (NiceFormat.float  p.YAxis.X) (NiceFormat.float  p.YAxis.Y) (NiceFormat.float  p.YAxis.Z)
-                    }
+                [|
+                "Rhino.Geometry.Plane:"
+                sprintf "Origin X=%s Y=%s Z=%s" (NiceFormat.float  p.Origin.X)(NiceFormat.float  p.Origin.Y) (NiceFormat.float  p.Origin.Z)
+                sprintf "X-Axis X=%s Y=%s Z=%s" (NiceFormat.float  p.XAxis.X) (NiceFormat.float  p.XAxis.Y) (NiceFormat.float  p.XAxis.Z)
+                sprintf "Y-Axis X=%s Y=%s Z=%s" (NiceFormat.float  p.YAxis.X) (NiceFormat.float  p.YAxis.Y) (NiceFormat.float  p.YAxis.Z)
+                |]
+                |> String.concat Environment.NewLine
 
     type BoundingBox with
         /// returns a string showing the Transformation Matrix in an aligned 4x4 grid
         member b.ToNiceString =
-            str{
-                if   b.IsDegenerate(Rhino.Scripting.State.Doc.ModelAbsoluteTolerance) > 0 then yield! "flat Rhino.Geometry.BoundingBox"
-                elif not b.IsValid then yield! "invalid (decreasing?) Rhino.Geometry.BoundingBox"
-                else                    yield! "Rhino.Geometry.BoundingBox:"
-                yield! sprintf "Size X=%s Y=%s Z=%s" (NiceFormat.float b.Diagonal .X) (NiceFormat.float  b.Diagonal .Y) (NiceFormat.float  b.Diagonal .Z)
-                yield! sprintf "from X=%s Y=%s Z=%s" (NiceFormat.float  b.Min.X) (NiceFormat.float  b.Min.Y) (NiceFormat.float  b.Min.Z)
-                yield! sprintf "till X=%s Y=%s Z=%s" (NiceFormat.float  b.Max.X) (NiceFormat.float  b.Max.Y) (NiceFormat.float  b.Max.Z)
-                }
+            [|
+            if b.IsDegenerate(Rhino.Scripting.State.Doc.ModelAbsoluteTolerance) > 0 then
+                sprintf "flat Rhino.Geometry.BoundingBox: Size X=%s Y=%s Z=%s" (NiceFormat.float b.Diagonal.X) (NiceFormat.float  b.Diagonal.Y) (NiceFormat.float  b.Diagonal.Z)
+            elif not b.IsValid then
+                "invalid (decreasing?) Rhino.Geometry.BoundingBox"
+            else
+                "Rhino.Geometry.BoundingBox:"
+            sprintf "Size X=%s Y=%s Z=%s" (NiceFormat.float b.Diagonal.X) (NiceFormat.float  b.Diagonal.Y) (NiceFormat.float  b.Diagonal.Z)
+            sprintf "from X=%s Y=%s Z=%s" (NiceFormat.float  b.Min.X) (NiceFormat.float  b.Min.Y) (NiceFormat.float  b.Min.Z)
+            sprintf "till X=%s Y=%s Z=%s" (NiceFormat.float  b.Max.X) (NiceFormat.float  b.Max.Y) (NiceFormat.float  b.Max.Z)
+            |]
+            |> String.concat Environment.NewLine
 
 

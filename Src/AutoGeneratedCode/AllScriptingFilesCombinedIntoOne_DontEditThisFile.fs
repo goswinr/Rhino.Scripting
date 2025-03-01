@@ -11,6 +11,7 @@ open Microsoft.FSharp.Core.LanguagePrimitives
 
 open Rhino.Geometry
 open Rhino.ApplicationSettings
+// open ResizeArray
 
 // open FsEx
 // open FsEx.UtilMath
@@ -3310,7 +3311,7 @@ type RhinoScriptSyntax private () =
                 let d = State.Doc.Objects.AddTextDot(string i, pt) // TODO really draw debug objects ?
                 RhinoScriptSyntax.ObjectLayer(d,"ERROR-AddPolyline", createLayerIfMissing=true)
             eprintfn "See %d TextDots on layer 'ERROR-AddPolyline'"  (Seq.length points)
-            RhinoScriptingException.Raise "RhinoScriptSyntax.AddPolyline: Unable to add polyline to document form points:\r\n'%A'" (Nice.str points)
+            RhinoScriptingException.Raise "RhinoScriptSyntax.AddPolyline: Unable to add polyline to document form points:%s'%A'" Environment.NewLine (Nice.str points)
         State.Doc.Views.Redraw()
         rc
 
@@ -3321,7 +3322,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Guid) objectId of the new Curve object.</returns>
     static member AddPolylineClosed(points:Point3d seq) : Guid =
         let pl = Polyline(points)
-        if pl.Count < 3 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPolylineClosed: Unable to add closed polyline to document from points:\r\n'%A'" (Nice.str points)
+        if pl.Count < 3 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPolylineClosed: Unable to add closed polyline to document from points:%s'%A'" Environment.NewLine (Nice.str points)
         if (pl.First-pl.Last).Length <= State.Doc.ModelAbsoluteTolerance then
             pl.[pl.Count-1] <- pl.First
         else
@@ -3333,7 +3334,7 @@ type RhinoScriptSyntax private () =
                 let d = State.Doc.Objects.AddTextDot(string i, pt)  // TODO really draw debug objects ?
                 RhinoScriptSyntax.ObjectLayer(d,"ERROR-AddPolylineClosed", createLayerIfMissing=true)
             eprintfn "See %d TextDots on layer 'ERROR-AddPolylineClosed'"  (Seq.length points)
-            RhinoScriptingException.Raise "RhinoScriptSyntax.AddPolylineClosed: Unable to add closed polyline to document.  points:'%A'" points
+            RhinoScriptingException.Raise "RhinoScriptSyntax.AddPolylineClosed: Unable to add closed polyline to document. points:'%A'" points
         State.Doc.Views.Redraw()
         rc
 
@@ -8603,7 +8604,7 @@ type RhinoScriptSyntax private () =
            else RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatch failed to create exactly on hatch from curve. It created %d Hatches"  rc.Count
         with e->
             let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance
-            RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatch failed on one curve using tolerance %f \r\nMessage: %s" tolerance  e.Message
+            RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatch failed on one curve using tolerance %f %sMessage: %s" tolerance  Environment.NewLine e.Message
 
 
     ///<summary>Creates one or more new Hatch objects from a list of closed planar Curves.</summary>
@@ -8622,7 +8623,7 @@ type RhinoScriptSyntax private () =
         try RhinoScriptSyntax.AddHatches(curves, hatchPattern, scale, rotation)
         with e->
             let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance
-            RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatches failed on curveIds using tolerance %f :'%s' \r\nMessage: %s" tolerance (Nice.str curveIds)  e.Message
+            RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatches failed on curveIds using tolerance %f :'%s' %sMessage: %s" tolerance (Nice.str curveIds) Environment.NewLine  e.Message
 
     ///<summary>Creates a new Hatch object from a closed planar Curve object.</summary>
     ///<param name="curveId">(Guid) Identifier of the closed planar Curve that defines the boundary of the Hatch object</param>
@@ -8639,7 +8640,7 @@ type RhinoScriptSyntax private () =
         try RhinoScriptSyntax.AddHatch(RhinoScriptSyntax.CoerceCurve(curveId), hatchPattern, scale, rotation, tolerance)
         with e->
             let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance
-            RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatch failed on one curve using tolerance %f : %s\r\nMessage: %s" tolerance (Nice.str curveId)  e.Message
+            RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatch failed on one curve using tolerance %f : %s%sMessage: %s" tolerance (Nice.str curveId) Environment.NewLine  e.Message
 
 
 
@@ -8654,7 +8655,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(string ResizeArray) Names of the newly added Hatch patterns.</returns>
     static member AddHatchPatterns(filename:string, [<OPT;DEF(false)>]replace:bool) : string ResizeArray =
         let patterns = DocObjects.HatchPattern.ReadFromFile(filename, true)
-        if isNull patterns then RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatchPatterns failed. filename:'%A' replace:'%A'" filename replace
+        if isNull patterns then RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatchPatterns failed. filename:'%s' replace:'%A'" filename replace
         let rc = ResizeArray()
         for pattern in patterns do
              let index = State.Doc.HatchPatterns.Add(pattern)

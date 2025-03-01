@@ -35,7 +35,7 @@ module internal UtilLayer =
                 RhinoScriptingException.Raise "%s: The layer name '%s' is invalid. It may not include line returns, tabs, and leading or trailing whitespace. in '%s'" eVSLN  name fullPath
         else
             if not<| Util.isGoodStringId(trimmed, false) then
-                RhinoScriptingException.Raise "%s: The layer name '%s' has invalid or not recommended characters.\r\nYou may be able to use this layer name by setting the optional 'allowUnicode' parameter in '%s' to 'true'" eVSLN  name fullPath
+                RhinoScriptingException.Raise "%s: The layer name '%s' has invalid or not recommended characters.%sYou may be able to use this layer name by setting the optional 'allowUnicode' parameter in '%s' to 'true'" eVSLN  name Environment.NewLine  fullPath
 
         match Char.GetUnicodeCategory(trimmed.[0]) with
         | UnicodeCategory.OpenPunctuation

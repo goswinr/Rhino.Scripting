@@ -35,24 +35,24 @@ module InternalToNiceStringSetup =
 
     /// Rhino specific formatting function that is set to be the
     /// externalFormatter in FsEx.NiceStringSettings. It is set in the init() function.
-    let internal formatRhinoObject (o:obj) : NiceStringSettings.Lines option=
+    let internal formatRhinoObject (o:obj) : option<string> =
           match o with
-          | :? Guid        as x -> Some <| NiceStringSettings.Element (guid x)
-          | :? Point3d     as x -> Some <| NiceStringSettings.Element x.ToNiceString
-          | :? Vector3d    as x -> Some <| NiceStringSettings.Element x.ToNiceString
-          | :? Line        as x -> Some <| NiceStringSettings.Element x.ToNiceString
-          | :? Point3f     as x -> Some <| NiceStringSettings.Element x.ToNiceString
-          | :? Vector3f    as x -> Some <| NiceStringSettings.Element x.ToNiceString
-          | :? Transform   as x -> Some <| NiceStringSettings.Element x.ToNiceString
-          | :? Plane       as x -> Some <| NiceStringSettings.Element x.ToNiceString
-          | :? BoundingBox as x -> Some <| NiceStringSettings.Element x.ToNiceString
+          | :? Guid        as x -> Some <| (guid x)
+          | :? Point3d     as x -> Some <| x.ToNiceString
+          | :? Vector3d    as x -> Some <| x.ToNiceString
+          | :? Line        as x -> Some <| x.ToNiceString
+          | :? Point3f     as x -> Some <| x.ToNiceString
+          | :? Vector3f    as x -> Some <| x.ToNiceString
+          | :? Transform   as x -> Some <| x.ToNiceString
+          | :? Plane       as x -> Some <| x.ToNiceString
+          | :? BoundingBox as x -> Some <| x.ToNiceString
           | _                  -> None
 
     let init()=
         if initIsPending then
             initIsPending <- false
             try
-                NiceStringSettings.externalFormatter  <- formatRhinoObject
+                NiceStringSettings.externalFormatter  <-  (fun o -> formatRhinoObject o |> Option.map NiceStringSettings.Element)
                 if Rhino.Runtime.HostUtils.RunningInRhino then
                     // these below fail if not running inside rhino.exe
                     // scripts that reference Rhino.Scripting from outside of rhino is still Ok , but all function that call the C++ API don't work
@@ -63,7 +63,7 @@ module InternalToNiceStringSetup =
                     RhinoDoc.EndOpenDocument.Add       (fun a -> NiceStringSettings.userZeroTolerance <- a.Document.ModelAbsoluteTolerance * 0.1 )
             with e ->
                 // try to log errors to error stream:
-                eprintfn "Initializing NiceString pretty printing in Rhino.InternalToNiceStringSetup.init() via Rhino.Scripting.dll failed with:\r\n%A" e
+                eprintfn "Initializing NiceString pretty printing in Rhino.InternalToNiceStringSetup.init() via Rhino.Scripting.dll failed with:%s%A" Environment.NewLine e
 
 
     /// Like printfn but in Blue if used from Fesh Editor. Adds a new line at end.

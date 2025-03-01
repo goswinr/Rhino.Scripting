@@ -12,7 +12,6 @@ open System
 
 [<AutoOpen>]
 module AutoOpenLayer =
-  module ResizeArray = ResizeArray.ResizeArray
 
   type RhinoScriptSyntax with
     //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete)
@@ -20,7 +19,6 @@ module AutoOpenLayer =
     //---So that all members are visible in C# and Ironpython too.
     //---This happens as part of the <Targets> in the *.fsproj file.
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
-
 
 
 

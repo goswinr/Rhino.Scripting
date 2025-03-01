@@ -5,7 +5,7 @@ open Rhino
 
 open System
 open System.Collections.Generic
-open ResizeArray
+// open ResizeArray
 open Rhino.Geometry
 
 // open FsEx

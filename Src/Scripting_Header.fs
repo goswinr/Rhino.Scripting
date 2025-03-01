@@ -11,6 +11,7 @@ open Microsoft.FSharp.Core.LanguagePrimitives
 
 open Rhino.Geometry
 open Rhino.ApplicationSettings
+// open ResizeArray
 
 // open FsEx
 // open FsEx.UtilMath

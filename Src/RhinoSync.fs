@@ -163,8 +163,8 @@ type RhinoSync private () =
             if isNull syncContext then
                 Eto.Forms.Application.Instance.Invoke func
 
-                // RhinoSyncException.Raise "%s\r\n%s\r\n%s" "This code needs to run on the main UI thread."
-                //         "Rhino.RhinoSync.syncContext is still null or not set up. An automatic context switch is not possible."
+                // RhinoSyncException.Raise "%s%s%s%s%s" "This code needs to run on the main UI thread." Environment.NewLine
+                //         "Rhino.RhinoSync.syncContext is still null or not set up. An automatic context switch is not possible." Environment.NewLine
                 //         "You are calling a function of Rhino.Scripting that need the UI thread."
                 // TODO: better would be to call https://developer.rhino3d.com/api/RhinoCommon/html/M_Rhino_RhinoApp_InvokeOnUiThread.htm and then pass in a continuation function?
                 // or somehow get the syncContext from RhinoCode or RhinoCommon or the Rhino .NET host via reflection.

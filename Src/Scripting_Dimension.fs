@@ -6,7 +6,7 @@ open Rhino
 open System
 
 open Rhino.Geometry
-open ResizeArray
+// open ResizeArray
 
 // open FsEx
 // open FsEx.SaveIgnore
@@ -438,7 +438,7 @@ module AutoOpenDimension =
     ///<summary>Returns the names of all dimension styles in the document.</summary>
     ///<returns>(string ResizeArray) The names of all dimension styles in the document.</returns>
     static member DimStyleNames() : string ResizeArray =
-        resizeArray {for  ds in State.Doc.DimStyles -> ds.Name }
+        State.Doc.DimStyles |> ResizeArray.mapSeq _.Name
 
 
     ///<summary>Returns the number display format of a dimension style.</summary>

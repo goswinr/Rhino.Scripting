@@ -7,7 +7,7 @@ open System
 open System.Collections.Generic
 
 open Rhino.Geometry
-open ResizeArray
+// open ResizeArray
 
 
 // open FsEx
@@ -126,7 +126,7 @@ module AutoOpenGeometry =
     ///<param name="points">(Point3d seq) List of points</param>
     ///<returns>(Guid ResizeArray) List of identifiers of the new objects.</returns>
     static member AddPoints(points:Point3d seq) : Guid ResizeArray =
-        let rc = resizeArray { for point in points do yield State.Doc.Objects.AddPoint(point) }
+        let rc = points |> ResizeArray.mapSeq State.Doc.Objects.AddPoint
         State.Doc.Views.Redraw()
         rc
 
@@ -437,7 +437,7 @@ module AutoOpenGeometry =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(textId)
         let curves = (rhobj.Geometry:?>TextEntity).Explode()
         let attr = rhobj.Attributes
-        let rc = resizeArray { for curve in curves do yield State.Doc.Objects.AddCurve(curve, attr) }
+        let rc = curves  |> ResizeArray.mapArr ( fun curve -> State.Doc.Objects.AddCurve(curve, attr) )
         if delete then State.Doc.Objects.Delete(rhobj, quiet=true) |>ignore
         State.Doc.Views.Redraw()
         rc
@@ -508,7 +508,10 @@ module AutoOpenGeometry =
     static member PointCloudHidePoints(objectId:Guid) : ResizeArray<bool> = //GET
         let pc = RhinoScriptSyntax.CoercePointCloud(objectId)
         resizeArray { for item in pc do yield item.Hidden }
-
+        let r = ResizeArray(pc.Count)
+        for i = 0 to pc.Count - 1 do
+            r.Add(pc.[i].Hidden)
+        r
 
     ///<summary>Modifies the hidden points of a point cloud object.</summary>
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>

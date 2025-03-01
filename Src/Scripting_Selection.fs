@@ -8,7 +8,7 @@ open Rhino.Geometry
 
 // open FsEx
 // open FsEx.SaveIgnore
-open ResizeArray
+// open ResizeArray
 
 [<AutoOpen>]
 module AutoOpenSelection =
@@ -669,7 +669,7 @@ module AutoOpenSelection =
             if select then
                 for obj in rhinoobjects do obj.Select(true) |> ignore // TODO needs sync ? apparently not needed!
                 State.Doc.Views.Redraw()
-            resizeArray { for obj in rhinoobjects do yield obj.Id }
+            rhinoobjects  |> ResizeArray.mapArr _.Id
 
 
     ///<summary>Returns identifiers of all objects based on the objects' layer name.</summary>
@@ -685,7 +685,7 @@ module AutoOpenSelection =
             if select then
                 for rhobj in rhinoobjects do rhobj.Select(true) |> ignore // TODO needs sync ? apparently not needed!
                 State.Doc.Views.Redraw()
-            resizeArray {for obj in rhinoobjects do yield obj.Id }
+            rhinoobjects  |> ResizeArray.mapArr _.Id
 
 
 
@@ -711,7 +711,7 @@ module AutoOpenSelection =
         settings.NameFilter <- name
         settings.ReferenceObjects <- includeReferences
         let objects = State.Doc.Objects.GetObjectList(settings)
-        let ids = resizeArray { for rhobj in objects do yield rhobj.Id }
+        let ids = objects  |> ResizeArray.mapSeq _.Id
         if ids.Count>0 && select then
             for rhobj in objects do rhobj.Select(true) |> ignore // TODO needs sync ? apparently not needed!
             State.Doc.Views.Redraw()

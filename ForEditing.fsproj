@@ -19,7 +19,7 @@
     <PackageReference Update="FSharp.Core" Version="6.0.7" />
     <PackageReference Include="RhinoCommon" Version="7.0.20314.3001" PrivateAssets="all" ExcludeAssets="runtime" />
     <PackageReference Include="FsEx" Version="0.16.0" />
-    <PackageReference Include="ResizeArray" Version="0.22.0" />
+    <!-- <PackageReference Include="ResizeArray" Version="0.22.0" /> -->
     <PackageReference Include="Eto.Forms" Version="2.9.0" />
     <!-- see https://discourse.mcneel.com/t/system-drawing-object-has-no-attribute-bitmap-rhino-8-wip/150608/6 -->
     <!-- <PackageReference Include="System.Drawing.Common" Version="7.0.0" ExcludeAssets="runtime"/> -->
@@ -29,8 +29,9 @@
   <ItemGroup>
     <None Include="combineIntoOneFile.fsx" />
     <None Include="Readme.md" />
+
     <Compile Include="Src/Exceptions.fs" />
-    <Compile Include="Src\FsExUtils.fs" />
+    <Compile Include="Src/FsExUtils.fs" />
     <Compile Include="Src/RhinoSync.fs" />
     <Compile Include="Src/State.fs" />
     <Compile Include="Src/ToNiceStringExtensions.fs" />
@@ -38,6 +39,7 @@
     <Compile Include="Src/UtilString.fs" />
     <Compile Include="Src/UtilLayer.fs" />
     <Compile Include="Src/ObjectFilterEnum.fs" />
+
     <Compile Include="Src/Scripting_Header.fs" />
     <Compile Include="Src/Scripting_Coerce.fs" />
     <Compile Include="Src/Scripting_Layer.fs" />

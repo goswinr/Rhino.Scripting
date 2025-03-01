@@ -6,7 +6,7 @@ open Rhino
 open System
 
 open Rhino.Geometry
-open ResizeArray
+// open ResizeArray
 
 // open FsEx
 // open FsEx.SaveIgnore
