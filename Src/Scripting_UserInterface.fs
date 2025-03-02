@@ -5,12 +5,12 @@ open Rhino
 
 open System
 open System.Collections.Generic
-// open ResizeArray
+
 open Rhino.Geometry
 
-// open FsEx
-// open FsEx.UtilMath
-// open FsEx.SaveIgnore
+
+
+
 
 [<AutoOpen>]
 module AutoOpenUserInterface =
@@ -70,15 +70,14 @@ module AutoOpenUserInterface =
     static member CheckListBox( items:(string*bool) seq,
                                 [<OPT;DEF(null:string)>]message:string,
                                 [<OPT;DEF(null:string)>]title:string) :ResizeArray<string*bool> =
-        let checkStates = resizeArray { for  item in items -> snd item }
-        let itemStrings =    resizeArray { for item in items -> fst item}
-
+        let checkStates = items |> ResizeArray.mapSeq snd
+        let itemStrings = items |> ResizeArray.mapSeq fst
         let newCheckStates =
             let getKeepEditor () = UI.Dialogs.ShowCheckListBox(title, message, itemStrings, checkStates)
             RhinoSync.DoSync getKeepEditor
 
         if notNull newCheckStates then
-            (Seq.zip itemStrings newCheckStates |>  ResizeArray.ofSeq)
+            (Seq.zip itemStrings newCheckStates |>  ResizeArray)
         else
             //RhinoScriptingException.Raise "RhinoScriptSyntax.CheckListBox failed.  items:'%A' message:'%A' title:'%A'" items message title
             RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.CheckListBox()"
@@ -208,7 +207,7 @@ module AutoOpenUserInterface =
 
             let box = ref (Box())
             let rc= Input.RhinoGet.GetBox(box, m, basePoint, prompt1, prompt2, prompt3)
-            if rc = Commands.Result.Success then ((!box).GetCorners())
+            if rc = Commands.Result.Success then (box.Value.GetCorners())
             else RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetBox()"
         RhinoSync.DoSyncRedrawHideEditor get
 
@@ -419,7 +418,7 @@ module AutoOpenUserInterface =
         let getKeepEditor () =
             let rc, layerindices = UI.Dialogs.ShowSelectMultipleLayersDialog(null, title, showNewButton)
             if rc then
-                (resizeArray { for index in layerindices do yield  State.Doc.Layers.[index].FullPath })
+                layerindices |> ResizeArray.mapArr (fun index -> State.Doc.Layers.[index].FullPath)
             else
                 RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetLayers()"
         RhinoSync.DoSync getKeepEditor
@@ -516,9 +515,8 @@ module AutoOpenUserInterface =
             if go.GetMultiple(minCount, maxCount) <> Input.GetResult.Object then
                 RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetMeshFaces()"
             else
-                let objrefs = go.Objects()
-                let rc = resizeArray { for  item in objrefs do yield item.GeometryComponentIndex.Index }
-                rc
+                go.Objects()
+                |> ResizeArray.mapArr _.GeometryComponentIndex.Index
 
         RhinoSync.DoSyncRedrawHideEditor get
 
@@ -550,9 +548,8 @@ module AutoOpenUserInterface =
             if go.GetMultiple(minCount, maxCount) <> Input.GetResult.Object then
                 RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetMeshVertices()"
             else
-                let objrefs = go.Objects()
-                let rc = resizeArray { for  item in objrefs do yield item.GeometryComponentIndex.Index }
-                rc
+                go.Objects()
+                |> ResizeArray.mapArr _.GeometryComponentIndex.Index
 
         RhinoSync.DoSyncRedrawHideEditor get
 
@@ -711,7 +708,7 @@ module AutoOpenUserInterface =
                             if cont && gp.CommandResult() <> Commands.Result.Success then
                                 rc.Clear()
                                 cont <- false
-                                InternalToNiceStringSetup.printfnRed "%s" "GetPoints had no Success"
+                                InternalToNiceStringSetup.printfnErr "%s" "GetPoints had no Success"
                             if cont then
                                 prevPoint <- gp.Point()
                                 rc.Add(prevPoint)
@@ -843,7 +840,7 @@ module AutoOpenUserInterface =
             let result = gs.Get()
             if result = Input.GetResult.Cancel then
                 RhinoUserInteractionException.Raise "No text was given by user in RhinoScriptSyntax.GetString()"
-            elif( result = Input.GetResult.Option ) then
+            elif result = Input.GetResult.Option then
                 gs.Option().EnglishName
             else
                 gs.StringResult()
@@ -945,17 +942,16 @@ module AutoOpenUserInterface =
 
     ///<summary>Displays list of items and their values in a property-style list box dialog.</summary>
     ///<param name="items">(string IList) list of string items</param>
-    ///<param name="values">(string seq) The corresponding values to the items</param>
+    ///<param name="values">(string IList) The corresponding values to the items</param>
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="title">(string) Optional, A dialog box title</param>
     ///<returns>(string array) An Array of new values.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member PropertyListBox(  items:string IList,
-                                    values:string seq,
+                                    values:string IList,
                                     [<OPT;DEF(null:string)>]message:string,
                                     [<OPT;DEF(null:string)>]title:string) : string array =
         let getKeepEditor () =
-            let values = resizeArray { for  v in values do yield v.ToString() }
             match UI.Dialogs.ShowPropertyListBox(title, message, Array.ofSeq items , values) with
             | null -> RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.PropertyListBox"
             | s -> s

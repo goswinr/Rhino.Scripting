@@ -6,10 +6,10 @@ open Rhino
 open System
 
 open Rhino.Geometry
-// open ResizeArray
 
-// open FsEx
-// open FsEx.SaveIgnore
+
+
+
 
 [<AutoOpen>]
 module AutoOpenGrips =
@@ -178,7 +178,6 @@ module AutoOpenGrips =
         State.Doc.Views.Redraw()
 
 
-
     ///<summary>Returns the location of all grips owned by an object. The
     /// locations of the grips are returned in a list of Point3d with each position
     /// in the list corresponding to that grip's index. To modify the locations of
@@ -191,8 +190,7 @@ module AutoOpenGrips =
         if not rhobj.GripsOn then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripLocations failed.  objectId:'%s'" (Nice.str objectId)
         let grips = rhobj.GetGrips()
         if isNull grips then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripLocations failed.  objectId:'%s'" (Nice.str objectId)
-        resizeArray { for grip in grips do yield grip.CurrentLocation }
-
+        grips |>  ResizeArray.mapArr _.CurrentLocation
 
 
     ///<summary>Modifies the location of all grips owned by an object. The

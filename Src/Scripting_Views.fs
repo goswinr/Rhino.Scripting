@@ -6,10 +6,10 @@ open Rhino
 open System
 
 open Rhino.Geometry
-// open ResizeArray
-// open FsEx
-// open FsEx.UtilMath
-// open FsEx.SaveIgnore
+
+
+
+
 
 [<AutoOpen>]
 module AutoOpenViews =
@@ -282,7 +282,10 @@ module AutoOpenViews =
     ///<returns>(string ResizeArray) The names of all named construction Planes in the document.</returns>
     static member NamedCPlanes() : string ResizeArray =
         let count = State.Doc.NamedConstructionPlanes.Count
-        resizeArray {for i = 0 to count - 1 do State.Doc.NamedConstructionPlanes.[i].Name }
+        let r = ResizeArray(count)
+        for i = 0 to count - 1 do
+            r.Add(State.Doc.NamedConstructionPlanes.[i].Name)
+        r
 
 
 
@@ -290,7 +293,10 @@ module AutoOpenViews =
     ///<returns>(string ResizeArray) The names of all named views in the document.</returns>
     static member NamedViews() : string ResizeArray =
         let count = State.Doc.NamedViews.Count
-        resizeArray {for i = 0 to count - 1 do State.Doc.NamedViews.[i].Name }
+        let r = ResizeArray(count)
+        for i = 0 to count - 1 do
+            r.Add(State.Doc.NamedViews.[i].Name)
+        r
 
 
     ///<summary>Changes the title of the specified view.</summary>
@@ -658,8 +664,8 @@ module AutoOpenViews =
     ///<summary>Return list of display modes.</summary>
     ///<returns>(string ResizeArray) strings identifying the display mode names.</returns>
     static member ViewDisplayModes() : string ResizeArray =
-        let modes = Display.DisplayModeDescription.GetDisplayModes()
-        resizeArray {for mode in modes do mode.EnglishName }
+        Display.DisplayModeDescription.GetDisplayModes()
+        |> ResizeArray.mapArr _.EnglishName
 
 
     ///<summary>Return the names/titles, of all views in the document.</summary>
@@ -671,9 +677,8 @@ module AutoOpenViews =
     ///<returns>(string ResizeArray) List of the view names.</returns>
     static member ViewNames([<OPT;DEF(0)>]viewType:int) : string ResizeArray =
         let views = State.Doc.Views.GetViewList(viewType <> 1, viewType>0)
-        if views|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.ViewNames failed. viewType:'%A'" viewType
-        resizeArray { for view in views do view.MainViewport.Name}
-
+        if isNull views then RhinoScriptingException.Raise "RhinoScriptSyntax.ViewNames failed. viewType:'%A'" viewType
+        views |> ResizeArray.mapArr _.MainViewport.Name
 
 
     ///<summary>Return 3d corners of a view's near clipping Plane rectangle. Useful

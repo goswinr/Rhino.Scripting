@@ -47,7 +47,7 @@ However, you can use this library just as well in compiled F#, C#, or VB.net pro
 
 First reference the assemblies.
 ```fsharp
-#r "nuget: Rhino.Scripting, 0.8.2"
+#r "nuget: Rhino.Scripting, 0.9.0"
 ```
 
 The main namespace is  `Rhino.Scripting`.\
@@ -74,9 +74,8 @@ You can use it via the new Rhino 8 [ScriptEditor](https://www.rhino3d.com/featur
 First reference the assemblies.
 
 ```csharp
-#r "nuget: FSharp.Core, 6.0.7"// dependency of Rhino.Scripting
-#r "nuget: FsEx, 0.16.0" // dependency of Rhino.Scripting
-#r "nuget: Rhino.Scripting, 0.8.2"
+#r "nuget: FSharp.Core, 9.0.201" // when used in Rhino 8 ScriptEditor all dependencies need to be added explicitly
+#r "nuget: Rhino.Scripting, 0.9.0"
 ```
 The main namespace is  `Rhino.Scripting`.\
 The main class of this library is called `RhinoScriptSyntax` it has all ~900 functions as static methods.\
@@ -181,9 +180,18 @@ These are implemented with 3 overloads and  `Optional` and `DefaultParameterValu
 ```
 
 
-### Full API Documentation
+## Full API Documentation
 
 [goswinr.github.io/Rhino.Scripting](https://goswinr.github.io/Rhino.Scripting)
+
+### .NET Framework or .NET Core?
+This libray is currently only targeting .NET Framework 4.8.\
+However, it should work in .NET 7.0 or higher as well.\
+But I could not yet compile it targeting net7.0, see https://discourse.mcneel.com/t/rhinocommon-with-net7-0-target/200460/2
+
+### Changelog
+
+see [CHANGELOG.md](https://github.com/goswinr/Rhino.Scripting/blob/main/CHANGELOG.md)
 
 ## Thread Safety
 While the main Rhino Document is officially not thread safe, this library can be used from any thread.\
@@ -197,6 +205,3 @@ Contributions are welcome even for small things like typos. If you have problems
 
 ### License
 [MIT](https://github.com/goswinr/Rhino.Scripting/blob/main/LICENSE.md)
-
-### Changelog
-see [CHANGELOG.md](https://github.com/goswinr/Rhino.Scripting/blob/main/CHANGELOG.md)

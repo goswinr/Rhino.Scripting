@@ -6,10 +6,10 @@ open Rhino
 open System
 
 open Rhino.Geometry
-// open ResizeArray
 
-// open FsEx
-// open FsEx.SaveIgnore
+
+
+
 
 [<AutoOpen>]
 module AutoOpenHatch =
@@ -126,7 +126,7 @@ module AutoOpenHatch =
                               [<OPT;DEF(1.0)>]scale:float,
                               [<OPT;DEF(0.0)>]rotation:float,
                               [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray =
-        let curves =  resizeArray { for objectId in curveIds do yield RhinoScriptSyntax.CoerceCurve(objectId) }
+        let curves  = curveIds |> ResizeArray.mapSeq RhinoScriptSyntax.CoerceCurve
         try RhinoScriptSyntax.AddHatches(curves, hatchPattern, scale, rotation)
         with e->
             let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance

@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.9.0] - 2025-02-23
 ### Changed
+- Remove dependency on FsEx
+- Replace the heavily used custom list `Rarr<'T>` with `Collections.Generic.List<'T>`
 - Use Eto.Forms instead of Windows.Forms
 
 ## [0.8.2] - 2025-02-23
@@ -60,8 +62,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - First public release
 
-[Unreleased]: https://github.com/goswinr/Rhino.Scripting/compare/0.8.1...HEAD
-[0.8.1]: https://github.com/goswinr/Rhino.Scripting/compare/0.8.0...0.8.1
+[Unreleased]: https://github.com/goswinr/Rhino.Scripting/compare/0.9.0...HEAD
+[0.9.0]: https://github.com/goswinr/Rhino.Scripting/compare/0.8.2...0.9.0
+[0.8.2]: https://github.com/goswinr/Rhino.Scripting/compare/0.8.0...0.8.2
 [0.8.0]: https://github.com/goswinr/Rhino.Scripting/compare/0.7.0...0.8.0
 [0.7.0]: https://github.com/goswinr/Rhino.Scripting/compare/0.6.2...0.7.0
 [0.6.2]: https://github.com/goswinr/Rhino.Scripting/compare/0.6.1...0.6.2

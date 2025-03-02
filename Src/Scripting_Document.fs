@@ -7,10 +7,10 @@ open System
 open Microsoft.FSharp.Core.LanguagePrimitives
 
 open Rhino.Geometry
-// open ResizeArray
-// open FsEx
-// open FsEx.UtilMath
-// open FsEx.SaveIgnore
+
+
+
+
 
 [<AutoOpen>]
 module AutoOpenDocument =

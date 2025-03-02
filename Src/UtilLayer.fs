@@ -9,8 +9,9 @@ open Rhino.DocObjects
 module internal UtilLayer =
 
     let randomLayerColor()=
-        let c = FsEx.Color.randomForRhino()
-        Drawing.Color.FromArgb(int c.Red, int c.Green, int c.Blue)
+        let h,s,l = ColorUtil.randomForRhino()
+        let r,g,b = ColorUtil.fromHSL(h,s,l)
+        Drawing.Color.FromArgb(r,g,b)
 
     let eVSLN = "RhinoScriptSyntax.UtilLayer.failOnBadShortLayerName"
 

@@ -4,8 +4,8 @@ namespace Rhino.Scripting
 open Rhino
 
 open System
-// open ResizeArray
-// open FsEx
+
+
 
 [<AutoOpen>]
 module AutoOpenGroup =
@@ -228,9 +228,8 @@ module AutoOpenGroup =
         let groupIndexes = obj.GetGroupList()
         if isNull groupIndexes then  (new ResizeArray<string>(0))
         else
-            groupIndexes
-            |>  ResizeArray.ofArray
-            |>! ResizeArray.sortInPlace
-            |>  ResizeArray.map (fun i -> State.Doc.Groups.FindIndex(i).Name)
+            let ixs = groupIndexes|>  ResizeArray.mapArr id
+            ixs.Sort()
+            ixs |>  ResizeArray.map (fun i -> State.Doc.Groups.FindIndex(i).Name)
 
 

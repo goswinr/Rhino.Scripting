@@ -2,7 +2,7 @@
 
 open Rhino
 open System
-// open FsEx
+
 
 /// An internal static class to hold current state like active Rhino document.
 [<AbstractClass; Sealed>] //static class, use these attributes to match C# static class and make in visible in C# // https://stackoverflow.com/questions/13101995/defining-static-classes-in-f

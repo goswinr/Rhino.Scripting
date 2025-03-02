@@ -4,7 +4,6 @@ open Rhino
 
 open System
 open Rhino.Geometry
-open FsEx
 
 /// Part of Rhino.Scripting nuget.
 /// An internal module to set up nice printing of Rhino Objects.
@@ -52,7 +51,7 @@ module InternalToNiceStringSetup =
         if initIsPending then
             initIsPending <- false
             try
-                NiceStringSettings.externalFormatter  <-  (fun o -> formatRhinoObject o |> Option.map NiceStringSettings.Element)
+                //NiceStringSettings.externalFormatter  <-  (fun o -> formatRhinoObject o |> Option.map NiceStringSettings.Element)
                 if Rhino.Runtime.HostUtils.RunningInRhino then
                     // these below fail if not running inside rhino.exe
                     // scripts that reference Rhino.Scripting from outside of rhino is still Ok , but all function that call the C++ API don't work
@@ -72,17 +71,21 @@ module InternalToNiceStringSetup =
         init()
         Printf.kprintf (fun s ->
             RhinoApp.WriteLine s
-            Printfn.blue "%s" s
-            RhinoApp.Wait())  msg // no switch to UI Thread needed !
+            printfn "%s" s
+            // Printfn.blue "%s" s
+            RhinoApp.Wait()
+            )  msg // no switch to UI Thread needed !
 
     /// Like printfn but in Red if used from Fesh Editor. Adds a new line at end.
     /// Prints to Console.Out and to Rhino Commandline.
-    let internal printfnRed msg =
+    let internal printfnErr msg =
         init()
         Printf.kprintf (fun s ->
             RhinoApp.WriteLine s
-            Printfn.blue "%s" s
-            RhinoApp.Wait())  msg // no switch to UI Thread needed !
+            eprintfn "%s" s
+            // Printfn.blue "%s" s
+            RhinoApp.Wait()
+            )  msg // no switch to UI Thread needed !
 
 
 [<RequireQualifiedAccess>]
@@ -96,6 +99,7 @@ module internal Nice  =
     /// - maxCharsInString        = 2000  ; set this to change how many characters of a string might be printed at once.
     let str (x:'T) :string =
         InternalToNiceStringSetup.init() // the shadowing is only done to ensure init() is called once
-        NiceString.toNiceString x
+        // NiceString.toNiceString x
+        x.ToString()
 
 

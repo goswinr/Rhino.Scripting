@@ -4,9 +4,9 @@ namespace Rhino.Scripting
 open Rhino
 
 open System
-// open ResizeArray
-// open FsEx
-// open FsEx.SaveIgnore
+
+
+
 
 [<AutoOpen>]
 module AutoOpenUserData =
@@ -65,12 +65,12 @@ module AutoOpenUserData =
     ///<summary>Returns all document user text keys.</summary>
     ///<returns>(string ResizeArray) all document user text keys.</returns>
     static member GetDocumentUserTextKeys() : string ResizeArray =
-        resizeArray {
-            for i = 0 to State.Doc.Strings.Count-1  do
-                let k = State.Doc.Strings.GetKey(i)
-                if not <| k.Contains "\\" then  // TODO why ??
-                    yield k
-            }
+        let r = ResizeArray(State.Doc.Strings.Count)
+        for i = 0 to State.Doc.Strings.Count-1  do
+            let k = State.Doc.Strings.GetKey(i)
+            if not <| k.Contains "\\" then  // TODO why ??
+                r.Add k
+        r
 
 
     ///<summary>Returns all user text keys stored on an object.</summary>
@@ -80,12 +80,15 @@ module AutoOpenUserData =
     ///<returns>(string ResizeArray) all keys.</returns>
     static member GetUserTextKeys(objectId:Guid, [<OPT;DEF(false)>]attachedToGeometry:bool) : string ResizeArray =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        if attachedToGeometry then
-            let uss = obj.Geometry.GetUserStrings()
-            resizeArray { for  i = 0 to uss.Count-1 do yield uss.GetKey(i)}
-        else
-            let uss = obj.Attributes.GetUserStrings()
-            resizeArray { for  i = 0 to uss.Count-1 do yield uss.GetKey(i)}
+        let uss =
+            if attachedToGeometry then
+                obj.Geometry.GetUserStrings()
+            else
+                obj.Attributes.GetUserStrings()
+        let r = ResizeArray(uss.Count)
+        for i = 0 to uss.Count-1  do
+            r.Add <| uss.GetKey(i)
+        r
 
 
     ///<summary>Returns user text stored on an object, fails if non existing.</summary>

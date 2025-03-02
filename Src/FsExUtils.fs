@@ -297,3 +297,81 @@ module FsExUtils =
 
     /// Get third element of Triple (Tuple of three elements)
     let inline t3 (_,_,c) = c
+
+
+
+    module internal ColorUtil =
+
+        let clamp01 x =
+            if x < 0.0 then 0.0
+            elif x > 1.0 then 1.0
+            else x
+
+        let Rand = new Random()
+
+        let mutable private lastHue = 0.0
+
+        let mutable private lumUp = false
+
+        /// Generates a Random color with high saturation probability, excluding yellow colors
+        /// These are ideal for layer color in Rhino3d CAD app
+        /// Using golden-ratio-loop subsequent colors will have very distinct hues
+        let rec randomForRhino () =
+            lastHue <- lastHue + 0.6180334 // golden angle conjugate
+            lastHue <- lastHue % 1.0 // loop it between 0.0 and 1.0
+            let mutable s = Rand.NextDouble()
+            s <- s * s * s * s  //  0.0 - 1.0 increases the probability that the number is small
+            s <- s * 0.7    //  0.0 - 0.7 make sure it is less than 0.6
+            s <- 1.1 - s  //  1.1 - 0.6
+            s <- clamp01 s //  1.0 - 0.6
+            let mutable l = Rand.NextDouble()
+            l <- l * l     //  0.0 - 1.0 increases the probability that the number is small
+            l <- l * 0.35 * s   //  0.0 - 0.25 , and scale down with saturation too
+            l <-
+                if lumUp then //alternate luminance up or down
+                    lumUp <- false
+                    0.5 + l * 1.1 //   more on the bright side
+                else
+                    lumUp <- true
+                    0.5 - l
+            if l > 0.3 && lastHue > 0.10 && lastHue < 0.22 then  // exclude yellow unless dark
+                randomForRhino()
+            else
+                lastHue, s, l
+
+
+        /// Given Hue, Saturation, Luminance in range of 0.0 to 1.0, returns a Farbe.Color
+        /// Will fail with ArgumentOutOfRangeException on too small or too big values,
+        /// but up to a tolerance of 0.001 values will be clamped to 0 or 1.
+        let fromHSL (hue:float, saturation:float, luminance:float) =
+            // from http://stackoverflow.com/questions/2942/hsl-in-net
+            // or http://bobpowell.net/RGBHSB.aspx
+            // allow some numerical error:
+            // if not (-0.01 <. hue        .< 1.01) then ArgumentOutOfRangeException.Raise "Farbe.createFromHSL: H is bigger than 1.0 or smaller than 0.0: %f" hue
+            // if not (-0.01 <. saturation .< 1.01) then ArgumentOutOfRangeException.Raise "Farbe.createFromHSL: S is bigger than 1.0 or smaller than 0.0: %f" saturation
+            // if not (-0.01 <. luminance  .< 1.01) then ArgumentOutOfRangeException.Raise "Farbe.createFromHSL: L is bigger than 1.0 or smaller than 0.0: %f" luminance
+            let H = clamp01 hue
+            let S = clamp01 saturation
+            let L = clamp01 luminance
+            let v = if L <= 0.5 then L * (1.0 + S) else L + S - L * S
+            let r,g,b =
+                if v > 0.001 then
+                    let m = L + L - v
+                    let sv = (v - m) / v
+                    let h = H * 5.999999 // so sextant never actually becomes 6
+                    let sextant = int h
+                    let fract = h - float sextant
+                    let vsf = v * sv * fract
+                    let mid1 = m + vsf
+                    let mid2 = v - vsf
+                    match sextant with
+                        | 0 -> v,   mid1,    m
+                        | 1 -> mid2,   v,    m
+                        | 2 -> m,      v, mid1
+                        | 3 -> m,   mid2,    v
+                        | 4 -> mid1,   m,    v
+                        | 5 -> v,      m, mid2
+                        | x -> RhinoScriptingException.Raise "fromHSL: Error in internal HLS Transform, sextant is %d at Hue=%g, Saturation=%g, Luminance=%g" x H S L
+                else
+                    L,L,L // default to gray value
+            (int(round(255.* r)) ,  int(round(255.* g)) , int(round(255.* b)) )

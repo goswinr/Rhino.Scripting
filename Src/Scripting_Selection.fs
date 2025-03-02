@@ -6,9 +6,9 @@ open System
 
 open Rhino.Geometry
 
-// open FsEx
-// open FsEx.SaveIgnore
-// open ResizeArray
+
+
+
 
 [<AutoOpen>]
 module AutoOpenSelection =
@@ -478,12 +478,11 @@ module AutoOpenSelection =
             settings.IncludeLights <- includeLights
             settings.IncludeGrips <- includeGrips
             settings.ReferenceObjects <- includeReferences
-            resizeArray {
-                for i in State.Doc.Objects.GetObjectList(settings) do
-                    if i.IsLocked || (State.Doc.Layers.[i.Attributes.LayerIndex]).IsLocked then
-                        yield i.Id }
-
-
+            let rc = ResizeArray()
+            for i in State.Doc.Objects.GetObjectList(settings) do
+                if i.IsLocked || (State.Doc.Layers.[i.Attributes.LayerIndex]).IsLocked then
+                    rc.Add(i.Id)
+            rc
 
     ///<summary>Returns identifiers of all hidden objects in the document. Hidden objects
     ///    are not visible, cannot be snapped to, and cannot be selected.</summary>
@@ -505,10 +504,11 @@ module AutoOpenSelection =
         settings.IncludeLights <- includeLights
         settings.IncludeGrips <- includeGrips
         settings.ReferenceObjects <- includeReferences
-        resizeArray {for i in State.Doc.Objects.GetObjectList(settings) do
-                        if i.IsHidden || not <| (State.Doc.Layers.[i.Attributes.LayerIndex]).IsVisible then
-                            i.Id }
-
+        let rc = ResizeArray()
+        for i in State.Doc.Objects.GetObjectList(settings) do
+            if i.IsHidden || not <| (State.Doc.Layers.[i.Attributes.LayerIndex]).IsVisible then
+                rc.Add(i.Id)
+        rc
 
     ///<summary>Inverts the current object selection. The identifiers of the newly
     ///    selected objects are returned.</summary>
@@ -633,7 +633,9 @@ module AutoOpenSelection =
         iter.LockedObjects <- false
         iter.IncludeLights <- includeLights
         iter.IncludeGrips <- includeGrips
-        resizeArray {for obj in State.Doc.Objects.GetObjectList(iter) do yield obj.Id }
+        State.Doc.Objects.GetObjectList(iter)
+        |> ResizeArray.mapSeq _.Id
+
 
 
     ///<summary>Returns identifiers of all objects based on color.</summary>
@@ -650,7 +652,7 @@ module AutoOpenSelection =
         if select then
             for obj in rhinoobjects do obj.Select(true)|> ignore // TODO needs sync ? apparently not needed!
             State.Doc.Views.Redraw()
-        resizeArray {for obj in rhinoobjects do yield obj.Id }
+        rhinoobjects |> ResizeArray.mapSeq _.Id
 
 
     ///<summary>Returns identifiers of all objects based on the objects' group name.</summary>
@@ -819,8 +821,8 @@ module AutoOpenSelection =
     ///    Include grip objects</param>
     ///<returns>(Guid ResizeArray) identifiers of selected objects.</returns>
     static member SelectedObjects([<OPT;DEF(false)>]includeLights:bool, [<OPT;DEF(false)>]includeGrips:bool) : Guid ResizeArray =
-        let selobjects = State.Doc.Objects.GetSelectedObjects(includeLights, includeGrips)
-        resizeArray {for obj in selobjects do obj.Id }
+        State.Doc.Objects.GetSelectedObjects(includeLights, includeGrips)
+        |> ResizeArray.mapSeq _.Id
 
 
     ///<summary>Unselects all objects in the document.</summary>

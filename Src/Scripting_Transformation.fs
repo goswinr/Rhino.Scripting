@@ -4,11 +4,11 @@ namespace Rhino.Scripting
 open Rhino
 
 open System
-// open ResizeArray
+
 open Rhino.Geometry
-// open FsEx
-// open FsEx.UtilMath
-// open FsEx.SaveIgnore
+
+
+
 
 [<AutoOpen>]
 module AutoOpenTransformation =

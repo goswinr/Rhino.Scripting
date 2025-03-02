@@ -7,8 +7,8 @@ open System
 
 open Rhino.Geometry
 
-// open FsEx
-// open FsEx.SaveIgnore
+
+
 
 [<AutoOpen>]
 module AutoOpenBlock =

@@ -6,9 +6,9 @@ open System
 
 open Rhino.Geometry
 
-// open FsEx
-// open FsEx.UtilMath
-// open FsEx.SaveIgnore
+
+
+
 
 [<AutoOpen>]
 module AutoOpenPlane =

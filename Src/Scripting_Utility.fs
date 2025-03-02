@@ -6,10 +6,10 @@ open Rhino
 open System
 
 open Rhino.Geometry
-// open ResizeArray
-// open FsEx
-// open FsEx.UtilMath
-// open FsEx.SaveIgnore
+
+
+
+
 
 [<AutoOpen>]
 module AutoOpenUtility =
@@ -214,15 +214,16 @@ module AutoOpenUtility =
             let first = Seq.head nums
             let second = (Seq.item 1 nums)
             let mutable lastOK = first
-            resizeArray {
-                if abs(first-second) > tol then
-                    yield first
-                    lastOK <- second
-                for n in Seq.skip 2 nums do
-                    if abs(lastOK-n) > tol then
-                        yield n
-                        lastOK <- n
-                }
+            let r = ResizeArray()
+            if abs(first-second) > tol then
+                r.Add first
+                lastOK <- second
+            for n in Seq.skip 2 nums do
+                if abs(lastOK-n) > tol then
+                    r.Add n
+                    lastOK <- n
+            r
+
 
 
     ///<summary>Removes duplicates from a list of 3D points.</summary>
@@ -277,12 +278,12 @@ module AutoOpenUtility =
     ///<param name="points">(Point3d seq) Points to flatten</param>
     ///<returns>(float ResizeArray) A one-dimensional list containing real numbers.</returns>
     static member SimplifyArray(points:Point3d seq) : float ResizeArray =
-        resizeArray {
-            for p in points do
-                yield p.X
-                yield p.Y
-                yield p.Z
-            }
+        let r = ResizeArray()
+        for p in points do
+            r.Add p.X
+            r.Add p.Y
+            r.Add p.Z
+        r
 
 
     ///<summary>Suspends execution of a running script for the specified interval. Then refreshes Rhino UI.</summary>

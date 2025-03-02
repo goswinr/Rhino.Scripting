@@ -7,11 +7,11 @@ open System
 open System.Collections.Generic
 
 open Rhino.Geometry
-// open ResizeArray
 
 
-// open FsEx
-// open FsEx.SaveIgnore
+
+
+
 
 
 [<AutoOpen>]
@@ -502,12 +502,11 @@ module AutoOpenGeometry =
         pc.ContainsColors
 
 
-    ///<summary>Returns the hidden points of a point cloud object.</summary>
+    ///<summary>Returns the hidden state of points in a point cloud object.</summary>
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
     ///<returns>(bool ResizeArray) List of point cloud hidden states.</returns>
     static member PointCloudHidePoints(objectId:Guid) : ResizeArray<bool> = //GET
         let pc = RhinoScriptSyntax.CoercePointCloud(objectId)
-        resizeArray { for item in pc do yield item.Hidden }
         let r = ResizeArray(pc.Count)
         for i = 0 to pc.Count - 1 do
             r.Add(pc.[i].Hidden)
@@ -538,7 +537,10 @@ module AutoOpenGeometry =
     ///<returns>(Drawing.Color ResizeArray) List of point cloud colors.</returns>
     static member PointCloudPointColors(objectId:Guid) : Drawing.Color ResizeArray = //GET
         let pc = RhinoScriptSyntax.CoercePointCloud objectId
-        resizeArray { for item in pc do yield item.Color }
+        let r = ResizeArray(pc.Count)
+        for i = 0 to pc.Count - 1 do
+            r.Add(pc.[i].Color)
+        r
 
     ///<summary>Modifies the point colors of a point cloud object.</summary>
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>

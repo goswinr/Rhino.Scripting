@@ -5,9 +5,9 @@ open Rhino
 
 open System
 
-// open ResizeArray
-// open FsEx
-// open FsEx.SaveIgnore
+
+
+
 
 [<AutoOpen>]
 module AutoOpenToolbar =
@@ -156,8 +156,7 @@ module AutoOpenToolbar =
     ///<summary>Returns names of all currently open tool-bar collections.</summary>
     ///<returns>(string ResizeArray) The names of all currently open tool-bar collections.</returns>
     static member ToolbarCollectionNames() : string ResizeArray =
-        resizeArray { for tbfile in RhinoApp.ToolbarFiles -> tbfile.Name }
-
+        RhinoApp.ToolbarFiles |> ResizeArray.mapSeq _.Name
 
     ///<summary>Returns full path to a currently open tool-bar collection file.</summary>
     ///<param name="name">(string) Name of currently open tool-bar collection</param>

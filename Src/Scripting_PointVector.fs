@@ -7,12 +7,12 @@ open System
 open System.Collections.Generic
 
 open Rhino.Geometry
-// open ResizeArray
 
 
-// open FsEx
-// open FsEx.UtilMath
-// open FsEx.SaveIgnore
+
+
+
+
 
 [<AutoOpen>]
 module AutoOpenPointVector =
@@ -87,16 +87,16 @@ module AutoOpenPointVector =
 
 
     ///<summary>Transforms a list of 3D points.</summary>
-    ///<param name="points">(Point3d seq) List of 3D points</param>
+    ///<param name="points">(Point3d IList) List of 3D points</param>
     ///<param name="xForm">(Transform) Transformation to apply</param>
-    ///<returns>(Point3d ResizeArray) transformed points.</returns>
-    static member PointArrayTransform(points:Point3d seq, xForm:Transform) : Point3d ResizeArray =
-        resizeArray {
-            for point in points do
-                let p = Point3d(point) //copy first !
-                p.Transform(xForm)
-                p
-            }
+    ///<returns>(Point3d ResizeArray) A new list of the transformed points.</returns>
+    static member PointArrayTransform(points:Point3d IList, xForm:Transform) : Point3d ResizeArray =
+        let r = ResizeArray<Point3d>()
+        for point in points do
+            let p = Point3d(point) //copy first !
+            p.Transform(xForm)
+            r.Add p
+        r
 
     ///<summary>Finds the object that is closest to a test point.</summary>
     ///<param name="point">(Point3d) Point to test</param>
@@ -232,7 +232,7 @@ module AutoOpenPointVector =
     static member ProjectPointToMesh( points:Point3d seq,
                                       meshIds:Guid seq,
                                       direction:Vector3d) : Point3d array =
-        let meshes =  resizeArray { for objectId in meshIds do yield RhinoScriptSyntax.CoerceMesh(objectId) }
+        let meshes  = meshIds |> ResizeArray.mapSeq RhinoScriptSyntax.CoerceMesh
         let tolerance = State.Doc.ModelAbsoluteTolerance
         Intersect.Intersection.ProjectPointsToMeshes(meshes, points, direction, tolerance)
 
@@ -246,7 +246,7 @@ module AutoOpenPointVector =
     static member ProjectPointToSurface( points:Point3d seq,
                                          surfaceIds:Guid seq,
                                          direction:Vector3d) : Point3d array =
-        let breps =  resizeArray { for objectId in surfaceIds do yield RhinoScriptSyntax.CoerceBrep(objectId) }
+        let breps  = surfaceIds |> ResizeArray.mapSeq RhinoScriptSyntax.CoerceBrep
         let tolerance = State.Doc.ModelAbsoluteTolerance
         Intersect.Intersection.ProjectPointsToBreps(breps, points, direction, tolerance)
 

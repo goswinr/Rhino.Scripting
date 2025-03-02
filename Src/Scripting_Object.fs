@@ -7,13 +7,13 @@ open System
 open System.Collections.Generic
 
 open Rhino.Geometry
-// open ResizeArray
 
 
-// open FsEx
-// open FsEx.UtilMath
-// open FsEx.SaveIgnore
-// open FsEx.CompareOperators
+
+
+
+
+
 
 [<AutoOpen>]
 module AutoOpenObject =
@@ -120,7 +120,7 @@ module AutoOpenObject =
     ///    If False, flash between visible and invisible</param>
     ///<returns>(unit).</returns>
     static member FlashObject(objectIds:Guid seq, [<OPT;DEF(true)>]style:bool) : unit =
-        let rhobjs = resizeArray { for objectId in objectIds do yield RhinoScriptSyntax.CoerceRhinoObject(objectId) }
+        let rhobjs =  objectIds |> ResizeArray.mapSeq RhinoScriptSyntax.CoerceRhinoObject
         if rhobjs.Count>0 then
             State.Doc.Views.FlashObjects(rhobjs, style)
 
@@ -1361,11 +1361,14 @@ module AutoOpenObject =
         shear2d.[0, 1] <- tan(toRadians(angleDegrees))
         let cobinv = Transform.ChangeBasis(frame, worldPlane)
         let xf = cobinv * shear2d * cob
-        resizeArray {
-            for ob in objectIds do
-                let res = State.Doc.Objects.Transform(ob, xf, not copy)
-                if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.ShearObjects failed for %s, origin %s, ref point  %s and angle in Deg  %f" (Nice.str ob) origin.ToNiceString referencePoint.ToNiceString angleDegrees
-                res  }
+        let r = ResizeArray()
+        for ob in objectIds do
+            let res = State.Doc.Objects.Transform(ob, xf, not copy)
+            if res = Guid.Empty then
+                RhinoScriptingException.Raise "RhinoScriptSyntax.ShearObjects failed for %s, origin %s, ref point  %s and angle in Deg  %f" (Nice.str ob) origin.ToNiceString referencePoint.ToNiceString angleDegrees
+            else
+                r.Add res
+        r
 
 
     ///<summary>Shows a previously hidden object. Hidden objects are not visible, cannot

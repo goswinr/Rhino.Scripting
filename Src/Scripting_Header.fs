@@ -1,4 +1,4 @@
-namespace Rhino.Scripting
+﻿namespace Rhino.Scripting
 
 open Rhino
 
@@ -11,12 +11,12 @@ open Microsoft.FSharp.Core.LanguagePrimitives
 
 open Rhino.Geometry
 open Rhino.ApplicationSettings
-// open ResizeArray
 
-// open FsEx
-// open FsEx.UtilMath
-// open FsEx.SaveIgnore
-// open FsEx.CompareOperators
+
+
+
+
+
 
 
 

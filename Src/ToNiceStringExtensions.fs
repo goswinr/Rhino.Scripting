@@ -3,7 +3,7 @@
 open Rhino
 open Rhino.Geometry
 open System
-// open FsEx
+
 
 /// This module provides type extensions for pretty printing.
 /// It adds a 'rhObj.ToNiceString' property to many Rhino geometry objects.

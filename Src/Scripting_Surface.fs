@@ -7,11 +7,11 @@ open System
 open System.Collections.Generic
 
 open Rhino.Geometry
-// open ResizeArray
 
-// open FsEx
-// open FsEx.UtilMath
-// open FsEx.SaveIgnore
+
+
+
+
 
 [<AutoOpen>]
 module AutoOpenSurface =
@@ -153,7 +153,7 @@ module AutoOpenSurface =
     ///<param name="curveIds">(Guid seq) List of Curves</param>
     ///<returns>(Guid) identifier of new object.</returns>
     static member AddEdgeSrf(curveIds:Guid seq) : Guid =
-        let curves =  resizeArray { for objectId in curveIds do yield RhinoScriptSyntax.CoerceCurve(objectId) }
+        let curves  = curveIds |> ResizeArray.mapSeq RhinoScriptSyntax.CoerceCurve
         let brep = Brep.CreateEdgeSurface(curves)
         if brep|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.AddEdgeSrf failed.  curveIds:'%s'" (Nice.str curveIds)
         let objectId = State.Doc.Objects.AddBrep(brep)
@@ -179,7 +179,7 @@ module AutoOpenSurface =
                                  [<OPT;DEF(0.0)>]edgeTolerance:float,
                                  [<OPT;DEF(0.0)>]interiorTolerance:float,
                                  [<OPT;DEF(0.0)>]angleTolerance:float) : Guid =
-        let curves =  resizeArray { for curve in curves do yield RhinoScriptSyntax.CoerceCurve(curve) }
+        let curves  = curves |> ResizeArray.mapSeq RhinoScriptSyntax.CoerceCurve
         let surf, _ = NurbsSurface.CreateNetworkSurface(curves, continuity, edgeTolerance, interiorTolerance, angleTolerance)// 0.0 Tolerance OK ? TODO
         if notNull surf then
             let rc = State.Doc.Objects.AddSurface(surf)
@@ -293,7 +293,7 @@ module AutoOpenSurface =
                               [<OPT;DEF(1.0)>]surfacePull:float,
                               [<OPT;DEF(false)>]fixEdges:bool) : Guid =
                     let uspan, vspan = 10, 10
-                    let geometry =   resizeArray {for objectId in objectIds do RhinoScriptSyntax.CoerceRhinoObject(objectId).Geometry }
+                    let geometry =  objectIds |> ResizeArray.mapSeq RhinoScriptSyntax.CoerceGeometry
                     let surface = RhinoScriptSyntax.CoerceSurface(startSurfaceId)
                     let tolerance = if 0.0 = tolerance then State.Doc.ModelAbsoluteTolerance else tolerance
                     let b =  Array.create 4 fixEdges
@@ -341,7 +341,7 @@ module AutoOpenSurface =
                             [<OPT;DEF(false)>]fixEdges:bool) : Guid =
 
         let uspan, vspan = uvSpans
-        let geometry =   resizeArray {for objectId in objectIds do RhinoScriptSyntax.CoerceRhinoObject(objectId).Geometry }
+        let geometry =   objectIds |> ResizeArray.mapSeq RhinoScriptSyntax.CoerceGeometry
         let tolerance = if 0.0 = tolerance then State.Doc.ModelAbsoluteTolerance else tolerance
         let b =  Array.create 4 fixEdges
         let brep = Brep.CreatePatch(geometry, null, uspan, vspan, trim, false, pointSpacing, flexibility, surfacePull, b, tolerance) //TODO test with null as srf
@@ -375,7 +375,7 @@ module AutoOpenSurface =
         let angtol = State.Doc.ModelAngleToleranceRadians
         let cap :PipeCapMode  = LanguagePrimitives.EnumOfValue  cap
         let breps = Brep.CreatePipe(rail, parameters, radii, (blendType = 0), cap, fit, abstol, angtol)
-        let rc =  resizeArray { for brep in breps do yield State.Doc.Objects.AddBrep(brep) }
+        let rc  = breps |> ResizeArray.mapArr State.Doc.Objects.AddBrep
         State.Doc.Views.Redraw()
         rc
 
@@ -416,7 +416,7 @@ module AutoOpenSurface =
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let breps = Brep.CreatePlanarBreps(curves, tolerance)
         if notNull breps then
-            let rc =  resizeArray { for brep in breps do yield State.Doc.Objects.AddBrep(brep) }
+            let rc  = breps |> ResizeArray.mapArr State.Doc.Objects.AddBrep
             State.Doc.Views.Redraw()
             rc
         else
@@ -426,11 +426,11 @@ module AutoOpenSurface =
     ///<param name="objectIds">(Guid seq) Curves to use for creating planar Surfaces</param>
     ///<returns>(Guid ResizeArray) identifiers of Surfaces created .</returns>
     static member AddPlanarSrf(objectIds:Guid seq) : Guid ResizeArray =
-        let curves =  resizeArray { for objectId in objectIds do yield RhinoScriptSyntax.CoerceCurve(objectId) }
+        let curves  = objectIds |> ResizeArray.mapSeq RhinoScriptSyntax.CoerceCurve
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let breps = Brep.CreatePlanarBreps(curves, tolerance)
         if notNull breps then
-            let rc =  resizeArray { for brep in breps do yield State.Doc.Objects.AddBrep(brep) }
+            let rc  = breps |> ResizeArray.mapArr State.Doc.Objects.AddBrep
             State.Doc.Views.Redraw()
             rc
         else
@@ -491,7 +491,7 @@ module AutoOpenSurface =
                               [<OPT;DEF(false)>]closed:bool) : Guid ResizeArray =
         if loftType<0 || loftType>4 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddLoftSrf: LoftType must be 0-4.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" (Nice.str objectIds) start ende loftType rebuild refit closed
         if rebuild<>0 && refit<>0.0 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddLoftSrf: set either rebuild or refit to a value ! not both.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" (Nice.str objectIds) start ende loftType rebuild refit closed
-        let curves =  resizeArray { for objectId in objectIds do yield RhinoScriptSyntax.CoerceCurve(objectId) }
+        let curves  = objectIds |> ResizeArray.mapSeq RhinoScriptSyntax.CoerceCurve
         if Seq.length(curves)<2 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddLoftSrf failed.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" (Nice.str objectIds) start ende loftType rebuild refit closed
         let start = if start = Point3d.Origin  then Point3d.Unset else start
         let ende  = if ende  = Point3d.Origin  then Point3d.Unset else ende
@@ -512,7 +512,7 @@ module AutoOpenSurface =
         for brep in breps do
             let objectId = State.Doc.Objects.AddBrep(brep)
             if objectId <> Guid.Empty then idlist.Add(objectId)
-        if idlist.IsNotEmpty then State.Doc.Views.Redraw()
+        if idlist.Count > 0 then State.Doc.Views.Redraw()
         idlist
 
 
@@ -678,11 +678,11 @@ module AutoOpenSurface =
                              shapes:Guid seq,
                              [<OPT;DEF(false)>]closed:bool) : Guid ResizeArray =
         let rail = RhinoScriptSyntax.CoerceCurve(rail)
-        let shapes =  resizeArray { for shape in shapes do yield RhinoScriptSyntax.CoerceCurve(shape) }
+        let shapes  = shapes |> ResizeArray.mapSeq RhinoScriptSyntax.CoerceCurve
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let breps = Brep.CreateFromSweep(rail, shapes, closed, tolerance)
         if isNull breps then RhinoScriptingException.Raise "RhinoScriptSyntax.AddSweep1 failed.  rail:'%A' shapes:'%A' closed:'%A'" rail shapes closed
-        let rc =  resizeArray { for brep in breps do yield State.Doc.Objects.AddBrep(brep) }
+        let rc  = breps |> ResizeArray.mapArr State.Doc.Objects.AddBrep
         State.Doc.Views.Redraw()
         rc
 
@@ -699,11 +699,11 @@ module AutoOpenSurface =
                              [<OPT;DEF(false)>]closed:bool) : Guid ResizeArray =
         let rail1 = RhinoScriptSyntax.CoerceCurve(fst rails)
         let rail2 = RhinoScriptSyntax.CoerceCurve(snd rails)
-        let shapes =  resizeArray { for shape in shapes do yield RhinoScriptSyntax.CoerceCurve(shape) }
+        let shapes  = shapes |> ResizeArray.mapSeq RhinoScriptSyntax.CoerceCurve
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let breps = Brep.CreateFromSweep(rail1, rail2, shapes, closed, tolerance)
         if isNull breps then RhinoScriptingException.Raise "RhinoScriptSyntax.AddSweep2 failed.  rails:'%A' shapes:'%A' closed:'%A'" rails shapes closed
-        let rc =  resizeArray { for brep in breps do yield State.Doc.Objects.AddBrep(brep) }
+        let rc  = breps |> ResizeArray.mapArr State.Doc.Objects.AddBrep
         State.Doc.Views.Redraw()
         rc
 
@@ -756,12 +756,12 @@ module AutoOpenSurface =
                                      input1:Guid seq,
                                      [<OPT;DEF(true)>]deleteInput:bool) : Guid ResizeArray =
 
-        let breps0 =  resizeArray { for objectId in input0 do yield RhinoScriptSyntax.CoerceBrep(objectId) }
-        let breps1 =  resizeArray { for objectId in input1 do yield RhinoScriptSyntax.CoerceBrep(objectId) }
+        let breps0  = input0 |> ResizeArray.mapSeq RhinoScriptSyntax.CoerceBrep
+        let breps1  = input1 |> ResizeArray.mapSeq RhinoScriptSyntax.CoerceBrep
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let newbreps = Brep.CreateBooleanDifference(breps0, breps1, tolerance)
         if newbreps|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.BooleanDifference failed.  input0:'%A' input1:'%A' deleteInput:'%A'" input0 input1 deleteInput
-        let rc =  resizeArray { for brep in newbreps do yield State.Doc.Objects.AddBrep(brep) }
+        let rc  = newbreps |> ResizeArray.mapArr State.Doc.Objects.AddBrep
         if deleteInput then
             for objectId in input0 do State.Doc.Objects.Delete(objectId, true)|> ignore
             for objectId in input1 do State.Doc.Objects.Delete(objectId, true)|> ignore
@@ -780,12 +780,12 @@ module AutoOpenSurface =
     static member BooleanIntersection( input0:Guid seq,
                                        input1:Guid seq,
                                        [<OPT;DEF(true)>]deleteInput:bool) : Guid ResizeArray =
-        let breps0 =  resizeArray { for objectId in input0 do yield RhinoScriptSyntax.CoerceBrep(objectId) }
-        let breps1 =  resizeArray { for objectId in input1 do yield RhinoScriptSyntax.CoerceBrep(objectId) }
+        let breps0  = input0 |> ResizeArray.mapSeq RhinoScriptSyntax.CoerceBrep
+        let breps1  = input1 |> ResizeArray.mapSeq RhinoScriptSyntax.CoerceBrep
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let newbreps = Brep.CreateBooleanIntersection(breps0, breps1, tolerance)
         if newbreps|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.BooleanIntersection failed.  input0:'%A' input1:'%A' deleteInput:'%A'" input0 input1 deleteInput
-        let rc =  resizeArray { for brep in newbreps do yield State.Doc.Objects.AddBrep(brep) }
+        let rc  = newbreps |> ResizeArray.mapArr State.Doc.Objects.AddBrep
         if deleteInput then
             for objectId in input0 do State.Doc.Objects.Delete(objectId, true)|> ignore
             for objectId in input1 do State.Doc.Objects.Delete(objectId, true)|> ignore
@@ -802,11 +802,11 @@ module AutoOpenSurface =
     ///<returns>(Guid ResizeArray) List of identifiers of newly created objects .</returns>
     static member BooleanUnion(input:Guid seq, [<OPT;DEF(true)>]deleteInput:bool) : Guid ResizeArray =
         if Seq.length(input)<2 then RhinoScriptingException.Raise "RhinoScriptSyntax.BooleanUnion failed.  input:'%A' deleteInput:'%A'" input deleteInput
-        let breps =  resizeArray { for objectId in input do yield RhinoScriptSyntax.CoerceBrep(objectId) }
+        let breps  = input |> ResizeArray.mapSeq RhinoScriptSyntax.CoerceBrep
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let newbreps = Brep.CreateBooleanUnion(breps, tolerance)
         if newbreps|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.BooleanUnion failed.  input:'%A' deleteInput:'%A'" input deleteInput
-        let rc =  resizeArray { for brep in newbreps do yield State.Doc.Objects.AddBrep(brep) }
+        let rc  = newbreps |> ResizeArray.mapArr State.Doc.Objects.AddBrep
         if  deleteInput then
             for objectId in input do State.Doc.Objects.Delete(objectId, true)|> ignore
         State.Doc.Views.Redraw()
@@ -889,7 +889,7 @@ module AutoOpenSurface =
                 if select then
                     let rhobject = RhinoScriptSyntax.CoerceRhinoObject(rc)
                     rhobject.Select(true)  |>  ignore // TODO needs sync ? apparently not needed!
-        if curves.IsNotEmpty then State.Doc.Views.Redraw()
+        if curves.Count > 0 then State.Doc.Views.Redraw()
         curves
 
 
@@ -910,7 +910,7 @@ module AutoOpenSurface =
         let tolerance = State.Doc.ModelAbsoluteTolerance * 2.1
         curves <- Curve.JoinCurves(curves, tolerance)
         if curves|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.DuplicateSurfaceBorder failed.  surfaceId:'%s' type:'%d'" (Nice.str surfaceId) typ
-        let rc =  resizeArray { for c in curves do yield State.Doc.Objects.AddCurve(c) }
+        let rc  = curves |> ResizeArray.mapArr State.Doc.Objects.AddCurve
         State.Doc.Views.Redraw()
         rc
 
@@ -1505,7 +1505,7 @@ module AutoOpenSurface =
     ///    Delete the original Surfaces</param>
     ///<returns>(Guid) identifier of newly created object.</returns>
     static member JoinSurfaces(objectIds:Guid seq, [<OPT;DEF(false)>]deleteInput:bool) : Guid =
-        let breps =  resizeArray { for objectId in objectIds do yield RhinoScriptSyntax.CoerceBrep(objectId) }
+        let breps  = objectIds |> ResizeArray.mapSeq RhinoScriptSyntax.CoerceBrep
         if breps.Count<2 then RhinoScriptingException.Raise "RhinoScriptSyntax.JoinSurfaces failed, less than two objects given.  objectIds:'%A' deleteInput:'%A'" (Nice.str objectIds) deleteInput
         let tol = State.Doc.ModelAbsoluteTolerance * 2.1
         let joinedbreps = Brep.JoinBreps(breps, tol)
@@ -1592,7 +1592,7 @@ module AutoOpenSurface =
         let curve = RhinoScriptSyntax.CoerceCurve(curve)
         let tol = State.Doc.ModelAbsoluteTolerance
         let curves = Curve.PullToBrepFace(curve, brep.Faces.[0], tol)
-        let rc =  resizeArray { for curve in curves do yield State.Doc.Objects.AddCurve(curve) }
+        let rc  = curves |> ResizeArray.mapArr State.Doc.Objects.AddCurve
         if deleteInput  then
             State.Doc.Objects.Delete(crvobj, true) |> ignore
         State.Doc.Views.Redraw()
@@ -1686,7 +1686,7 @@ module AutoOpenSurface =
         //id = RhinoScriptSyntax.CoerceGuid(surfaceIds)
         //if notNull objectId then surfaceIds <- .[id]
         let ray = Ray3d(startPoint, direction)
-        let breps = resizeArray {for objectId in surfaceIds do RhinoScriptSyntax.CoerceBrep(objectId)}
+        let breps = surfaceIds |> ResizeArray.mapSeq RhinoScriptSyntax.CoerceBrep
         if breps.Count = 0 then RhinoScriptingException.Raise "RhinoScriptSyntax.ShootRay failed.  surfaceIds:'%A' startPoint:'%A' direction:'%A' reflections:'%A'"  surfaceIds startPoint direction reflections
         Intersect.Intersection.RayShoot(ray, Seq.cast breps, reflections)
 
@@ -1740,7 +1740,6 @@ module AutoOpenSurface =
 
 
 
-
     ///<summary>Splits a brep.</summary>
     ///<param name="brepId">(Guid) Identifier of the brep to split</param>
     ///<param name="cutterId">(Guid) Identifier of the brep to split with</param>
@@ -1758,7 +1757,7 @@ module AutoOpenSurface =
         if deleteInput then
             //brepId = RhinoScriptSyntax.CoerceGuid(brepId)
             State.Doc.Objects.Delete(brepId, true) |> ignore
-        let rc =  resizeArray { for piece in pieces do yield State.Doc.Objects.AddBrep(piece) }
+        let rc  = pieces |> ResizeArray.mapArr State.Doc.Objects.AddBrep
         State.Doc.Views.Redraw()
         rc
 
@@ -1839,22 +1838,22 @@ module AutoOpenSurface =
             )
         |> Option.defaultWith (fun () -> RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceAreaMoments failed on %A" surfaceId)
         |> fun mp ->
-            resizeArray {
-                yield (mp.WorldCoordinatesFirstMoments.X, mp.WorldCoordinatesFirstMoments.Y, mp.WorldCoordinatesFirstMoments.Z)                                     //  [0]     First Moments.
-                yield (mp.WorldCoordinatesFirstMomentsError.X, mp.WorldCoordinatesFirstMomentsError.Y, mp.WorldCoordinatesFirstMomentsError.Z)                      //  [1]     The absolute (+/-) error bound for the First Moments.
-                yield (mp.WorldCoordinatesSecondMoments.X, mp.WorldCoordinatesSecondMoments.Y, mp.WorldCoordinatesSecondMoments.Z)                                  //  [2]     Second Moments.
-                yield (mp.WorldCoordinatesSecondMomentsError.X, mp.WorldCoordinatesSecondMomentsError.Y, mp.WorldCoordinatesSecondMomentsError.Z)                   //  [3]     The absolute (+/-) error bound for the Second Moments.
-                yield (mp.WorldCoordinatesProductMoments.X, mp.WorldCoordinatesProductMoments.Y, mp.WorldCoordinatesProductMoments.Z)                               //  [4]     Product Moments.
-                yield (mp.WorldCoordinatesProductMomentsError.X, mp.WorldCoordinatesProductMomentsError.Y, mp.WorldCoordinatesProductMomentsError.Z)                //  [5]     The absolute (+/-) error bound for the Product Moments.
-                yield (mp.WorldCoordinatesMomentsOfInertia.X, mp.WorldCoordinatesMomentsOfInertia.Y, mp.WorldCoordinatesMomentsOfInertia.Z)                         //  [6]     Area Moments of Inertia about the World Coordinate Axes.
-                yield (mp.WorldCoordinatesMomentsOfInertiaError.X, mp.WorldCoordinatesMomentsOfInertiaError.Y, mp.WorldCoordinatesMomentsOfInertiaError.Z)          //  [7]     The absolute (+/-) error bound for the Area Moments of Inertia about World Coordinate Axes.
-                yield (mp.WorldCoordinatesRadiiOfGyration.X, mp.WorldCoordinatesRadiiOfGyration.Y, mp.WorldCoordinatesRadiiOfGyration.Z)                            //  [8]     Area Radii of Gyration about the World Coordinate Axes.
-                yield (0., 0., 0.) // need to add error calc to RhinoCommon                                                                                         //  [9]     The absolute (+/-) error bound for the Area Radii of Gyration about World Coordinate Axes.
-                yield (mp.CentroidCoordinatesMomentsOfInertia.X, mp.CentroidCoordinatesMomentsOfInertia.Y, mp.CentroidCoordinatesMomentsOfInertia.Z)                //  [10]    Area Moments of Inertia about the Centroid Coordinate Axes.
-                yield (mp.CentroidCoordinatesMomentsOfInertiaError.X, mp.CentroidCoordinatesMomentsOfInertiaError.Y, mp.CentroidCoordinatesMomentsOfInertiaError.Z) //  [11]    The absolute (+/-) error bound for the Area Moments of Inertia about the Centroid Coordinate Axes.
-                yield (mp.CentroidCoordinatesRadiiOfGyration.X, mp.CentroidCoordinatesRadiiOfGyration.Y, mp.CentroidCoordinatesRadiiOfGyration.Z)                   //  [12]    Area Radii of Gyration about the Centroid Coordinate Axes.
-                yield (0., 0., 0.) //need to add error calc to RhinoCommon                                                                                          //  [13]    The absolute (+/-) error bound for the Area Radii of Gyration about the Centroid Coordinate Axes</returns>
-                }
+            let r = ResizeArray(15)
+            r.Add (mp.WorldCoordinatesFirstMoments.X, mp.WorldCoordinatesFirstMoments.Y, mp.WorldCoordinatesFirstMoments.Z)                                     //  [0]     First Moments.
+            r.Add (mp.WorldCoordinatesFirstMomentsError.X, mp.WorldCoordinatesFirstMomentsError.Y, mp.WorldCoordinatesFirstMomentsError.Z)                      //  [1]     The absolute (+/-) error bound for the First Moments.
+            r.Add (mp.WorldCoordinatesSecondMoments.X, mp.WorldCoordinatesSecondMoments.Y, mp.WorldCoordinatesSecondMoments.Z)                                  //  [2]     Second Moments.
+            r.Add (mp.WorldCoordinatesSecondMomentsError.X, mp.WorldCoordinatesSecondMomentsError.Y, mp.WorldCoordinatesSecondMomentsError.Z)                   //  [3]     The absolute (+/-) error bound for the Second Moments.
+            r.Add (mp.WorldCoordinatesProductMoments.X, mp.WorldCoordinatesProductMoments.Y, mp.WorldCoordinatesProductMoments.Z)                               //  [4]     Product Moments.
+            r.Add (mp.WorldCoordinatesProductMomentsError.X, mp.WorldCoordinatesProductMomentsError.Y, mp.WorldCoordinatesProductMomentsError.Z)                //  [5]     The absolute (+/-) error bound for the Product Moments.
+            r.Add (mp.WorldCoordinatesMomentsOfInertia.X, mp.WorldCoordinatesMomentsOfInertia.Y, mp.WorldCoordinatesMomentsOfInertia.Z)                         //  [6]     Area Moments of Inertia about the World Coordinate Axes.
+            r.Add (mp.WorldCoordinatesMomentsOfInertiaError.X, mp.WorldCoordinatesMomentsOfInertiaError.Y, mp.WorldCoordinatesMomentsOfInertiaError.Z)          //  [7]     The absolute (+/-) error bound for the Area Moments of Inertia about World Coordinate Axes.
+            r.Add (mp.WorldCoordinatesRadiiOfGyration.X, mp.WorldCoordinatesRadiiOfGyration.Y, mp.WorldCoordinatesRadiiOfGyration.Z)                            //  [8]     Area Radii of Gyration about the World Coordinate Axes.
+            r.Add (0., 0., 0.) // need to add error calc to RhinoCommon                                                                                         //  [9]     The absolute (+/-) error bound for the Area Radii of Gyration about World Coordinate Axes.
+            r.Add (mp.CentroidCoordinatesMomentsOfInertia.X, mp.CentroidCoordinatesMomentsOfInertia.Y, mp.CentroidCoordinatesMomentsOfInertia.Z)                //  [10]    Area Moments of Inertia about the Centroid Coordinate Axes.
+            r.Add (mp.CentroidCoordinatesMomentsOfInertiaError.X, mp.CentroidCoordinatesMomentsOfInertiaError.Y, mp.CentroidCoordinatesMomentsOfInertiaError.Z) //  [11]    The absolute (+/-) error bound for the Area Moments of Inertia about the Centroid Coordinate Axes.
+            r.Add (mp.CentroidCoordinatesRadiiOfGyration.X, mp.CentroidCoordinatesRadiiOfGyration.Y, mp.CentroidCoordinatesRadiiOfGyration.Z)                   //  [12]    Area Radii of Gyration about the Centroid Coordinate Axes.
+            r.Add (0., 0., 0.) //need to add error calc to RhinoCommon                                                                                          //  [13]    The absolute (+/-) error bound for the Area Radii of Gyration about the Centroid Coordinate Axes</returns>
+            r
 
 
     ///<summary>Returns the point on a Surface that is closest to a test point.</summary>
@@ -1975,12 +1974,14 @@ module AutoOpenSurface =
                 degree <- nurb.Degree(1)
                 vfirst <- degree/2
                 vlast <- nurb.Points.CountV-degree + vfirst
-        resizeArray {
-            for u = ufirst to ulast-1 do
-                for v = vfirst to  vlast-1 do
-                    let pt = nurb.Points.GetGrevillePoint(u, v)
-                    nurb.PointAt(pt.X, pt.Y)
-                    }
+        let r = ResizeArray((ulast-1)*(vlast-1))
+        for u = ufirst to ulast-1 do
+            for v = vfirst to  vlast-1 do
+                let pt = nurb.Points.GetGrevillePoint(u, v)
+                r.Add <| nurb.PointAt(pt.X, pt.Y)
+        r
+
+
     ///<summary>Returns the parameters at edit, or Greville points of a Surface object. For each
     ///    Surface control point, there is a corresponding edit point.</summary>
     ///<param name="surfaceId">(Guid) The Surface's identifier</param>
@@ -2009,12 +2010,13 @@ module AutoOpenSurface =
                 degree <- nurb.Degree(1)
                 vfirst <- degree/2
                 vlast <- nurb.Points.CountV-degree + vfirst
-        resizeArray {
-            for u = ufirst to ulast-1 do
-                for v = vfirst to  vlast-1 do
-                    let pt = nurb.Points.GetGrevillePoint(u, v)
-                    pt.X, pt.Y
-                    }
+        let r = ResizeArray((ulast-1)*(vlast-1))
+        for u = ufirst to ulast-1 do
+            for v = vfirst to  vlast-1 do
+                let pt = nurb.Points.GetGrevillePoint(u, v)
+                r.Add(pt.X, pt.Y)
+        r
+
 
 
     ///<summary>A general purpose Surface evaluator.</summary>
@@ -2037,7 +2039,7 @@ module AutoOpenSurface =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let success, point, der = surface.Evaluate(parameter|> fst, parameter|> snd, derivative)
         if not success then RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceEvaluate failed.  surfaceId:'%s' parameter:'%A' derivative:'%A'" (Nice.str surfaceId) parameter derivative
-        let rc = resizeArray {()}
+        let rc = ResizeArray(der.Length)
         if der.Length > 0 then
           for d in der do rc.Add(d)
         point, rc
@@ -2321,22 +2323,22 @@ module AutoOpenSurface =
             )
         |> Option.defaultWith (fun () -> RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceVolumeMoments failed on %A" (Nice.str objectId))
         |> fun mp ->
-            resizeArray {
-                yield (mp.WorldCoordinatesFirstMoments.X, mp.WorldCoordinatesFirstMoments.Y, mp.WorldCoordinatesFirstMoments.Z)                                     //  [0]     First Moments.
-                yield (mp.WorldCoordinatesFirstMomentsError.X, mp.WorldCoordinatesFirstMomentsError.Y, mp.WorldCoordinatesFirstMomentsError.Z)                      //  [1]     The absolute (+/-) error bound for the First Moments.
-                yield (mp.WorldCoordinatesSecondMoments.X, mp.WorldCoordinatesSecondMoments.Y, mp.WorldCoordinatesSecondMoments.Z)                                  //  [2]     Second Moments.
-                yield (mp.WorldCoordinatesSecondMomentsError.X, mp.WorldCoordinatesSecondMomentsError.Y, mp.WorldCoordinatesSecondMomentsError.Z)                   //  [3]     The absolute (+/-) error bound for the Second Moments.
-                yield (mp.WorldCoordinatesProductMoments.X, mp.WorldCoordinatesProductMoments.Y, mp.WorldCoordinatesProductMoments.Z)                               //  [4]     Product Moments.
-                yield (mp.WorldCoordinatesProductMomentsError.X, mp.WorldCoordinatesProductMomentsError.Y, mp.WorldCoordinatesProductMomentsError.Z)                //  [5]     The absolute (+/-) error bound for the Product Moments.
-                yield (mp.WorldCoordinatesMomentsOfInertia.X, mp.WorldCoordinatesMomentsOfInertia.Y, mp.WorldCoordinatesMomentsOfInertia.Z)                         //  [6]     Area Moments of Inertia about the World Coordinate Axes.
-                yield (mp.WorldCoordinatesMomentsOfInertiaError.X, mp.WorldCoordinatesMomentsOfInertiaError.Y, mp.WorldCoordinatesMomentsOfInertiaError.Z)          //  [7]     The absolute (+/-) error bound for the Area Moments of Inertia about World Coordinate Axes.
-                yield (mp.WorldCoordinatesRadiiOfGyration.X, mp.WorldCoordinatesRadiiOfGyration.Y, mp.WorldCoordinatesRadiiOfGyration.Z)                            //  [8]     Area Radii of Gyration about the World Coordinate Axes.
-                yield (0., 0., 0.) // need to add error calc to RhinoCommon                                                                                         //  [9]     The absolute (+/-) error bound for the Area Radii of Gyration about World Coordinate Axes.
-                yield (mp.CentroidCoordinatesMomentsOfInertia.X, mp.CentroidCoordinatesMomentsOfInertia.Y, mp.CentroidCoordinatesMomentsOfInertia.Z)                //  [10]    Area Moments of Inertia about the Centroid Coordinate Axes.
-                yield (mp.CentroidCoordinatesMomentsOfInertiaError.X, mp.CentroidCoordinatesMomentsOfInertiaError.Y, mp.CentroidCoordinatesMomentsOfInertiaError.Z) //  [11]    The absolute (+/-) error bound for the Area Moments of Inertia about the Centroid Coordinate Axes.
-                yield (mp.CentroidCoordinatesRadiiOfGyration.X, mp.CentroidCoordinatesRadiiOfGyration.Y, mp.CentroidCoordinatesRadiiOfGyration.Z)                   //  [12]    Area Radii of Gyration about the Centroid Coordinate Axes.
-                yield (0., 0., 0.) //need to add error calc to RhinoCommon                                                                                          //  [13]    The absolute (+/-) error bound for the Area Radii of Gyration about the Centroid Coordinate Axes</returns>
-                }
+            let r = ResizeArray(15)
+            r.Add (mp.WorldCoordinatesFirstMoments.X, mp.WorldCoordinatesFirstMoments.Y, mp.WorldCoordinatesFirstMoments.Z)                                     //  [0]     First Moments.
+            r.Add (mp.WorldCoordinatesFirstMomentsError.X, mp.WorldCoordinatesFirstMomentsError.Y, mp.WorldCoordinatesFirstMomentsError.Z)                      //  [1]     The absolute (+/-) error bound for the First Moments.
+            r.Add (mp.WorldCoordinatesSecondMoments.X, mp.WorldCoordinatesSecondMoments.Y, mp.WorldCoordinatesSecondMoments.Z)                                  //  [2]     Second Moments.
+            r.Add (mp.WorldCoordinatesSecondMomentsError.X, mp.WorldCoordinatesSecondMomentsError.Y, mp.WorldCoordinatesSecondMomentsError.Z)                   //  [3]     The absolute (+/-) error bound for the Second Moments.
+            r.Add (mp.WorldCoordinatesProductMoments.X, mp.WorldCoordinatesProductMoments.Y, mp.WorldCoordinatesProductMoments.Z)                               //  [4]     Product Moments.
+            r.Add (mp.WorldCoordinatesProductMomentsError.X, mp.WorldCoordinatesProductMomentsError.Y, mp.WorldCoordinatesProductMomentsError.Z)                //  [5]     The absolute (+/-) error bound for the Product Moments.
+            r.Add (mp.WorldCoordinatesMomentsOfInertia.X, mp.WorldCoordinatesMomentsOfInertia.Y, mp.WorldCoordinatesMomentsOfInertia.Z)                         //  [6]     Area Moments of Inertia about the World Coordinate Axes.
+            r.Add (mp.WorldCoordinatesMomentsOfInertiaError.X, mp.WorldCoordinatesMomentsOfInertiaError.Y, mp.WorldCoordinatesMomentsOfInertiaError.Z)          //  [7]     The absolute (+/-) error bound for the Area Moments of Inertia about World Coordinate Axes.
+            r.Add (mp.WorldCoordinatesRadiiOfGyration.X, mp.WorldCoordinatesRadiiOfGyration.Y, mp.WorldCoordinatesRadiiOfGyration.Z)                            //  [8]     Area Radii of Gyration about the World Coordinate Axes.
+            r.Add (0., 0., 0.) // need to add error calc to RhinoCommon                                                                                         //  [9]     The absolute (+/-) error bound for the Area Radii of Gyration about World Coordinate Axes.
+            r.Add (mp.CentroidCoordinatesMomentsOfInertia.X, mp.CentroidCoordinatesMomentsOfInertia.Y, mp.CentroidCoordinatesMomentsOfInertia.Z)                //  [10]    Area Moments of Inertia about the Centroid Coordinate Axes.
+            r.Add (mp.CentroidCoordinatesMomentsOfInertiaError.X, mp.CentroidCoordinatesMomentsOfInertiaError.Y, mp.CentroidCoordinatesMomentsOfInertiaError.Z) //  [11]    The absolute (+/-) error bound for the Area Moments of Inertia about the Centroid Coordinate Axes.
+            r.Add (mp.CentroidCoordinatesRadiiOfGyration.X, mp.CentroidCoordinatesRadiiOfGyration.Y, mp.CentroidCoordinatesRadiiOfGyration.Z)                   //  [12]    Area Radii of Gyration about the Centroid Coordinate Axes.
+            r.Add (0., 0., 0.) //need to add error calc to RhinoCommon                                                                                          //  [13]    The absolute (+/-) error bound for the Area Radii of Gyration about the Centroid Coordinate Axes</returns>
+            r
 
 
 
@@ -2381,7 +2383,7 @@ module AutoOpenSurface =
             State.Doc.Views.Redraw()
             rc
         else
-            let rc =  resizeArray { for brep in breps do yield State.Doc.Objects.AddBrep(brep) }
+            let rc  = breps |> ResizeArray.mapArr State.Doc.Objects.AddBrep
             State.Doc.Views.Redraw()
             rc
 
@@ -2409,7 +2411,7 @@ module AutoOpenSurface =
             State.Doc.Views.Redraw()
             rc
         else
-            let rc =  resizeArray { for brep in breps do yield State.Doc.Objects.AddBrep(brep) }
+            let rc  = breps |> ResizeArray.mapArr State.Doc.Objects.AddBrep
             State.Doc.Views.Redraw()
             rc
 
@@ -2523,7 +2525,7 @@ module AutoOpenSurface =
 
         let breps, curves, points, dots = unroll.PerformUnroll()
         if isNull breps then RhinoScriptingException.Raise "RhinoScriptSyntax.UnrollSurface: failed on  %A" surfaceId
-        let rc =  resizeArray { for brep in breps do yield State.Doc.Objects.AddBrep(brep) }
+        let rc  = breps |> ResizeArray.mapArr State.Doc.Objects.AddBrep
         let newfollowing = ResizeArray()
         for curve in curves do
             let objectId = State.Doc.Objects.AddCurve(curve) //TODO verify order is correct ???

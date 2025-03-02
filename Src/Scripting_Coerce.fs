@@ -2,15 +2,9 @@
 namespace Rhino.Scripting
 
 open Rhino
-
 open System
-
 open Rhino.Geometry
 
-// open FsEx
-// open FsEx.UtilMath
-// open FsEx.SaveIgnore
-// open FsEx.CompareOperators
 
 [<AutoOpen>]
 module AutoOpenCoerce =

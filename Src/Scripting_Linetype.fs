@@ -4,7 +4,7 @@ namespace Rhino.Scripting
 open Rhino
 
 
-// open FsEx
+
 
 [<AutoOpen>]
 module AutoOpenLinetype =
