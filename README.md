@@ -93,14 +93,14 @@ rs.ObjectColor(pt, System.Drawing.Color.Blue);
 
 
 ## How about the dynamic types and optional parameters from VBScript and Python?
-Many RhinoScript function take variable types of input parameters.\
+Many RhinoScript functions take variable types of input parameters.\
 This is implemented with method overloads.\
-Many RhinoScript function have optional parameters.\
+Many RhinoScript functions have optional parameters.\
 These are also implemented as optional method parameters.
 
 
 ### Example
-for example `rs.ObjectLayer` can be called in several ways:
+For example `rs.ObjectLayer` can be called in several ways:
 
 `rs.ObjectLayer(guid)` To get the layer of one object, returns a string.\
 `rs.ObjectLayer(guid, string)` To set the layer of one object (fails if layer does not exist), no return value.\
@@ -185,7 +185,7 @@ These are implemented with 3 overloads and  `Optional` and `DefaultParameterValu
 [goswinr.github.io/Rhino.Scripting](https://goswinr.github.io/Rhino.Scripting)
 
 ### .NET Framework or .NET Core?
-This libray is currently only targeting .NET Framework 4.8.\
+This library is currently only targeting .NET Framework 4.8.\
 However, it should work in .NET 7.0 or higher as well.\
 But I could not yet compile it targeting net7.0, see https://discourse.mcneel.com/t/rhinocommon-with-net7-0-target/200460/2
 
