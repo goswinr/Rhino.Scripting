@@ -8,10 +8,9 @@ open System
 open System.Globalization
 open System.Collections.Generic
 open Microsoft.FSharp.Core.LanguagePrimitives
-
 open Rhino.Geometry
 open Rhino.ApplicationSettings
-
+open Rhino.Scripting.RhinoScriptingUtils
 
 
 

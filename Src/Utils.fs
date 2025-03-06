@@ -1,12 +1,13 @@
-namespace Rhino.Scripting
+namespace Rhino.Scripting.RhinoScriptingUtils
 
 open Rhino
+open Rhino.Scripting
 open System
 
 
-/// Exposes the settings used in toNiceString pretty printing function
+/// Exposes the settings used in toPretty pretty printing function
 [<RequireQualifiedAccess>]
-module NiceStringSettings =
+module PrettySettings =
 
     /// Set this to change the printing of floats larger than 10'000
     let mutable thousandSeparator = '\'' // = just one quote '
@@ -18,7 +19,7 @@ module NiceStringSettings =
     let mutable userZeroTolerance = 1e-24 // Double.Epsilon
 
 [<RequireQualifiedAccess>]
-module internal NiceFormat =
+module PrettyFormat =
 
     module private Literals =
 
@@ -60,14 +61,14 @@ module internal NiceFormat =
             for i=st to en-1 do // don't go to last one because it shall never get a separator
                 let rest = en-i
                 add s.[i]
-                if rest % 3 = 0 then add NiceStringSettings.thousandSeparator
+                if rest % 3 = 0 then add PrettySettings.thousandSeparator
             add s.[en] //add last (never with sep)
 
         let inline doAfterComma st en =
             add s.[st] //add fist (never with sep)
             for i=st+1 to en do // don't go to last one because it shall never get a separator
                 let pos = i-st
-                if pos % 3 = 0 then add NiceStringSettings.thousandSeparator
+                if pos % 3 = 0 then add PrettySettings.thousandSeparator
                 add s.[i]
 
         let start =
@@ -98,7 +99,7 @@ module internal NiceFormat =
     /// Formatting with automatic precision
     /// e.g.: 0 digits behind comma if above 1000
     /// if there are more than 15 zeros behind the comma just '~0.0' will be displayed
-    /// if the value is smaller than NiceStringSettings.roundToZeroBelow '0.0' will be shown.
+    /// if the value is smaller than PrettySettings.roundToZeroBelow '0.0' will be shown.
     /// this is Double.Epsilon by default
     let float  (x:float) =
         if   Double.IsNaN x then Literals.NaN
@@ -108,7 +109,7 @@ module internal NiceFormat =
         elif x = 0.0 then "0.0" // not "0" as in sprintf "%g"
         else
             let  a = abs x
-            if   a <  NiceStringSettings.userZeroTolerance then Literals.BelowUserZeroTolerance // do this check up here, value might be very high
+            if   a <  PrettySettings.userZeroTolerance then Literals.BelowUserZeroTolerance // do this check up here, value might be very high
             elif a >= 10000.          then x.ToString("#")|> addThousandSeparators
             elif a >= 1000.           then x.ToString("#")
             elif a >= 100.            then x.ToString("#.#" , invC)
@@ -135,7 +136,7 @@ module internal NiceFormat =
         elif x = 0.0f then "0.0" // not "0" as in sprintf "%g"
         else
             let  a = abs x
-            if   a <  float32 NiceStringSettings.userZeroTolerance then Literals.BelowUserZeroTolerance // do this check up here, value might be very high
+            if   a <  float32 PrettySettings.userZeroTolerance then Literals.BelowUserZeroTolerance // do this check up here, value might be very high
             elif a >= 10000.f      then x.ToString("#")|> addThousandSeparators
             elif a >= 1000.f       then x.ToString("#")
             elif a >= 100.f        then x.ToString("#.#" , invC)
@@ -172,7 +173,9 @@ module internal  Seq =
             if predicate x then
                 k <- k + 1
         k
-module internal ResizeArray =
+
+
+module internal RArr =
 
     let inline map (mapping: 'T -> 'U) (resizeArray: ResizeArray<'T>) : ResizeArray<'U> =
         resizeArray.ConvertAll(System.Converter mapping)
@@ -193,7 +196,7 @@ module internal ResizeArray =
 
 
 [<AutoOpenAttribute>]
-module FsExUtils =
+module AutoOpenRsUtils =
 
     type Dict<'K,'V> = Collections.Generic.Dictionary<'K,'V>
 
@@ -302,7 +305,7 @@ module FsExUtils =
 
     module internal ColorUtil =
 
-        let clamp01 x =
+        let inline clamp01 x =
             if x < 0.0 then 0.0
             elif x > 1.0 then 1.0
             else x

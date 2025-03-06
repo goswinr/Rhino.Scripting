@@ -1,11 +1,8 @@
-﻿
-namespace Rhino.Scripting
+﻿namespace Rhino.Scripting
 
 open Rhino
-
 open System
-
-
+open Rhino.Scripting.RhinoScriptingUtils
 
 
 [<AutoOpen>]
@@ -107,7 +104,7 @@ module AutoOpenUserData =
             let err = Text.StringBuilder()
             let addLn (s:String) = err.AppendLine s |> ignore
             let add (s:String) = err.Append s |> ignore
-            addLn <| sprintf "RhinoScriptSyntax.GetUserText key: '%s' does not exist on %s" key (Nice.str objectId)
+            addLn <| sprintf "RhinoScriptSyntax.GetUserText key: '%s' does not exist on %s" key (Pretty.str objectId)
             let ks = RhinoScriptSyntax.GetUserTextKeys(objectId, attachedToGeometry=false)
             if ks.Count = 0 then
                 addLn  "This Object does not have any UserText."
@@ -238,10 +235,10 @@ module AutoOpenUserData =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if attachToGeometry then
             if not <| obj.Geometry.SetUserString(key, value) then
-                RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' value '%s'" (Nice.str objectId) key value
+                RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' value '%s'" (Pretty.str objectId) key value
         else
             if not <| obj.Attributes.SetUserString(key, value) then
-                RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' value '%s'" (Nice.str objectId) key value
+                RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' value '%s'" (Pretty.str objectId) key value
 
         obj.CommitChanges() |> ignore // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
 
@@ -268,10 +265,10 @@ module AutoOpenUserData =
             let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             if attachToGeometry then
                 if not <| obj.Geometry.SetUserString(key, value) then
-                    RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' value '%s'" (Nice.str objectId) key value
+                    RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' value '%s'" (Pretty.str objectId) key value
             else
                 if not <| obj.Attributes.SetUserString(key, value) then
-                    RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' value '%s'" (Nice.str objectId) key value
+                    RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' value '%s'" (Pretty.str objectId) key value
             obj.CommitChanges() |> ignore  // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
 
     ///<summary>Removes user text stored on an object. If the key exists.</summary>

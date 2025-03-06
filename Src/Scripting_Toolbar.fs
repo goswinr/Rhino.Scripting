@@ -1,12 +1,8 @@
-﻿
-namespace Rhino.Scripting
+﻿namespace Rhino.Scripting
 
 open Rhino
-
 open System
-
-
-
+open Rhino.Scripting.RhinoScriptingUtils
 
 
 [<AutoOpen>]
@@ -156,7 +152,7 @@ module AutoOpenToolbar =
     ///<summary>Returns names of all currently open tool-bar collections.</summary>
     ///<returns>(string ResizeArray) The names of all currently open tool-bar collections.</returns>
     static member ToolbarCollectionNames() : string ResizeArray =
-        RhinoApp.ToolbarFiles |> ResizeArray.mapSeq _.Name
+        RhinoApp.ToolbarFiles |> RArr.mapSeq _.Name
 
     ///<summary>Returns full path to a currently open tool-bar collection file.</summary>
     ///<param name="name">(string) Name of currently open tool-bar collection</param>

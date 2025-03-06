@@ -2,16 +2,10 @@
 namespace Rhino.Scripting
 
 open Rhino
-
 open System
 open System.Collections.Generic
-
 open Rhino.Geometry
-
-
-
-
-
+open Rhino.Scripting.RhinoScriptingUtils
 
 
 [<AutoOpen>]
@@ -46,7 +40,7 @@ module AutoOpenGeometry =
                 ]
         let rc = State.Doc.Objects.AddClippingPlane(plane, uMagnitude, vMagnitude, viewList)
         if rc = Guid.Empty then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.AddClippingPlane: Unable to add clipping plane to document.  plane:'%s' uMagnitude:'%g' vMagnitude:'%g' views:'%s'" plane.ToNiceString uMagnitude vMagnitude (Nice.str views)
+            RhinoScriptingException.Raise "RhinoScriptSyntax.AddClippingPlane: Unable to add clipping plane to document.  plane:'%s' uMagnitude:'%g' vMagnitude:'%g' views:'%s'" plane.Pretty uMagnitude vMagnitude (Pretty.str views)
         State.Doc.Views.Redraw()
         rc
 
@@ -76,7 +70,7 @@ module AutoOpenGeometry =
         if not <| IO.File.Exists(filename) then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPictureFrame image %s does not exist" filename
         let rc = State.Doc.Objects.AddPictureFrame(plane, filename, makeMesh, width, height, selfIllumination, embed)
         if rc = Guid.Empty
-            then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPictureFrame: Unable to add picture frame to document. plane:'%s' filename:'%s' width:'%g' height:'%g' selfIllumination:'%b' embed:'%b' useAlpha:'%b' makeMesh:'%b'" plane.ToNiceString filename width height selfIllumination embed useAlpha makeMesh
+            then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPictureFrame: Unable to add picture frame to document. plane:'%s' filename:'%s' width:'%g' height:'%g' selfIllumination:'%b' embed:'%b' useAlpha:'%b' makeMesh:'%b'" plane.Pretty filename width height selfIllumination embed useAlpha makeMesh
         State.Doc.Views.Redraw()
         rc
 
@@ -87,7 +81,7 @@ module AutoOpenGeometry =
     ///<returns>(Guid) identifier for the object that was added to the doc.</returns>
     static member AddPoint(x:float, y:float, z:float) : Guid =
         let rc = State.Doc.Objects.AddPoint(Point3d(x, y, z))
-        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPoint: Unable to add point to document.  x:'%s' y:'%s' z:'%s'"  (NiceFormat.float x) (NiceFormat.float y) (NiceFormat.float z)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPoint: Unable to add point to document.  x:'%s' y:'%s' z:'%s'"  (PrettyFormat.float x) (PrettyFormat.float y) (PrettyFormat.float z)
         State.Doc.Views.Redraw()
         rc
 
@@ -96,7 +90,7 @@ module AutoOpenGeometry =
     ///<returns>(Guid) identifier for the object that was added to the doc.</returns>
     static member AddPoint(point:Point3d) : Guid =
         let rc = State.Doc.Objects.AddPoint(point)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPoint: Unable to add point to document.  point:'%s'" point.ToNiceString
+        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPoint: Unable to add point to document.  point:'%s'" point.Pretty
         State.Doc.Views.Redraw()
         rc
 
@@ -126,7 +120,7 @@ module AutoOpenGeometry =
     ///<param name="points">(Point3d seq) List of points</param>
     ///<returns>(Guid ResizeArray) List of identifiers of the new objects.</returns>
     static member AddPoints(points:Point3d seq) : Guid ResizeArray =
-        let rc = points |> ResizeArray.mapSeq State.Doc.Objects.AddPoint
+        let rc = points |> RArr.mapSeq State.Doc.Objects.AddPoint
         State.Doc.Views.Redraw()
         rc
 
@@ -167,7 +161,7 @@ module AutoOpenGeometry =
                             [<OPT;DEF(1uy)>]horizontalAlignment:byte, //DocObjects.TextHorizontalAlignment, //TODO how to keep enum type and keep parameter optional ???
                             [<OPT;DEF(3uy)>]verticalAlignment  :byte) : Guid = //DocObjects.TextVerticalAlignment) : Guid =
 
-        if isNull text || text = "" then RhinoScriptingException.Raise "RhinoScriptSyntax.AddText Text invalid.  text:'%s' plane:'%s' height:'%g' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane.ToNiceString height font fontStyle horizontalAlignment verticalAlignment
+        if isNull text || text = "" then RhinoScriptingException.Raise "RhinoScriptSyntax.AddText Text invalid.  text:'%s' plane:'%s' height:'%g' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane.Pretty height font fontStyle horizontalAlignment verticalAlignment
         let bold   = (1 = fontStyle || 3 = fontStyle)
         let italic = (2 = fontStyle || 3 = fontStyle)
         let ds = State.Doc.DimStyles.Current
@@ -180,19 +174,19 @@ module AutoOpenGeometry =
         let f = DocObjects.Font.FromQuartetProperties(qn, quartetBoldProp, quartetItalicProp)
 
         if isNull f then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.AddText failed. text:'%s' plane:'%s' height:'%g' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane.ToNiceString height font fontStyle horizontalAlignment verticalAlignment
+            RhinoScriptingException.Raise "RhinoScriptSyntax.AddText failed. text:'%s' plane:'%s' height:'%g' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane.Pretty height font fontStyle horizontalAlignment verticalAlignment
         let te = TextEntity.Create(text, plane, ds, false, 0.0, 0.0)
         te.TextHeight <- height
         if font |> notNull then
             te.Font <- f
         if bold <> quartetBoldProp then
             if DocObjects.Font.FromQuartetProperties(qn, bold, false) |> isNull then
-                RhinoScriptingException.Raise "RhinoScriptSyntax.AddText failed. text:'%s' plane:'%s' height:'%g' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane.ToNiceString height font fontStyle horizontalAlignment verticalAlignment
+                RhinoScriptingException.Raise "RhinoScriptSyntax.AddText failed. text:'%s' plane:'%s' height:'%g' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane.Pretty height font fontStyle horizontalAlignment verticalAlignment
             else
                 te.SetBold(bold)|> ignore
         if italic <> quartetItalicProp then
             if DocObjects.Font.FromQuartetProperties(qn, false, italic) |> isNull then
-                RhinoScriptingException.Raise "RhinoScriptSyntax.AddText failed. text:'%s' plane:'%s' height:'%g' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane.ToNiceString height font fontStyle horizontalAlignment verticalAlignment
+                RhinoScriptingException.Raise "RhinoScriptSyntax.AddText failed. text:'%s' plane:'%s' height:'%g' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane.Pretty height font fontStyle horizontalAlignment verticalAlignment
             else
                 te.SetItalic(italic)|> ignore
 
@@ -246,7 +240,7 @@ module AutoOpenGeometry =
     ///<returns>(Guid) The identifier of the new object.</returns>
     static member AddTextDot(text:string, point:Point3d) : Guid =
         let rc = State.Doc.Objects.AddTextDot(text, point)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddTextDot: Unable to add TextDot to document. text:'%s' point:'%s'" text (Nice.str point)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddTextDot: Unable to add TextDot to document. text:'%s' point:'%s'" text (Pretty.str point)
         State.Doc.Views.Redraw()
         rc
 
@@ -268,7 +262,7 @@ module AutoOpenGeometry =
     ///<returns>(float) area.</returns>
     static member Area(geometry:GeometryBase) : float =
         let mp = AreaMassProperties.Compute([geometry])
-        if mp |> isNull then RhinoScriptingException.Raise "RhinoScriptSyntax.Area: Unable to compute area mass properties from geometry:'%s'" (Nice.str geometry)
+        if mp |> isNull then RhinoScriptingException.Raise "RhinoScriptSyntax.Area: Unable to compute area mass properties from geometry:'%s'" (Pretty.str geometry)
         mp.Area
 
     ///<summary>Compute the area of a closed Curve, Hatch, Surface, Polysurface, or Mesh.</summary>
@@ -277,7 +271,7 @@ module AutoOpenGeometry =
     static member Area(objectId:Guid) : float =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let mp = AreaMassProperties.Compute([rhobj.Geometry])
-        if mp |> isNull then RhinoScriptingException.Raise "RhinoScriptSyntax.Area: Unable to compute area mass properties from objectId:'%s'" (Nice.str objectId)
+        if mp |> isNull then RhinoScriptingException.Raise "RhinoScriptSyntax.Area: Unable to compute area mass properties from objectId:'%s'" (Pretty.str objectId)
         mp.Area
 
     ///<summary>Returns a world axis-aligned bounding box of several objects.
@@ -363,7 +357,7 @@ module AutoOpenGeometry =
     ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
     static member BoundingBox(objects:Guid seq, plane:Plane, [<OPT;DEF(true)>]inWorldCoords:bool) : Box =
         let mutable bbox = BoundingBox.Empty
-        if not plane.IsValid then RhinoScriptingException.Raise "Invalid Geometry.Plane:%s in RhinoScriptSyntax.BoundingBox of %s" plane.ToNiceString (Nice.str objects)
+        if not plane.IsValid then RhinoScriptingException.Raise "Invalid Geometry.Plane:%s in RhinoScriptSyntax.BoundingBox of %s" plane.Pretty (Pretty.str objects)
         let worldtoplane = Transform.ChangeBasis(Plane.WorldXY, plane)
         objects
         |> Seq.map RhinoScriptSyntax.CoerceGeometry
@@ -399,7 +393,7 @@ module AutoOpenGeometry =
     static member BoundingBoxInflate(bbox:BoundingBox, amount:float) : BoundingBox =
         let b = BoundingBox(bbox.Min,bbox.Max)
         b.Inflate(amount)
-        if not b.IsValid then RhinoScriptingException.Raise "RhinoScriptSyntax.BoundingBoxInflate Invalid BoundingBox from rs.BoundingBoxInflate by %f on %s" amount bbox.ToNiceString
+        if not b.IsValid then RhinoScriptingException.Raise "RhinoScriptSyntax.BoundingBoxInflate Invalid BoundingBox from rs.BoundingBoxInflate by %f on %s" amount bbox.Pretty
         b
 
     ///<summary>Returns a new inflated box with custom x, y and z amounts in their directions.
@@ -414,7 +408,7 @@ module AutoOpenGeometry =
     static member BoundingBoxInflate(bbox:BoundingBox, amountX:float, amountY:float, amountZ:float) : BoundingBox =
         let b = BoundingBox(bbox.Min,bbox.Max)
         b.Inflate(amountX, amountY, amountZ)
-        if not b.IsValid then RhinoScriptingException.Raise "RhinoScriptSyntax.BoundingBoxInflate Invalid BoundingBox from rs.BoundingBoxInflate by x:%f, y:%f, z:%f, on %s" amountX amountY amountZ bbox.ToNiceString
+        if not b.IsValid then RhinoScriptingException.Raise "RhinoScriptSyntax.BoundingBoxInflate Invalid BoundingBox from rs.BoundingBoxInflate by x:%f, y:%f, z:%f, on %s" amountX amountY amountZ bbox.Pretty
         b
 
 
@@ -437,7 +431,7 @@ module AutoOpenGeometry =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(textId)
         let curves = (rhobj.Geometry:?>TextEntity).Explode()
         let attr = rhobj.Attributes
-        let rc = curves  |> ResizeArray.mapArr ( fun curve -> State.Doc.Objects.AddCurve(curve, attr) )
+        let rc = curves  |> RArr.mapArr ( fun curve -> State.Doc.Objects.AddCurve(curve, attr) )
         if delete then State.Doc.Objects.Delete(rhobj, quiet=true) |>ignore
         State.Doc.Views.Redraw()
         rc
@@ -605,7 +599,7 @@ module AutoOpenGeometry =
     ///<returns>(unit) void, nothing.</returns>
     static member PointCoordinates(objectId:Guid, point:Point3d) : unit = //SET
         let pt = RhinoScriptSyntax.Coerce3dPoint(objectId)
-        if not <| State.Doc.Objects.Replace(objectId, pt) then RhinoScriptingException.Raise "RhinoScriptSyntax.PointCoordinates failed to change object %s to %s" (Nice.str objectId) (Nice.str point)
+        if not <| State.Doc.Objects.Replace(objectId, pt) then RhinoScriptingException.Raise "RhinoScriptSyntax.PointCoordinates failed to change object %s to %s" (Pretty.str objectId) (Pretty.str point)
         State.Doc.Views.Redraw()
 
 
@@ -623,7 +617,7 @@ module AutoOpenGeometry =
     static member TextDotFont(objectId:Guid, fontFace:string) : unit = //SET
         let textdot = RhinoScriptSyntax.CoerceTextDot(objectId)
         textdot.FontFace <-  fontFace
-        if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotFont failed to change object %s to '%s'" (Nice.str objectId) fontFace
+        if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotFont failed to change object %s to '%s'" (Pretty.str objectId) fontFace
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the font of multiple text dots.</summary>
@@ -634,7 +628,7 @@ module AutoOpenGeometry =
         for objectId in objectIds do
             let textdot = RhinoScriptSyntax.CoerceTextDot(objectId)
             textdot.FontFace <-  fontFace
-            if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotFont failed to change object %s to '%s'" (Nice.str objectId) fontFace
+            if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotFont failed to change object %s to '%s'" (Pretty.str objectId) fontFace
         State.Doc.Views.Redraw()
 
 
@@ -651,7 +645,7 @@ module AutoOpenGeometry =
     static member TextDotHeight(objectId:Guid, height:int) : unit = //SET
         let textdot = RhinoScriptSyntax.CoerceTextDot(objectId)
         textdot.FontHeight <- height
-        if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotHeight failed to change object %s to %d" (Nice.str objectId) height
+        if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotHeight failed to change object %s to %d" (Pretty.str objectId) height
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the font height of multiple text dots.</summary>
@@ -662,7 +656,7 @@ module AutoOpenGeometry =
         for objectId in objectIds do
             let textdot = RhinoScriptSyntax.CoerceTextDot(objectId)
             textdot.FontHeight <- height
-            if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotHeight failed to change object %s to %d" (Nice.str objectId) height
+            if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotHeight failed to change object %s to %d" (Pretty.str objectId) height
         State.Doc.Views.Redraw()
 
 
@@ -680,7 +674,7 @@ module AutoOpenGeometry =
     static member TextDotPoint(objectId:Guid, point:Point3d) : unit = //SET
         let textdot = RhinoScriptSyntax.CoerceTextDot(objectId)
         textdot.Point <-  point
-        if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotPoint failed to change object %s to %s" (Nice.str objectId) point.ToNiceString
+        if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotPoint failed to change object %s to %s" (Pretty.str objectId) point.Pretty
         State.Doc.Views.Redraw()
 
 
@@ -701,7 +695,7 @@ module AutoOpenGeometry =
     static member TextDotText(objectId:Guid, text:string) : unit = //SET
         let textdot = RhinoScriptSyntax.CoerceTextDot(objectId)
         textdot.Text <-  text
-        if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotText failed to change object %s to '%s'" (Nice.str objectId) text
+        if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotText failed to change object %s to '%s'" (Pretty.str objectId) text
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the text on multiple text dot objects.</summary>
@@ -712,7 +706,7 @@ module AutoOpenGeometry =
         for objectId in objectIds do
             let textdot = RhinoScriptSyntax.CoerceTextDot(objectId)
             textdot.Text <-  text
-            if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotText failed to change object %s to '%s'" (Nice.str objectId) text
+            if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotText failed to change object %s to '%s'" (Pretty.str objectId) text
         State.Doc.Views.Redraw()
 
 
@@ -737,7 +731,7 @@ module AutoOpenGeometry =
     static member TextObjectHeight(objectId:Guid, height:float) : unit = //SET
         let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
         annotation.TextHeight <-  height
-        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectHeight failed.  objectId:'%s' height:'%s'" (Nice.str objectId) (NiceFormat.float height)
+        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectHeight failed.  objectId:'%s' height:'%s'" (Pretty.str objectId) (PrettyFormat.float height)
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the height of multiple text objects.</summary>
@@ -748,7 +742,7 @@ module AutoOpenGeometry =
         for objectId in objectIds do
             let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
             annotation.TextHeight <-  height
-            if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectHeight failed.  objectId:'%s' height:'%s'" (Nice.str objectId) (NiceFormat.float height)
+            if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectHeight failed.  objectId:'%s' height:'%s'" (Pretty.str objectId) (PrettyFormat.float height)
         State.Doc.Views.Redraw()
         State.Doc.Views.Redraw()
 
@@ -765,7 +759,7 @@ module AutoOpenGeometry =
     static member TextObjectPlane(objectId:Guid, plane:Plane) : unit = //SET
         let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
         annotation.Plane <-  plane
-        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectPlane failed.  objectId:'%s' plane:'%s'" (Nice.str objectId) plane.ToNiceString
+        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectPlane failed.  objectId:'%s' plane:'%s'" (Pretty.str objectId) plane.Pretty
         State.Doc.Views.Redraw()
 
 
@@ -785,7 +779,7 @@ module AutoOpenGeometry =
         plane.Origin <-  point
         text.Plane <-  plane
 
-        if not <| State.Doc.Objects.Replace(objectId, text) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectPoint failed.  objectId:'%s' point:'%s'" (Nice.str objectId) point.ToNiceString
+        if not <| State.Doc.Objects.Replace(objectId, text) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectPoint failed.  objectId:'%s' point:'%s'" (Pretty.str objectId) point.Pretty
         State.Doc.Views.Redraw()
 
     ///<summary>Returns the font style of a text object.</summary>
@@ -817,7 +811,7 @@ module AutoOpenGeometry =
     static member TextObjectText(objectId:Guid, text:string) : unit = //SET
         let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
         annotation.PlainText <-  text
-        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectText failed.  objectId:'%s' text:'%s'" (Nice.str objectId) text
+        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectText failed.  objectId:'%s' text:'%s'" (Pretty.str objectId) text
         State.Doc.Views.Redraw()
 
 
@@ -830,7 +824,7 @@ module AutoOpenGeometry =
         for objectId in objectIds do
             let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
             annotation.PlainText <-  text
-            if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectText failed.  objectId:'%s' text:'%s'" (Nice.str objectId) text
+            if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectText failed.  objectId:'%s' text:'%s'" (Pretty.str objectId) text
         State.Doc.Views.Redraw()
 
 
@@ -855,7 +849,7 @@ module AutoOpenGeometry =
             annotation.SetRichText(rtfString, ds)
         else
             annotation.RichText <-  rtfString
-        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectRichText failed.  objectId:'%s' text:'%s'" (Nice.str objectId) rtfString
+        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectRichText failed.  objectId:'%s' text:'%s'" (Pretty.str objectId) rtfString
         State.Doc.Views.Redraw()
 
 
@@ -871,13 +865,13 @@ module AutoOpenGeometry =
             if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectRichText, style not found:'%s'"  style
             for objectId in objectIds do
                 let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
-                if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectRichText failed.  objectId:'%s' text:'%s' style:'%s'" (Nice.str objectId) rtfString style
+                if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectRichText failed.  objectId:'%s' text:'%s' style:'%s'" (Pretty.str objectId) rtfString style
                 annotation.SetRichText(rtfString, ds)
         else
             for objectId in objectIds do
                 let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
                 annotation.RichText <-  rtfString
-                if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectRichText failed.  objectId:'%s' text:'%s'" (Nice.str objectId) rtfString
+                if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectRichText failed.  objectId:'%s' text:'%s'" (Pretty.str objectId) rtfString
         State.Doc.Views.Redraw()
 
 
@@ -899,10 +893,10 @@ module AutoOpenGeometry =
             |2 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=false, italic=true)
             |1 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=true , italic=false)
             |0 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=false, italic=false)
-            |_ -> (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' bad style:%d" (Nice.str objectId) style)
-        if isNull f then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' style:%d not available for %s" (Nice.str objectId) style fontdata.QuartetName
+            |_ -> (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' bad style:%d" (Pretty.str objectId) style)
+        if isNull f then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' style:%d not available for %s" (Pretty.str objectId) style fontdata.QuartetName
         if not <| State.Doc.Objects.Replace(objectId, annotation) then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' bad style:%d" (Nice.str objectId) style
+            RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' bad style:%d" (Pretty.str objectId) style
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the font style of multiple text objects. Keeps the font face</summary>
@@ -932,9 +926,9 @@ module AutoOpenGeometry =
             |? DocObjects.Font.FromQuartetProperties(font, bold=true , italic=false)
             |? DocObjects.Font.FromQuartetProperties(font, bold=false, italic=true )
             |? DocObjects.Font.FromQuartetProperties(font, bold=true , italic=true )
-            |? (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectFont failed.  objectId:'%s' font:''%s''" (Nice.str objectId) font)
+            |? (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectFont failed.  objectId:'%s' font:''%s''" (Pretty.str objectId) font)
         annotation.Font <- f
-        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectFont failed.  objectId:'%s' font:''%s''" (Nice.str objectId) font
+        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectFont failed.  objectId:'%s' font:''%s''" (Pretty.str objectId) font
         State.Doc.Views.Redraw()
         State.Doc.Views.Redraw()
 

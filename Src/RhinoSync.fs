@@ -1,12 +1,9 @@
 ﻿namespace Rhino.Scripting
 
 open Rhino
-
-
+open Rhino.Scripting.RhinoScriptingUtils
 open System
 open Rhino.Runtime
-
-
 
 type internal RunOnUiDelegate = delegate of unit -> unit
 
@@ -23,7 +20,7 @@ type RhinoSync private () =
 
     static let mutable syncContext: Threading.SynchronizationContext  = null //set via reflection below ; from Fesh.Rhino
 
-    static let mutable feshAssembly : Reflection.Assembly = null //set via reflection below ; from Fesh.Rhino
+    static let mutable feshRhAssembly : Reflection.Assembly = null //set via reflection below ; from Fesh.Rhino
 
     static let mutable hideEditor : Action = null //set via reflection below ; from Fesh.Rhino
 
@@ -33,14 +30,67 @@ type RhinoSync private () =
 
     static let mutable logErrors = true
 
-    static let log msg = Printf.kprintf(fun s ->  if logErrors then (RhinoApp.WriteLine s ; eprintfn "%s" s))  msg
+    static let mutable prettyFormatters: ResizeArray<obj -> option<string>> = null
+
+    /// Red green blue text
+    static let mutable printColor : int-> int -> int -> string -> unit = //changed via reflection below from Fesh.Rhino
+        fun _ _ _ s -> Console.Write s
+
+    /// Red green blue text
+    static let mutable printNewLineColor : int-> int -> int -> string -> unit = //changed via reflection below from Fesh.Rhino
+        fun _ _ _ s -> Console.WriteLine s
+
+    static let mutable clear : unit -> unit = // changed via reflection below from Fesh
+        fun () -> ()
+
+    static let initFeshPrint() =
+        let allAss = AppDomain.CurrentDomain.GetAssemblies()
+        match allAss |> Array.tryFind (fun a -> a.GetName().Name = "Fesh") with
+        | Some feshAssembly ->
+            try
+                let printModule = feshAssembly.GetType("Fesh.Model.IFeshLogModule")
+                if notNull printModule then
+                    let pc = printModule.GetProperty("printColor" ).GetValue(feshAssembly)
+                    if notNull pc then
+                        let pct = pc :?>  int-> int -> int -> string -> unit
+                        printColor   <- pct
+                    let pnc = printModule.GetProperty("printnColor").GetValue(feshAssembly)
+                    if notNull pnc then
+                        let pct = pnc :?> int-> int -> int -> string -> unit
+                        printNewLineColor   <- pct
+                    let cl = printModule.GetProperty("clear").GetValue(feshAssembly)
+                    if notNull cl then
+                        let clt = cl :?> unit -> unit
+                        clear   <- clt
+            with ex ->
+                eprintfn "The Fesh was found but setting up color printing failed. The Error was: %A" ex
+        |None -> ()
+
+        match allAss |> Array.tryFind (fun a -> a.GetName().Name = "Pretty") with
+        | Some prettyAssembly ->
+            try
+                let prettySettings = prettyAssembly.GetType("Pretty.PrettySettings")
+                if notNull prettySettings then
+                    let formatters = prettySettings.GetProperty("Formatters").GetValue(prettyAssembly) :?> ResizeArray<obj -> option<string>>
+                    if notNull formatters then
+                        prettyFormatters <- formatters
+
+
+            with ex ->
+                eprintfn "The Pretty was found but setting up color printing failed. The Error was: %A" ex
+        |None -> ()
+
+
+
+
+    static let log msg = Printf.kprintf(fun s -> if logErrors then (RhinoApp.WriteLine s ; eprintfn "%s" s))  msg
 
     static let mutable initIsPending = true
 
     //only called when actually needed in DoSync methods below.
     static let init() =
         initIsPending <- false
-        if isNull feshAssembly then
+        if isNull feshRhAssembly then
             // it s ok to log errors here since we check 'if notNull feshRh then'
             try
                 // some reflection hacks because Rhinocommon does not expose a UI sync context
@@ -48,36 +98,37 @@ type RhinoSync private () =
                 let feshId = Guid "01dab273-99ae-4760-8695-3f29f4887831" // the GUID of Fesh.Rhino Plugin set in it's AssemblyInfo.fs see https://github.com/goswinr/Fesh.Rhino/blob/main/Src/AssemblyInfo.fs#L15
                 let feshRh = Rhino.PlugIns.PlugIn.Find feshId
                 if notNull feshRh then
-                    feshAssembly <- feshRh.Assembly
-                    feshRhinoSyncModule <- feshAssembly.GetType "Fesh.Rhino.Sync"
+                    feshRhAssembly <- feshRh.Assembly
+                    feshRhinoSyncModule <- feshRhAssembly.GetType "Fesh.Rhino.Sync"
+                    initFeshPrint()
             with e ->
                 log "Rhino.Scripting.dll could not get feshRhinoSyncModule from Fesh Assembly via Reflection: %A" e
 
         if notNull feshRhinoSyncModule then
             // it s ok to log errors here since feshRhinoSyncModule is not null and we expect to find those all:
             try
-                hideEditor <- feshRhinoSyncModule.GetProperty("hideEditor").GetValue(feshAssembly)  :?> Action
+                hideEditor <- feshRhinoSyncModule.GetProperty("hideEditor").GetValue(feshRhAssembly)  :?> Action
                 //if isNull hideEditor then
                     //log "Rhino.Scripting.dll: Fesh.Rhino.Sync.hideEditor is null" // null is expected when the Fesh plugin is loaded but the editor is not running.
             with e ->
                 log "Rhino.Scripting.dll: Fesh.Rhino.Sync.hideEditor failed with: %O" e
 
             try
-                showEditor <- feshRhinoSyncModule.GetProperty("showEditor").GetValue(feshAssembly) :?> Action
+                showEditor <- feshRhinoSyncModule.GetProperty("showEditor").GetValue(feshRhAssembly) :?> Action
                 // if isNull showEditor then
                 //     log "Rhino.Scripting.dll: Fesh.Rhino.Sync showEditor is null" // null is expected when the Fesh plugin is loaded but the editor is not running.
             with e ->
                 log "Rhino.Scripting.dll: Fesh.Rhino.Sync.showEditor failed with: %O" e
 
             try
-                isEditorVisible <- feshRhinoSyncModule.GetProperty("isEditorVisible").GetValue(feshAssembly) :?> Func<bool>
+                isEditorVisible <- feshRhinoSyncModule.GetProperty("isEditorVisible").GetValue(feshRhAssembly) :?> Func<bool>
                 //if isNull isEditorVisible then
                 //    log "Rhino.Scripting.dll: Fesh.Rhino.Sync isEditorVisible is null" // null is expected when the Fesh plugin is loaded but the editor is not running.
             with e ->
                 log "Rhino.Scripting.dll: Fesh.Rhino.Sync.isEditorVisible failed with: %O" e
 
             try
-                syncContext <- feshRhinoSyncModule.GetProperty("syncContext").GetValue(feshAssembly) :?> Threading.SynchronizationContext
+                syncContext <- feshRhinoSyncModule.GetProperty("syncContext").GetValue(feshRhAssembly) :?> Threading.SynchronizationContext
                 //if isNull syncContext then
                     //log "Rhino.Scripting.dll: Fesh.Rhino.Sync.syncContext is null"// null is expected when the Fesh plugin is loaded but the editor is not running.
 
@@ -150,11 +201,33 @@ type RhinoSync private () =
     /// Or do nothing if not running in Fesh Editor.
     static member ShowEditor() = if notNull showEditor then showEditor.Invoke()
 
-    /// The Assembly currently running Fesh Editor Window.
-    /// Or 'null' if not running in Fesh Editor.
-    static member FeshRhinoAssembly = feshAssembly
+    // The Assembly currently running Fesh Editor Window.
+    // Or 'null' if not running in Fesh Editor.
+    // static member FeshRhinoAssembly :Reflection.Assembly = feshRhAssembly
 
     //static member Initialize() =  init() // not called in ActiveDocument module anymore , only called when actually needed in DoSync methods below.
+    static member PrettyFormatters = prettyFormatters
+
+    /// Prints in both RhinoApp.WriteLine and Console.WriteLine, or Fesh Editor with color if running.
+    /// Red green blue text , NO new line
+    static member PrintColor r g b s =
+        printColor r g b s
+        RhinoApp.Write s
+        RhinoApp.Wait()
+
+    /// Prints in both RhinoApp.WriteLine and Console.WriteLine, or Fesh Editor with color  if running.
+    /// Red green blue text , with new line
+    static member PrintnColor r g b s =
+        printNewLineColor r g b s
+        RhinoApp.WriteLine s
+        RhinoApp.Wait()
+
+    /// Clears the Fesh log window
+    /// and the Rhino command history window.
+    static member ClearLog() =
+        clear()
+        RhinoApp.ClearCommandHistoryWindow()
+        RhinoApp.Wait()
 
     /// Evaluates a function on UI Thread.
     static member DoSync (func:unit->'T) : 'T =

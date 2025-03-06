@@ -2,7 +2,7 @@
 namespace Rhino.Scripting
 
 open Rhino
-
+open Rhino.Scripting.RhinoScriptingUtils
 open System
 
 
@@ -131,8 +131,8 @@ module AutoOpenLayer =
     ///<returns>(unit) void, nothing.</returns>
     static member ObjectLayer(objectId:Guid, layerIndex:int) : unit = //SET
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        if layerIndex < 0 || layerIndex >= State.Doc.Layers.Count then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectLayer: Setting it via index failed. bad index '%d' (max %d) on: %s " layerIndex State.Doc.Layers.Count (Nice.str objectId)
-        if State.Doc.Layers.[layerIndex].IsDeleted then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectLayer: Setting it via index failed.  index '%d' is deleted.  on: %s " layerIndex  (Nice.str objectId)
+        if layerIndex < 0 || layerIndex >= State.Doc.Layers.Count then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectLayer: Setting it via index failed. bad index '%d' (max %d) on: %s " layerIndex State.Doc.Layers.Count (Pretty.str objectId)
+        if State.Doc.Layers.[layerIndex].IsDeleted then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectLayer: Setting it via index failed.  index '%d' is deleted.  on: %s " layerIndex  (Pretty.str objectId)
         obj.Attributes.LayerIndex <- layerIndex
         obj.CommitChanges() |> ignore
         State.Doc.Views.Redraw()

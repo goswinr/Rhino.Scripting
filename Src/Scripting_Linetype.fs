@@ -2,9 +2,7 @@
 namespace Rhino.Scripting
 
 open Rhino
-
-
-
+open Rhino.Scripting.RhinoScriptingUtils
 
 [<AutoOpen>]
 module AutoOpenLinetype =

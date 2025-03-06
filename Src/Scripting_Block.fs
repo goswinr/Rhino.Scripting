@@ -4,7 +4,7 @@ namespace Rhino.Scripting
 open Rhino
 
 open System
-
+open Rhino.Scripting.RhinoScriptingUtils
 open Rhino.Geometry
 
 
@@ -35,15 +35,15 @@ module AutoOpenBlock =
         let objects = ResizeArray()
         for objectId in objectIds do
             let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)  //Coerce should not be needed
-            if obj.IsReference then  RhinoScriptingException.Raise "RhinoScriptSyntax.AddBlock: cannot add Reference object '%s' to '%s'" (Nice.str objectId) name
+            if obj.IsReference then  RhinoScriptingException.Raise "RhinoScriptSyntax.AddBlock: cannot add Reference object '%s' to '%s'" (Pretty.str objectId) name
             let ot = obj.ObjectType
-            if   ot= DocObjects.ObjectType.Light then  RhinoScriptingException.Raise "RhinoScriptSyntax.AddBlock: cannot add Light object '%s' to '%s'" (Nice.str objectId) name
-            elif ot= DocObjects.ObjectType.Grip then  RhinoScriptingException.Raise "RhinoScriptSyntax.AddBlock: cannot add Grip object '%s' to '%s'" (Nice.str objectId) name
-            elif ot= DocObjects.ObjectType.Phantom then RhinoScriptingException.Raise "RhinoScriptSyntax.AddBlock: cannot add Phantom object '%s' to '%s'" (Nice.str objectId) name
+            if   ot= DocObjects.ObjectType.Light then  RhinoScriptingException.Raise "RhinoScriptSyntax.AddBlock: cannot add Light object '%s' to '%s'" (Pretty.str objectId) name
+            elif ot= DocObjects.ObjectType.Grip then  RhinoScriptingException.Raise "RhinoScriptSyntax.AddBlock: cannot add Grip object '%s' to '%s'" (Pretty.str objectId) name
+            elif ot= DocObjects.ObjectType.Phantom then RhinoScriptingException.Raise "RhinoScriptSyntax.AddBlock: cannot add Phantom object '%s' to '%s'" (Pretty.str objectId) name
             elif ot= DocObjects.ObjectType.InstanceReference && notNull found then
                 let bli = RhinoScriptSyntax.CoerceBlockInstanceObject(objectId) // not obj ?
                 let uses, _ = bli.UsesDefinition(found.Index) // _ = nesting
-                if uses then RhinoScriptingException.Raise "RhinoScriptSyntax.AddBlock: cannot add Instance Ref object '%s' to '%s'" (Nice.str objectId) name
+                if uses then RhinoScriptingException.Raise "RhinoScriptSyntax.AddBlock: cannot add Instance Ref object '%s' to '%s'" (Pretty.str objectId) name
 
             objects.Add(obj)
         if objects.Count>0 then
@@ -364,6 +364,6 @@ module AutoOpenBlock =
         if deleteInput then
             let k = State.Doc.Objects.Delete(newObjects, quiet=true)
             let l = Seq.length newObjects
-            if k <> l then RhinoScriptingException.Raise "RhinoScriptSyntax.ReplaceBlockObjects failed to delete input on %d out of %s" (l-k) (Nice.str newObjects)
+            if k <> l then RhinoScriptingException.Raise "RhinoScriptSyntax.ReplaceBlockObjects failed to delete input on %d out of %s" (l-k) (Pretty.str newObjects)
         State.Doc.InstanceDefinitions.ModifyGeometry(instDef.Index,geos,attrs)
 

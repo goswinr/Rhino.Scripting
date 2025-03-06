@@ -5,6 +5,7 @@ open Rhino
 open System
 open System.Globalization // for UnicodeCategory
 open Rhino.DocObjects
+open Rhino.Scripting.RhinoScriptingUtils
 
 module internal UtilLayer =
 

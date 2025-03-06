@@ -155,7 +155,7 @@ module AutoOpenLight =
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         light.IsEnabled <- enable
         if not <| State.Doc.Lights.Modify(objectId, light) then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.EnableLight failed.  objectId:'%s' enable:'%A'" (Nice.str objectId) enable
+            RhinoScriptingException.Raise "RhinoScriptSyntax.EnableLight failed.  objectId:'%s' enable:'%A'" (Pretty.str objectId) enable
         State.Doc.Views.Redraw()
 
     ///<summary>Enables or disables multiple light objects.</summary>
@@ -167,7 +167,7 @@ module AutoOpenLight =
             let light = RhinoScriptSyntax.CoerceLight(objectId)
             light.IsEnabled <- enable
             if not <| State.Doc.Lights.Modify(objectId, light) then
-                RhinoScriptingException.Raise "RhinoScriptSyntax.EnableLight failed.  objectId:'%s' enable:'%A'" (Nice.str objectId) enable
+                RhinoScriptingException.Raise "RhinoScriptSyntax.EnableLight failed.  objectId:'%s' enable:'%A'" (Pretty.str objectId) enable
         State.Doc.Views.Redraw()
 
 
@@ -200,7 +200,7 @@ module AutoOpenLight =
     ///<returns>(bool) True or False.</returns>
     static member IsLightReference(objectId:Guid) : bool =
         let light = State.Doc.Lights.FindId(objectId)
-        if isNull light then RhinoScriptingException.Raise "RhinoScriptSyntax.IsLightReference light (a %s) not found" (Nice.str objectId)
+        if isNull light then RhinoScriptingException.Raise "RhinoScriptSyntax.IsLightReference light (a %s) not found" (Pretty.str objectId)
         light.IsReference
 
 
@@ -252,7 +252,7 @@ module AutoOpenLight =
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         light.Diffuse <- color
         if not <|  State.Doc.Lights.Modify(objectId, light) then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.LightColor failed.  objectId:'%s' color:'%A'" (Nice.str objectId) color
+            RhinoScriptingException.Raise "RhinoScriptSyntax.LightColor failed.  objectId:'%s' color:'%A'" (Pretty.str objectId) color
         State.Doc.Views.Redraw()
 
     ///<summary>Changes the color of multiple light.</summary>
@@ -264,7 +264,7 @@ module AutoOpenLight =
             let light = RhinoScriptSyntax.CoerceLight(objectId)
             light.Diffuse <- color
             if not <|  State.Doc.Lights.Modify(objectId, light) then
-                RhinoScriptingException.Raise "RhinoScriptSyntax.LightColor failed.  objectId:'%s' color:'%A'" (Nice.str objectId) color
+                RhinoScriptingException.Raise "RhinoScriptSyntax.LightColor failed.  objectId:'%s' color:'%A'" (Pretty.str objectId) color
         State.Doc.Views.Redraw()
 
 
@@ -290,7 +290,7 @@ module AutoOpenLight =
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         light.Direction <- direction
         if not<|  State.Doc.Lights.Modify(objectId, light) then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.LightDirection failed.  objectId:'%s' direction:'%A'" (Nice.str objectId) direction
+            RhinoScriptingException.Raise "RhinoScriptSyntax.LightDirection failed.  objectId:'%s' direction:'%A'" (Pretty.str objectId) direction
         State.Doc.Views.Redraw()
 
     ///<summary>Changes the direction of multiple light objects.</summary>
@@ -302,7 +302,7 @@ module AutoOpenLight =
             let light = RhinoScriptSyntax.CoerceLight(objectId)
             light.Direction <- direction
             if not<|  State.Doc.Lights.Modify(objectId, light) then
-                RhinoScriptingException.Raise "RhinoScriptSyntax.LightDirection failed.  objectId:'%s' direction:'%A'" (Nice.str objectId) direction
+                RhinoScriptingException.Raise "RhinoScriptSyntax.LightDirection failed.  objectId:'%s' direction:'%A'" (Pretty.str objectId) direction
         State.Doc.Views.Redraw()
 
 
@@ -322,7 +322,7 @@ module AutoOpenLight =
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         light.Location <- location
         if not<|  State.Doc.Lights.Modify(objectId, light) then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.LightLocation failed.  objectId:'%s' location:'%A'" (Nice.str objectId) location
+            RhinoScriptingException.Raise "RhinoScriptSyntax.LightLocation failed.  objectId:'%s' location:'%A'" (Pretty.str objectId) location
         State.Doc.Views.Redraw()
 
     ///<summary>Changes the location of multiple light objects.</summary>
@@ -334,7 +334,7 @@ module AutoOpenLight =
             let light = RhinoScriptSyntax.CoerceLight(objectId)
             light.Location <- location
             if not<|  State.Doc.Lights.Modify(objectId, light) then
-                RhinoScriptingException.Raise "RhinoScriptSyntax.LightLocation failed.  objectId:'%s' location:'%A'" (Nice.str objectId) location
+                RhinoScriptingException.Raise "RhinoScriptSyntax.LightLocation failed.  objectId:'%s' location:'%A'" (Pretty.str objectId) location
         State.Doc.Views.Redraw()
 
 
@@ -354,7 +354,7 @@ module AutoOpenLight =
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         light.Name <- name
         if not <|  State.Doc.Lights.Modify(objectId, light) then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.LightName failed.  objectId:'%s' name:'%A'" (Nice.str objectId) name
+            RhinoScriptingException.Raise "RhinoScriptSyntax.LightName failed.  objectId:'%s' name:'%A'" (Pretty.str objectId) name
         State.Doc.Views.Redraw()
     ///<summary>Changes the name of multiple light objects.</summary>
     ///<param name="objectIds">(Guid seq) The light objects's identifiers</param>
@@ -365,7 +365,7 @@ module AutoOpenLight =
             let light = RhinoScriptSyntax.CoerceLight(objectId)
             light.Name <- name
             if not <|  State.Doc.Lights.Modify(objectId, light) then
-                RhinoScriptingException.Raise "RhinoScriptSyntax.LightName failed.  objectId:'%s' name:'%A'" (Nice.str objectId) name
+                RhinoScriptingException.Raise "RhinoScriptSyntax.LightName failed.  objectId:'%s' name:'%A'" (Pretty.str objectId) name
         State.Doc.Views.Redraw()
 
 
@@ -386,7 +386,7 @@ module AutoOpenLight =
     static member RectangularLightPlane(objectId:Guid) : Plane*float*float =
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         if light.LightStyle <> LightStyle.WorldRectangular then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.RectangularLightPlane failed.  objectId:'%s'" (Nice.str objectId)
+            RhinoScriptingException.Raise "RhinoScriptSyntax.RectangularLightPlane failed.  objectId:'%s'" (Pretty.str objectId)
         let location = light.Location
         let length = light.Length
         let width = light.Width
@@ -401,7 +401,7 @@ module AutoOpenLight =
     static member SpotLightHardness(objectId:Guid) : float = //GET
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         if light.LightStyle <> LightStyle.WorldSpot then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.SpotLightHardness failed.  objectId:'%s'" (Nice.str objectId)
+            RhinoScriptingException.Raise "RhinoScriptSyntax.SpotLightHardness failed.  objectId:'%s'" (Pretty.str objectId)
         let rc = light.HotSpot
         rc
 
@@ -413,10 +413,10 @@ module AutoOpenLight =
     static member SpotLightHardness(objectId:Guid, hardness:float) : unit = //SET
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         if light.LightStyle <> LightStyle.WorldSpot then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.SpotLightHardness failed.  objectId:'%s' hardness:'%A'" (Nice.str objectId) hardness
+            RhinoScriptingException.Raise "RhinoScriptSyntax.SpotLightHardness failed.  objectId:'%s' hardness:'%A'" (Pretty.str objectId) hardness
         light.HotSpot <- hardness
         if not <|  State.Doc.Lights.Modify(objectId, light) then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.SpotLightHardness failed.  objectId:'%s' hardness:'%A'" (Nice.str objectId) hardness
+            RhinoScriptingException.Raise "RhinoScriptSyntax.SpotLightHardness failed.  objectId:'%s' hardness:'%A'" (Pretty.str objectId) hardness
         State.Doc.Views.Redraw()
 
     ///<summary>Changes the hardness of multiple spot light. Spotlight hardness
@@ -428,10 +428,10 @@ module AutoOpenLight =
         for objectId in objectIds do
             let light = RhinoScriptSyntax.CoerceLight(objectId)
             if light.LightStyle <> LightStyle.WorldSpot then
-                RhinoScriptingException.Raise "RhinoScriptSyntax.SpotLightHardness failed.  objectId:'%s' hardness:'%A'" (Nice.str objectId) hardness
+                RhinoScriptingException.Raise "RhinoScriptSyntax.SpotLightHardness failed.  objectId:'%s' hardness:'%A'" (Pretty.str objectId) hardness
             light.HotSpot <- hardness
             if not <|  State.Doc.Lights.Modify(objectId, light) then
-                RhinoScriptingException.Raise "RhinoScriptSyntax.SpotLightHardness failed.  objectId:'%s' hardness:'%A'" (Nice.str objectId) hardness
+                RhinoScriptingException.Raise "RhinoScriptSyntax.SpotLightHardness failed.  objectId:'%s' hardness:'%A'" (Pretty.str objectId) hardness
         State.Doc.Views.Redraw()
 
 
@@ -441,7 +441,7 @@ module AutoOpenLight =
     static member SpotLightRadius(objectId:Guid) : float = //GET
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         if light.LightStyle <> LightStyle.WorldSpot then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.SpotLightRadius failed.  objectId:'%s'" (Nice.str objectId)
+            RhinoScriptingException.Raise "RhinoScriptSyntax.SpotLightRadius failed.  objectId:'%s'" (Pretty.str objectId)
         let radians = light.SpotAngleRadians
         let rc = light.Direction.Length * tan(radians)
         rc
@@ -453,11 +453,11 @@ module AutoOpenLight =
     static member SpotLightRadius(objectId:Guid, radius:float) : unit = //SET
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         if light.LightStyle <> LightStyle.WorldSpot then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.SpotLightRadius failed.  objectId:'%s' radius:'%A'" (Nice.str objectId) radius
+            RhinoScriptingException.Raise "RhinoScriptSyntax.SpotLightRadius failed.  objectId:'%s' radius:'%A'" (Pretty.str objectId) radius
         let radians = Math.Atan(radius/light.Direction.Length)
         light.SpotAngleRadians <- radians
         if not <|  State.Doc.Lights.Modify(objectId, light) then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.SpotLightRadius failed.  objectId:'%s' radius:'%A'" (Nice.str objectId) radius
+            RhinoScriptingException.Raise "RhinoScriptSyntax.SpotLightRadius failed.  objectId:'%s' radius:'%A'" (Pretty.str objectId) radius
         State.Doc.Views.Redraw()
 
     ///<summary>Changes the radius of multiple spot light.</summary>
@@ -468,11 +468,11 @@ module AutoOpenLight =
         for objectId in objectIds do
             let light = RhinoScriptSyntax.CoerceLight(objectId)
             if light.LightStyle <> LightStyle.WorldSpot then
-                RhinoScriptingException.Raise "RhinoScriptSyntax.SpotLightRadius failed.  objectId:'%s' radius:'%A'" (Nice.str objectId) radius
+                RhinoScriptingException.Raise "RhinoScriptSyntax.SpotLightRadius failed.  objectId:'%s' radius:'%A'" (Pretty.str objectId) radius
             let radians = Math.Atan(radius/light.Direction.Length)
             light.SpotAngleRadians <- radians
             if not <|  State.Doc.Lights.Modify(objectId, light) then
-                RhinoScriptingException.Raise "RhinoScriptSyntax.SpotLightRadius failed.  objectId:'%s' radius:'%A'" (Nice.str objectId) radius
+                RhinoScriptingException.Raise "RhinoScriptSyntax.SpotLightRadius failed.  objectId:'%s' radius:'%A'" (Pretty.str objectId) radius
         State.Doc.Views.Redraw()
 
 
@@ -482,7 +482,7 @@ module AutoOpenLight =
     static member SpotLightShadowIntensity(objectId:Guid) : float = //GET
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         if light.LightStyle <> LightStyle.WorldSpot then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.SpotLightShadowIntensity failed.  objectId:'%s'" (Nice.str objectId)
+            RhinoScriptingException.Raise "RhinoScriptSyntax.SpotLightShadowIntensity failed.  objectId:'%s'" (Pretty.str objectId)
         let rc = light.ShadowIntensity
         rc
 
@@ -493,10 +493,10 @@ module AutoOpenLight =
     static member SpotLightShadowIntensity(objectId:Guid, intensity:float) : unit = //SET
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         if light.LightStyle <> LightStyle.WorldSpot then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.SpotLightShadowIntensity failed.  objectId:'%s' intensity:'%A'" (Nice.str objectId) intensity
+            RhinoScriptingException.Raise "RhinoScriptSyntax.SpotLightShadowIntensity failed.  objectId:'%s' intensity:'%A'" (Pretty.str objectId) intensity
         light.ShadowIntensity <- intensity
         if not <|  State.Doc.Lights.Modify(objectId, light) then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.SpotLightShadowIntensity failed.  objectId:'%s' intensity:'%A'" (Nice.str objectId) intensity
+            RhinoScriptingException.Raise "RhinoScriptSyntax.SpotLightShadowIntensity failed.  objectId:'%s' intensity:'%A'" (Pretty.str objectId) intensity
         State.Doc.Views.Redraw()
 
     ///<summary>Changes the shadow intensity of multiple spot light.</summary>
@@ -507,10 +507,10 @@ module AutoOpenLight =
         for objectId in objectIds do
             let light = RhinoScriptSyntax.CoerceLight(objectId)
             if light.LightStyle <> LightStyle.WorldSpot then
-                RhinoScriptingException.Raise "RhinoScriptSyntax.SpotLightShadowIntensity failed.  objectId:'%s' intensity:'%A'" (Nice.str objectId) intensity
+                RhinoScriptingException.Raise "RhinoScriptSyntax.SpotLightShadowIntensity failed.  objectId:'%s' intensity:'%A'" (Pretty.str objectId) intensity
             light.ShadowIntensity <- intensity
             if not <|  State.Doc.Lights.Modify(objectId, light) then
-                RhinoScriptingException.Raise "RhinoScriptSyntax.SpotLightShadowIntensity failed.  objectId:'%s' intensity:'%A'" (Nice.str objectId) intensity
+                RhinoScriptingException.Raise "RhinoScriptSyntax.SpotLightShadowIntensity failed.  objectId:'%s' intensity:'%A'" (Pretty.str objectId) intensity
         State.Doc.Views.Redraw()
 
 

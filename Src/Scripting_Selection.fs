@@ -1,14 +1,9 @@
 ﻿namespace Rhino.Scripting
 
 open Rhino
-
 open System
-
 open Rhino.Geometry
-
-
-
-
+open Rhino.Scripting.RhinoScriptingUtils
 
 [<AutoOpen>]
 module AutoOpenSelection =
@@ -302,7 +297,7 @@ module AutoOpenSelection =
                     rc.Add(objref.ObjectId)
                     let obj = objref.Object()
                     if select && notNull obj then obj.Select(select) |> ignore
-                if printCount then InternalToNiceStringSetup.printfnBlue "RhinoScriptSyntax.GetObjects(...) returned %s" (RhinoScriptSyntax.ObjectDescription(rc))
+                if printCount then PrettySetup.printfnBlue "RhinoScriptSyntax.GetObjects(...) returned %s" (RhinoScriptSyntax.ObjectDescription(rc))
                 rc
         RhinoSync.DoSyncRedrawHideEditor get
 
@@ -377,9 +372,9 @@ module AutoOpenSelection =
                     if select && notNull obj then obj.Select(select) |> ignore
                 if printCount then
                     rc
-                    |> ResizeArray.map ( fun (id, _, _, _, _) -> id )
+                    |> RArr.map ( fun (id, _, _, _, _) -> id )
                     |> RhinoScriptSyntax.ObjectDescription
-                    |> InternalToNiceStringSetup.printfnBlue "RhinoScriptSyntax.GetObjectsEx(...) returned %s"
+                    |> PrettySetup.printfnBlue "RhinoScriptSyntax.GetObjectsEx(...) returned %s"
                 rc
         RhinoSync.DoSyncRedrawHideEditor get
 
@@ -611,7 +606,7 @@ module AutoOpenSelection =
         |> Seq.skipWhile (fun obj -> obj.Id <> objectId)
         |> Seq.skip 1
         |> Seq.tryHead
-        |> Option.defaultWith ( fun () -> RhinoScriptingException.Raise "RhinoScriptSyntax.NextObject not found for %A" (Nice.str objectId))
+        |> Option.defaultWith ( fun () -> RhinoScriptingException.Raise "RhinoScriptSyntax.NextObject not found for %A" (Pretty.str objectId))
         |> fun obj ->
             if select then
                 obj.Select(true) |> ignore // TODO needs sync ? apparently not needed!
@@ -634,7 +629,7 @@ module AutoOpenSelection =
         iter.IncludeLights <- includeLights
         iter.IncludeGrips <- includeGrips
         State.Doc.Objects.GetObjectList(iter)
-        |> ResizeArray.mapSeq _.Id
+        |> RArr.mapSeq _.Id
 
 
 
@@ -652,7 +647,7 @@ module AutoOpenSelection =
         if select then
             for obj in rhinoobjects do obj.Select(true)|> ignore // TODO needs sync ? apparently not needed!
             State.Doc.Views.Redraw()
-        rhinoobjects |> ResizeArray.mapSeq _.Id
+        rhinoobjects |> RArr.mapSeq _.Id
 
 
     ///<summary>Returns identifiers of all objects based on the objects' group name.</summary>
@@ -671,7 +666,7 @@ module AutoOpenSelection =
             if select then
                 for obj in rhinoobjects do obj.Select(true) |> ignore // TODO needs sync ? apparently not needed!
                 State.Doc.Views.Redraw()
-            rhinoobjects  |> ResizeArray.mapArr _.Id
+            rhinoobjects  |> RArr.mapArr _.Id
 
 
     ///<summary>Returns identifiers of all objects based on the objects' layer name.</summary>
@@ -687,7 +682,7 @@ module AutoOpenSelection =
             if select then
                 for rhobj in rhinoobjects do rhobj.Select(true) |> ignore // TODO needs sync ? apparently not needed!
                 State.Doc.Views.Redraw()
-            rhinoobjects  |> ResizeArray.mapArr _.Id
+            rhinoobjects  |> RArr.mapArr _.Id
 
 
 
@@ -713,7 +708,7 @@ module AutoOpenSelection =
         settings.NameFilter <- name
         settings.ReferenceObjects <- includeReferences
         let objects = State.Doc.Objects.GetObjectList(settings)
-        let ids = objects  |> ResizeArray.mapSeq _.Id
+        let ids = objects  |> RArr.mapSeq _.Id
         if ids.Count>0 && select then
             for rhobj in objects do rhobj.Select(true) |> ignore // TODO needs sync ? apparently not needed!
             State.Doc.Views.Redraw()
@@ -822,7 +817,7 @@ module AutoOpenSelection =
     ///<returns>(Guid ResizeArray) identifiers of selected objects.</returns>
     static member SelectedObjects([<OPT;DEF(false)>]includeLights:bool, [<OPT;DEF(false)>]includeGrips:bool) : Guid ResizeArray =
         State.Doc.Objects.GetSelectedObjects(includeLights, includeGrips)
-        |> ResizeArray.mapSeq _.Id
+        |> RArr.mapSeq _.Id
 
 
     ///<summary>Unselects all objects in the document.</summary>

@@ -2,13 +2,9 @@
 namespace Rhino.Scripting
 
 open Rhino
-
 open System
-
 open Rhino.Geometry
-
-
-
+open Rhino.Scripting.RhinoScriptingUtils
 
 
 [<AutoOpen>]
@@ -185,7 +181,7 @@ module AutoOpenDimension =
     static member DimensionStyle(objectId:Guid, dimStyleName:string) : unit = //SET
         let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
         let ds =  State.Doc.DimStyles.FindName(dimStyleName)
-        if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimensionStyle set failed.  objectId:'%s' dimStyleName:'%s'" (Nice.str objectId) dimStyleName
+        if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimensionStyle set failed.  objectId:'%s' dimStyleName:'%s'" (Pretty.str objectId) dimStyleName
         let mutable annotation = annotationObject.Geometry:?> AnnotationBase
         annotation.DimensionStyleId <- ds.Id
         annotationObject.CommitChanges() |> ignore
@@ -197,7 +193,7 @@ module AutoOpenDimension =
     ///<returns>(unit) void, nothing.</returns>
     static member DimensionStyle(objectIds:Guid seq, dimStyleName:string) : unit = //MULTISET
         let ds =  State.Doc.DimStyles.FindName(dimStyleName)
-        if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimensionStyle set failed.  objectId:'%s' dimStyleName:'%s'" (Nice.str objectIds) dimStyleName
+        if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimensionStyle set failed.  objectId:'%s' dimStyleName:'%s'" (Pretty.str objectIds) dimStyleName
         for objectId in objectIds do
             let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
             let mutable annotation = annotationObject.Geometry:?> AnnotationBase
@@ -438,7 +434,7 @@ module AutoOpenDimension =
     ///<summary>Returns the names of all dimension styles in the document.</summary>
     ///<returns>(string ResizeArray) The names of all dimension styles in the document.</returns>
     static member DimStyleNames() : string ResizeArray =
-        State.Doc.DimStyles |> ResizeArray.mapSeq _.Name
+        State.Doc.DimStyles |> RArr.mapSeq _.Name
 
 
     ///<summary>Returns the number display format of a dimension style.</summary>
@@ -756,7 +752,7 @@ module AutoOpenDimension =
             | :? Leader ->
                 let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
                 annotationObject.DisplayText
-            | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.LeaderText get failed.  objectId:'%s'" (Nice.str objectId)
+            | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.LeaderText get failed.  objectId:'%s'" (Pretty.str objectId)
 
     ///<summary>Modifies the text string of a dimension leader object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
@@ -767,10 +763,10 @@ module AutoOpenDimension =
             | :? Leader as g ->
                 let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
                 g.PlainText <- text               // TODO or use rich text?
-                if not <| State.Doc.Objects.Replace(objectId,g) then RhinoScriptingException.Raise "RhinoScriptSyntax.LeaderText: Objects.Replace(objectId,g) get failed. objectId:'%s'" (Nice.str objectId)
+                if not <| State.Doc.Objects.Replace(objectId,g) then RhinoScriptingException.Raise "RhinoScriptSyntax.LeaderText: Objects.Replace(objectId,g) get failed. objectId:'%s'" (Pretty.str objectId)
                 annotationObject.CommitChanges() |> ignore
                 State.Doc.Views.Redraw()
-            | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.LeaderText set failed for  %s"  (Nice.str objectId)
+            | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.LeaderText set failed for  %s"  (Pretty.str objectId)
 
     ///<summary>Modifies the text string of multiple dimension leader objects.</summary>
     ///<param name="objectIds">(Guid seq) The objects's identifiers</param>

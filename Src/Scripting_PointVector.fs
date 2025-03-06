@@ -1,16 +1,10 @@
-﻿
-namespace Rhino.Scripting
+﻿namespace Rhino.Scripting
 
 open Rhino
-
 open System
 open System.Collections.Generic
-
 open Rhino.Geometry
-
-
-
-
+open Rhino.Scripting.RhinoScriptingUtils
 
 
 
@@ -232,7 +226,7 @@ module AutoOpenPointVector =
     static member ProjectPointToMesh( points:Point3d seq,
                                       meshIds:Guid seq,
                                       direction:Vector3d) : Point3d array =
-        let meshes  = meshIds |> ResizeArray.mapSeq RhinoScriptSyntax.CoerceMesh
+        let meshes  = meshIds |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
         let tolerance = State.Doc.ModelAbsoluteTolerance
         Intersect.Intersection.ProjectPointsToMeshes(meshes, points, direction, tolerance)
 
@@ -246,7 +240,7 @@ module AutoOpenPointVector =
     static member ProjectPointToSurface( points:Point3d seq,
                                          surfaceIds:Guid seq,
                                          direction:Vector3d) : Point3d array =
-        let breps  = surfaceIds |> ResizeArray.mapSeq RhinoScriptSyntax.CoerceBrep
+        let breps  = surfaceIds |> RArr.mapSeq RhinoScriptSyntax.CoerceBrep
         let tolerance = State.Doc.ModelAbsoluteTolerance
         Intersect.Intersection.ProjectPointsToBreps(breps, points, direction, tolerance)
 
@@ -407,7 +401,7 @@ module AutoOpenPointVector =
     ///<returns>(Vector3d) unitized vector.</returns>
     static member inline VectorUnitize(vector:Vector3d) : Vector3d =
         let le = sqrt (vector.X * vector.X + vector.Y * vector.Y + vector.Z * vector.Z)
-        if Double.IsInfinity le || le < RhinoMath.ZeroTolerance then RhinoScriptingException.Raise "RhinoScriptSyntax.VectorUnitize failed on zero length or very short Vector %s" vector.ToNiceString
+        if Double.IsInfinity le || le < RhinoMath.ZeroTolerance then RhinoScriptingException.Raise "RhinoScriptSyntax.VectorUnitize failed on zero length or very short Vector %s" vector.Pretty
         let f = 1. / le
         Vector3d(vector.X*f, vector.Y*f, vector.Z*f)
 

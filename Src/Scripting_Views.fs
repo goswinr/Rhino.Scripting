@@ -2,13 +2,9 @@
 namespace Rhino.Scripting
 
 open Rhino
-
 open System
-
 open Rhino.Geometry
-
-
-
+open Rhino.Scripting.RhinoScriptingUtils
 
 
 [<AutoOpen>]
@@ -155,7 +151,7 @@ module AutoOpenViews =
     static member DetailLock(detailId:Guid, lock:bool) : unit = //SET
         let detail =
             try State.Doc.Objects.FindId(detailId) :?> DocObjects.DetailViewObject
-            with _ ->  RhinoScriptingException.Raise "RhinoScriptSyntax.DetailLock: Setting it failed. detailId is a %s  lock:'%A'" (Nice.str detailId)  lock
+            with _ ->  RhinoScriptingException.Raise "RhinoScriptSyntax.DetailLock: Setting it failed. detailId is a %s  lock:'%A'" (Pretty.str detailId)  lock
         if lock <> detail.DetailGeometry.IsProjectionLocked then
             detail.DetailGeometry.IsProjectionLocked <- lock
             detail.CommitChanges() |> ignore
@@ -182,7 +178,7 @@ module AutoOpenViews =
             detail.CommitChanges() |> ignore
             State.Doc.Views.Redraw()
         else
-            RhinoScriptingException.Raise "RhinoScriptSyntax.DetailScale failed.  detailId:'%s' modelLength:'%A' pageLength:'%A'" (Nice.str detailId) modelLength pageLength
+            RhinoScriptingException.Raise "RhinoScriptSyntax.DetailScale failed.  detailId:'%s' modelLength:'%A' pageLength:'%A'" (Pretty.str detailId) modelLength pageLength
 
 
 
@@ -665,7 +661,7 @@ module AutoOpenViews =
     ///<returns>(string ResizeArray) strings identifying the display mode names.</returns>
     static member ViewDisplayModes() : string ResizeArray =
         Display.DisplayModeDescription.GetDisplayModes()
-        |> ResizeArray.mapArr _.EnglishName
+        |> RArr.mapArr _.EnglishName
 
 
     ///<summary>Return the names/titles, of all views in the document.</summary>
@@ -678,7 +674,7 @@ module AutoOpenViews =
     static member ViewNames([<OPT;DEF(0)>]viewType:int) : string ResizeArray =
         let views = State.Doc.Views.GetViewList(viewType <> 1, viewType>0)
         if isNull views then RhinoScriptingException.Raise "RhinoScriptSyntax.ViewNames failed. viewType:'%A'" viewType
-        views |> ResizeArray.mapArr _.MainViewport.Name
+        views |> RArr.mapArr _.MainViewport.Name
 
 
     ///<summary>Return 3d corners of a view's near clipping Plane rectangle. Useful

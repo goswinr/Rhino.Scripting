@@ -6,9 +6,7 @@ open Rhino
 open System
 
 open Rhino.Geometry
-
-
-
+open Rhino.Scripting.RhinoScriptingUtils
 
 
 [<AutoOpen>]
@@ -126,11 +124,11 @@ module AutoOpenHatch =
                               [<OPT;DEF(1.0)>]scale:float,
                               [<OPT;DEF(0.0)>]rotation:float,
                               [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray =
-        let curves  = curveIds |> ResizeArray.mapSeq RhinoScriptSyntax.CoerceCurve
+        let curves  = curveIds |> RArr.mapSeq RhinoScriptSyntax.CoerceCurve
         try RhinoScriptSyntax.AddHatches(curves, hatchPattern, scale, rotation)
         with e->
             let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance
-            RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatches failed on curveIds using tolerance %f :'%s' %sMessage: %s" tolerance (Nice.str curveIds) Environment.NewLine  e.Message
+            RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatches failed on curveIds using tolerance %f :'%s' %sMessage: %s" tolerance (Pretty.str curveIds) Environment.NewLine  e.Message
 
     ///<summary>Creates a new Hatch object from a closed planar Curve object.</summary>
     ///<param name="curveId">(Guid) Identifier of the closed planar Curve that defines the boundary of the Hatch object</param>
@@ -147,7 +145,7 @@ module AutoOpenHatch =
         try RhinoScriptSyntax.AddHatch(RhinoScriptSyntax.CoerceCurve(curveId), hatchPattern, scale, rotation, tolerance)
         with e->
             let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance
-            RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatch failed on one curve using tolerance %f : %s%sMessage: %s" tolerance (Nice.str curveId) Environment.NewLine  e.Message
+            RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatch failed on one curve using tolerance %f : %s%sMessage: %s" tolerance (Pretty.str curveId) Environment.NewLine  e.Message
 
 
 
@@ -204,7 +202,7 @@ module AutoOpenHatch =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(hatchId)
         let geo =  RhinoScriptSyntax.CoerceHatch(hatchId)
         let pieces = geo.Explode()
-        if isNull pieces then RhinoScriptingException.Raise "RhinoScriptSyntax.ExplodeHatch failed.  hatchId:'%s' delete:'%A'" (Nice.str hatchId) delete
+        if isNull pieces then RhinoScriptingException.Raise "RhinoScriptSyntax.ExplodeHatch failed.  hatchId:'%s' delete:'%A'" (Pretty.str hatchId) delete
         let attr = rhobj.Attributes
         let rc = ResizeArray()
         for piece in pieces do
@@ -237,7 +235,7 @@ module AutoOpenHatch =
         let hatchObj = RhinoScriptSyntax.CoerceHatchObject(hatchId)
         RhinoScriptSyntax.InitHatchPatterns()
         let newPattern = State.Doc.HatchPatterns.FindName(hatchPattern)
-        if newPattern|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.HatchPattern failed.  hatchId:'%s' hatchPattern:'%A'" (Nice.str hatchId) hatchPattern
+        if newPattern|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.HatchPattern failed.  hatchId:'%s' hatchPattern:'%A'" (Pretty.str hatchId) hatchPattern
         hatchObj.HatchGeometry.PatternIndex <- newPattern.Index
         hatchObj.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
@@ -252,7 +250,7 @@ module AutoOpenHatch =
         for hatchId in hatchIds do
             let hatchObj = RhinoScriptSyntax.CoerceHatchObject(hatchId)
             let newPattern = State.Doc.HatchPatterns.FindName(hatchPattern)
-            if newPattern|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.HatchPattern failed.  hatchId:'%s' hatchPattern:'%A'" (Nice.str hatchId) hatchPattern
+            if newPattern|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.HatchPattern failed.  hatchId:'%s' hatchPattern:'%A'" (Pretty.str hatchId) hatchPattern
             hatchObj.HatchGeometry.PatternIndex <- newPattern.Index
             hatchObj.CommitChanges() |> ignore
         State.Doc.Views.Redraw()

@@ -2,10 +2,8 @@
 namespace Rhino.Scripting
 
 open Rhino
-
 open System
-
-
+open Rhino.Scripting.RhinoScriptingUtils
 
 [<AutoOpen>]
 module AutoOpenGroup =
@@ -154,11 +152,11 @@ module AutoOpenGroup =
     static member RemoveObjectFromGroup(objectId:Guid, groupName:string) : unit =
         let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let index = State.Doc.Groups.Find(groupName)
-        if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.RemoveObjectFromGroup failed.  objectId:'%s' groupName:'%A'" (Nice.str objectId) groupName
+        if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.RemoveObjectFromGroup failed.  objectId:'%s' groupName:'%A'" (Pretty.str objectId) groupName
         let attrs = rhinoObject.Attributes
         attrs.RemoveFromGroup(index)
         if not <| State.Doc.Objects.ModifyAttributes(rhinoObject, attrs, true) then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.RemoveObjectFromGroup failed.  objectId:'%s' groupName:'%A'" (Nice.str objectId) groupName
+            RhinoScriptingException.Raise "RhinoScriptSyntax.RemoveObjectFromGroup failed.  objectId:'%s' groupName:'%A'" (Pretty.str objectId) groupName
 
 
     ///<summary>Removes multiple objects from an existing group.</summary>
@@ -167,13 +165,13 @@ module AutoOpenGroup =
     ///<returns>(unit) void, nothing.</returns>
     static member RemoveObjectsFromGroup(objectIds:Guid seq, groupName:string) : unit = //PLURAL
         let index = State.Doc.Groups.Find(groupName)
-        if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.RemoveObjectsFromGroup failed.  objectIds:'%A' groupName:'%A'" (Nice.str objectIds) groupName
+        if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.RemoveObjectsFromGroup failed.  objectIds:'%A' groupName:'%A'" (Pretty.str objectIds) groupName
         for objectId in objectIds do
             let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             let attrs = rhinoObject.Attributes
             attrs.RemoveFromGroup(index)
             if not <| State.Doc.Objects.ModifyAttributes(rhinoObject, attrs, true) then
-                RhinoScriptingException.Raise "RhinoScriptSyntax.RemoveObjectsFromGroup failed.  objectId:'%s' groupName:'%A'" (Nice.str objectId) groupName
+                RhinoScriptingException.Raise "RhinoScriptSyntax.RemoveObjectsFromGroup failed.  objectId:'%s' groupName:'%A'" (Pretty.str objectId) groupName
 
 
 
@@ -214,7 +212,7 @@ module AutoOpenGroup =
     static member ObjectTopGroup(objId:Guid) : string =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objId)
         let groupIndexes = obj.GetGroupList()
-        if isNull groupIndexes then  RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectTopGroup objId not part of a group:'%s'" (Nice.str objId)
+        if isNull groupIndexes then  RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectTopGroup objId not part of a group:'%s'" (Pretty.str objId)
         else
             let topGroupIndex = Array.max(groupIndexes) // this is a bad assumption. See RH-49189
             State.Doc.Groups.FindIndex(topGroupIndex).Name
@@ -228,8 +226,8 @@ module AutoOpenGroup =
         let groupIndexes = obj.GetGroupList()
         if isNull groupIndexes then  (new ResizeArray<string>(0))
         else
-            let ixs = groupIndexes|>  ResizeArray.mapArr id
+            let ixs = groupIndexes|>  RArr.mapArr id
             ixs.Sort()
-            ixs |>  ResizeArray.map (fun i -> State.Doc.Groups.FindIndex(i).Name)
+            ixs |>  RArr.map (fun i -> State.Doc.Groups.FindIndex(i).Name)
 
 

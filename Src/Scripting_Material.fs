@@ -4,9 +4,7 @@ namespace Rhino.Scripting
 open Rhino
 
 open System
-
-
-
+open Rhino.Scripting.RhinoScriptingUtils
 
 [<AutoOpen>]
 module AutoOpenMaterial =

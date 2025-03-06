@@ -86,11 +86,11 @@
     <None Include="Docs/img/logo128.png" Pack="true" PackagePath="" /> <!--PackagePath = "" makes the file available to nuget pack tool-->
 
     <Compile Include="Src/Exceptions.fs" />
-    <Compile Include="Src/FsExUtils.fs" />
+    <Compile Include="Src/Utils.fs" />
     <Compile Include="Src/RhinoSync.fs" />
     <Compile Include="Src/State.fs" />
-    <Compile Include="Src/ToNiceStringExtensions.fs" />
-    <Compile Include="Src/ToNiceStringSetup.fs" />
+
+    <Compile Include="Src/Pretty.fs" />
     <Compile Include="Src/UtilString.fs" />
     <Compile Include="Src/UtilLayer.fs" />
     <Compile Include="Src/ObjectFilterEnum.fs" />

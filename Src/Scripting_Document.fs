@@ -5,11 +5,8 @@ open Rhino
 
 open System
 open Microsoft.FSharp.Core.LanguagePrimitives
-
 open Rhino.Geometry
-
-
-
+open Rhino.Scripting.RhinoScriptingUtils
 
 
 [<AutoOpen>]
