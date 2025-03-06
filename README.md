@@ -47,7 +47,7 @@ However, you can use this library just as well in compiled F#, C#, or VB.net pro
 
 First reference the assemblies.
 ```fsharp
-#r "nuget: Rhino.Scripting, 0.9.0"
+#r "nuget: Rhino.Scripting, 0.10.0"
 ```
 
 The main namespace is  `Rhino.Scripting`.\
@@ -75,7 +75,7 @@ First reference the assemblies.
 
 ```csharp
 #r "nuget: FSharp.Core, 9.0.201" // when used in Rhino 8 ScriptEditor all dependencies need to be added explicitly
-#r "nuget: Rhino.Scripting, 0.9.0"
+#r "nuget: Rhino.Scripting, 0.10.0"
 ```
 The main namespace is  `Rhino.Scripting`.\
 The main class of this library is called `RhinoScriptSyntax` it has all ~900 functions as static methods.\

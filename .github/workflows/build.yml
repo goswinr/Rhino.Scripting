@@ -1,4 +1,4 @@
-name: Build for Standalone and Hosting
+name: Build
 
 on:
   push:
