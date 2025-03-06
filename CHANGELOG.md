@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
-## [0.10.0] - 2025-02-23
+## [0.10.0] - 2025-03-07
 ### Changed
 - rename .ToNiceString to .Pretty
 - add rs.Print(..)
