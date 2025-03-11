@@ -186,12 +186,12 @@ These are implemented with 3 overloads and  `Optional` and `DefaultParameterValu
 
 [goswinr.github.io/Rhino.Scripting](https://goswinr.github.io/Rhino.Scripting)
 
-### .NET Framework or .NET Core?
+## .NET Framework or .NET Core?
 This library is currently only targeting .NET Framework 4.8.\
 However, it should work in .NET 7.0 or higher as well.\
 But I could not yet compile it targeting net7.0, see https://discourse.mcneel.com/t/rhinocommon-with-net7-0-target/200460/2
 
-### Build from source
+## Build from source
 To build this library from source you need the .NET SDK 7 or higher installed\
 Then just run in the root folder:
 ```bash
@@ -201,14 +201,14 @@ dotnet build ForPublishing.fsproj
 This will first combine all `Scripting_*.fs` files into one file and compile it.\
 This is neede because F# type extension are not visible from C# editor tooling.
 
-### Edit the source
+## Edit the source
 While having all 900 methods on one class in one file is needed for publishing via `ForPublishing.fsproj` \
 it is not ideal for editing.\
 The source is split into several files imitating the structure of the original Python implementation.\
 Open the project `ForEditing.fsproj` to edit the source.\
 
 
-### Changelog
+## Changelog
 
 see [CHANGELOG.md](https://github.com/goswinr/Rhino.Scripting/blob/main/CHANGELOG.md)
 
@@ -222,5 +222,5 @@ The main reason to use this library async is to keep the Rhino UI and Fesh scrip
 ## Contributing
 Contributions are welcome even for small things like typos. If you have problems with this library please submit an issue.
 
-### License
+## License
 [MIT](https://github.com/goswinr/Rhino.Scripting/blob/main/LICENSE.md)
