@@ -41,7 +41,7 @@ If you have problems, questions, or find a bug, please open an [issue](https://g
 ## Get started
 
 The recommended scripting use case is via [Fesh](https://github.com/goswinr/Fesh.Rhino), the dedicated F# scripting editor for Rhino.\
-However, you can use this library just as well in compiled F#, C#, or VB.net projects.
+However, you can use this library just as well in the new Rhino 8 [ScriptEditor](https://www.rhino3d.com/features/developer/scripting/#refreshed-editor--new-in-8-) with C# or in independently compiled F#, C#, or VB.net projects.
 
 ### Get started in F#
 
@@ -96,8 +96,10 @@ rs.ObjectColor(pt, System.Drawing.Color.Blue);
 Many RhinoScript functions take variable types of input parameters.\
 This is implemented with method overloads.\
 Many RhinoScript functions have optional parameters.\
-These are also implemented as optional method parameters.
-
+These are also implemented as optional method parameters.\
+Many RhinoScript functions are getters and setters at the same time.\
+Depending on if an argument is provided or not, the function acts as a getter or setter.\
+This is also implemented with method overloads.
 
 ### Example
 For example `rs.ObjectLayer` can be called in several ways:
@@ -202,10 +204,9 @@ This is neede because F# type extension are not visible from C# editor tooling.
 ### Edit the source
 While having all 900 methods on one class in one file is needed for publishing via `ForPublishing.fsproj` \
 it is not ideal for editing.\
-The source is split into several files imitationg the structure of the original Python implementation.\
+The source is split into several files imitating the structure of the original Python implementation.\
 Open the project `ForEditing.fsproj` to edit the source.\
 
-###
 
 ### Changelog
 
