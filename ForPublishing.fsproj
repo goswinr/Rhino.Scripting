@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <!-- https://docs.microsoft.com/en-us/dotnet/core/project-sdk/msbuild-props -->
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFramework>net48</TargetFramework>
-    <!-- <TargetFramework>net7.0</TargetFramework> -->
+    <!-- <TargetFramework>net48</TargetFramework> -->
+    <TargetFramework>net7.0</TargetFramework>
     <!-- net7 fails: https://discourse.mcneel.com/t/rhinocommon-with-net7-0-target/200460/2 -->
     <!-- <TargetFrameworks>net48;net7.0</TargetFrameworks> -->
     <!-- to suppress warning about RhinoCommon targeting only for net48: -->
@@ -75,7 +75,8 @@
 
   <ItemGroup>
     <PackageReference Include="FSharp.Core" Version="6.0.7" /> <!-- so that dependabot does not fail, even though it is set to be excluded -->
-    <PackageReference Include="RhinoCommon" Version="7.0.20314.3001" PrivateAssets="all" ExcludeAssets="runtime" />
+    <!-- <PackageReference Include="RhinoCommon" Version="7.0.20314.3001" PrivateAssets="all" ExcludeAssets="runtime" /> -->
+    <PackageReference Include="RhinoCommon" Version="8.16.25042.13001" PrivateAssets="all" ExcludeAssets="runtime" />
     <PackageReference Include="Ionide.KeepAChangelog.Tasks" Version="0.1.8" PrivateAssets="all"  />
     <PackageReference Include="Eto.Forms" Version="2.9.0" /> <!-- so it works on Mac too and doesn't need Mac.Mono https://discourse.mcneel.com/t/rhino-for-mac-wip-goodbye-mono-hello-net-6/131925 -->
 
