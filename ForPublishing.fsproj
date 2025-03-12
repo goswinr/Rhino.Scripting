@@ -79,7 +79,7 @@
     <PackageReference Include="Ionide.KeepAChangelog.Tasks" Version="0.1.8" PrivateAssets="all"  />
     <PackageReference Include="Eto.Forms" Version="2.9.0" /> <!-- so it works on Mac too and doesn't need Mac.Mono https://discourse.mcneel.com/t/rhino-for-mac-wip-goodbye-mono-hello-net-6/131925 -->
 
-    <PackageReference Include="System.Drawing.Common" Version="7.0.0" ExcludeAssets="runtime" />
+    <PackageReference Include="System.Drawing.Common" Version="9.0.3" ExcludeAssets="runtime" />
 
     <!-- This is probably not working to the editing files because the way files a structured on github does not match the way the are compiled from a one big generated file.-->
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
