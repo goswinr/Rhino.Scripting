@@ -174,7 +174,6 @@ module internal  Seq =
                 k <- k + 1
         k
 
-
 module internal RArr =
 
     let inline map (mapping: 'T -> 'U) (resizeArray: ResizeArray<'T>) : ResizeArray<'U> =
@@ -206,7 +205,7 @@ module AutoOpenRsUtils =
         /// Get (or set) the last item in the Array.
         /// equal to this.[this.Length - 1]
         /// (this is an Extension Member from FsEx.ExtensionsArray)
-        member inline this.Last
+        member this.Last
             with get() =
                 if this.Length = 0 then RhinoScriptingException.Raise "Rhino.Scripting.FsExUtils arr.Last: Failed to get last item of empty Array"
                 this.[this.Length - 1]
@@ -215,7 +214,7 @@ module AutoOpenRsUtils =
                 this.[this.Length - 1] <- v
 
     type Collections.Generic.HashSet<'T> with
-        member inline this.DoesNotContain (item:'T) =
+        member this.DoesNotContain (item:'T) =
             not (this.Contains item)
 
 
@@ -223,7 +222,7 @@ module AutoOpenRsUtils =
 
         /// Gets an item in the ResizeArray by index.
         /// Allows for negative index too ( -1 is last item,  like Python)
-        member inline xs.GetNeg index =
+        member xs.GetNeg index =
             let len = xs.Count
             let ii = if index < 0 then len + index else index
             xs.[ii]

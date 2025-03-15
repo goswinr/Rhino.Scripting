@@ -21,12 +21,10 @@ open VersionInfo
 /// Rhino.Scripting Exception for Errors in script execution
 type RhinoScriptingException (s:string) =
     inherit Exception(s)
-
-
-    static member inline Raise msg =
+    static member Raise msg =
         Printf.kprintf (fun s -> raise (new RhinoScriptingException(s+versionInfo.Value))) msg
 
-    static member inline FailIfFalse s b =
+    static member FailIfFalse s b =
         if not b then raise (new RhinoScriptingException(s+versionInfo.Value))
 
 
@@ -34,7 +32,7 @@ type RhinoScriptingException (s:string) =
 type RhinoUserInteractionException (s:string) =
     inherit Exception(s)
 
-    static member inline Raise msg =
+    static member Raise msg =
         Printf.kprintf (fun s -> raise (new RhinoUserInteractionException(s+versionInfo.Value
         ))) msg
 
