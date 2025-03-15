@@ -8,9 +8,9 @@
 [![license](https://img.shields.io/github/license/goswinr/Rhino.Scripting)](LICENSE.md)
 ![code size](https://img.shields.io/github/languages/code-size/goswinr/Rhino.Scripting.svg)
 
-Rhino.Scripting is a complete re-implementation of the original **RhinoScript syntax** in and for F# (and C#).\
-Before this repo, the high-level RhinoScript API was only available for VBScript and (Iron-)Python.\
-This repo enables the use of the RhinoScriptSyntax in F# and C#\
+Rhino.Scripting is a complete re-implementation of the original **RhinoScript syntax** in and for F# (and C#).<br>
+Before this repo, the high-level RhinoScript API was only available for VBScript and (Iron-)Python.<br>
+This repo enables the use of the RhinoScriptSyntax in F# and C#<br>
 together with all the great coding experience and editor tooling that come with F# and C#, like:
 - automatic code completion while typing.
 - automatic error checking and highlighting in the background.
@@ -19,28 +19,28 @@ together with all the great coding experience and editor tooling that come with 
 
 ## What is RhinoScript?
 
-RhinoScript provides application scripting for the [Rhino3D](https://www.rhino3d.com/) CAD app.\
-RhinoScript has [more than 900 functions](https://developer.rhino3d.com/api/RhinoScriptSyntax/) to control all kinds of aspects of automating Rhino3D.\
-It was originally implemented in 2002 in VBScript.\
+RhinoScript provides application scripting for the [Rhino3D](https://www.rhino3d.com/) CAD app.<br>
+RhinoScript has [more than 900 functions](https://developer.rhino3d.com/api/RhinoScriptSyntax/) to control all kinds of aspects of automating Rhino3D.<br>
+It was originally implemented in 2002 in VBScript.<br>
 Extensive documentation on the original VBScript-based version is available [here](https://developer.rhino3d.com/guides/rhinoscript/).
 
-In 2010, all functions from [RhinoScript were reimplemented in IronPython](https://developer.rhino3d.com/guides/#rhinopython) (Python running on .NET).\
-This allowed the use of a modern, rich, and dynamically typed programming language with a huge standard library and \
+In 2010, all functions from [RhinoScript were reimplemented in IronPython](https://developer.rhino3d.com/guides/#rhinopython) (Python running on .NET).<br>
+This allowed the use of a modern, rich, and dynamically typed programming language with a huge standard library and <br>
 also access to all functions of the underlying .NET Framework as well as the [RhinoCommon SDK](https://developer.rhino3d.com/guides/rhinocommon/).
 
 ## What is this repo?
 
-This repo has [all original  RhinoScript functions](https://developer.rhino3d.com/api/RhinoScriptSyntax/) reimplemented in [F#](https://fsharp.org/).\
-It is literally a translation of [the open-source IronPython rhinoscriptsyntax](https://github.com/mcneel/rhinoscriptsyntax) implementation to F#.\
+This repo has [all original  RhinoScript functions](https://developer.rhino3d.com/api/RhinoScriptSyntax/) reimplemented in [F#](https://fsharp.org/).<br>
+It is literally a translation of [the open-source IronPython rhinoscriptsyntax](https://github.com/mcneel/rhinoscriptsyntax) implementation to F#.<br>
 [You can see all 900+ methods in this repo in the docs](https://goswinr.github.io/Rhino.Scripting/reference/rhino-scripting-rhinoscriptsyntax.html).
 
-A few minor bugs from the Python implementation are fixed and a few extra methods and optional parameters were added.\
-I have been using this library extensively for my own professional scripting needs since 2019.\
+A few minor bugs from the Python implementation are fixed and a few extra methods and optional parameters were added.<br>
+I have been using this library extensively for my own professional scripting needs since 2019.<br>
 If you have problems, questions, or find a bug, please open an [issue](https://github.com/goswinr/Rhino.Scripting/issues).
 
 ## Get started
 
-The recommended scripting use case is via [Fesh](https://github.com/goswinr/Fesh.Rhino), the dedicated F# scripting editor for Rhino.\
+The recommended scripting use case is via [Fesh](https://github.com/goswinr/Fesh.Rhino), the dedicated F# scripting editor for Rhino.<br>
 However, you can use this library just as well in the new Rhino 8 [ScriptEditor](https://www.rhino3d.com/features/developer/scripting/#refreshed-editor--new-in-8-) with C# or in independently compiled F#, C#, or VB.net projects.
 
 ### Get started in F#
@@ -50,8 +50,8 @@ First reference the assemblies.
 #r "nuget: Rhino.Scripting, 0.10.0"
 ```
 
-The main namespace is  `Rhino.Scripting`.\
-The main class of this library is called `RhinoScriptSyntax` it has all ~900 functions as static methods.\
+The main namespace is  `Rhino.Scripting`.<br>
+The main class of this library is called `RhinoScriptSyntax` it has all ~900 functions as static methods.<br>
 In F# you can create an alias like this:
 
 ```fsharp
@@ -59,7 +59,7 @@ open Rhino.Scripting
 type rs = RhinoScriptSyntax
 ```
 
-then use any of the RhinoScript functions like you would in Python or VBScript.\
+then use any of the RhinoScript functions like you would in Python or VBScript.<br>
 The `CoerceXXXX` functions will help you create types if you are too lazy to fully specify them.
 
 ```fsharp
@@ -77,8 +77,8 @@ First reference the assemblies.
 #r "nuget: FSharp.Core, 9.0.201" // when used in Rhino 8 ScriptEditor all dependencies need to be added explicitly
 #r "nuget: Rhino.Scripting, 0.10.0"
 ```
-The main namespace is  `Rhino.Scripting`.\
-The main class of this library is called `RhinoScriptSyntax` it has all ~900 functions as static methods.\
+The main namespace is  `Rhino.Scripting`.<br>
+The main class of this library is called `RhinoScriptSyntax` it has all ~900 functions as static methods.<br>
 In C# you can create an alias like this:
 
 ```csharp
@@ -93,22 +93,22 @@ rs.ObjectColor(pt, System.Drawing.Color.Blue);
 
 
 ## How about the dynamic types and optional parameters from VBScript and Python?
-Many RhinoScript functions take variable types of input parameters.\
-This is implemented with method overloads.\
-Many RhinoScript functions have optional parameters.\
-These are also implemented as optional method parameters.\
-Many RhinoScript functions are getters and setters at the same time.\
-Depending on if an argument is provided or not, the function acts as a getter or setter.\
+Many RhinoScript functions take variable types of input parameters.<br>
+This is implemented with method overloads.<br>
+Many RhinoScript functions have optional parameters.<br>
+These are also implemented as optional method parameters.<br>
+Many RhinoScript functions are getters and setters at the same time.<br>
+Depending on if an argument is provided or not, the function acts as a getter or setter.<br>
 This is also implemented with method overloads.
 
 ### Example
 For example `rs.ObjectLayer` can be called in several ways:
 
-`rs.ObjectLayer(guid)` To get the layer of one object, returns a string.\
-`rs.ObjectLayer(guid, string)` To set the layer of one object (fails if layer does not exist), no return value.\
-`rs.ObjectLayer(guid, string, createLayerIfMissing = true )` To set the layer of one object, and create the layer if it does not exist yet, no return value.\
-`rs.ObjectLayer(list of guids, string)` To set the layer of several objects (fails if layer does not exist), no return value.\
-`rs.ObjectLayer(list of guids, string, createLayerIfMissing = true )` To set the layer of several objects, and create the layer if it does not exist yet, no return value.\
+`rs.ObjectLayer(guid)` To get the layer of one object, returns a string.<br>
+`rs.ObjectLayer(guid, string)` To set the layer of one object (fails if layer does not exist), no return value.<br>
+`rs.ObjectLayer(guid, string, createLayerIfMissing = true )` To set the layer of one object, and create the layer if it does not exist yet, no return value.<br>
+`rs.ObjectLayer(list of guids, string)` To set the layer of several objects (fails if layer does not exist), no return value.<br>
+`rs.ObjectLayer(list of guids, string, createLayerIfMissing = true )` To set the layer of several objects, and create the layer if it does not exist yet, no return value.<br>
 
 These are implemented with 3 overloads and  `Optional` and `DefaultParameterValue` parameters:
 ```fsharp
@@ -188,7 +188,7 @@ These are implemented with 3 overloads and  `Optional` and `DefaultParameterValu
 
 ## .NET Framework or .NET Core?
 
-This library is currently only targeting .NET Framework 4.8.\
+This library is currently only targeting .NET Framework 4.8.<br>
 However, it should work in .NET 7.0 or higher as well as per [the offical guidelines](https://developer.rhino3d.com/guides/rhinocommon/moving-to-dotnet-7/#migrating-your-plugin)
 
 But I can not be compiled for net7.0.
@@ -202,20 +202,20 @@ https://mcneel.myjetbrains.com/youtrack/issue/RH-77311/Add-.NET-7-target-to-nuge
 
 
 ## Build from source
-To build this library from source you need the .NET SDK 7 or higher installed\
+To build this library from source you need the .NET SDK 7 or higher installed<br>
 Then just run in the root folder:
 ```bash
 dotnet build ForPublishing.fsproj
 ```
 
-This will first combine all `Scripting_*.fs` files into one file and compile it.\
+This will first combine all `Scripting_*.fs` files into one file and compile it.<br>
 This is neede because F# type extension are not visible from C# editor tooling.
 
 ## Edit the source
-While having all 900 methods on one class in one file is needed for publishing via `ForPublishing.fsproj` \
-it is not ideal for editing.\
-The source is split into several files imitating the structure of the original Python implementation.\
-Open the project `ForEditing.fsproj` to edit the source.\
+While having all 900 methods on one class in one file is needed for publishing via `ForPublishing.fsproj` <br>
+it is not ideal for editing.<br>
+The source is split into several files imitating the structure of the original Python implementation.<br>
+Open the project `ForEditing.fsproj` to edit the source.<br>
 
 
 ## Changelog
@@ -223,10 +223,10 @@ Open the project `ForEditing.fsproj` to edit the source.\
 see [CHANGELOG.md](https://github.com/goswinr/Rhino.Scripting/blob/main/CHANGELOG.md)
 
 ## Thread Safety
-While the main Rhino Document is officially not thread safe, this library can be used from any thread.\
-If running async this library will automatically marshal all calls that affect the UI to the main Rhino UI thread \
-and wait for switching back till completion on UI thread.\
-Modifying the Rhino Document from a background thread is actually OK as long as there is only one thread doing it.\
+While the main Rhino Document is officially not thread safe, this library can be used from any thread.<br>
+If running async this library will automatically marshal all calls that affect the UI to the main Rhino UI thread <br>
+and wait for switching back till completion on UI thread.<br>
+Modifying the Rhino Document from a background thread is actually OK as long as there is only one thread doing it.<br>
 The main reason to use this library async is to keep the Rhino UI and Fesh scripting editor UI responsive while doing long running operations.
 
 ## Contributing
