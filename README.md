@@ -187,9 +187,19 @@ These are implemented with 3 overloads and  `Optional` and `DefaultParameterValu
 [goswinr.github.io/Rhino.Scripting](https://goswinr.github.io/Rhino.Scripting)
 
 ## .NET Framework or .NET Core?
+
 This library is currently only targeting .NET Framework 4.8.\
-However, it should work in .NET 7.0 or higher as well.\
-But I could not yet compile it targeting net7.0, see https://discourse.mcneel.com/t/rhinocommon-with-net7-0-target/200460/2
+However, it should work in .NET 7.0 or higher as well as per [the offical guidelines](https://developer.rhino3d.com/guides/rhinocommon/moving-to-dotnet-7/#migrating-your-plugin)
+
+But I can not be compiled for net7.0.
+C# allows a project with RhinoCommon to compile targeting net7, but arguably it shouldn't.
+F# is stricter and does not allow this. See [dotnet/fsharp#17295 (comment)](https://github.com/dotnet/fsharp/issues/17295#issuecomment-2158893769)
+
+So this libary is waiting for a [RhinoCommon Nuget](https://www.nuget.org/packages/RhinoCommon/) nuget properly targeting `net7.0`.
+It is actually planned but seems to be tricky because of some hacks from the past:
+https://mcneel.myjetbrains.com/youtrack/issue/RH-77311/Add-.NET-7-target-to-nuget-packages
+
+
 
 ## Build from source
 To build this library from source you need the .NET SDK 7 or higher installed\
