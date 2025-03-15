@@ -195,7 +195,7 @@ But I can not be compiled for net7.0.
 C# allows a project with RhinoCommon to compile targeting net7, but arguably it shouldn't.
 F# is stricter and does not allow this. See [dotnet/fsharp#17295 (comment)](https://github.com/dotnet/fsharp/issues/17295#issuecomment-2158893769)
 
-So this libary is waiting for a [RhinoCommon Nuget](https://www.nuget.org/packages/RhinoCommon/) nuget properly targeting `net7.0`.
+So this libary is waiting for a [RhinoCommon Nuget](https://www.nuget.org/packages/RhinoCommon/#supportedframeworks-body-tab) nuget properly targeting `net7.0`.
 It is actually planned but seems to be tricky because of some hacks from the past:
 https://mcneel.myjetbrains.com/youtrack/issue/RH-77311/Add-.NET-7-target-to-nuget-packages
 
