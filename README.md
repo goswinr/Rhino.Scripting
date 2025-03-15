@@ -12,10 +12,10 @@ Rhino.Scripting is a complete re-implementation of the original **RhinoScript sy
 Before this repo, the high-level RhinoScript API was only available for VBScript and (Iron-)Python.<br>
 This repo enables the use of the RhinoScriptSyntax in F# and C#<br>
 together with all the great coding experience and editor tooling that come with F# and C#, like:
-- automatic code completion while typing.
-- automatic error checking and highlighting in the background.
-- type info on mouse over.
-- type safety even without type annotation (= type inference in F#).
+* automatic code completion while typing.
+* automatic error checking and highlighting in the background.
+* type info on mouse over.
+* type safety even without type annotation (= type inference in F#).
 
 ## What is RhinoScript?
 
@@ -104,11 +104,26 @@ This is also implemented with method overloads.
 ### Example
 For example `rs.ObjectLayer` can be called in several ways:
 
-`rs.ObjectLayer(guid)` To get the layer of one object, returns a string.<br>
-`rs.ObjectLayer(guid, string)` To set the layer of one object (fails if layer does not exist), no return value.<br>
-`rs.ObjectLayer(guid, string, createLayerIfMissing = true )` To set the layer of one object, and create the layer if it does not exist yet, no return value.<br>
-`rs.ObjectLayer(list of guids, string)` To set the layer of several objects (fails if layer does not exist), no return value.<br>
-`rs.ObjectLayer(list of guids, string, createLayerIfMissing = true )` To set the layer of several objects, and create the layer if it does not exist yet, no return value.<br>
+To get the layer of one object, returns a string:<br>
+```fsharp
+rs.ObjectLayer(guid)
+```
+To set the layer of one object (fails if layer does not exist), no return value:<br>
+```fsharp
+rs.ObjectLayer(guid, string)
+```
+To set the layer of one object, and create the layer if it does not exist yet, no return value:<br>
+```fsharp
+rs.ObjectLayer(guid, string, createLayerIfMissing = true )
+```
+To set the layer of several objects (fails if layer does not exist), no return value:<br>
+```fsharp
+rs.ObjectLayer(list of guids, string)
+```
+To set the layer of several objects, and create the layer if it does not exist yet, no return value:<br>
+```fsharp
+rs.ObjectLayer(list of guids, string, createLayerIfMissing = true )
+```
 
 These are implemented with 3 overloads and  `Optional` and `DefaultParameterValue` parameters:
 ```fsharp
