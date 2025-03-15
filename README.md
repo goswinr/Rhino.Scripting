@@ -11,11 +11,11 @@
 Rhino.Scripting is a complete re-implementation of the original **RhinoScript syntax** in and for F# (and C#).<br>
 Before this repo, the high-level RhinoScript API was only available for VBScript and (Iron-)Python.<br>
 This repo enables the use of the RhinoScriptSyntax in F# and C#<br>
-together with all the great coding experience and editor tooling that come with F# and C#, like:
-* automatic code completion while typing.
-* automatic error checking and highlighting in the background.
-* type info on mouse over.
-* type safety even without type annotation (= type inference in F#).
+together with all the great coding experience and editor tooling that come with F# and C#, like:<br>
+- automatic code completion while typing.<br>
+- automatic error checking and highlighting in the background.<br>
+- type info on mouse over.<br>
+- type safety even without type annotation (= type inference in F#).<br>
 
 ## What is RhinoScript?
 
