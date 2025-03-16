@@ -4,13 +4,11 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>net48</TargetFramework>
+	  <!-- net7 fails: https://discourse.mcneel.com/t/rhinocommon-with-net7-0-target/200460/2 -->
+	  <!-- <TargetFrameworks>net48;net7.0</TargetFrameworks> -->
+	  <!-- <NoWarn>NU1701</NoWarn>   to suppress warning about RhinoCommon targeting only for net48 -->
+	  <!-- <UseWindowsForms>true</UseWindowsForms>  use Eto Forms instead -->
 
-    <!-- net7 fails: https://discourse.mcneel.com/t/rhinocommon-with-net7-0-target/200460/2 -->
-    <!-- <TargetFrameworks>net48;net7.0</TargetFrameworks> -->
-    <!-- to suppress warning about RhinoCommon targeting only for net48: -->
-    <!-- <NoWarn>NU1701</NoWarn> -->
-
-    <!-- <UseWindowsForms>true</UseWindowsForms> to get screen resolution and show dialogs,  use Eto.Forms not Mono: https://discourse.mcneel.com/t/rhino-for-mac-wip-goodbye-mono-hello-net-6/131925-->
     <LangVersion>preview</LangVersion>
     <NeutralLanguage>en</NeutralLanguage>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>   <!-- to only have the english resources-->

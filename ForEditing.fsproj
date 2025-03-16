@@ -5,25 +5,30 @@
     <TargetFramework>net48</TargetFramework>
     <!-- net7 fails: https://discourse.mcneel.com/t/rhinocommon-with-net7-0-target/200460/2 -->
     <!-- <TargetFrameworks>net48;net7.0</TargetFrameworks> -->
-    <!-- <NoWarn>NU1701</NoWarn>  -->
-    <!-- to suppress warning about RhinoCommon targeting only for net48 -->
+    <!-- <NoWarn>NU1701</NoWarn>   to suppress warning about RhinoCommon targeting only for net48 -->
     <!-- <UseWindowsForms>true</UseWindowsForms>  use Eto Forms instead -->
+	  
     <LangVersion>preview</LangVersion>
-    <OtherFlags>$(OtherFlags)--warnon:3390</OtherFlags>
-    <!-- warnon:3390 is to verify xml docstrings https://devblogs.microsoft.com/dotnet/announcing-f-5/#improved-compiler-analysis-for-library-authors -->
-    <OtherFlags>$(OtherFlags) --warnon:1182</OtherFlags>
-    <!-- 1182: warn on unused variables -->
+	<SatelliteResourceLanguages>en</SatelliteResourceLanguages> <!-- to only have the english resources-->
+	<DisableImplicitFSharpCoreReference>true</DisableImplicitFSharpCoreReference><!-- so that dependabot does not fail https://github.com/dependabot/dependabot-core/issues/10883#issuecomment-2495962805 -->
+
+
+	  <OtherFlags>$(OtherFlags)--warnon:3390</OtherFlags>    <!-- warnon:3390 is to verify xml docstrings https://devblogs.microsoft.com/dotnet/announcing-f-5/#improved-compiler-analysis-for-library-authors -->
+    <OtherFlags>$(OtherFlags) --warnon:1182</OtherFlags>    <!-- 1182: warn on unused variables -->
   </PropertyGroup>
+	
   <ItemGroup>
     <!-- otherwise the minimum FSharp.Core version would be forced by the SDK used for building it. this would be needlessly too high-->
-    <PackageReference Update="FSharp.Core" Version="6.0.7" />
+	<PackageReference Include="FSharp.Core" Version="6.0.7" /> <!-- so that dependabot does not fail, even though it is set to be excluded -->
     <PackageReference Include="RhinoCommon" Version="7.0.20314.3001" PrivateAssets="all" ExcludeAssets="runtime" />
     <PackageReference Include="Eto.Forms" Version="2.9.0" />
+	  
     <!-- see https://discourse.mcneel.com/t/system-drawing-object-has-no-attribute-bitmap-rhino-8-wip/150608/6 -->
     <!-- <PackageReference Include="System.Drawing.Common" Version="7.0.0" ExcludeAssets="runtime"/> -->
     <!-- <PackageReference Include="RhinoCommon" Version="9.0.25051.305-wip"  ExcludeAssets="runtime" /> -->
     <!-- <Reference Include="C:\Program Files\Rhino 8\System\RhinoCommon.dll" ExcludeAssets="runtime"/> -->
   </ItemGroup>
+	
   <ItemGroup>
     <None Include="combineIntoOneFile.fsx" />
     <None Include="Readme.md" />
@@ -65,10 +70,7 @@
     <Compile Include="Src/Scripting_UserData.fs" />
     <Compile Include="Src/Scripting_UserInterface.fs" />
     <Compile Include="Src/Scripting_Utility.fs" />
-    <Compile Include="Src/Scripting_Views.fs" />
-    <!-- included only for editing referenced file names:-->
-    <None Include="ForPublishing.fsproj" />
-    <None Include="ForPublishingV7.fsproj" />
-    <None Include="ForEditingV7.fsproj" />
+    <Compile Include="Src/Scripting_Views.fs" />   
+    
   </ItemGroup>
 </Project>
