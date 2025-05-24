@@ -1,5 +1,4 @@
-﻿
-namespace Rhino.Scripting
+﻿namespace Rhino.Scripting
 
 open Rhino
 open System
@@ -18,13 +17,13 @@ module AutoOpenObject =
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
 
-    ///<summary>Moves, scales, or rotates a list of objects given a 4x4 transformation
-    ///    matrix. The matrix acts on the left. To transform Geometry objects instead of DocObjects or Guids use their .Transform(xForm) member.</summary>
-    ///<param name="objectIds">(Guid seq) List of object identifiers</param>
-    ///<param name="matrix">(Transform) The transformation matrix (4x4 array of numbers)</param>
-    ///<param name="copy">(bool) Optional, default value: <c>false</c>
+    /// <summary>Moves, scales, or rotates a list of objects given a 4x4 transformation
+    ///    matrix. The matrix acts on the left. To transform geometry objects instead of DocObjects or Guids use their .Transform(xForm) member.</summary>
+    /// <param name="objectIds">(Guid seq) List of object identifiers</param>
+    /// <param name="matrix">(Transform) The transformation matrix (4x4 array of numbers)</param>
+    /// <param name="copy">(bool) Optional, default value: <c>false</c>
     ///    Copy the objects</param>
-    ///<returns>(Guid ResizeArray) ids identifying the newly transformed objects.</returns>
+    /// <returns>(Guid ResizeArray) IDs identifying the newly transformed objects.</returns>
     static member TransformObjects( objectIds:Guid seq,
                                     matrix:Transform,
                                     [<OPT;DEF(false)>]copy:bool) : Guid ResizeArray =   //PLURAL
@@ -37,13 +36,13 @@ module AutoOpenObject =
         State.Doc.Views.Redraw()
         rc
 
-    ///<summary>Moves, scales, or rotates an object given a 4x4 transformation matrix.
-    ///    The matrix acts on the left. To transform Geometry objects instead of DocObjects or Guids use their .Transform(xForm) member.</summary>
-    ///<param name="objectId">(Guid) The identifier of the object</param>
-    ///<param name="matrix">(Transform) The transformation matrix (4x4 array of numbers)</param>
-    ///<param name="copy">(bool) Optional, default value: <c>false</c>
+    /// <summary>Moves, scales, or rotates an object given a 4x4 transformation matrix.
+    ///    The matrix acts on the left. To transform geometry objects instead of DocObjects or Guids use their .Transform(xForm) member.</summary>
+    /// <param name="objectId">(Guid) The identifier of the object</param>
+    /// <param name="matrix">(Transform) The transformation matrix (4x4 array of numbers)</param>
+    /// <param name="copy">(bool) Optional, default value: <c>false</c>
     ///    Copy the object</param>
-    ///<returns>(Guid) The identifier of the transformed object.</returns>
+    /// <returns>(Guid) The identifier of the transformed object.</returns>
     static member TransformObject(  objectId:Guid,
                                     matrix:Transform,
                                     [<OPT;DEF(false)>]copy:bool) : Guid =
@@ -52,10 +51,10 @@ module AutoOpenObject =
         res
 
 
-    ///<summary>Copies object from one location to another, or in-place.</summary>
-    ///<param name="objectId">(Guid) Object to copy</param>
-    ///<param name="translation">(Vector3d) Optional, additional Translation vector to apply</param>
-    ///<returns>(Guid) objectId for the copy.</returns>
+    /// <summary>Copies an object from one location to another, or in-place.</summary>
+    /// <param name="objectId">(Guid) Object to copy</param>
+    /// <param name="translation">(Vector3d) Optional, additional translation vector to apply</param>
+    /// <returns>(Guid) objectId for the copy.</returns>
     static member CopyObject(objectId:Guid, [<OPT;DEF(Vector3d())>]translation:Vector3d) : Guid =
         let translation =
             if not translation.IsZero then
@@ -68,10 +67,10 @@ module AutoOpenObject =
 
 
 
-    ///<summary>Copies one or more objects from one location to another, or in-place.</summary>
-    ///<param name="objectIds">(Guid seq) List of objects to copy</param>
-    ///<param name="translation">(Vector3d) Optional, Vector3d representing translation vector to apply to copied set</param>
-    ///<returns>(Guid ResizeArray) identifiers for the copies.</returns>
+    /// <summary>Copies one or more objects from one location to another, or in-place.</summary>
+    /// <param name="objectIds">(Guid seq) List of objects to copy</param>
+    /// <param name="translation">(Vector3d) Optional, translation vector to apply to copied set</param>
+    /// <returns>(Guid ResizeArray) Identifiers for the copies.</returns>
     static member CopyObjects(objectIds:Guid seq, [<OPT;DEF(Vector3d())>]translation:Vector3d) : Guid ResizeArray = //PLURAL
         let translation =
             if not translation.IsZero then
@@ -86,18 +85,18 @@ module AutoOpenObject =
         rc
 
 
-    ///<summary>Deletes a single object from the document.</summary>
-    ///<param name="objectId">(Guid) Identifier of object to delete</param>
-    ///<returns>(unit) void, nothing.</returns>
+    /// <summary>Deletes a single object from the document.</summary>
+    /// <param name="objectId">(Guid) Identifier of object to delete</param>
+    /// <returns>(unit) void, nothing.</returns>
     static member DeleteObject(objectId:Guid) : unit =
         if not <| State.Doc.Objects.Delete(objectId, quiet=true)  then RhinoScriptingException.Raise "RhinoScriptSyntax.DeleteObject failed on %s" (Pretty.str objectId)
         State.Doc.Views.Redraw()
 
 
 
-    ///<summary>Deletes one or more objects from the document, Fails if not all objects can be deleted.</summary>
-    ///<param name="objectIds">(Guid seq) Identifiers of objects to delete</param>
-    ///<returns>(unit) void, nothing.</returns>
+    /// <summary>Deletes one or more objects from the document, Fails if not all objects can be deleted.</summary>
+    /// <param name="objectIds">(Guid seq) Identifiers of objects to delete</param>
+    /// <returns>(unit) void, nothing.</returns>
     static member DeleteObjects(objectIds:Guid seq) : unit = //PLURAL
         let k = State.Doc.Objects.Delete(objectIds, quiet=true)
         let l = Seq.length objectIds
@@ -105,29 +104,29 @@ module AutoOpenObject =
         State.Doc.Views.Redraw()
 
 
-    ///<summary>Causes the selection state of one or more objects to change momentarily
+    /// <summary>Causes the selection state of one or more objects to change momentarily
     ///    so the object appears to flash on the screen.</summary>
-    ///<param name="objectIds">(Guid seq) Identifiers of objects to flash</param>
-    ///<param name="style">(bool) Optional, default value: <c>true</c>
+    /// <param name="objectIds">(Guid seq) Identifiers of objects to flash</param>
+    /// <param name="style">(bool) Optional, default value: <c>true</c>
     ///    If True, flash between object color and selection color.
     ///    If False, flash between visible and invisible</param>
-    ///<returns>(unit).</returns>
+    /// <returns>(unit).</returns>
     static member FlashObject(objectIds:Guid seq, [<OPT;DEF(true)>]style:bool) : unit =
         let rhobjs =  objectIds |> RArr.mapSeq RhinoScriptSyntax.CoerceRhinoObject
         if rhobjs.Count>0 then
             State.Doc.Views.FlashObjects(rhobjs, style)
 
 
-    ///<summary>Hides a single object.</summary>
-    ///<param name="objectId">(Guid) Id of object to hide</param>
-    ///<returns>(bool) True of False indicating success or failure.</returns>
+    /// <summary>Hides a single object.</summary>
+    /// <param name="objectId">(Guid) Id of object to hide</param>
+    /// <returns>(bool) True of False indicating success or failure.</returns>
     static member HideObject(objectId:Guid) : bool =
         State.Doc.Objects.Hide(objectId, ignoreLayerMode=false)
 
 
-    ///<summary>Hides one or more objects.</summary>
-    ///<param name="objectIds">(Guid seq) Identifiers of objects to hide</param>
-    ///<returns>(int) Number of objects hidden.</returns>
+    /// <summary>Hides one or more objects.</summary>
+    /// <param name="objectIds">(Guid seq) Identifiers of objects to hide</param>
+    /// <returns>(int) Number of objects hidden.</returns>
     static member HideObjects(objectIds:Guid seq) : int = //PLURAL
         let mutable rc = 0
         for objectId in objectIds do
@@ -136,37 +135,37 @@ module AutoOpenObject =
         rc
 
 
-    ///<summary>Checks if an object is in on a page layout space. (as opposed to model space).</summary>
-    ///<param name="objectId">(Guid) Id of an object to test</param>
-    ///<returns>(bool) True if the object is in page layout space, False if the object is in model space.</returns>
+    /// <summary>Checks if an object is in on a page layout space. (as opposed to model space).</summary>
+    /// <param name="objectId">(Guid) Id of an object to test</param>
+    /// <returns>(bool) True if the object is in page layout space, False if the object is in model space.</returns>
     static member IsLayoutObject(objectId:Guid) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.Attributes.Space = DocObjects.ActiveSpace.PageSpace
 
 
-    ///<summary>Verifies the existence of an object in the State.Doc.Objects table. Fails on empty Guid.</summary>
-    ///<param name="objectId">(Guid) An object to test</param>
-    ///<returns>(bool) True if the object exists, False if the object does not exist.</returns>
+    /// <summary>Verifies the existence of an object in the State.Doc.Objects table. Fails on empty Guid.</summary>
+    /// <param name="objectId">(Guid) An object to test</param>
+    /// <returns>(bool) True if the object exists, False if the object does not exist.</returns>
     static member IsObject(objectId:Guid) : bool =
         RhinoScriptSyntax.TryCoerceRhinoObject(objectId) <> None
 
 
-    ///<summary>Checks if an object is hidden. Hidden objects are not visible, cannot
+    /// <summary>Checks if an object is hidden. Hidden objects are not visible, cannot
     ///    be snapped to, and cannot be selected.</summary>
-    ///<param name="objectId">(Guid) The identifier of an object to test</param>
-    ///<returns>(bool) True if the object is hidden, False if the object is not hidden.</returns>
+    /// <param name="objectId">(Guid) The identifier of an object to test</param>
+    /// <returns>(bool) True if the object is hidden, False if the object is not hidden.</returns>
     static member IsObjectHidden(objectId:Guid) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.IsHidden
 
 
-    ///<summary>Verifies an object's bounding box is inside of another bounding box.</summary>
-    ///<param name="objectId">(Guid) Identifier of an object to be tested</param>
-    ///<param name="box">(Geometry.BoundingBox) Bounding box to test for containment</param>
-    ///<param name="testMode">(bool) Optional, default value: <c>true</c>
+    /// <summary>Verifies an object's bounding box is inside of another bounding box.</summary>
+    /// <param name="objectId">(Guid) Identifier of an object to be tested</param>
+    /// <param name="box">(Geometry.BoundingBox) Bounding box to test for containment</param>
+    /// <param name="testMode">(bool) Optional, default value: <c>true</c>
     ///    If True, the object's bounding box must be contained by box
     ///    If False, the object's bounding box must be contained by or intersect box</param>
-    ///<returns>(bool) True if object is inside box, False is object is not inside box.</returns>
+    /// <returns>(bool) True if object is inside box, False is object is not inside box.</returns>
     static member IsObjectInBox( objectId:Guid,
                                  box:BoundingBox,
                                  [<OPT;DEF(true)>]testMode:bool) : bool =
@@ -179,10 +178,10 @@ module AutoOpenObject =
             union.IsValid
 
 
-    ///<summary>Checks if an object is a member of a group.</summary>
-    ///<param name="objectId">(Guid) The identifier of an object</param>
-    ///<param name="groupName">(string) Optional, The name of a group. If omitted, the function checks if the object is a member of any group</param>
-    ///<returns>(bool) True if the object is a member of the specified group. If a groupName
+    /// <summary>Checks if an object is a member of a group.</summary>
+    /// <param name="objectId">(Guid) The identifier of an object</param>
+    /// <param name="groupName">(string) Optional, The name of a group. If omitted, the function checks if the object is a member of any group</param>
+    /// <returns>(bool) True if the object is a member of the specified group. If a groupName
     ///    was not specified, the object is a member of some group.
     ///    False if the object  is not a member of the specified group.
     ///    If a groupName was not specified, the object is not a member of any group.</returns>
@@ -200,36 +199,36 @@ module AutoOpenObject =
 
 
 
-    ///<summary>Checks if an object is locked. Locked objects are visible, and can
+    /// <summary>Checks if an object is locked. Locked objects are visible, and can
     ///    be snapped to, but cannot be selected.</summary>
-    ///<param name="objectId">(Guid) The identifier of an object to be tested</param>
-    ///<returns>(bool) True if the object is locked, False if the object is not locked.</returns>
+    /// <param name="objectId">(Guid) The identifier of an object to be tested</param>
+    /// <returns>(bool) True if the object is locked, False if the object is not locked.</returns>
     static member IsObjectLocked(objectId:Guid) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.IsLocked
 
 
-    ///<summary>Checks if an object is normal. Normal objects are visible, can be
+    /// <summary>Checks if an object is normal. Normal objects are visible, can be
     ///    snapped to, and can be selected.</summary>
-    ///<param name="objectId">(Guid) The identifier of an object to be tested</param>
-    ///<returns>(bool) True if the object is normal, False if the object is not normal.</returns>
+    /// <param name="objectId">(Guid) The identifier of an object to be tested</param>
+    /// <returns>(bool) True if the object is normal, False if the object is not normal.</returns>
     static member IsObjectNormal(objectId:Guid) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.IsNormal
 
 
-    ///<summary>Checks if an object is a reference object. Reference objects are
+    /// <summary>Checks if an object is a reference object. Reference objects are
     ///    objects that are not part of the current document.</summary>
-    ///<param name="objectId">(Guid) The identifier of an object to test</param>
-    ///<returns>(bool) True if the object is a reference object, False if the object is not a reference object.</returns>
+    /// <param name="objectId">(Guid) The identifier of an object to test</param>
+    /// <returns>(bool) True if the object is a reference object, False if the object is not a reference object.</returns>
     static member IsObjectReference(objectId:Guid) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.IsReference
 
 
-    ///<summary>Checks if an object can be selected.</summary>
-    ///<param name="objectId">(Guid) The identifier of an object to test</param>
-    ///<returns>(bool) True or False.</returns>
+    /// <summary>Checks if an object can be selected.</summary>
+    /// <param name="objectId">(Guid) The identifier of an object to test</param>
+    /// <returns>(bool) True or False.</returns>
     static member IsObjectSelectable(objectId:Guid) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.IsSelectable( ignoreSelectionState=true,
@@ -238,9 +237,9 @@ module AutoOpenObject =
                             ignoreLayerVisibility=false )
 
 
-    ///<summary>Checks if an object is currently selected.</summary>
-    ///<param name="objectId">(Guid) The identifier of an object to test</param>
-    ///<returns>(int)
+    /// <summary>Checks if an object is currently selected.</summary>
+    /// <param name="objectId">(Guid) The identifier of an object to test</param>
+    /// <returns>(int)
     ///    0, the object is not selected
     ///    1, the object is selected
     ///    2, the object is entirely persistently selected
@@ -250,9 +249,9 @@ module AutoOpenObject =
         rhobj.IsSelected(false)
 
 
-    ///<summary>Determines if an object is closed or solid.</summary>
-    ///<param name="objectId">(Guid) The identifier of an object to test</param>
-    ///<returns>(bool) True if the object is solid, or a Mesh is closed, False otherwise.</returns>
+    /// <summary>Determines if an object is closed or solid.</summary>
+    /// <param name="objectId">(Guid) The identifier of an object to test</param>
+    /// <returns>(bool) True if the object is solid, or a Mesh is closed, False otherwise.</returns>
     static member IsObjectSolid(objectId:Guid) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         // rhobj.IsSolid //TODO  'rhobj.IsSolid'  could be used from RhCommon 7.5 onwards see https://github.com/mcneel/rhinoscriptsyntax/pull/197
@@ -269,19 +268,19 @@ module AutoOpenObject =
 
 
 
-    ///<summary>Verifies an object's geometry is valid and without error.</summary>
-    ///<param name="objectId">(Guid) The identifier of an object to test</param>
-    ///<returns>(bool) True if the object is valid.</returns>
+    /// <summary>Verifies an object's geometry is valid and without error.</summary>
+    /// <param name="objectId">(Guid) The identifier of an object to test</param>
+    /// <returns>(bool) True if the object is valid.</returns>
     static member IsObjectValid(objectId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceRhinoObject(objectId) with
         |None -> false
         |Some rhobj ->  rhobj.IsValid
 
 
-    ///<summary>Verifies an object is visible in a view.</summary>
-    ///<param name="objectId">(Guid) The identifier of an object to test</param>
-    ///<param name="view">(string) Optional, default value: <c>ActiveView.MainViewport</c> The title of the view. If omitted, the current active view is used</param>
-    ///<returns>(bool) True if the object is visible in the specified view, otherwise False.</returns>
+    /// <summary>Verifies an object is visible in a view.</summary>
+    /// <param name="objectId">(Guid) The identifier of an object to test</param>
+    /// <param name="view">(string) Optional, default value: <c>ActiveView.MainViewport</c> The title of the view. If omitted, the current active view is used</param>
+    /// <returns>(bool) True if the object is visible in the specified view, otherwise False.</returns>
     static member IsVisibleInView(objectId:Guid, [<OPT;DEF(null:string)>]view:string) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let viewport = if notNull view then (RhinoScriptSyntax.CoerceView(view)).MainViewport else State.Doc.Views.ActiveView.MainViewport
@@ -289,18 +288,18 @@ module AutoOpenObject =
         rhobj.Visible && viewport.IsVisible(bbox)
 
 
-    ///<summary>Locks a single object. Locked objects are visible, and they can be
+    /// <summary>Locks a single object. Locked objects are visible, and they can be
     ///    snapped to. But, they cannot be selected.</summary>
-    ///<param name="objectId">(Guid) The identifier of an object</param>
-    ///<returns>(bool) True or False indicating success or failure.</returns>
+    /// <param name="objectId">(Guid) The identifier of an object</param>
+    /// <returns>(bool) True or False indicating success or failure.</returns>
     static member LockObject(objectId:Guid) : bool =
         State.Doc.Objects.Lock(objectId, ignoreLayerMode=false)
 
 
-    ///<summary>Locks multiple objects. Locked objects are visible, and they can be
+    /// <summary>Locks multiple objects. Locked objects are visible, and they can be
     ///    snapped to. But, they cannot be selected.</summary>
-    ///<param name="objectIds">(Guid seq) List of Strings or Guids. The identifiers of objects</param>
-    ///<returns>(int) number of objects locked.</returns>
+    /// <param name="objectIds">(Guid seq) List of Strings or Guids. The identifiers of objects</param>
+    /// <returns>(int) number of objects locked.</returns>
     static member LockObjects(objectIds:Guid seq) : int = //PLURAL
         let mutable rc = 0
         for objectId in objectIds do
@@ -309,11 +308,11 @@ module AutoOpenObject =
         rc
 
 
-    ///<summary>Matches, or copies the attributes of a source object to a target object.</summary>
-    ///<param name="targetIds">(Guid seq) Identifiers of objects to copy attributes to</param>
-    ///<param name="sourceId">(Guid) Optional, Identifier of object to copy attributes from. If None,
+    /// <summary>Matches, or copies the attributes of a source object to a target object.</summary>
+    /// <param name="targetIds">(Guid seq) Identifiers of objects to copy attributes to</param>
+    /// <param name="sourceId">(Guid) Optional, Identifier of object to copy attributes from. If None,
     ///    then the default attributes are copied to the targetIds</param>
-    ///<returns>(int) number of objects modified.</returns>
+    /// <returns>(int) number of objects modified.</returns>
     static member MatchObjectAttributes(targetIds:Guid seq, [<OPT;DEF(Guid())>]sourceId:Guid) : int =
         let sourceAttr =
             if Guid.Empty <> sourceId then
@@ -329,13 +328,13 @@ module AutoOpenObject =
         rc
 
 
-    ///<summary>Mirrors a single object on World XY Plane.</summary>
-    ///<param name="objectId">(Guid) The identifier of an object to mirror</param>
-    ///<param name="startPoint">(Point3d) Start of the mirror Plane</param>
-    ///<param name="endPoint">(Point3d) End of the mirror Plane</param>
-    ///<param name="copy">(bool) Optional, default value: <c>false</c>
+    /// <summary>Mirrors a single object on World XY Plane.</summary>
+    /// <param name="objectId">(Guid) The identifier of an object to mirror</param>
+    /// <param name="startPoint">(Point3d) Start of the mirror Plane</param>
+    /// <param name="endPoint">(Point3d) End of the mirror Plane</param>
+    /// <param name="copy">(bool) Optional, default value: <c>false</c>
     ///    Copy the object</param>
-    ///<returns>(Guid) Identifier of the mirrored object.</returns>
+    /// <returns>(Guid) Identifier of the mirrored object.</returns>
     static member MirrorObject( objectId:Guid,
                                 startPoint:Point3d,
                                 endPoint:Point3d,
@@ -351,13 +350,13 @@ module AutoOpenObject =
         res
 
 
-    ///<summary>Mirrors a list of objects on World XY Plane.</summary>
-    ///<param name="objectIds">(Guid seq) Identifiers of objects to mirror</param>
-    ///<param name="startPoint">(Point3d) Start of the mirror Plane</param>
-    ///<param name="endPoint">(Point3d) End of the mirror Plane</param>
-    ///<param name="copy">(bool) Optional, default value: <c>false</c>
+    /// <summary>Mirrors a list of objects on World XY Plane.</summary>
+    /// <param name="objectIds">(Guid seq) Identifiers of objects to mirror</param>
+    /// <param name="startPoint">(Point3d) Start of the mirror Plane</param>
+    /// <param name="endPoint">(Point3d) End of the mirror Plane</param>
+    /// <param name="copy">(bool) Optional, default value: <c>false</c>
     ///    Copy the objects</param>
-    ///<returns>(Guid ResizeArray) List of identifiers of the mirrored objects.</returns>
+    /// <returns>(Guid ResizeArray) List of identifiers of the mirrored objects.</returns>
     static member MirrorObjects(  objectIds:Guid seq,
                                  startPoint:Point3d,
                                  endPoint:Point3d,
@@ -377,20 +376,20 @@ module AutoOpenObject =
 
 
 
-    ///<summary>Moves a single object.</summary>
-    ///<param name="objectId">(Guid) The identifier of an object to move</param>
-    ///<param name="translation">(Vector3d) Vector3d</param>
-    ///<returns>(unit) void, nothing.</returns>
+    /// <summary>Moves a single object.</summary>
+    /// <param name="objectId">(Guid) The identifier of an object to move</param>
+    /// <param name="translation">(Vector3d) Vector3d</param>
+    /// <returns>(unit) void, nothing.</returns>
     static member MoveObject(objectId:Guid, translation:Vector3d) : unit = //TODO or return unit ??
         let xf = Transform.Translation(translation)
         let res = State.Doc.Objects.Transform(objectId, xf, deleteOriginal=true)
         if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.MoveObject Cannot apply move to from objectId:'%s' translation:'%A'" (Pretty.str objectId) translation
         //if objectId <> res
 
-    ///<summary>Moves one or more objects.</summary>
-    ///<param name="objectIds">(Guid seq) The identifiers objects to move</param>
-    ///<param name="translation">(Vector3d)Vector3d</param>
-    ///<returns>(unit) void, nothing.</returns>
+    /// <summary>Moves one or more objects.</summary>
+    /// <param name="objectIds">(Guid seq) The identifiers objects to move</param>
+    /// <param name="translation">(Vector3d)Vector3d</param>
+    /// <returns>(unit) void, nothing.</returns>
     static member MoveObjects(objectIds:Guid seq, translation:Vector3d) : unit =  //PLURAL
         let xf = Transform.Translation(translation)
         //let rc = ResizeArray()
@@ -401,21 +400,21 @@ module AutoOpenObject =
         //rc
 
 
-    ///<summary>Returns the color of an object. Object colors are represented
+    /// <summary>Returns the color of an object. Object colors are represented
     /// as RGB colors. An RGB color specifies the relative intensity of red, green,
     /// and blue to cause a specific color to be displayed.</summary>
-    ///<param name="objectId">(Guid)Id of object</param>
-    ///<returns>(Drawing.Color) The current color value.</returns>
+    /// <param name="objectId">(Guid)Id of object</param>
+    /// <returns>(Drawing.Color) The current color value.</returns>
     static member ObjectColor(objectId:Guid) : Drawing.Color = //GET
         let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhinoObject.Attributes.DrawColor(State.Doc)
 
-    ///<summary>Modifies the color of an object. Object colors are represented
+    /// <summary>Modifies the color of an object. Object colors are represented
     /// as RGB colors. An RGB color specifies the relative intensity of red, green,
     /// and blue to cause a specific color to be displayed.</summary>
-    ///<param name="objectId">(Guid)Id of object</param>
-    ///<param name="color">(Drawing.Color) The new color value</param>
-    ///<returns>(unit) void, nothing.</returns>
+    /// <param name="objectId">(Guid)Id of object</param>
+    /// <param name="color">(Drawing.Color) The new color value</param>
+    /// <returns>(unit) void, nothing.</returns>
     static member ObjectColor(objectId:Guid, color:Drawing.Color) : unit = //SET
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let attr = rhobj.Attributes
@@ -424,12 +423,12 @@ module AutoOpenObject =
         if not <| State.Doc.Objects.ModifyAttributes( rhobj, attr, quiet=true) then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectColor setting failed for %A; %A" (Pretty.str objectId) color
         State.Doc.Views.Redraw()
 
-    ///<summary>Modifies the color of multiple objects. Object colors are represented
+    /// <summary>Modifies the color of multiple objects. Object colors are represented
     /// as RGB colors. An RGB color specifies the relative intensity of red, green,
     /// and blue to cause a specific color to be displayed.</summary>
-    ///<param name="objectIds">(Guid seq)Ids of objects</param>
-    ///<param name="color">(Drawing.Color) The new color value</param>
-    ///<returns>(unit) void, nothing.</returns>
+    /// <param name="objectIds">(Guid seq)Ids of objects</param>
+    /// <param name="color">(Drawing.Color) The new color value</param>
+    /// <returns>(unit) void, nothing.</returns>
     static member ObjectColor(objectIds:Guid seq, color:Drawing.Color) : unit = //MULTISET
         for objectId in objectIds do
             let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
@@ -442,9 +441,9 @@ module AutoOpenObject =
 
 
 
-    ///<summary>Returns the color source of an object.</summary>
-    ///<param name="objectId">(Guid) Single identifier</param>
-    ///<returns>(int) The current color source
+    /// <summary>Returns the color source of an object.</summary>
+    /// <param name="objectId">(Guid) Single identifier</param>
+    /// <returns>(int) The current color source
     ///    0 = color from layer
     ///    1 = color from object
     ///    2 = color from material
@@ -453,14 +452,14 @@ module AutoOpenObject =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         int(rhobj.Attributes.ColorSource)
 
-    ///<summary>Modifies the color source of an object.</summary>
-    ///<param name="objectId">(Guid) Single identifier</param>
-    ///<param name="source">(int) New color source
+    /// <summary>Modifies the color source of an object.</summary>
+    /// <param name="objectId">(Guid) Single identifier</param>
+    /// <param name="source">(int) New color source
     ///    0 = color from layer
     ///    1 = color from object
     ///    2 = color from material
     ///    3 = color from parent</param>
-    ///<returns>(unit) void, nothing.</returns>
+    /// <returns>(unit) void, nothing.</returns>
     static member ObjectColorSource(objectId:Guid, source:int) : unit = //SET
         let source : DocObjects.ObjectColorSource = LanguagePrimitives.EnumOfValue source
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
@@ -468,14 +467,14 @@ module AutoOpenObject =
         rhobj.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
-    ///<summary>Modifies the color source of multiple objects.</summary>
-    ///<param name="objectIds">(Guid seq) Multiple identifiers</param>
-    ///<param name="source">(int) New color source
+    /// <summary>Modifies the color source of multiple objects.</summary>
+    /// <param name="objectIds">(Guid seq) Multiple identifiers</param>
+    /// <param name="source">(int) New color source
     ///    0 = color from layer
     ///    1 = color from object
     ///    2 = color from material
     ///    3 = color from parent</param>
-    ///<returns>(unit) void, nothing.</returns>
+    /// <returns>(unit) void, nothing.</returns>
     static member ObjectColorSource(objectIds:Guid seq, source:int) : unit = //MULTISET
         let source : DocObjects.ObjectColorSource = LanguagePrimitives.EnumOfValue source
         for objectId in objectIds do
@@ -488,18 +487,18 @@ module AutoOpenObject =
 
 
 
-    ///<summary>Returns a description of the object type (e.g. Line, Surface, Text,...).</summary>
-    ///<param name="objectId">(Guid) Identifier of an object</param>
-    ///<returns>(string) A short text description of the object.</returns>
+    /// <summary>Returns a description of the object type (e.g. Line, Surface, Text,...).</summary>
+    /// <param name="objectId">(Guid) Identifier of an object</param>
+    /// <returns>(string) A short text description of the object.</returns>
     static member ObjectDescription(objectId:Guid) : string =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.ShortDescription(false)
 
 
 
-    ///<summary>Returns the count for each object type in a List of objects.</summary>
-    ///<param name="objectIds">(Guid seq) Identifiers of objects</param>
-    ///<returns>(string) A short text description of the object.</returns>
+    /// <summary>Returns the count for each object type in a List of objects.</summary>
+    /// <param name="objectIds">(Guid seq) Identifiers of objects</param>
+    /// <returns>(string) A short text description of the object.</returns>
     static member ObjectDescription(objectIds:Guid seq) : string =
         let count =  objectIds|> Seq.countBy (fun id ->
                         /// TODO could be optimized by using Object-type integer instead of string
@@ -521,10 +520,10 @@ module AutoOpenObject =
 
 
 
-    ///<summary>Returns the short layer of an object.
+    /// <summary>Returns the short layer of an object.
     ///    Without Parent Layers.</summary>
-    ///<param name="objectId">(Guid) The identifier of the object</param>
-    ///<returns>(string) The object's current layer.</returns>
+    /// <param name="objectId">(Guid) The identifier of the object</param>
+    /// <returns>(string) The object's current layer.</returns>
     static member ObjectLayerShort(objectId:Guid) : string = //GET
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let index = obj.Attributes.LayerIndex
@@ -533,9 +532,9 @@ module AutoOpenObject =
 
     //static member ObjectLayer()// all 3 overloads moved to  top of file Scripting_Layer.fs
 
-    ///<summary>Returns the layout or model space of an object.</summary>
-    ///<param name="objectId">(Guid) Identifier of the object</param>
-    ///<returns>(string) The object's current page layout view, Empty String if it is in Model Space.</returns>
+    /// <summary>Returns the layout or model space of an object.</summary>
+    /// <param name="objectId">(Guid) Identifier of the object</param>
+    /// <returns>(string) The object's current page layout view, Empty String if it is in Model Space.</returns>
     static member ObjectLayout(objectId:Guid) : string = //GET
         // this fixes bug in rhinoscriptsyntax, see https://github.com/mcneel/rhinoscriptsyntax/pull/203
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
@@ -547,13 +546,13 @@ module AutoOpenObject =
             ""
 
 
-    ///<summary>Changes the layout or model space of an object.</summary>
-    ///<param name="objectId">(Guid) Identifier of the object</param>
-    ///<param name="layout">(string) To change, or move, an object from model space to page
+    /// <summary>Changes the layout or model space of an object.</summary>
+    /// <param name="objectId">(Guid) Identifier of the object</param>
+    /// <param name="layout">(string) To change, or move, an object from model space to page
     ///    layout space, or from one page layout to another, then specify the
     ///    title of an existing page layout view. To move an object
     ///    from page layout space to model space, just specify an empty string.</param>
-    ///<returns>(unit) void, nothing.</returns>
+    /// <returns>(unit) void, nothing.</returns>
     static member ObjectLayout(objectId:Guid, layout:string) : unit = //SET
         // this fixes bug in rhinoscriptsyntax, see https://github.com/mcneel/rhinoscriptsyntax/pull/203
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
@@ -580,13 +579,13 @@ module AutoOpenObject =
             rhobj.CommitChanges() |> ignore<bool>
             State.Doc.Views.Redraw()
 
-    ///<summary>Changes the layout or model space of an objects.</summary>
-    ///<param name="objectIds">(Guid seq) Identifier of the objects</param>
-    ///<param name="layout">(string) To change, or move, an objects from model space to page
+    /// <summary>Changes the layout or model space of an objects.</summary>
+    /// <param name="objectIds">(Guid seq) Identifier of the objects</param>
+    /// <param name="layout">(string) To change, or move, an objects from model space to page
     ///    layout space, or from one page layout to another, then specify the
     ///    title of an existing page layout view. To move an objects
     ///    from page layout space to model space, just specify an empty string.</param>
-    ///<returns>(unit) void, nothing.</returns>
+    /// <returns>(unit) void, nothing.</returns>
     static member ObjectLayout(objectIds:Guid seq, layout:string) : unit = //MULTISET
         let lay =
             if layout<>"" then
@@ -619,18 +618,18 @@ module AutoOpenObject =
         State.Doc.Views.Redraw()
 
 
-    ///<summary>Returns the linetype of an object.</summary>
-    ///<param name="objectId">(Guid) Identifier of object</param>
-    ///<returns>(string) The object's current linetype.</returns>
+    /// <summary>Returns the linetype of an object.</summary>
+    /// <param name="objectId">(Guid) Identifier of object</param>
+    /// <returns>(string) The object's current linetype.</returns>
     static member ObjectLinetype(objectId:Guid) : string = //GET
         let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let oldIndex = State.Doc.Linetypes.LinetypeIndexForObject(rhinoObject)
         State.Doc.Linetypes.[oldIndex].Name
 
-    ///<summary>Modifies the linetype of an object.</summary>
-    ///<param name="objectId">(Guid) Identifier of object</param>
-    ///<param name="linetype">(string) Name of an existing linetype</param>
-    ///<returns>(unit) void, nothing.</returns>
+    /// <summary>Modifies the linetype of an object.</summary>
+    /// <param name="objectId">(Guid) Identifier of object</param>
+    /// <param name="linetype">(string) Name of an existing linetype</param>
+    /// <returns>(unit) void, nothing.</returns>
     static member ObjectLinetype(objectId:Guid, linetype:string) : unit = //SET
         let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let newIndex = State.Doc.Linetypes.Find(linetype)
@@ -640,10 +639,10 @@ module AutoOpenObject =
         rhinoObject.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
-    ///<summary>Modifies the linetype of multiple object.</summary>
-    ///<param name="objectIds">(Guid seq) Identifiers of objects</param>
-    ///<param name="linetype">(string) Name of an existing linetype</param>
-    ///<returns>(unit) void, nothing.</returns>
+    /// <summary>Modifies the linetype of multiple object.</summary>
+    /// <param name="objectIds">(Guid seq) Identifiers of objects</param>
+    /// <param name="linetype">(string) Name of an existing linetype</param>
+    /// <returns>(unit) void, nothing.</returns>
     static member ObjectLinetype(objectIds:Guid seq, linetype:string) : unit = //MULTISET
         let newIndex = State.Doc.Linetypes.Find(linetype)
         if newIndex <0 then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectLinetype: Setting it failed for '%A' and '%A'"  linetype objectIds
@@ -655,9 +654,9 @@ module AutoOpenObject =
         State.Doc.Views.Redraw()
 
 
-    ///<summary>Returns the linetype source of an object.</summary>
-    ///<param name="objectId">(Guid) Identifier of object</param>
-    ///<returns>(int) The object's current linetype source
+    /// <summary>Returns the linetype source of an object.</summary>
+    /// <param name="objectId">(Guid) Identifier of object</param>
+    /// <returns>(int) The object's current linetype source
     ///      0 = By Layer
     ///      1 = By Object
     ///      3 = By Parent.</returns>
@@ -666,14 +665,14 @@ module AutoOpenObject =
         let oldSource = rhinoObject.Attributes.LinetypeSource
         int(oldSource)
 
-    ///<summary>Modifies the linetype source of an object.</summary>
-    ///<param name="objectId">(Guid) Identifier of object</param>
-    ///<param name="source">(int) New linetype source.
+    /// <summary>Modifies the linetype source of an object.</summary>
+    /// <param name="objectId">(Guid) Identifier of object</param>
+    /// <param name="source">(int) New linetype source.
     ///    If objectId is a list of identifiers, this parameter is required
     ///      0 = By Layer
     ///      1 = By Object
     ///      3 = By Parent</param>
-    ///<returns>(unit) void, nothing.</returns>
+    /// <returns>(unit) void, nothing.</returns>
     static member ObjectLinetypeSource(objectId:Guid, source:int) : unit = //SET
         let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if source <0 || source >3 || source = 2 then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectLinetypeSource: Setting it failed for '%A' and '%A'"  source objectId
@@ -682,14 +681,14 @@ module AutoOpenObject =
         rhinoObject.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
-    ///<summary>Modifies the linetype source of multiple objects.</summary>
-    ///<param name="objectIds">(Guid seq) Identifiers of objects</param>
-    ///<param name="source">(int) New linetype source.
+    /// <summary>Modifies the linetype source of multiple objects.</summary>
+    /// <param name="objectIds">(Guid seq) Identifiers of objects</param>
+    /// <param name="source">(int) New linetype source.
     ///    If objectId is a list of identifiers, this parameter is required
     ///      0 = By Layer
     ///      1 = By Object
     ///      3 = By Parent</param>
-    ///<returns>(unit) void, nothing.</returns>
+    /// <returns>(unit) void, nothing.</returns>
     static member ObjectLinetypeSource(objectIds:Guid seq, source:int) : unit = //MULTISET
         if source <0 || source >3 || source = 2 then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectLinetypeSource: Setting it failed for '%A' and '%A'"  source objectIds
         let source : DocObjects.ObjectLinetypeSource = LanguagePrimitives.EnumOfValue source
@@ -700,12 +699,12 @@ module AutoOpenObject =
         State.Doc.Views.Redraw()
 
 
-    ///<summary>Returns the material index of an object. Rendering materials are stored in
+    /// <summary>Returns the material index of an object. Rendering materials are stored in
     /// Rhino's rendering material table. The table is conceptually an array. Render
     /// materials associated with objects and layers are specified by zero based
     /// indices into this array.</summary>
-    ///<param name="objectId">(Guid) Identifier of an object</param>
-    ///<returns>(int) If the return value of ObjectMaterialSource is "material by object", then
+    /// <param name="objectId">(Guid) Identifier of an object</param>
+    /// <returns>(int) If the return value of ObjectMaterialSource is "material by object", then
     ///    the return value of this function is the index of the object's rendering
     ///    material. A material index of -1 indicates no material has been assigned,
     ///    and that Rhino's internal default material has been assigned to the object.</returns>
@@ -713,12 +712,12 @@ module AutoOpenObject =
         let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhinoObject.Attributes.MaterialIndex
 
-    ///<summary>Changes the material index of an object. Rendering materials are stored in
+    /// <summary>Changes the material index of an object. Rendering materials are stored in
     /// Rhino's rendering material table. The table is conceptually an array. Render
     /// materials associated with objects and layers are specified by zero based
     /// indices into this array.</summary>
-    ///<param name="objectId">(Guid) Identifier of an object</param>
-    ///<param name="materialIndex">(int) The new material index</param>
+    /// <param name="objectId">(Guid) Identifier of an object</param>
+    /// <param name="materialIndex">(int) The new material index</param>
     static member ObjectMaterialIndex(objectId:Guid, materialIndex:int) : unit = //SET
         let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if 0 <= materialIndex && materialIndex < State.Doc.Materials.Count then
@@ -728,12 +727,12 @@ module AutoOpenObject =
         if not <| State.Doc.Objects.ModifyAttributes(rhinoObject, attrs, quiet=true) then
             RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectMaterialIndex: Setting it failed for '%A' and '%A'"  materialIndex objectId
 
-    ///<summary>Changes the material index multiple objects. Rendering materials are stored in
+    /// <summary>Changes the material index multiple objects. Rendering materials are stored in
     /// Rhino's rendering material table. The table is conceptually an array. Render
     /// materials associated with objects and layers are specified by zero based
     /// indices into this array.</summary>
-    ///<param name="objectIds">(Guid seq) Identifiers of an objects</param>
-    ///<param name="materialIndex">(int) The new material index</param>
+    /// <param name="objectIds">(Guid seq) Identifiers of an objects</param>
+    /// <param name="materialIndex">(int) The new material index</param>
     static member ObjectMaterialIndex(objectIds:Guid seq, materialIndex:int) : unit = //MULTISET
         if 0 <= materialIndex && materialIndex < State.Doc.Materials.Count then
             RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectMaterialIndex: Setting it failed for '%A' and '%A'"  materialIndex objectIds
@@ -744,9 +743,9 @@ module AutoOpenObject =
             if not <| State.Doc.Objects.ModifyAttributes(rhinoObject, attrs, quiet=true) then
                 RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectMaterialIndex: Setting it failed for '%A' and '%A'"  materialIndex objectId
 
-    ///<summary>Returns the rendering material source of an object.</summary>
-    ///<param name="objectId">(Guid) One or more object identifiers</param>
-    ///<returns>(int) The current rendering material source
+    /// <summary>Returns the rendering material source of an object.</summary>
+    /// <param name="objectId">(Guid) One or more object identifiers</param>
+    /// <returns>(int) The current rendering material source
     ///    0 = Material from layer
     ///    1 = Material from object
     ///    3 = Material from parent.</returns>
@@ -755,13 +754,13 @@ module AutoOpenObject =
         int(rhinoObject.Attributes.MaterialSource)
 
 
-    ///<summary>Modifies the rendering material source of an object.</summary>
-    ///<param name="objectId">(Guid) One or more object identifiers</param>
-    ///<param name="source">(int) The new rendering material source.
+    /// <summary>Modifies the rendering material source of an object.</summary>
+    /// <param name="objectId">(Guid) One or more object identifiers</param>
+    /// <param name="source">(int) The new rendering material source.
     ///    0 = Material from layer
     ///    1 = Material from object
     ///    3 = Material from parent</param>
-    ///<returns>(unit) void, nothing.</returns>
+    /// <returns>(unit) void, nothing.</returns>
     static member ObjectMaterialSource(objectId:Guid, source:int) : unit = //SET
         let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if source <0 || source >3 || source = 2 then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectMaterialSource: Setting it failed for '%A' and '%A'"  source objectId
@@ -770,13 +769,13 @@ module AutoOpenObject =
         rhinoObject.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
-    ///<summary>Modifies the rendering material source of multiple objects.</summary>
-    ///<param name="objectIds">(Guid seq) One or more objects identifiers</param>
-    ///<param name="source">(int) The new rendering material source.
+    /// <summary>Modifies the rendering material source of multiple objects.</summary>
+    /// <param name="objectIds">(Guid seq) One or more objects identifiers</param>
+    /// <param name="source">(int) The new rendering material source.
     ///    0 = Material from layer
     ///    1 = Material from objects
     ///    3 = Material from parent</param>
-    ///<returns>(unit) void, nothing.</returns>
+    /// <returns>(unit) void, nothing.</returns>
     static member ObjectMaterialSource(objectIds:Guid seq, source:int) : unit = //MULTISET
         if source <0 || source >3 || source = 2 then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectMaterialSource: Setting it failed for '%A' and '%A'"  source objectIds
         let source :DocObjects.ObjectMaterialSource  = LanguagePrimitives.EnumOfValue  source
@@ -787,13 +786,13 @@ module AutoOpenObject =
         State.Doc.Views.Redraw()
 
 
-    ///<summary>Checks if a string is a good string for use in Rhino Object Names or User Dictionary key as and values.
+    /// <summary>Checks if a string is a good string for use in Rhino Object Names or User Dictionary key as and values.
     /// A good string may not include line returns, tabs, and leading or trailing whitespace.
     /// Confusing characters that look like ASCII but are some other Unicode are also not allowed. </summary>
-    ///<param name="name">(string) The string to check.</param>
-    ///<param name="allowEmpty">(bool) Optional, default value: <c>false</c> , set to true to make empty strings pass. </param>
-    ///<param name="limitToAscii">(bool) Optional, default value: <c>false</c> , set to true to only allow chars between Unicode points 32 till 126 (ASCII) </param>
-    ///<returns>(bool) true if the string is a valid name.</returns>
+    /// <param name="name">(string) The string to check.</param>
+    /// <param name="allowEmpty">(bool) Optional, default value: <c>false</c> , set to true to make empty strings pass. </param>
+    /// <param name="limitToAscii">(bool) Optional, default value: <c>false</c> , set to true to only allow chars between Unicode points 32 till 126 (ASCII) </param>
+    /// <returns>(bool) true if the string is a valid name.</returns>
     static member IsGoodStringId    ( name:string
                                     , [<OPT;DEF(false)>]allowEmpty:bool
                                     , [<OPT;DEF(false)>]limitToAscii:bool
@@ -805,19 +804,19 @@ module AutoOpenObject =
 
 
 
-    ///<summary>Returns the name of an object or "" if none given.</summary>
-    ///<param name="objectId">(Guid)Id of object</param>
-    ///<returns>(string) The current object name, or empty string if no name given .</returns>
+    /// <summary>Returns the name of an object or "" if none given.</summary>
+    /// <param name="objectId">(Guid)Id of object</param>
+    /// <returns>(string) The current object name, or empty string if no name given .</returns>
     static member ObjectName(objectId:Guid) : string = //GET
         let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let n = rhinoObject.Attributes.Name
         if isNull n then ""
         else n
 
-    ///<summary>Modifies the name of an object.</summary>
-    ///<param name="objectId">(Guid)Id of object</param>
-    ///<param name="name">(string) The new object name. Or empty string</param>
-    ///<returns>(unit) void, nothing.</returns>
+    /// <summary>Modifies the name of an object.</summary>
+    /// <param name="objectId">(Guid)Id of object</param>
+    /// <param name="name">(string) The new object name. Or empty string</param>
+    /// <returns>(unit) void, nothing.</returns>
     static member ObjectName(objectId:Guid, name:string) : unit = //SET
         let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if RhinoScriptSyntax.IsGoodStringId( name, allowEmpty=true) then
@@ -826,10 +825,10 @@ module AutoOpenObject =
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectName: Setting it string '%s' cannot be used as Name. see RhinoScriptSyntax.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." name
 
-    ///<summary>Modifies the name of multiple objects.</summary>
-    ///<param name="objectIds">(Guid seq)Id of objects</param>
-    ///<param name="name">(string) The new objects name. Or empty string</param>
-    ///<returns>(unit) void, nothing.</returns>
+    /// <summary>Modifies the name of multiple objects.</summary>
+    /// <param name="objectIds">(Guid seq)Id of objects</param>
+    /// <param name="name">(string) The new objects name. Or empty string</param>
+    /// <returns>(unit) void, nothing.</returns>
     static member ObjectName(objectIds:Guid seq, name:string) : unit = //MULTISET
         if RhinoScriptSyntax.IsGoodStringId( name, allowEmpty=true) then
             for objectId in objectIds do
@@ -841,19 +840,19 @@ module AutoOpenObject =
 
 
 
-    ///<summary>Returns the print color of an object.</summary>
-    ///<param name="objectId">(Guid) Identifier of object</param>
-    ///<returns>(Drawing.Color) The object's current print color.</returns>
+    /// <summary>Returns the print color of an object.</summary>
+    /// <param name="objectId">(Guid) Identifier of object</param>
+    /// <returns>(Drawing.Color) The object's current print color.</returns>
     static member ObjectPrintColor(objectId:Guid) : Drawing.Color = //GET
         let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhinoObject.Attributes.PlotColor
 
 
 
-    ///<summary>Modifies the print color of an object.</summary>
-    ///<param name="objectId">(Guid) Identifier of object</param>
-    ///<param name="color">(Drawing.Color) New print color.</param>
-    ///<returns>(unit) void, nothing.</returns>
+    /// <summary>Modifies the print color of an object.</summary>
+    /// <param name="objectId">(Guid) Identifier of object</param>
+    /// <param name="color">(Drawing.Color) New print color.</param>
+    /// <returns>(unit) void, nothing.</returns>
     static member ObjectPrintColor(objectId:Guid, color:Drawing.Color) : unit = //SET
         let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhinoObject.Attributes.PlotColorSource <- DocObjects.ObjectPlotColorSource.PlotColorFromObject
@@ -861,10 +860,10 @@ module AutoOpenObject =
         rhinoObject.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
-    ///<summary>Modifies the print color of multiple objects.</summary>
-    ///<param name="objectIds">(Guid seq) Identifier of objects</param>
-    ///<param name="color">(Drawing.Color) New print color.</param>
-    ///<returns>(unit) void, nothing.</returns>
+    /// <summary>Modifies the print color of multiple objects.</summary>
+    /// <param name="objectIds">(Guid seq) Identifier of objects</param>
+    /// <param name="color">(Drawing.Color) New print color.</param>
+    /// <returns>(unit) void, nothing.</returns>
     static member ObjectPrintColor(objectIds:Guid seq, color:Drawing.Color) : unit = //MULTISET
         for objectId in objectIds do
             let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
@@ -873,9 +872,9 @@ module AutoOpenObject =
             rhinoObject.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
-    ///<summary>Returns the print color source of an object.</summary>
-    ///<param name="objectId">(Guid) Identifier of object</param>
-    ///<returns>(int) The object's current print color source
+    /// <summary>Returns the print color source of an object.</summary>
+    /// <param name="objectId">(Guid) Identifier of object</param>
+    /// <returns>(int) The object's current print color source
     ///    0 = print color by layer
     ///    1 = print color by object
     ///    3 = print color by parent.</returns>
@@ -884,13 +883,13 @@ module AutoOpenObject =
             int(rhinoObject.Attributes.PlotColorSource)
 
 
-    ///<summary>Modifies the print color source of an object.</summary>
-    ///<param name="objectId">(Guid) Identifier of object</param>
-    ///<param name="source">(int) New print color source
+    /// <summary>Modifies the print color source of an object.</summary>
+    /// <param name="objectId">(Guid) Identifier of object</param>
+    /// <param name="source">(int) New print color source
     ///    0 = print color by layer
     ///    1 = print color by object
     ///    3 = print color by parent</param>
-    ///<returns>(unit) void, nothing.</returns>
+    /// <returns>(unit) void, nothing.</returns>
     static member ObjectPrintColorSource(objectId:Guid, source:int) : unit = //SET
         if source <0 || source >3 || source = 2 then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectPrintColorSource: Setting it failed for '%A' and '%A'"  source objectId
         let source : DocObjects.ObjectPlotColorSource = LanguagePrimitives.EnumOfValue source
@@ -899,13 +898,13 @@ module AutoOpenObject =
         rhobj.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
-    ///<summary>Modifies the print color source of multiple objects.</summary>
-    ///<param name="objectIds">(Guid seq) Identifier of objects</param>
-    ///<param name="source">(int) New print color source
+    /// <summary>Modifies the print color source of multiple objects.</summary>
+    /// <param name="objectIds">(Guid seq) Identifier of objects</param>
+    /// <param name="source">(int) New print color source
     ///    0 = print color by layer
     ///    1 = print color by objects
     ///    3 = print color by parent</param>
-    ///<returns>(unit) void, nothing.</returns>
+    /// <returns>(unit) void, nothing.</returns>
     static member ObjectPrintColorSource(objectIds:Guid seq, source:int) : unit = //MULTISET
         if source <0 || source >3 || source = 2 then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectPrintColorSource: Setting it failed for '%A' and '%A'"  source objectIds
         let source : DocObjects.ObjectPlotColorSource = LanguagePrimitives.EnumOfValue source
@@ -915,20 +914,20 @@ module AutoOpenObject =
             rhobj.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
-    ///<summary>Returns the print width of an object.</summary>
-    ///<param name="objectId">(Guid) Identifier of object</param>
-    ///<returns>(float) The object's current print width.</returns>
+    /// <summary>Returns the print width of an object.</summary>
+    /// <param name="objectId">(Guid) Identifier of object</param>
+    /// <returns>(float) The object's current print width.</returns>
     static member ObjectPrintWidth(objectId:Guid) : float = //GET
             let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             rhinoObject.Attributes.PlotWeight
 
 
-    ///<summary>Modifies the print width of an object.</summary>
-    ///<param name="objectId">(Guid) Identifier of object</param>
-    ///<param name="width">(float) New print width value in millimeters, where width = 0.0 means use
+    /// <summary>Modifies the print width of an object.</summary>
+    /// <param name="objectId">(Guid) Identifier of object</param>
+    /// <param name="width">(float) New print width value in millimeters, where width = 0.0 means use
     ///    the default width, and width smaller than 0.0 (e.g. -1.0)means do-not-print (visible for screen display,
     ///    but does not show on print)</param>
-    ///<returns>(unit) void, nothing.</returns>
+    /// <returns>(unit) void, nothing.</returns>
     static member ObjectPrintWidth(objectId:Guid, width:float) : unit = //SET
         let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhinoObject.Attributes.PlotWeightSource <- DocObjects.ObjectPlotWeightSource.PlotWeightFromObject
@@ -936,12 +935,12 @@ module AutoOpenObject =
         rhinoObject.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
-    ///<summary>Modifies the print width of multiple objects.</summary>
-    ///<param name="objectIds">(Guid seq) Identifier of objects</param>
-    ///<param name="width">(float) New print width value in millimeters, where width = 0.0 means use
+    /// <summary>Modifies the print width of multiple objects.</summary>
+    /// <param name="objectIds">(Guid seq) Identifier of objects</param>
+    /// <param name="width">(float) New print width value in millimeters, where width = 0.0 means use
     ///    the default width, and width smaller than 0.0 (e.g. -1.0)means do-not-print (visible for screen display,
     ///    but does not show on print)</param>
-    ///<returns>(unit) void, nothing.</returns>
+    /// <returns>(unit) void, nothing.</returns>
     static member ObjectPrintWidth(objectIds:Guid seq, width:float) : unit = //MULTISET
         for objectId in objectIds do
             let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
@@ -951,9 +950,9 @@ module AutoOpenObject =
         State.Doc.Views.Redraw()
 
 
-    ///<summary>Returns the print width source of an object.</summary>
-    ///<param name="objectId">(Guid) Identifier of object</param>
-    ///<returns>(int) The object's current print width source
+    /// <summary>Returns the print width source of an object.</summary>
+    /// <param name="objectId">(Guid) Identifier of object</param>
+    /// <returns>(int) The object's current print width source
     ///    0 = print width by layer
     ///    1 = print width by object
     ///    3 = print width by parent.</returns>
@@ -962,26 +961,26 @@ module AutoOpenObject =
             int(rhinoObject.Attributes.PlotWeightSource)
 
 
-    ///<summary>Modifies the print width source of an object.</summary>
-    ///<param name="objectId">(Guid) Identifier of object</param>
-    ///<param name="source">(int) New print width source
+    /// <summary>Modifies the print width source of an object.</summary>
+    /// <param name="objectId">(Guid) Identifier of object</param>
+    /// <param name="source">(int) New print width source
     ///    0 = print width by layer
     ///    1 = print width by object
     ///    3 = print width by parent</param>
-    ///<returns>(unit) void, nothing.</returns>
+    /// <returns>(unit) void, nothing.</returns>
     static member ObjectPrintWidthSource(objectId:Guid, source:int) : unit = //SET
         let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhinoObject.Attributes.PlotWeightSource <- LanguagePrimitives.EnumOfValue source
         rhinoObject.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
-    ///<summary>Modifies the print width source of multiple objects.</summary>
-    ///<param name="objectIds">(Guid seq) Identifier of objects</param>
-    ///<param name="source">(int) New print width source
+    /// <summary>Modifies the print width source of multiple objects.</summary>
+    /// <param name="objectIds">(Guid seq) Identifier of objects</param>
+    /// <param name="source">(int) New print width source
     ///    0 = print width by layer
     ///    1 = print width by objects
     ///    3 = print width by parent</param>
-    ///<returns>(unit) void, nothing.</returns>
+    /// <returns>(unit) void, nothing.</returns>
     static member ObjectPrintWidthSource(objectIds:Guid seq, source:int) : unit = //MULTISET
         for objectId in objectIds do
             let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
@@ -990,9 +989,9 @@ module AutoOpenObject =
         State.Doc.Views.Redraw()
 
 
-    ///<summary>Returns the object type.</summary>
-    ///<param name="objectId">(Guid) Identifier of an object</param>
-    ///<returns>(int) The object type .
+    /// <summary>Returns the object type.</summary>
+    /// <param name="objectId">(Guid) Identifier of an object</param>
+    /// <returns>(int) The object type .
     ///    The valid object types are as follows:
     ///    Value   Description
     ///      0           Unknown object
@@ -1025,22 +1024,22 @@ module AutoOpenObject =
         |_ -> int(geom.ObjectType)
 
 
-    ///<summary>Orients a single object based on input points.
+    /// <summary>Orients a single object based on input points.
     /// If two 3-D points are specified, then this method will
     /// function similar to Rhino's Orient command.
     /// If more than two 3-D points are specified,
     /// then the function will orient similar to Rhino's Orient3Pt command.
     /// </summary>
-    ///<param name="objectId">(Guid) Identifier of object</param>
-    ///<param name="referencePts">(IList of Point3d) list of 3D reference points.</param>
-    ///<param name="targetPts">(IList of Point3d) list of 3D target points.</param>
-    ///<param name="flags">(int) The orient flags values can be added together to specify multiple options.
+    /// <param name="objectId">(Guid) Identifier of object</param>
+    /// <param name="referencePts">(IList of Point3d) list of 3D reference points.</param>
+    /// <param name="targetPts">(IList of Point3d) list of 3D target points.</param>
+    /// <param name="flags">(int) The orient flags values can be added together to specify multiple options.
     ///    Value   Description
     ///    1       Copy object.  The default is not to copy the object.
     ///    2       Scale object.  The default is not to scale the object.  Note, the scale option only applies if both reference and target contain only two 3-D points.
     ///    3       Scale and copy.
-    ///</param>
-    ///<returns>(Guid) The identifier of the oriented object. The original or the copied object. Depending on given flags</returns>
+    /// </param>
+    /// <returns>(Guid) The identifier of the oriented object. The original or the copied object. Depending on given flags</returns>
     static member OrientObject( objectId:Guid,  referencePts:IList<Point3d>,  targetPts:IList<Point3d>,   [<OPT;DEF(0)>]flags:int) : Guid =
         if referencePts.Count <> targetPts.Count then
             RhinoScriptingException.Raise "RhinoScriptSyntax.OrientObject referencePts.Count <> targetPts.Count: %d <> %d " referencePts.Count targetPts.Count
@@ -1089,14 +1088,14 @@ module AutoOpenObject =
         rc
 
 
-    ///<summary>Rotates a single object.</summary>
-    ///<param name="objectId">(Guid) The identifier of an object to rotate</param>
-    ///<param name="centerPoint">(Point3d) The center of rotation</param>
-    ///<param name="rotationAngle">(float) In degrees</param>
-    ///<param name="axis">(Vector3d) Optional, default value: <c>Vector3d.ZAxis</c>
+    /// <summary>Rotates a single object.</summary>
+    /// <param name="objectId">(Guid) The identifier of an object to rotate</param>
+    /// <param name="centerPoint">(Point3d) The center of rotation</param>
+    /// <param name="rotationAngle">(float) In degrees</param>
+    /// <param name="axis">(Vector3d) Optional, default value: <c>Vector3d.ZAxis</c>
     ///    Axis of rotation, If omitted, the Vector3d.ZAxis is used as the rotation axis</param>
-    ///<param name="copy">(bool) Optional, default value: <c>false</c>. Copy the object</param>
-    ///<returns>(Guid) Identifier of the rotated object.</returns>
+    /// <param name="copy">(bool) Optional, default value: <c>false</c>. Copy the object</param>
+    /// <returns>(Guid) Identifier of the rotated object.</returns>
     static member RotateObject( objectId:Guid,
                                 centerPoint:Point3d,
                                 rotationAngle:float,
@@ -1110,14 +1109,14 @@ module AutoOpenObject =
         res
 
 
-    ///<summary>Rotates multiple objects.</summary>
-    ///<param name="objectIds">(Guid seq) Identifiers of objects to rotate</param>
-    ///<param name="centerPoint">(Point3d) The center of rotation</param>
-    ///<param name="rotationAngle">(float) In degrees</param>
-    ///<param name="axis">(Vector3d) Optional, default value: <c>Vector3d.ZAxis</c>
+    /// <summary>Rotates multiple objects.</summary>
+    /// <param name="objectIds">(Guid seq) Identifiers of objects to rotate</param>
+    /// <param name="centerPoint">(Point3d) The center of rotation</param>
+    /// <param name="rotationAngle">(float) In degrees</param>
+    /// <param name="axis">(Vector3d) Optional, default value: <c>Vector3d.ZAxis</c>
     ///    Axis of rotation, If omitted, the Vector3d.ZAxis is used as the rotation axis</param>
-    ///<param name="copy">(bool) Optional, default value: <c>false</c>. Copy the object</param>
-    ///<returns>(Guid ResizeArray) identifiers of the rotated objects.</returns>
+    /// <param name="copy">(bool) Optional, default value: <c>false</c>. Copy the object</param>
+    /// <returns>(Guid ResizeArray) identifiers of the rotated objects.</returns>
     static member RotateObjects( objectIds:Guid seq,
                                  centerPoint:Point3d,
                                  rotationAngle:float,
@@ -1134,13 +1133,13 @@ module AutoOpenObject =
         rc
 
 
-    ///<summary>Scales a single object. Can be used to perform a uniform or non-uniform
+    /// <summary>Scales a single object. Can be used to perform a uniform or non-uniform
     ///    scale transformation. Scaling is based on the WorldXY Plane.</summary>
-    ///<param name="objectId">(Guid) The identifier of an object</param>
-    ///<param name="origin">(Point3d) The origin of the scale transformation</param>
-    ///<param name="scale">(float*float*float) Three numbers that identify the X, Y, and Z axis scale factors to apply</param>
-    ///<param name="copy">(bool) Optional, default value: <c>false</c>.Copy the object</param>
-    ///<returns>(Guid) Identifier of the scaled object.</returns>
+    /// <param name="objectId">(Guid) The identifier of an object</param>
+    /// <param name="origin">(Point3d) The origin of the scale transformation</param>
+    /// <param name="scale">(float*float*float) Three numbers that identify the X, Y, and Z axis scale factors to apply</param>
+    /// <param name="copy">(bool) Optional, default value: <c>false</c>.Copy the object</param>
+    /// <returns>(Guid) Identifier of the scaled object.</returns>
     static member ScaleObject( objectId:Guid,
                                origin:Point3d,
                                scale:float*float*float,
@@ -1153,12 +1152,12 @@ module AutoOpenObject =
         if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.ScaleObject failed.  objectId:'%s' origin:'%A' scale:'%A' copy:'%A'" (Pretty.str objectId) origin scale  copy
         res
 
-    ///<summary>Scales a single object. Uniform scale transformation. Scaling is based on the WorldXY Plane.</summary>
-    ///<param name="objectId">(Guid) The identifier of an object</param>
-    ///<param name="origin">(Point3d) The origin of the scale transformation</param>
-    ///<param name="scale">(float) One numbers that identify the X, Y, and Z axis scale factors to apply</param>
-    ///<param name="copy">(bool) Optional, default value: <c>false</c>. Copy the object</param>
-    ///<returns>(Guid) Identifier of the scaled object.</returns>
+    /// <summary>Scales a single object. Uniform scale transformation. Scaling is based on the WorldXY Plane.</summary>
+    /// <param name="objectId">(Guid) The identifier of an object</param>
+    /// <param name="origin">(Point3d) The origin of the scale transformation</param>
+    /// <param name="scale">(float) One numbers that identify the X, Y, and Z axis scale factors to apply</param>
+    /// <param name="copy">(bool) Optional, default value: <c>false</c>. Copy the object</param>
+    /// <returns>(Guid) Identifier of the scaled object.</returns>
     static member ScaleObject( objectId:Guid,
                                origin:Point3d,
                                scale:float,
@@ -1170,13 +1169,13 @@ module AutoOpenObject =
         if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.ScaleObject failed.  objectId:'%s' origin:'%A' scale:'%A' copy:'%A'" (Pretty.str objectId) origin scale  copy
         res
 
-    ///<summary>Scales one or more objects. Can be used to perform a uniform or non-
+    /// <summary>Scales one or more objects. Can be used to perform a uniform or non-
     ///    uniform scale transformation. Scaling is based on the WorldXY Plane.</summary>
-    ///<param name="objectIds">(Guid seq) Identifiers of objects to scale</param>
-    ///<param name="origin">(Point3d) The origin of the scale transformation</param>
-    ///<param name="scale">(float*float*float) Three numbers that identify the X, Y, and Z axis scale factors to apply</param>
-    ///<param name="copy">(bool) Optional, default value: <c>false</c>. Copy the objects</param>
-    ///<returns>(Guid ResizeArray) identifiers of the scaled objects.</returns>
+    /// <param name="objectIds">(Guid seq) Identifiers of objects to scale</param>
+    /// <param name="origin">(Point3d) The origin of the scale transformation</param>
+    /// <param name="scale">(float*float*float) Three numbers that identify the X, Y, and Z axis scale factors to apply</param>
+    /// <param name="copy">(bool) Optional, default value: <c>false</c>. Copy the objects</param>
+    /// <returns>(Guid ResizeArray) identifiers of the scaled objects.</returns>
     static member ScaleObjects( objectIds:Guid seq,
                                 origin:Point3d,
                                 scale:float*float*float,
@@ -1192,13 +1191,13 @@ module AutoOpenObject =
             rc.Add res
         rc
 
-    ///<summary>Scales one or more objects. Uniform scale transformation. Scaling is based on the WorldXY Plane.</summary>
-    ///<param name="objectIds">(Guid seq) Identifiers of objects to scale</param>
-    ///<param name="origin">(Point3d) The origin of the scale transformation</param>
-    ///<param name="scale">(float) One numbers that identify the X, Y, and Z axis scale factors to apply</param>
-    ///<param name="copy">(bool) Optional, default value: <c>false</c>
+    /// <summary>Scales one or more objects. Uniform scale transformation. Scaling is based on the WorldXY Plane.</summary>
+    /// <param name="objectIds">(Guid seq) Identifiers of objects to scale</param>
+    /// <param name="origin">(Point3d) The origin of the scale transformation</param>
+    /// <param name="scale">(float) One numbers that identify the X, Y, and Z axis scale factors to apply</param>
+    /// <param name="copy">(bool) Optional, default value: <c>false</c>
     ///    Copy the objects</param>
-    ///<returns>(Guid ResizeArray) identifiers of the scaled objects.</returns>
+    /// <returns>(Guid ResizeArray) identifiers of the scaled objects.</returns>
     static member ScaleObjects( objectIds:Guid seq,
                                 origin:Point3d,
                                 scale:float,
@@ -1215,13 +1214,13 @@ module AutoOpenObject =
 
 
 
-    ///<summary>Selects a single object.
+    /// <summary>Selects a single object.
     /// Throws an exception if object can't be selected for some reason
     ///  e.g. when locked , hidden, or on invisible layer .</summary>
-    ///<param name="objectId">(Guid) The identifier of the object to select</param>
-    ///<param name="forceVisible">(bool) Optional, default value: <c>false</c> whether to make objects that a hidden or layers that are off visible and unlocked </param>
-    ///<param name="ignoreErrors">(bool) Optional, default value: <c>false</c> whether to ignore errors when object can be set visible </param>
-    ///<returns>(unit) void, nothing.</returns>
+    /// <param name="objectId">(Guid) The identifier of the object to select</param>
+    /// <param name="forceVisible">(bool) Optional, default value: <c>false</c> whether to make objects that a hidden or layers that are off visible and unlocked </param>
+    /// <param name="ignoreErrors">(bool) Optional, default value: <c>false</c> whether to ignore errors when object can be set visible </param>
+    /// <returns>(unit) void, nothing.</returns>
     static member SelectObject( objectId:Guid,
                                 [<OPT;DEF(false)>]forceVisible:bool,
                                 [<OPT;DEF(false)>]ignoreErrors:bool) : unit =
@@ -1251,13 +1250,13 @@ module AutoOpenObject =
             State.Doc.Views.Redraw()
             )
 
-    ///<summary>Selects one or more objects
+    /// <summary>Selects one or more objects
     /// Throws an exception if object can't be selected for some reason
     ///  e.g. when locked , hidden, or on invisible layer .</summary>
-    ///<param name="objectIds">(Guid seq) Identifiers of the objects to select</param>
-    ///<param name="forceVisible">(bool) Optional, default value: <c>false</c> whether to make objects that a hidden or layers that are off visible and unlocked </param>
-    ///<param name="ignoreErrors">(bool) Optional, default value: <c>false</c> whether to ignore errors when object can be set visible </param>
-    ///<returns>(unit) void, nothing.</returns>
+    /// <param name="objectIds">(Guid seq) Identifiers of the objects to select</param>
+    /// <param name="forceVisible">(bool) Optional, default value: <c>false</c> whether to make objects that a hidden or layers that are off visible and unlocked </param>
+    /// <param name="ignoreErrors">(bool) Optional, default value: <c>false</c> whether to ignore errors when object can be set visible </param>
+    /// <returns>(unit) void, nothing.</returns>
     static member SelectObjects( objectIds:Guid seq,
                                 [<OPT;DEF(false)>]forceVisible:bool,
                                 [<OPT;DEF(false)>]ignoreErrors:bool) : unit =  //PLURAL
@@ -1289,14 +1288,14 @@ module AutoOpenObject =
             )
 
 
-    ///<summary>Perform a shear transformation on a single object.</summary>
-    ///<param name="objectId">(Guid) The identifier of an object</param>
-    ///<param name="origin">(Point3d) Origin point of the shear transformation</param>
-    ///<param name="referencePoint">(Point3d) Reference point of the shear transformation</param>
-    ///<param name="angleDegrees">(float) The shear angle in degrees</param>
-    ///<param name="copy">(bool) Optional, default value: <c>false</c>
+    /// <summary>Perform a shear transformation on a single object.</summary>
+    /// <param name="objectId">(Guid) The identifier of an object</param>
+    /// <param name="origin">(Point3d) Origin point of the shear transformation</param>
+    /// <param name="referencePoint">(Point3d) Reference point of the shear transformation</param>
+    /// <param name="angleDegrees">(float) The shear angle in degrees</param>
+    /// <param name="copy">(bool) Optional, default value: <c>false</c>
     ///    Copy the objects</param>
-    ///<returns>(Guid) Identifier of the sheared object.</returns>
+    /// <returns>(Guid) Identifier of the sheared object.</returns>
     static member ShearObject( objectId:Guid,
                                origin:Point3d,
                                referencePoint:Point3d,
@@ -1324,14 +1323,14 @@ module AutoOpenObject =
        res
 
 
-    ///<summary>Shears one or more objects.</summary>
-    ///<param name="objectIds">(Guid seq) The identifiers objects to shear</param>
-    ///<param name="origin">(Point3d) Origin point of the shear transformation</param>
-    ///<param name="referencePoint">(Point3d) Reference point of the shear transformation</param>
-    ///<param name="angleDegrees">(float) The shear angle in degrees</param>
-    ///<param name="copy">(bool) Optional, default value: <c>false</c>
+    /// <summary>Shears one or more objects.</summary>
+    /// <param name="objectIds">(Guid seq) The identifiers objects to shear</param>
+    /// <param name="origin">(Point3d) Origin point of the shear transformation</param>
+    /// <param name="referencePoint">(Point3d) Reference point of the shear transformation</param>
+    /// <param name="angleDegrees">(float) The shear angle in degrees</param>
+    /// <param name="copy">(bool) Optional, default value: <c>false</c>
     ///    Copy the objects</param>
-    ///<returns>(Guid ResizeArray) identifiers of the sheared objects.</returns>
+    /// <returns>(Guid ResizeArray) identifiers of the sheared objects.</returns>
     static member ShearObjects( objectIds:Guid seq,
                                 origin:Point3d,
                                 referencePoint:Point3d,
@@ -1364,55 +1363,55 @@ module AutoOpenObject =
         r
 
 
-    ///<summary>Shows a previously hidden object. Hidden objects are not visible, cannot
+    /// <summary>Shows a previously hidden object. Hidden objects are not visible, cannot
     ///    be snapped to and cannot be selected.</summary>
-    ///<param name="objectId">(Guid) Representing id of object to show</param>
-    ///<returns>(unit) void, nothing.</returns>
+    /// <param name="objectId">(Guid) Representing id of object to show</param>
+    /// <returns>(unit) void, nothing.</returns>
     static member ShowObject(objectId:Guid) : unit =
         if not <| State.Doc.Objects.Show(objectId, ignoreLayerMode=false) then RhinoScriptingException.Raise "RhinoScriptSyntax.ShowObject failed on %s" (Pretty.str objectId)
         State.Doc.Views.Redraw()
 
 
-    ///<summary>Shows one or more objects. Hidden objects are not visible, cannot be
+    /// <summary>Shows one or more objects. Hidden objects are not visible, cannot be
     ///    snapped to and cannot be selected.</summary>
-    ///<param name="objectIds">(Guid seq) Ids of objects to show.</param>
-    ///<returns>(unit) void, nothing.</returns>
+    /// <param name="objectIds">(Guid seq) Ids of objects to show.</param>
+    /// <returns>(unit) void, nothing.</returns>
     static member ShowObjects(objectIds:Guid seq) : unit = //PLURAL
         for objectId in objectIds do
             if not <| State.Doc.Objects.Show(objectId, ignoreLayerMode=false) then RhinoScriptingException.Raise "RhinoScriptSyntax.ShowObjects failed on %s" (Pretty.str objectId)
         State.Doc.Views.Redraw()
 
 
-    ///<summary>Unlocks an object. Locked objects are visible, and can be snapped to,
+    /// <summary>Unlocks an object. Locked objects are visible, and can be snapped to,
     ///    but they cannot be selected.</summary>
-    ///<param name="objectId">(Guid) The identifier of an object</param>
-    ///<returns>(unit) void, nothing.</returns>
+    /// <param name="objectId">(Guid) The identifier of an object</param>
+    /// <returns>(unit) void, nothing.</returns>
     static member UnlockObject(objectId:Guid) : unit =
         if not <| State.Doc.Objects.Unlock(objectId, ignoreLayerMode=false) then RhinoScriptingException.Raise "RhinoScriptSyntax.UnlockObject failed on %s" (Pretty.str objectId)
         State.Doc.Views.Redraw()
 
-    ///<summary>Unlocks one or more objects. Locked objects are visible, and can be
+    /// <summary>Unlocks one or more objects. Locked objects are visible, and can be
     ///    snapped to, but they cannot be selected.</summary>
-    ///<param name="objectIds">(Guid seq) The identifiers of objects</param>
-    ///<returns>(unit) void, nothing.</returns>
+    /// <param name="objectIds">(Guid seq) The identifiers of objects</param>
+    /// <returns>(unit) void, nothing.</returns>
     static member UnlockObjects(objectIds:Guid seq) : unit =  //PLURAL
         for objectId in objectIds do
             if not <| State.Doc.Objects.Unlock(objectId, ignoreLayerMode=false) then RhinoScriptingException.Raise "RhinoScriptSyntax.UnlockObjects failed on %s" (Pretty.str objectId)
         State.Doc.Views.Redraw()
 
 
-    ///<summary>Unselects a single selected object.</summary>
-    ///<param name="objectId">(Guid) Id of object to unselect.</param>
-    ///<returns>(unit) void, nothing.</returns>
+    /// <summary>Unselects a single selected object.</summary>
+    /// <param name="objectId">(Guid) Id of object to unselect.</param>
+    /// <returns>(unit) void, nothing.</returns>
     static member UnselectObject(objectId:Guid) : unit =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if 0 <> obj.Select(false) then RhinoScriptingException.Raise "RhinoScriptSyntax.UnselectObject failed on %s" (Pretty.str objectId)
         State.Doc.Views.Redraw()
 
 
-    ///<summary>Unselects multiple selected objects.</summary>
-    ///<param name="objectIds">(Guid seq) Identifiers of the objects to unselect.</param>
-    ///<returns>(unit) void, nothing.</returns>
+    /// <summary>Unselects multiple selected objects.</summary>
+    /// <param name="objectIds">(Guid seq) Identifiers of the objects to unselect.</param>
+    /// <returns>(unit) void, nothing.</returns>
     static member UnselectObjects(objectIds:Guid seq) : unit = //PLURAL
         for objectId in objectIds do
             let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)

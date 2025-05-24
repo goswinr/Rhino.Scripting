@@ -16,7 +16,7 @@ open Rhino.Scripting.RhinoScriptingUtils
 module AutoOpenPrettyExtensions =
 
     type Point3d with
-        ///Like the ToString function but with appropriate precision formatting
+        /// Like the ToString function but with appropriate precision formatting
         member pt.Pretty =
             if pt = Point3d.Unset then
                 "Point3d.Unset"
@@ -24,7 +24,7 @@ module AutoOpenPrettyExtensions =
                 sprintf "Point3d(%s, %s, %s)" (PrettyFormat.float  pt.X) (PrettyFormat.float  pt.Y) (PrettyFormat.float  pt.Z)
 
     type Point3f with
-        ///Like the ToString function but with appropriate precision formatting
+        /// Like the ToString function but with appropriate precision formatting
         member pt.Pretty =
             if pt = Point3f.Unset then
                 "Point3f.Unset"
@@ -32,7 +32,7 @@ module AutoOpenPrettyExtensions =
                 sprintf "Point3f(%s, %s, %s)" (PrettyFormat.single  pt.X) (PrettyFormat.single  pt.Y) (PrettyFormat.single  pt.Z)
 
     type Vector3d with
-        ///Like the ToString function but with appropriate precision formatting
+        /// Like the ToString function but with appropriate precision formatting
         member v.Pretty =
             if v = Vector3d.Unset then
                 "Vector3d.Unset"
@@ -40,7 +40,7 @@ module AutoOpenPrettyExtensions =
                 sprintf "Vector3d(%s, %s, %s)" (PrettyFormat.float  v.X) (PrettyFormat.float  v.Y) (PrettyFormat.float  v.Z)
 
     type Vector3f with
-        ///Like the ToString function but with appropriate precision formatting
+        /// Like the ToString function but with appropriate precision formatting
         member v.Pretty =
             if v = Vector3f.Unset then
                 "Vector3f.Unset"
@@ -48,7 +48,7 @@ module AutoOpenPrettyExtensions =
                 sprintf "Vector3f(%s, %s, %s)" (PrettyFormat.single  v.X) (PrettyFormat.single  v.Y) (PrettyFormat.single  v.Z)
 
     type Line with
-        ///Like the ToString function but with appropriate precision formatting
+        /// Like the ToString function but with appropriate precision formatting
         member ln.Pretty =
             sprintf "Rhino.Geometry.Line from %s, %s, %s to %s, %s, %s" (PrettyFormat.float  ln.From.X) (PrettyFormat.float  ln.From.Y) (PrettyFormat.float  ln.From.Z) (PrettyFormat.float  ln.To.X) (PrettyFormat.float  ln.To.Y) (PrettyFormat.float  ln.To.Z)
 

@@ -1,5 +1,4 @@
-﻿
-namespace Rhino.Scripting
+﻿namespace Rhino.Scripting
 
 open Rhino
 open Rhino.Scripting.RhinoScriptingUtils
@@ -14,30 +13,30 @@ module AutoOpenLinetype =
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
 
-    ///<summary>Verifies the existence of a line-type in the document.</summary>
-    ///<param name="name">(string) The name of an existing line-type</param>
-    ///<returns>(bool) True or False.</returns>
+    /// <summary>Verifies the existence of a linetype in the document.</summary>
+    /// <param name="name">(string) The name of an existing linetype</param>
+    /// <returns>(bool) True or False.</returns>
     static member IsLinetype(name:string) : bool =
         notNull <| State.Doc.Linetypes.FindName(name)
 
 
-    ///<summary>Checks if an existing line-type is from a reference file.</summary>
-    ///<param name="name">(string) The name of an existing line-type</param>
-    ///<returns>(bool) True or False.</returns>
+    /// <summary>Checks if an existing linetype is from a reference file.</summary>
+    /// <param name="name">(string) The name of an existing linetype</param>
+    /// <returns>(bool) True or False.</returns>
     static member IsLinetypeReference(name:string) : bool =
         let lt = State.Doc.Linetypes.FindName(name)
         if isNull lt then RhinoScriptingException.Raise "RhinoScriptSyntax.IsLinetypeReference unable to find '%s' in a line-types" name
         lt.IsReference
 
 
-    ///<summary>Returns number of line-types in the document.</summary>
-    ///<returns>(int) The number of line-types in the document.</returns>
+    /// <summary>Returns the number of linetypes in the document.</summary>
+    /// <returns>(int) The number of linetypes in the document.</returns>
     static member LinetypeCount() : int =
         State.Doc.Linetypes.Count
 
 
-    ///<summary>Returns names of all line-types in the document.</summary>
-    ///<returns>(string ResizeArray) list of line-type names.</returns>
+    /// <summary>Returns names of all linetypes in the document.</summary>
+    /// <returns>(string ResizeArray) List of linetype names.</returns>
     static member LinetypeNames() : string ResizeArray =
         let count = State.Doc.Linetypes.Count
         let rc = ResizeArray()

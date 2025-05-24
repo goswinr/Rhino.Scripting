@@ -1,4 +1,4 @@
-﻿namespace Rhino.Scripting
+namespace Rhino.Scripting
 
 open Rhino
 open System
@@ -17,12 +17,12 @@ module AutoOpenUserInterface =
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
 
-    ///<summary>Display browse-for-folder dialog allowing the user to select a folder.</summary>
-    ///<param name="folder">(string) Optional, A default folder</param>
-    ///<param name="message">(string) Optional, A prompt or message</param>
-    ///<param name="title">(string) Optional, A dialog box title</param>
-    ///<returns>(string) selected folder or None if selection was canceled.
-    /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
+    /// <summary>Display browse-for-folder dialog allowing the user to select a folder.</summary>
+    /// <param name="folder">(string) Optional, a default folder</param>
+    /// <param name="message">(string) Optional, a prompt or message</param>
+    /// <param name="title">(string) Optional, a dialog box title</param>
+    /// <returns>(string) Selected folder or None if selection was cancelled.
+    /// A RhinoUserInteractionException is raised if input is cancelled via Esc key.</returns>
     static member BrowseForFolder(  [<OPT;DEF(null:string)>]folder:string,
                                     [<OPT;DEF(null:string)>]message:string,
                                     [<OPT;DEF(null:string)>]title:string) : string =
@@ -55,12 +55,12 @@ module AutoOpenUserInterface =
 
 
 
-    ///<summary>Displays a list of items in a checkable-style list dialog box.</summary>
-    ///<param name="items">((string*bool) seq) A list of tuples containing a string and a boolean check state</param>
-    ///<param name="message">(string) Optional, A prompt or message</param>
-    ///<param name="title">(string) Optional, A dialog box title</param>
-    ///<returns>((string*bool) ResizeArray) Option of tuples containing the input string in items along with their new boolean check value.
-    /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
+    /// <summary>Displays a list of items in a checkable-style list dialog box.</summary>
+    /// <param name="items">((string*bool) seq) A list of tuples containing a string and a boolean check state</param>
+    /// <param name="message">(string) Optional, a prompt or message</param>
+    /// <param name="title">(string) Optional, a dialog box title</param>
+    /// <returns>((string*bool) ResizeArray) Option of tuples containing the input string in items along with their new boolean check value.
+    /// A RhinoUserInteractionException is raised if input is cancelled via Esc key.</returns>
     static member CheckListBox( items:(string*bool) seq,
                                 [<OPT;DEF(null:string)>]message:string,
                                 [<OPT;DEF(null:string)>]title:string) :ResizeArray<string*bool> =
@@ -77,11 +77,11 @@ module AutoOpenUserInterface =
             RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.CheckListBox()"
 
 
-    ///<summary>Displays a list of items in a combo-style list box dialog.</summary>
-    ///<param name="items">(string seq) A list of string</param>
-    ///<param name="message">(string) Optional, A prompt of message</param>
-    ///<param name="title">(string) Optional, A dialog box title</param>
-    ///<returns>(string) Option of The selected item.
+    /// <summary>Displays a list of items in a combo-style list box dialog.</summary>
+    /// <param name="items">(string seq) A list of string</param>
+    /// <param name="message">(string) Optional, A prompt of message</param>
+    /// <param name="title">(string) Optional, A dialog box title</param>
+    /// <returns>(string) Option of The selected item.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member ComboListBox(items:string seq, [<OPT;DEF(null:string)>]message:string, [<OPT;DEF(null:string)>]title:string) : string=
         let getKeepEditor () =
@@ -92,12 +92,12 @@ module AutoOpenUserInterface =
         RhinoSync.DoSync getKeepEditor
 
 
-    ///<summary>Display dialog prompting the user to enter a string. The
+    /// <summary>Display dialog prompting the user to enter a string. The
     ///    string value may span multiple lines.</summary>
-    ///<param name="defaultValString">(string) Optional, A default string value</param>
-    ///<param name="message">(string) Optional, A prompt message</param>
-    ///<param name="title">(string) Optional, A dialog box title</param>
-    ///<returns>(string Option) Option of Multiple lines that are separated by carriage return-linefeed combinations.
+    /// <param name="defaultValString">(string) Optional, A default string value</param>
+    /// <param name="message">(string) Optional, A prompt message</param>
+    /// <param name="title">(string) Optional, A dialog box title</param>
+    /// <returns>(string Option) Option of Multiple lines that are separated by carriage return-linefeed combinations.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member EditBox(  [<OPT;DEF(null:string)>]defaultValString:string,
                             [<OPT;DEF(null:string)>]message:string,
@@ -108,14 +108,14 @@ module AutoOpenUserInterface =
         RhinoSync.DoSync getKeepEditor
 
 
-    ///<summary>Pause for user input of an angle.</summary>
-    ///<param name="point">(Point3d) Optional, default value: <c>Point3d.Unset</c>
+    /// <summary>Pause for user input of an angle.</summary>
+    /// <param name="point">(Point3d) Optional, default value: <c>Point3d.Unset</c>
     ///    Starting, or base point</param>
-    ///<param name="referencePoint">(Point3d) Optional, default value: <c>Point3d.Unset</c>
+    /// <param name="referencePoint">(Point3d) Optional, default value: <c>Point3d.Unset</c>
     ///    If specified, the reference angle is calculated from it and the base point</param>
-    ///<param name="defaultValAngleDegrees">(float) Optional, A default angle value specified</param>
-    ///<param name="message">(string) Optional, A prompt to display</param>
-    ///<returns>(float) Option of angle in degree.
+    /// <param name="defaultValAngleDegrees">(float) Optional, A default angle value specified</param>
+    /// <param name="message">(string) Optional, A prompt to display</param>
+    /// <returns>(float) Option of angle in degree.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetAngle( [<OPT;DEF(Point3d())>]point:Point3d, //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
                             [<OPT;DEF(Point3d())>]referencePoint:Point3d,
@@ -131,15 +131,15 @@ module AutoOpenUserInterface =
         RhinoSync.DoSyncRedrawHideEditor get
 
 
-    ///<summary>Pauses for user input of one or more boolean values. Boolean values are
+    /// <summary>Pauses for user input of one or more boolean values. Boolean values are
     ///    displayed as click-able Command-line toggles.</summary>
-    ///<param name="message">(string) A prompt</param>
-    ///<param name="items">((string*string*string) array) List of options. Each is a tuple of three strings
+    /// <param name="message">(string) A prompt</param>
+    /// <param name="items">((string*string*string) array) List of options. Each is a tuple of three strings
     ///    [n][1]    description of the boolean value. Must only consist of letters and numbers. (no characters like space, period, or dash)
     ///    [n][2]    string identifying the false value
     ///    [n][3]    string identifying the true value</param>
-    ///<param name="defaultVals">(bool seq) List of boolean values used as default or starting values</param>
-    ///<returns>(bool ResizeArray) Option of a list of values that represent the boolean values.
+    /// <param name="defaultVals">(bool seq) List of boolean values used as default or starting values</param>
+    /// <returns>(bool ResizeArray) Option of a list of values that represent the boolean values.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetBoolean(message:string, items:(string*string*string) array, defaultVals:bool array) : ResizeArray<bool> =
         let get () =
@@ -169,19 +169,19 @@ module AutoOpenUserInterface =
         RhinoSync.DoSyncRedrawHideEditor get
 
 
-    ///<summary>Pauses for user input of a box.</summary>
-    ///<param name="mode">(int) Optional, default value: <c>0</c>
+    /// <summary>Pauses for user input of a box.</summary>
+    /// <param name="mode">(int) Optional, default value: <c>0</c>
     ///    The box selection mode.
     ///    0 = All modes
     ///    1 = Corner. The base rectangle is created by picking two corner points
     ///    2 = 3-Point. The base rectangle is created by picking three points
     ///    3 = Vertical. The base vertical rectangle is created by picking three points.
     ///    4 = Center. The base rectangle is created by picking a center point and a corner point</param>
-    ///<param name="basePoint">(Point3d) Optional, Optional 3D base point</param>
-    ///<param name="prompt1">(string) Optional, Prompt1 of 'optional prompts to set'</param>
-    ///<param name="prompt2">(string) Optional, Prompt2 of 'optional prompts to set'</param>
-    ///<param name="prompt3">(string) Optional, Prompt3 of 'optional prompts to set'</param>
-    ///<returns>(Point3d array) array of eight Point3d that define the corners of the box.
+    /// <param name="basePoint">(Point3d) Optional, Optional 3D base point</param>
+    /// <param name="prompt1">(string) Optional, Prompt1 of 'optional prompts to set'</param>
+    /// <param name="prompt2">(string) Optional, Prompt2 of 'optional prompts to set'</param>
+    /// <param name="prompt3">(string) Optional, Prompt3 of 'optional prompts to set'</param>
+    /// <returns>(Point3d array) array of eight Point3d that define the corners of the box.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetBox(   [<OPT;DEF(0)>]mode:int,
                             [<OPT;DEF(Point3d())>]basePoint:Point3d, //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
@@ -206,9 +206,9 @@ module AutoOpenUserInterface =
         RhinoSync.DoSyncRedrawHideEditor get
 
 
-    ///<summary>Display the Rhino color picker dialog allowing the user to select an RGB color.</summary>
-    ///<param name="color">(Drawing.Color) Optional, default value: <c>Drawing.Color.Black</c></param>
-    ///<returns>(Drawing.Color) RGB color.
+    /// <summary>Display the Rhino color picker dialog allowing the user to select an RGB color.</summary>
+    /// <param name="color">(Drawing.Color) Optional, default value: <c>Drawing.Color.Black</c></param>
+    /// <returns>(Drawing.Color) RGB color.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetColor([<OPT;DEF(Drawing.Color())>]color:Drawing.Color) : Drawing.Color =
         let get () =
@@ -232,8 +232,8 @@ module AutoOpenUserInterface =
         RhinoSync.DoSyncRedrawHideEditor get
 
 
-    ///<summary>Retrieves the cursor's position.</summary>
-    ///<returns>(Point3d * Point2d * Guid * Point2d) a Tuple of containing the following information
+    /// <summary>Retrieves the cursor's position.</summary>
+    /// <returns>(Point3d * Point2d * Guid * Point2d) a Tuple of containing the following information
     ///    0  Point3d: cursor position in world coordinates
     ///    1  Point2d: cursor position in screen coordinates
     ///    2  Guid:    objectId of the active view-port
@@ -251,14 +251,14 @@ module AutoOpenUserInterface =
         RhinoSync.DoSyncRedrawHideEditor get
 
 
-    ///<summary>Pauses for user input of a distance.</summary>
-    ///<param name="firstPt">(Point3d) Optional, First distance point</param>
-    ///<param name="distance">(float) Optional, Default distance</param>
-    ///<param name="firstPtMsg">(string) Optional, default value: <c>"First distance point"</c>
+    /// <summary>Pauses for user input of a distance.</summary>
+    /// <param name="firstPt">(Point3d) Optional, First distance point</param>
+    /// <param name="distance">(float) Optional, Default distance</param>
+    /// <param name="firstPtMsg">(string) Optional, default value: <c>"First distance point"</c>
     ///    Prompt for the first distance point</param>
-    ///<param name="secondPtMsg">(string) Optional, default value: <c>"Second distance point"</c>
+    /// <param name="secondPtMsg">(string) Optional, default value: <c>"Second distance point"</c>
     ///    Prompt for the second distance point</param>
-    ///<returns>(float) The distance between the two points.
+    /// <returns>(float) The distance between the two points.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetDistance(  [<OPT;DEF(Point3d())>]firstPt:Point3d, //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
                                 [<OPT;DEF(0.0)>]distance:float,
@@ -303,16 +303,16 @@ module AutoOpenUserInterface =
         RhinoSync.DoSyncRedrawHideEditor get
 
 
-    ///<summary>Prompt the user to pick one or more Surface or Polysurface edge Curves.</summary>
-    ///<param name="message">(string) Optional, default value: <c>Select Edges</c>
+    /// <summary>Prompt the user to pick one or more Surface or Polysurface edge Curves.</summary>
+    /// <param name="message">(string) Optional, default value: <c>Select Edges</c>
     ///    A prompt or message</param>
-    ///<param name="minCount">(int) Optional, default value: <c>1</c>
+    /// <param name="minCount">(int) Optional, default value: <c>1</c>
     ///    Minimum number of edges to select</param>
-    ///<param name="maxCount">(int) Optional, default value: <c>0</c>
+    /// <param name="maxCount">(int) Optional, default value: <c>0</c>
     ///    Maximum number of edges to select</param>
-    ///<param name="select">(bool) Optional, default value: <c>false</c>
+    /// <param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select the duplicated edge Curves</param>
-    ///<returns>((Guid*Guid*Point3d) ResizeArray) a List of selection prompts (curve objectId, parent objectId, selection point).
+    /// <returns>((Guid*Guid*Point3d) ResizeArray) a List of selection prompts (curve objectId, parent objectId, selection point).
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetEdgeCurves(    [<OPT;DEF("Select Edges")>]message:string,
                                     [<OPT;DEF(1)>]minCount:int,
@@ -346,12 +346,12 @@ module AutoOpenUserInterface =
         RhinoSync.DoSyncRedrawHideEditor get
 
 
-    ///<summary>Pauses for user input of a whole number.</summary>
-    ///<param name="message">(string) Optional, A prompt or message</param>
-    ///<param name="number">(int) Optional, A default whole number value</param>
-    ///<param name="minimum">(int) Optional, A minimum allowable value</param>
-    ///<param name="maximum">(int) Optional, A maximum allowable value</param>
-    ///<returns>(int) The whole number input by the user.
+    /// <summary>Pauses for user input of a whole number.</summary>
+    /// <param name="message">(string) Optional, A prompt or message</param>
+    /// <param name="number">(int) Optional, A default whole number value</param>
+    /// <param name="minimum">(int) Optional, A minimum allowable value</param>
+    /// <param name="maximum">(int) Optional, A maximum allowable value</param>
+    /// <returns>(int) The whole number input by the user.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetInteger(   [<OPT;DEF(null:string)>]message:string,
                                 [<OPT;DEF(2147482999)>]number:int,
@@ -373,15 +373,15 @@ module AutoOpenUserInterface =
         RhinoSync.DoSyncRedrawHideEditor get
 
 
-    ///<summary>Displays dialog box prompting the user to select a layer.</summary>
-    ///<param name="title">(string) Optional, default value: <c>"Select Layer"</c>
+    /// <summary>Displays dialog box prompting the user to select a layer.</summary>
+    /// <param name="title">(string) Optional, default value: <c>"Select Layer"</c>
     ///    Dialog box title</param>
-    ///<param name="layer">(string) Optional, Name of a layer to preselect. If omitted, the current layer will be preselected</param>
-    ///<param name="showNewButton">(bool) Optional, default value: <c>false</c>
+    /// <param name="layer">(string) Optional, Name of a layer to preselect. If omitted, the current layer will be preselected</param>
+    /// <param name="showNewButton">(bool) Optional, default value: <c>false</c>
     ///    Show new button of on the dialog</param>
-    ///<param name="showSetCurrent">(bool) Optional, default value: <c>false</c>
+    /// <param name="showSetCurrent">(bool) Optional, default value: <c>false</c>
     ///    Show set current  button on the dialog</param>
-    ///<returns>(string) name of selected layer.
+    /// <returns>(string) name of selected layer.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetLayer( [<OPT;DEF("Select Layer")>]title:string,
                             [<OPT;DEF(null:string)>]layer:string,
@@ -400,12 +400,12 @@ module AutoOpenUserInterface =
         RhinoSync.DoSync getKeepEditor
 
 
-    ///<summary>Displays a dialog box prompting the user to select one or more layers.</summary>
-    ///<param name="title">(string) Optional, default value: <c>"Select Layers"</c>
+    /// <summary>Displays a dialog box prompting the user to select one or more layers.</summary>
+    /// <param name="title">(string) Optional, default value: <c>"Select Layers"</c>
     ///    Dialog box title</param>
-    ///<param name="showNewButton">(bool) Optional, default value: <c>false</c>
+    /// <param name="showNewButton">(bool) Optional, default value: <c>false</c>
     ///    Optional button to show on the dialog</param>
-    ///<returns>(string ResizeArray) The names of selected layers.
+    /// <returns>(string ResizeArray) The names of selected layers.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetLayers([<OPT;DEF("Select Layers")>]title:string, [<OPT;DEF(false)>]showNewButton:bool) : string ResizeArray =
         let getKeepEditor () =
@@ -417,8 +417,8 @@ module AutoOpenUserInterface =
         RhinoSync.DoSync getKeepEditor
 
 
-    ///<summary>Prompts the user to pick points that define a line.</summary>
-    ///<param name="mode">(int) Optional, default value: <c>0</c>
+    /// <summary>Prompts the user to pick points that define a line.</summary>
+    /// <param name="mode">(int) Optional, default value: <c>0</c>
     ///    Line definition mode.
     ///    0  Default - Show all modes, start in two-point mode
     ///    1  Two-point - Defines a line from two points.
@@ -430,11 +430,11 @@ module AutoOpenUserInterface =
     ///    7  Perpendicular - Defines a line perpendicular to or from a Curve
     ///    8  Tangent - Defines a line tangent from a Curve.
     ///    9  Extension - Defines a line that extends from a Curve</param>
-    ///<param name="point">(Point3d) Optional, Optional starting point</param>
-    ///<param name="message1">(string) Optional, Message1 of optional prompts</param>
-    ///<param name="message2">(string) Optional, Message2 of optional prompts</param>
-    ///<param name="message3">(string) Optional, Message3 of optional prompts</param>
-    ///<returns>(Line) a Line.
+    /// <param name="point">(Point3d) Optional, Optional starting point</param>
+    /// <param name="message1">(string) Optional, Message1 of optional prompts</param>
+    /// <param name="message2">(string) Optional, Message2 of optional prompts</param>
+    /// <param name="message3">(string) Optional, Message3 of optional prompts</param>
+    /// <returns>(Line) a Line.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetLine(  [<OPT;DEF(0)>]mode:int,
                             [<OPT;DEF(Point3d())>]point:Point3d,
@@ -459,10 +459,10 @@ module AutoOpenUserInterface =
         RhinoSync.DoSyncRedrawHideEditor get
 
 
-    ///<summary>Displays a dialog box prompting the user to select one line-type.
+    /// <summary>Displays a dialog box prompting the user to select one line-type.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</summary>
-    ///<param name="defaultValLinetype">(string) Optional, Optional. The name of the line-type to select. If omitted, the current line-type will be selected</param>
-    ///<returns>(string) The names of selected line-type.</returns>
+    /// <param name="defaultValLinetype">(string) Optional, Optional. The name of the line-type to select. If omitted, the current line-type will be selected</param>
+    /// <returns>(string) The names of selected line-type.</returns>
     static member GetLinetype(  [<OPT;DEF(null:string)>]defaultValLinetype:string) : string =
         // the original python script has an unused parameter showByLayer
         //<param name="showByLayer">(bool) Optional, default value: <c>false</c> If True, the "by Layer" line-type will show. Defaults to False</param>
@@ -481,17 +481,17 @@ module AutoOpenUserInterface =
         RhinoSync.DoSync getKeepEditor
 
 
-    ///<summary>Prompts the user to pick one or more Mesh faces.</summary>
-    ///<param name="objectId">(Guid) The Mesh object's identifier</param>
-    ///<param name="message">(string) Optional, default value: <c>"Select Mesh Faces"</c>
+    /// <summary>Prompts the user to pick one or more Mesh faces.</summary>
+    /// <param name="objectId">(Guid) The Mesh object's identifier</param>
+    /// <param name="message">(string) Optional, default value: <c>"Select Mesh Faces"</c>
     ///    A prompt of message</param>
-    ///<param name="minCount">(int) Optional, default value: <c>1</c>
+    /// <param name="minCount">(int) Optional, default value: <c>1</c>
     ///    The minimum number of faces to select</param>
-    ///<param name="maxCount">(int) Optional, default value: <c>0</c>
+    /// <param name="maxCount">(int) Optional, default value: <c>0</c>
     ///    The maximum number of faces to select.
     ///    If 0, the user must press enter to finish selection.
     ///    If -1, selection stops as soon as there are at least minCount faces selected</param>
-    ///<returns>(int ResizeArray) Mesh face indices.
+    /// <returns>(int ResizeArray) Mesh face indices.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetMeshFaces( objectId:Guid,
                                 [<OPT;DEF("Select Mesh Faces")>]message:string,
@@ -514,17 +514,17 @@ module AutoOpenUserInterface =
         RhinoSync.DoSyncRedrawHideEditor get
 
 
-    ///<summary>Prompts the user to pick one or more Mesh vertices.</summary>
-    ///<param name="objectId">(Guid) The Mesh object's identifier</param>
-    ///<param name="message">(string) Optional, default value: <c>"Select Mesh Vertices"</c>
+    /// <summary>Prompts the user to pick one or more Mesh vertices.</summary>
+    /// <param name="objectId">(Guid) The Mesh object's identifier</param>
+    /// <param name="message">(string) Optional, default value: <c>"Select Mesh Vertices"</c>
     ///    A prompt of message</param>
-    ///<param name="minCount">(int) Optional, default value: <c>1</c>
+    /// <param name="minCount">(int) Optional, default value: <c>1</c>
     ///    The minimum number of vertices to select</param>
-    ///<param name="maxCount">(int) Optional, default value: <c>0</c>
+    /// <param name="maxCount">(int) Optional, default value: <c>0</c>
     ///    The maximum number of vertices to select. If 0, the user must
     ///    press enter to finish selection. If -1, selection stops as soon as there
     ///    are at least minCount vertices selected</param>
-    ///<returns>(int ResizeArray) Mesh vertex indices.
+    /// <returns>(int ResizeArray) Mesh vertex indices.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetMeshVertices(  objectId:Guid,
                                     [<OPT;DEF("Select Mesh Vertices")>]message:string,
@@ -547,13 +547,13 @@ module AutoOpenUserInterface =
         RhinoSync.DoSyncRedrawHideEditor get
 
 
-    ///<summary>Pauses for user input of a point.</summary>
-    ///<param name="message">(string) Optional, A prompt or message</param>
-    ///<param name="basePoint">(Point3d) Optional, Point3d identifying a starting, or base point</param>
-    ///<param name="distance">(float) Optional, Constraining distance. If distance is specified, basePoint must also be specified</param>
-    ///<param name="inPlane">(bool) Optional, default value: <c>false</c>
+    /// <summary>Pauses for user input of a point.</summary>
+    /// <param name="message">(string) Optional, A prompt or message</param>
+    /// <param name="basePoint">(Point3d) Optional, Point3d identifying a starting, or base point</param>
+    /// <param name="distance">(float) Optional, Constraining distance. If distance is specified, basePoint must also be specified</param>
+    /// <param name="inPlane">(bool) Optional, default value: <c>false</c>
     ///    Constrains the point selections to the active construction Plane</param>
-    ///<returns>(Point3d) point3d.
+    /// <returns>(Point3d) point3d.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetPoint( [<OPT;DEF(null:string)>]message:string,
                             [<OPT;DEF(Point3d())>]basePoint:Point3d,
@@ -578,11 +578,11 @@ module AutoOpenUserInterface =
 
 
 
-    ///<summary>Pauses for user input of a point constrained to a Curve object.</summary>
-    ///<param name="curveId">(Guid) Identifier of the Curve to get a point on</param>
-    ///<param name="message">(string) Optional, default value: <c>"Pick Point On Curve"</c>
+    /// <summary>Pauses for user input of a point constrained to a Curve object.</summary>
+    /// <param name="curveId">(Guid) Identifier of the Curve to get a point on</param>
+    /// <param name="message">(string) Optional, default value: <c>"Pick Point On Curve"</c>
     ///    A prompt of message</param>
-    ///<returns>(Point3d) 3d point.
+    /// <returns>(Point3d) 3d point.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetPointOnCurve(curveId:Guid, [<OPT;DEF("Pick Point On Curve")>]message:string) : Point3d =
         let get () =
@@ -600,11 +600,11 @@ module AutoOpenUserInterface =
         RhinoSync.DoSyncRedrawHideEditor get
 
 
-    ///<summary>Pauses for user input of a point constrained to a Mesh object.</summary>
-    ///<param name="meshId">(Guid) Identifier of the Mesh to get a point on</param>
-    ///<param name="message">(string) Optional, default value: <c>"Pick Point On Mesh"</c>
+    /// <summary>Pauses for user input of a point constrained to a Mesh object.</summary>
+    /// <param name="meshId">(Guid) Identifier of the Mesh to get a point on</param>
+    /// <param name="message">(string) Optional, default value: <c>"Pick Point On Mesh"</c>
     ///    A prompt or message</param>
-    ///<returns>(Point3d) 3d point.
+    /// <returns>(Point3d) 3d point.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetPointOnMesh(meshId:Guid, [<OPT;DEF("Pick Point On Mesh")>]message:string) : Point3d =
         let get () =
@@ -616,12 +616,12 @@ module AutoOpenUserInterface =
         RhinoSync.DoSyncRedrawHideEditor get
 
 
-    ///<summary>Pauses for user input of a point constrained to a Surface or Polysurface
+    /// <summary>Pauses for user input of a point constrained to a Surface or Polysurface
     ///    object.</summary>
-    ///<param name="surfaceId">(Guid) Identifier of the Surface to get a point on</param>
-    ///<param name="message">(string) Optional, default value: <c>"Pick Point on Surface or Polysurface"</c>
+    /// <param name="surfaceId">(Guid) Identifier of the Surface to get a point on</param>
+    /// <param name="message">(string) Optional, default value: <c>"Pick Point on Surface or Polysurface"</c>
     ///    A prompt or message</param>
-    ///<returns>(Point3d) 3d point.
+    /// <returns>(Point3d) 3d point.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetPointOnSurface(surfaceId:Guid, [<OPT;DEF("Pick Point on Surface or Polysurface")>]message:string) : Point3d =
         let get () =
@@ -647,16 +647,16 @@ module AutoOpenUserInterface =
         RhinoSync.DoSyncRedrawHideEditor get
 
 
-    ///<summary>Pauses for user input of one or more points.</summary>
-    ///<param name="drawLines">(bool) Optional, default value: <c>false</c>
+    /// <summary>Pauses for user input of one or more points.</summary>
+    /// <param name="drawLines">(bool) Optional, default value: <c>false</c>
     ///    Draw lines between points</param>
-    ///<param name="inPlane">(bool) Optional, default value: <c>false</c>
+    /// <param name="inPlane">(bool) Optional, default value: <c>false</c>
     ///    Constrain point selection to the active construction Plane</param>
-    ///<param name="message1">(string) Optional, A prompt or message for the first point</param>
-    ///<param name="message2">(string) Optional, A prompt or message for the next points</param>
-    ///<param name="maxPoints">(int) Optional, Maximum number of points to pick. If not specified, an
+    /// <param name="message1">(string) Optional, A prompt or message for the first point</param>
+    /// <param name="message2">(string) Optional, A prompt or message for the next points</param>
+    /// <param name="maxPoints">(int) Optional, Maximum number of points to pick. If not specified, an
     ///    unlimited number of points can be picked</param>
-    ///<returns>(Point3d array) 3d points.
+    /// <returns>(Point3d array) 3d points.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetPoints( [<OPT;DEF(false)>]drawLines:bool,
                              [<OPT;DEF(false)>]inPlane:bool,
@@ -717,16 +717,16 @@ module AutoOpenUserInterface =
 
 
 
-    ///<summary>Prompts the user to pick points that define a polyline.</summary>
-    ///<param name="message1">(string) Optional, A prompt or message for the first point</param>
-    ///<param name="message2">(string) Optional, A prompt or message for the second point</param>
-    ///<param name="message3">(string) Optional, A prompt or message for the third point</param>
-    ///<param name="message4">(string) Optional, A prompt or message for the 'next' point</param>
-    ///<param name="min">(int) Optional, default value: <c>2</c>
+    /// <summary>Prompts the user to pick points that define a polyline.</summary>
+    /// <param name="message1">(string) Optional, A prompt or message for the first point</param>
+    /// <param name="message2">(string) Optional, A prompt or message for the second point</param>
+    /// <param name="message3">(string) Optional, A prompt or message for the third point</param>
+    /// <param name="message4">(string) Optional, A prompt or message for the 'next' point</param>
+    /// <param name="min">(int) Optional, default value: <c>2</c>
     ///    The minimum number of points to require. The default is 2</param>
-    ///<param name="max">(int) Optional, default value: <c>0</c>
+    /// <param name="max">(int) Optional, default value: <c>0</c>
     ///    The maximum number of points to require; 0 for no limit.</param>
-    ///<returns>(Polyline) a  polyline.
+    /// <returns>(Polyline) a  polyline.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetPolyline( [<OPT;DEF(null:string)>]message1:string,
                                [<OPT;DEF(null:string)>]message2:string,
@@ -751,13 +751,13 @@ module AutoOpenUserInterface =
         RhinoSync.DoSyncRedrawHideEditor get
 
 
-    ///<summary>Pauses for user input of a number.</summary>
-    ///<param name="message">(string) Optional, default value: <c>"Number"</c>
+    /// <summary>Pauses for user input of a number.</summary>
+    /// <param name="message">(string) Optional, default value: <c>"Number"</c>
     ///    A prompt or message</param>
-    ///<param name="number">(float) Optional, A default number value</param>
-    ///<param name="minimum">(float) Optional, A minimum allowable value</param>
-    ///<param name="maximum">(float) Optional, A maximum allowable value</param>
-    ///<returns>(float) The number input by the user.
+    /// <param name="number">(float) Optional, A default number value</param>
+    /// <param name="minimum">(float) Optional, A minimum allowable value</param>
+    /// <param name="maximum">(float) Optional, A maximum allowable value</param>
+    /// <returns>(float) The number input by the user.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetReal( [<OPT;DEF("Number")>]message:string,
                            [<OPT;DEF(7e89)>]number:float,
@@ -779,19 +779,19 @@ module AutoOpenUserInterface =
         RhinoSync.DoSyncRedrawHideEditor get
 
 
-    ///<summary>Pauses for user input of a rectangle.</summary>
-    ///<param name="mode">(int) Optional, default value: <c>0</c>
+    /// <summary>Pauses for user input of a rectangle.</summary>
+    /// <param name="mode">(int) Optional, default value: <c>0</c>
     ///    The rectangle selection mode. The modes are as follows
     ///    0 = All modes
     ///    1 = Corner - a rectangle is created by picking two corner points
     ///    2 = 3Point - a rectangle is created by picking three points
     ///    3 = Vertical - a vertical rectangle is created by picking three points
     ///    4 = Center - a rectangle is created by picking a center point and a corner point</param>
-    ///<param name="basePoint">(Point3d) Optional, A 3d base point</param>
-    ///<param name="prompt1">(string) Optional, Prompt1 of optional prompts</param>
-    ///<param name="prompt2">(string) Optional, Prompt2 of optional prompts</param>
-    ///<param name="prompt3">(string) Optional, Prompt3 of optional prompts</param>
-    ///<returns>(Point3d * Point3d * Point3d * Point3d) Four 3d points that define the corners of the rectangle.
+    /// <param name="basePoint">(Point3d) Optional, A 3d base point</param>
+    /// <param name="prompt1">(string) Optional, Prompt1 of optional prompts</param>
+    /// <param name="prompt2">(string) Optional, Prompt2 of optional prompts</param>
+    /// <param name="prompt3">(string) Optional, Prompt3 of optional prompts</param>
+    /// <returns>(Point3d * Point3d * Point3d * Point3d) Four 3d points that define the corners of the rectangle.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetRectangle([<OPT;DEF(0)>]mode:int,
                                [<OPT;DEF(Point3d())>]basePoint:Point3d,
@@ -813,12 +813,12 @@ module AutoOpenUserInterface =
         RhinoSync.DoSyncRedrawHideEditor get
 
 
-    ///<summary>Pauses for user input of a string value.</summary>
-    ///<param name="message">(string) Optional, A prompt or message</param>
-    ///<param name="defaultValString">(string) Optional, A default value</param>
-    ///<param name="strings">(string seq) Optional, List of strings to be displayed as a click-able command options.
+    /// <summary>Pauses for user input of a string value.</summary>
+    /// <param name="message">(string) Optional, A prompt or message</param>
+    /// <param name="defaultValString">(string) Optional, A default value</param>
+    /// <param name="strings">(string seq) Optional, List of strings to be displayed as a click-able command options.
     ///    Note, strings cannot begin with a numeric character</param>
-    ///<returns>(string) The string either input or selected by the user .
+    /// <returns>(string) The string either input or selected by the user .
     ///    If the user presses the Enter key without typing in a string, an empty string "" is returned.
     ///    A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetString( [<OPT;DEF(null:string)>]message:string,
@@ -842,12 +842,12 @@ module AutoOpenUserInterface =
         RhinoSync.DoSyncRedrawHideEditor get
 
 
-    ///<summary>Display a list of items in a list box dialog.</summary>
-    ///<param name="items">(string IList) A list of values to select</param>
-    ///<param name="message">(string) Optional, A prompt of message</param>
-    ///<param name="title">(string) Optional, A dialog box title</param>
-    ///<param name="defaultVal">(string) Optional, Selected item in the list</param>
-    ///<returns>(string) The selected item.</returns>
+    /// <summary>Display a list of items in a list box dialog.</summary>
+    /// <param name="items">(string IList) A list of values to select</param>
+    /// <param name="message">(string) Optional, A prompt of message</param>
+    /// <param name="title">(string) Optional, A dialog box title</param>
+    /// <param name="defaultVal">(string) Optional, Selected item in the list</param>
+    /// <returns>(string) The selected item.</returns>
     static member ListBox( items:string IList,
                            [<OPT;DEF(null:string)>]message:string,
                            [<OPT;DEF(null:string)>]title:string,
@@ -861,10 +861,10 @@ module AutoOpenUserInterface =
         RhinoSync.DoSync getKeepEditor
 
 
-    ///<summary>Displays a message box. A message box contains a message and
+    /// <summary>Displays a message box. A message box contains a message and
     ///    title, plus any combination of predefined icons and push buttons.</summary>
-    ///<param name="message">(string) A prompt or message</param>
-    ///<param name="buttons">(int) Optional, default value: <c>0</c>
+    /// <param name="message">(string) A prompt or message</param>
+    /// <param name="buttons">(int) Optional, default value: <c>0</c>
     ///    Buttons and icon to display as a bit coded flag. Can be a combination of the
     ///    following flags. If omitted, an OK button and no icon is displayed
     ///    0      Display OK button only.
@@ -885,9 +885,9 @@ module AutoOpenUserInterface =
     ///      before continuing work in the current application.
     ///    4096   System modal. The user must respond to the message box
     ///      before continuing work in any application</param>
-    ///<param name="title">(string) Optional, default value: <c>""</c>
+    /// <param name="title">(string) Optional, default value: <c>""</c>
     ///    The dialog box title</param>
-    ///<returns>(int) an Int32 of indicating which button was clicked:
+    /// <returns>(int) an Int32 of indicating which button was clicked:
     ///    1      OK button was clicked.
     ///    2      Cancel button was clicked.
     ///    3      Abort button was clicked.
@@ -934,12 +934,12 @@ module AutoOpenUserInterface =
         RhinoSync.DoSync getKeepEditor
 
 
-    ///<summary>Displays list of items and their values in a property-style list box dialog.</summary>
-    ///<param name="items">(string IList) list of string items</param>
-    ///<param name="values">(string IList) The corresponding values to the items</param>
-    ///<param name="message">(string) Optional, A prompt or message</param>
-    ///<param name="title">(string) Optional, A dialog box title</param>
-    ///<returns>(string array) An Array of new values.
+    /// <summary>Displays list of items and their values in a property-style list box dialog.</summary>
+    /// <param name="items">(string IList) list of string items</param>
+    /// <param name="values">(string IList) The corresponding values to the items</param>
+    /// <param name="message">(string) Optional, A prompt or message</param>
+    /// <param name="title">(string) Optional, A dialog box title</param>
+    /// <returns>(string array) An Array of new values.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member PropertyListBox(  items:string IList,
                                     values:string IList,
@@ -952,12 +952,12 @@ module AutoOpenUserInterface =
         RhinoSync.DoSync getKeepEditor
 
 
-    ///<summary>Displays a list of items in a multiple-selection list box dialog.</summary>
-    ///<param name="items">(string IList) A zero-based list of string items</param>
-    ///<param name="message">(string) Optional, A prompt or message</param>
-    ///<param name="title">(string) Optional, A dialog box title</param>
-    ///<param name="defaultVals">(string IList) Optional, a list if multiple items that are pre-selected</param>
-    ///<returns>(string array) an Array of containing the selected items.
+    /// <summary>Displays a list of items in a multiple-selection list box dialog.</summary>
+    /// <param name="items">(string IList) A zero-based list of string items</param>
+    /// <param name="message">(string) Optional, A prompt or message</param>
+    /// <param name="title">(string) Optional, A dialog box title</param>
+    /// <param name="defaultVals">(string IList) Optional, a list if multiple items that are pre-selected</param>
+    /// <returns>(string array) an Array of containing the selected items.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member MultiListBox( items:string IList,
                                 [<OPT;DEF(null:string)>]message:string,
@@ -970,16 +970,16 @@ module AutoOpenUserInterface =
         RhinoSync.DoSync getKeepEditor
 
 
-    ///<summary>Displays file open dialog box allowing the user to enter a file name.
+    /// <summary>Displays file open dialog box allowing the user to enter a file name.
     ///    Note, this function does not open the file.</summary>
-    ///<param name="title">(string) Optional, A dialog box title</param>
-    ///<param name="filter">(string) Optional, A filter string. The filter must be in the following form:
+    /// <param name="title">(string) Optional, A dialog box title</param>
+    /// <param name="filter">(string) Optional, A filter string. The filter must be in the following form:
     ///    "Description1|Filter1|Description2|Filter2||", where "||" terminates filter string.
     ///    If omitted, the filter (*.*) is used</param>
-    ///<param name="folder">(string) Optional, A default folder</param>
-    ///<param name="filename">(string) Optional, A default file name</param>
-    ///<param name="extension">(string) Optional, A default file extension</param>
-    ///<returns>(string) A file name is successful.
+    /// <param name="folder">(string) Optional, A default folder</param>
+    /// <param name="filename">(string) Optional, A default file name</param>
+    /// <param name="extension">(string) Optional, A default file extension</param>
+    /// <returns>(string) A file name is successful.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member OpenFileName( [<OPT;DEF(null:string)>]title:string,
                                 [<OPT;DEF(null:string)>]filter:string,
@@ -998,16 +998,16 @@ module AutoOpenUserInterface =
         RhinoSync.DoSync getKeepEditor
 
 
-    ///<summary>Displays file open dialog box allowing the user to select one or more file names.
+    /// <summary>Displays file open dialog box allowing the user to select one or more file names.
     ///    Note, this function does not open the file.</summary>
-    ///<param name="title">(string) Optional, A dialog box title</param>
-    ///<param name="filter">(string) Optional, A filter string. The filter must be in the following form:
+    /// <param name="title">(string) Optional, A dialog box title</param>
+    /// <param name="filter">(string) Optional, A filter string. The filter must be in the following form:
     ///    "Description1|Filter1|Description2|Filter2||", where "||" terminates filter string.
     ///    If omitted, the filter (*.*) is used</param>
-    ///<param name="folder">(string) Optional, A default folder</param>
-    ///<param name="filename">(string) Optional, A default file name</param>
-    ///<param name="extension">(string) Optional, A default file extension</param>
-    ///<returns>(string array) The selected file names.
+    /// <param name="folder">(string) Optional, A default folder</param>
+    /// <param name="filename">(string) Optional, A default file name</param>
+    /// <param name="extension">(string) Optional, A default file extension</param>
+    /// <returns>(string array) The selected file names.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member OpenFileNames( [<OPT;DEF(null:string)>]title:string,
                                  [<OPT;DEF(null:string)>]filter:string,
@@ -1027,21 +1027,21 @@ module AutoOpenUserInterface =
         RhinoSync.DoSync getKeepEditor
 
 
-    ///<summary>Display a context-style popup menu. The popup menu can appear almost
+    /// <summary>Display a context-style popup menu. The popup menu can appear almost
     ///    anywhere, and can be dismissed by clicking the left or right mouse buttons.</summary>
-    ///<param name="items">(string seq) List of strings representing the menu items. An empty string or None
+    /// <param name="items">(string seq) List of strings representing the menu items. An empty string or None
     ///    will create a separator</param>
-    ///<param name="modes">(int seq) Optional, List of numbers identifying the display modes. If omitted, all
+    /// <param name="modes">(int seq) Optional, List of numbers identifying the display modes. If omitted, all
     ///    modes are enabled.
     ///      0 = menu item is enabled
     ///      1 = menu item is disabled
     ///      2 = menu item is checked
     ///      3 = menu item is disabled and checked</param>
-    ///<param name="point">(Point3d) Optional, A 3D point where the menu item will appear. If omitted, the menu
+    /// <param name="point">(Point3d) Optional, A 3D point where the menu item will appear. If omitted, the menu
     ///    will appear at the current cursor position</param>
-    ///<param name="view">(string) Optional, If point is specified, the view in which the point is computed.
+    /// <param name="view">(string) Optional, If point is specified, the view in which the point is computed.
     ///    If omitted, the active view is used</param>
-    ///<returns>(int) index of the menu item picked or -1 if no menu item was picked.</returns>
+    /// <returns>(int) index of the menu item picked or -1 if no menu item was picked.</returns>
     static member PopupMenu(items:string seq,
                             [<OPT;DEF(null:int seq)>]modes:int seq,
                             [<OPT;DEF(Point3d())>]point:Point3d,
@@ -1087,15 +1087,15 @@ module AutoOpenUserInterface =
         RhinoSync.DoSync getKeepEditor
 
 
-    ///<summary>Display a dialog box prompting the user to enter a number.</summary>
-    ///<param name="message">(string) Optional, default value: <c>""</c>
+    /// <summary>Display a dialog box prompting the user to enter a number.</summary>
+    /// <param name="message">(string) Optional, default value: <c>""</c>
     ///    A prompt message</param>
-    ///<param name="defaultValNumber">(float) Optional, A default number</param>
-    ///<param name="title">(string) Optional, default value: <c>""</c>
+    /// <param name="defaultValNumber">(float) Optional, A default number</param>
+    /// <param name="title">(string) Optional, default value: <c>""</c>
     ///    A dialog box title</param>
-    ///<param name="minimum">(float) Optional, A minimum allowable value</param>
-    ///<param name="maximum">(float) Optional, A maximum allowable value</param>
-    ///<returns>(float) The newly entered number.
+    /// <param name="minimum">(float) Optional, A minimum allowable value</param>
+    /// <param name="maximum">(float) Optional, A maximum allowable value</param>
+    /// <returns>(float) The newly entered number.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member RealBox( [<OPT;DEF("")>]message:string,
                            [<OPT;DEF(7e89)>]defaultValNumber:float,
@@ -1114,16 +1114,16 @@ module AutoOpenUserInterface =
         RhinoSync.DoSyncRedrawHideEditor get
 
 
-    ///<summary>Display a save dialog box allowing the user to enter a file name.
+    /// <summary>Display a save dialog box allowing the user to enter a file name.
     ///    Note, this function does not save the file.</summary>
-    ///<param name="title">(string) Optional, A dialog box title</param>
-    ///<param name="filter">(string) Optional, A filter string. The filter must be in the following form:
+    /// <param name="title">(string) Optional, A dialog box title</param>
+    /// <param name="filter">(string) Optional, A filter string. The filter must be in the following form:
     ///    "Description1|Filter1|Description2|Filter2||", where "||" terminates filter string.
     ///    If omitted, the filter (*.*) is used</param>
-    ///<param name="folder">(string) Optional, A default folder</param>
-    ///<param name="filename">(string) Optional, A default file name</param>
-    ///<param name="extension">(string) Optional, A default file extension</param>
-    ///<returns>(string) the file name is successful.
+    /// <param name="folder">(string) Optional, A default folder</param>
+    /// <param name="filename">(string) Optional, A default file name</param>
+    /// <param name="extension">(string) Optional, A default file extension</param>
+    /// <returns>(string) the file name is successful.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member SaveFileName([<OPT;DEF(null:string)>]title:string,
                                [<OPT;DEF(null:string)>]filter:string,
@@ -1141,11 +1141,11 @@ module AutoOpenUserInterface =
         RhinoSync.DoSync getKeepEditor
 
 
-    ///<summary>Display a dialog box prompting the user to enter a string value.</summary>
-    ///<param name="message">(string) Optional, A prompt message</param>
-    ///<param name="defaultValValue">(string) Optional, A default string value</param>
-    ///<param name="title">(string) Optional, A dialog box title</param>
-    ///<returns>(string) the newly entered string value.
+    /// <summary>Display a dialog box prompting the user to enter a string value.</summary>
+    /// <param name="message">(string) Optional, A prompt message</param>
+    /// <param name="defaultValValue">(string) Optional, A default string value</param>
+    /// <param name="title">(string) Optional, A dialog box title</param>
+    /// <returns>(string) the newly entered string value.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member StringBox( [<OPT;DEF(null:string)>]message:string,
                              [<OPT;DEF(null:string)>]defaultValValue:string,
@@ -1156,10 +1156,10 @@ module AutoOpenUserInterface =
         RhinoSync.DoSync getKeepEditor
 
 
-    ///<summary>Display a text dialog box similar to the one used by the _What command.</summary>
-    ///<param name="message">(string) The message</param>
-    ///<param name="title">(string) Optional, The message title</param>
-    ///<returns>(unit) void, nothing.</returns>
+    /// <summary>Display a text dialog box similar to the one used by the _What command.</summary>
+    /// <param name="message">(string) The message</param>
+    /// <param name="title">(string) Optional, The message title</param>
+    /// <returns>(unit) void, nothing.</returns>
     static member TextOut(message:string,
                           [<OPT;DEF(null:string)>]title:string) : unit =
         let getKeepEditor () =
@@ -1167,18 +1167,18 @@ module AutoOpenUserInterface =
         RhinoSync.DoSync getKeepEditor
 
 
-    ///<summary>Prints any object to the console and to the Rhino command line using F#'s %A formatting.</summary>
-    ///<param name="obj">(object) any object</param>
-    ///<returns>(unit) void, nothing.</returns>
+    /// <summary>Prints any object to the console and to the Rhino command line using F#'s %A formatting.</summary>
+    /// <param name="obj">(object) any object</param>
+    /// <returns>(unit) void, nothing.</returns>
     static member Print(obj:'T) : unit =
         let txt = sprintf "%A" obj
         Console.WriteLine(txt)
         RhinoApp.WriteLine(txt)
         RhinoApp.Wait()
 
-    ///<summary>Prints a string to the console and to the Rhino command line using F#'s %A formatting.</summary>
-    ///<param name="txt">(string) the string to Print</param>
-    ///<returns>(unit) void, nothing.</returns>
+    /// <summary>Prints a string to the console and to the Rhino command line using F#'s %A formatting.</summary>
+    /// <param name="txt">(string) the string to Print</param>
+    /// <returns>(unit) void, nothing.</returns>
     static member Print(txt:string) : unit =
         Console.WriteLine(txt)
         RhinoApp.WriteLine(txt)

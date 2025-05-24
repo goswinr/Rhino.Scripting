@@ -19,12 +19,12 @@ module AutoOpenSelection =
     // static member GetObjectsAndRemember(
     // static member GetObjectAndRemember(
 
-    ///<summary>Returns identifiers of all objects in the document.</summary>
-    ///<param name="select">(bool) Optional, default value: <c>false</c> Select the objects</param>
-    ///<param name="includeLights">(bool) Optional, default value: <c>false</c> Include light objects</param>
-    ///<param name="includeGrips">(bool) Optional, default value: <c>false</c> Include grips objects</param>
-    ///<param name="includeReferences">(bool) Optional, default value: <c>false</c> Include reference objects such as work session objects</param>
-    ///<returns>(Guid ResizeArray) Identifiers for all the objects in the document.</returns>
+    /// <summary>Returns identifiers of all objects in the document.</summary>
+    /// <param name="select">(bool) Optional, default value: <c>false</c> Select the objects</param>
+    /// <param name="includeLights">(bool) Optional, default value: <c>false</c> Include light objects</param>
+    /// <param name="includeGrips">(bool) Optional, default value: <c>false</c> Include grips objects</param>
+    /// <param name="includeReferences">(bool) Optional, default value: <c>false</c> Include reference objects such as work session objects</param>
+    /// <returns>(Guid ResizeArray) Identifiers for all the objects in the document.</returns>
     static member AllObjects(  [<OPT;DEF(false)>]select:bool,
                                [<OPT;DEF(false)>]includeLights:bool,
                                [<OPT;DEF(false)>]includeGrips:bool,
@@ -45,12 +45,12 @@ module AutoOpenSelection =
             objectIds
 
 
-    ///<summary>Returns identifier of the first object in the document. The first
+    /// <summary>Returns identifier of the first object in the document. The first
     ///    object is the last object created by the user.</summary>
-    ///<param name="select">(bool) Optional, default value: <c>false</c> Select the object. If omitted, the object is not selected</param>
-    ///<param name="includeLights">(bool) Optional, default value: <c>false</c> Include light objects. If omitted, light objects are not returned</param>
-    ///<param name="includeGrips">(bool) Optional, default value: <c>false</c> Include grips objects. If omitted, grips objects are not returned</param>
-    ///<returns>(Guid) The identifier of the object.</returns>
+    /// <param name="select">(bool) Optional, default value: <c>false</c> Select the object. If omitted, the object is not selected</param>
+    /// <param name="includeLights">(bool) Optional, default value: <c>false</c> Include light objects. If omitted, light objects are not returned</param>
+    /// <param name="includeGrips">(bool) Optional, default value: <c>false</c> Include grips objects. If omitted, grips objects are not returned</param>
+    /// <returns>(Guid) The identifier of the object.</returns>
     static member FirstObject(      [<OPT;DEF(false)>]select:bool,
                                     [<OPT;DEF(false)>]includeLights:bool,
                                     [<OPT;DEF(false)>]includeGrips:bool) : Guid =
@@ -67,11 +67,11 @@ module AutoOpenSelection =
 
 
 
-    ///<summary>Prompts user to pick or select a single Curve object.</summary>
-    ///<param name="message">(string) Optional, A prompt or message</param>
-    ///<param name="preselect">(bool) Optional, default value: <c>true</c> Allow for the selection of pre-selected objects</param>
-    ///<param name="select">(bool) Optional, default value: <c>false</c> Select the picked objects. If False, objects that are picked are not selected</param>
-    ///<returns>(Guid * bool * int * Point3d * float * string) Tuple containing the following information
+    /// <summary>Prompts user to pick or select a single Curve object.</summary>
+    /// <param name="message">(string) Optional, A prompt or message</param>
+    /// <param name="preselect">(bool) Optional, default value: <c>true</c> Allow for the selection of pre-selected objects</param>
+    /// <param name="select">(bool) Optional, default value: <c>false</c> Select the picked objects. If False, objects that are picked are not selected</param>
+    /// <returns>(Guid * bool * int * Point3d * float * string) Tuple containing the following information
     ///    [0]  guid     identifier of the Curve object
     ///    [1]  bool     True if the Curve was preselected, otherwise False
     ///    [2]  Enum     DocObjects.SelectionMethod
@@ -113,22 +113,22 @@ module AutoOpenSelection =
         RhinoSync.DoSyncRedrawHideEditor get
 
 
-    ///<summary>Prompts user to pick, or select, a single object.
+    /// <summary>Prompts user to pick, or select, a single object.
     /// Raises a RhinoUserInteractionException if no object was selected. For example when Esc key was pressed.</summary>
-    ///<param name="message">(string) Optional, A prompt or message</param>
-    ///<param name="filter">(int) Optional, The type(s) of geometry (points, Curves, Surfaces, Meshes,...)
+    /// <param name="message">(string) Optional, A prompt or message</param>
+    /// <param name="filter">(int) Optional, The type(s) of geometry (points, Curves, Surfaces, Meshes,...)
     ///    that can be selected. Object types can be added together to filter
     ///    several different kinds of geometry. use the RhinoScriptSyntax.Filter enum to get values, they can be joined with '+'</param>
-    ///<param name="preselect">(bool) Optional, default value: <c>true</c>
+    /// <param name="preselect">(bool) Optional, default value: <c>true</c>
     ///    Allow for the selection of pre-selected objects</param>
-    ///<param name="select">(bool) Optional, default value: <c>false</c>
+    /// <param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select the picked objects. If False, the objects that are
     ///    picked are not selected</param>
-    ///<param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, A custom filter function</param>
-    ///<param name="subObjects">(bool) Optional, default value: <c>false</c>
+    /// <param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, A custom filter function</param>
+    /// <param name="subObjects">(bool) Optional, default value: <c>false</c>
     ///    If True, sub-objects can be selected. When this is the
     ///    case, for tracking  of the sub-object go via the Object Ref</param>
-    ///<returns>(Guid) Identifier of the picked object.
+    /// <returns>(Guid) Identifier of the picked object.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetObject(        [<OPT;DEF(null:string)>]message:string,
                                     [<OPT;DEF(0)>]filter:int,
@@ -165,21 +165,21 @@ module AutoOpenSelection =
         RhinoSync.DoSyncRedrawHideEditor get
 
 
-    ///<summary>Prompts user to pick, or select a single object.
+    /// <summary>Prompts user to pick, or select a single object.
     /// Raises a RhinoUserInteractionException if no object was selected. For example when Esc key was pressed.</summary>
-    ///<param name="message">(string) Optional, A prompt or message</param>
-    ///<param name="filter">(int) Optional, default value: <c>0</c>
+    /// <param name="message">(string) Optional, A prompt or message</param>
+    /// <param name="filter">(int) Optional, default value: <c>0</c>
     ///    The type(s) of geometry (points, Curves, Surfaces, Meshes,...)
     ///    that can be selected. Object types can be added together to filter
     ///    several different kinds of geometry. use the filter class to get values</param>
-    ///<param name="preselect">(bool) Optional, default value: <c>true</c>
+    /// <param name="preselect">(bool) Optional, default value: <c>true</c>
     ///    Allow for the selection of pre-selected objects</param>
-    ///<param name="select">(bool) Optional, default value: <c>false</c>
+    /// <param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select the picked objects. If False, the objects that are
     ///    picked are not selected</param>
-    ///<param name="objects">(Guid seq) Optional, List of object identifiers specifying objects that are
+    /// <param name="objects">(Guid seq) Optional, List of object identifiers specifying objects that are
     ///    allowed to be selected</param>
-    ///<returns>(Guid * bool * float * Point3d * string) Tuple containing the following information
+    /// <returns>(Guid * bool * float * Point3d * string) Tuple containing the following information
     ///    [0] identifier of the object
     ///    [1] True if the object was preselected, otherwise False
     ///    [2] selection method Enum DocObjects.SelectionMethod
@@ -231,32 +231,32 @@ module AutoOpenSelection =
         RhinoSync.DoSyncRedrawHideEditor get
 
 
-    ///<summary>Prompts user to pick or select one or more objects.
+    /// <summary>Prompts user to pick or select one or more objects.
     /// Raises a RhinoUserInteractionException if no object was selected. For example when Esc key was pressed.</summary>
-    ///<param name="message">(string) Optional, default value: <c>"Select objects"</c>
+    /// <param name="message">(string) Optional, default value: <c>"Select objects"</c>
     ///    A prompt or message</param>
-    ///<param name="filter">(int) Optional, The type(s) of geometry (points, Curves, Surfaces, Meshes,...)
+    /// <param name="filter">(int) Optional, The type(s) of geometry (points, Curves, Surfaces, Meshes,...)
     ///    that can be selected. Object types can be added together to filter
     ///    several different kinds of geometry. use the RhinoScriptSyntax.Filter enum to get values, they can be joined with '+'</param>
-    ///<param name="group">(bool) Optional, default value: <c>true</c>
+    /// <param name="group">(bool) Optional, default value: <c>true</c>
     ///    Honor object grouping. If omitted and the user picks a group,
     ///    the entire group will be picked (True). Note, if filter is set to a
     ///    value other than 0 (All objects), then group selection will be disabled</param>
-    ///<param name="preselect">(bool) Optional, default value: <c>true</c>
+    /// <param name="preselect">(bool) Optional, default value: <c>true</c>
     ///    Allow for the selection of pre-selected objects</param>
-    ///<param name="select">(bool) Optional, default value: <c>false</c>
+    /// <param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select the picked objects. If False, the objects that are
     ///    picked are not selected</param>
-    ///<param name="objectsToSelectFrom">(Guid seq) Optional, List of objects that are allowed to be selected. If set customFilter will be ignored</param>
-    ///<param name="minimumCount">(int) Optional, default value: <c>1</c>
+    /// <param name="objectsToSelectFrom">(Guid seq) Optional, List of objects that are allowed to be selected. If set customFilter will be ignored</param>
+    /// <param name="minimumCount">(int) Optional, default value: <c>1</c>
     ///    Minimum count of objects allowed to be selected</param>
-    ///<param name="maximumCount">(int) Optional, default value: <c>0</c>
+    /// <param name="maximumCount">(int) Optional, default value: <c>0</c>
     ///    Maximum count of objects allowed to be selected</param>
-    ///<param name="printCount">(bool) Optional, default value: <c>true</c> Print object count to command window.</param>
-    ///<param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, Will be ignored if 'objects' are set. Calls a custom function in the script and passes
+    /// <param name="printCount">(bool) Optional, default value: <c>true</c> Print object count to command window.</param>
+    /// <param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, Will be ignored if 'objects' are set. Calls a custom function in the script and passes
     ///    the Rhino Object, Geometry, and component index and returns true or false indicating if the object can be selected</param>
-    ///<returns>(Guid ResizeArray) List of identifiers of the picked objects.
-    ///A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
+    /// <returns>(Guid ResizeArray) List of identifiers of the picked objects.
+    /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetObjects(       [<OPT;DEF("Select objects")>]message:string,
                                     [<OPT;DEF(0)>]filter:int,
                                     [<OPT;DEF(true)>]group:bool,
@@ -303,27 +303,27 @@ module AutoOpenSelection =
 
 
 
-    ///<summary>Prompts user to pick, or select one or more objects.
+    /// <summary>Prompts user to pick, or select one or more objects.
     /// Raises a RhinoUserInteractionException if no object was selected. For example when Esc key was pressed.</summary>
-    ///<param name="message">(string) Optional, default value: <c>"Select objects"</c>
+    /// <param name="message">(string) Optional, default value: <c>"Select objects"</c>
     ///    A prompt or message</param>
-    ///<param name="filter">(int) Optional, default value: <c>0</c>
+    /// <param name="filter">(int) Optional, default value: <c>0</c>
     ///    The type(s) of geometry (points, Curves, Surfaces, Meshes,...)
     ///    that can be selected. Object types can be added together to filter
     ///    several different kinds of geometry. use the filter class to get values</param>
-    ///<param name="group">(bool) Optional, default value: <c>true</c>
+    /// <param name="group">(bool) Optional, default value: <c>true</c>
     ///    Honor object grouping. If omitted and the user picks a group,
     ///    the entire group will be picked (True). Note, if filter is set to a
     ///    value other than 0 (All objects), then group selection will be disabled</param>
-    ///<param name="preselect">(bool) Optional, default value: <c>true</c>
+    /// <param name="preselect">(bool) Optional, default value: <c>true</c>
     ///    Allow for the selection of pre-selected objects</param>
-    ///<param name="select">(bool) Optional, default value: <c>false</c>
+    /// <param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select the picked objects. If False, the objects that are
     ///    picked are not selected</param>
-    ///<param name="printCount">(bool) Optional, default value: <c>true</c> Print object count to command window</param>
-    ///<param name="objectsToSelectFrom">(Guid seq) Optional, List of object identifiers specifying objects that are
+    /// <param name="printCount">(bool) Optional, default value: <c>true</c> Print object count to command window</param>
+    /// <param name="objectsToSelectFrom">(Guid seq) Optional, List of object identifiers specifying objects that are
     ///    allowed to be selected</param>
-    ///<returns>((Guid*bool*int*Point3d*string) ResizeArray) List containing the following information
+    /// <returns>((Guid*bool*int*Point3d*string) ResizeArray) List containing the following information
     ///    [n][0]  identifier of the object
     ///    [n][1]  True if the object was preselected, otherwise False
     ///    [n][2]  selection method (DocObjects.SelectionMethod)
@@ -379,12 +379,12 @@ module AutoOpenSelection =
         RhinoSync.DoSyncRedrawHideEditor get
 
 
-    ///<summary>Prompts the user to select one or more point objects.</summary>
-    ///<param name="message">(string) Optional, default value: <c>"Select Point Objects"</c>
+    /// <summary>Prompts the user to select one or more point objects.</summary>
+    /// <param name="message">(string) Optional, default value: <c>"Select Point Objects"</c>
     ///    A prompt message</param>
-    ///<param name="preselect">(bool) Optional, default value: <c>true</c>
+    /// <param name="preselect">(bool) Optional, default value: <c>true</c>
     ///    Allow for the selection of pre-selected objects. If omitted, pre-selected objects are not accepted</param>
-    ///<returns>(Point3d ResizeArray) List of 3d points.</returns>
+    /// <returns>(Point3d ResizeArray) List of 3d points.</returns>
     static member GetPointCoordinates(  [<OPT;DEF("Select Point Objects")>] message:string,
                                         [<OPT;DEF(false)>]                  preselect:bool) : Point3d ResizeArray =
         let ids =  RhinoScriptSyntax.GetObjects(message, RhinoScriptSyntax.Filter.Point, preselect = preselect)
@@ -397,15 +397,15 @@ module AutoOpenSelection =
 
 
 
-    ///<summary>Prompts the user to select a single Surface.
+    /// <summary>Prompts the user to select a single Surface.
     /// Raises a RhinoUserInteractionException if no object was selected. For example when Esc key was pressed.</summary>
-    ///<param name="message">(string) Optional, default value: <c>"Select Surface"</c>
+    /// <param name="message">(string) Optional, default value: <c>"Select Surface"</c>
     ///    Prompt displayed</param>
-    ///<param name="preselect">(bool) Optional, default value: <c>true</c>
+    /// <param name="preselect">(bool) Optional, default value: <c>true</c>
     ///    Allow for preselected objects</param>
-    ///<param name="select">(bool) Optional, default value: <c>false</c>
+    /// <param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select the picked object</param>
-    ///<returns>((Guid * bool * DocObjects.SelectionMethod * Point3d * (float * float) * string))
+    /// <returns>((Guid * bool * DocObjects.SelectionMethod * Point3d * (float * float) * string))
     ///    [0]  identifier of the Surface
     ///    [1]  True if the Surface was preselected, otherwise False
     ///    [2]  selection method ( DocObjects.SelectionMethod )
@@ -453,15 +453,15 @@ module AutoOpenSelection =
         RhinoSync.DoSyncRedrawHideEditor get
 
 
-    ///<summary>Returns identifiers of all locked objects in the document. Locked objects
+    /// <summary>Returns identifiers of all locked objects in the document. Locked objects
     ///    cannot be snapped to, and cannot be selected.</summary>
-    ///<param name="includeLights">(bool) Optional, default value: <c>false</c>
+    /// <param name="includeLights">(bool) Optional, default value: <c>false</c>
     ///    Include light objects</param>
-    ///<param name="includeGrips">(bool) Optional, default value: <c>false</c>
+    /// <param name="includeGrips">(bool) Optional, default value: <c>false</c>
     ///    Include grip objects</param>
-    ///<param name="includeReferences">(bool) Optional, default value: <c>false</c>
+    /// <param name="includeReferences">(bool) Optional, default value: <c>false</c>
     ///    Include reference objects such as work session objects</param>
-    ///<returns>(Guid ResizeArray) identifiers the locked objects.</returns>
+    /// <returns>(Guid ResizeArray) identifiers the locked objects.</returns>
     static member LockedObjects(    [<OPT;DEF(false)>]includeLights:bool,
                                     [<OPT;DEF(false)>]includeGrips:bool,
                                     [<OPT;DEF(false)>]includeReferences:bool) : Guid ResizeArray =
@@ -479,15 +479,15 @@ module AutoOpenSelection =
                     rc.Add(i.Id)
             rc
 
-    ///<summary>Returns identifiers of all hidden objects in the document. Hidden objects
+    /// <summary>Returns identifiers of all hidden objects in the document. Hidden objects
     ///    are not visible, cannot be snapped to, and cannot be selected.</summary>
-    ///<param name="includeLights">(bool) Optional, default value: <c>false</c>
+    /// <param name="includeLights">(bool) Optional, default value: <c>false</c>
     ///    Include light objects</param>
-    ///<param name="includeGrips">(bool) Optional, default value: <c>false</c>
+    /// <param name="includeGrips">(bool) Optional, default value: <c>false</c>
     ///    Include grip objects</param>
-    ///<param name="includeReferences">(bool) Optional, default value: <c>false</c>
+    /// <param name="includeReferences">(bool) Optional, default value: <c>false</c>
     ///    Include reference objects such as work session objects</param>
-    ///<returns>(Guid ResizeArray) identifiers of the hidden objects.</returns>
+    /// <returns>(Guid ResizeArray) identifiers of the hidden objects.</returns>
     static member HiddenObjects(    [<OPT;DEF(false)>]includeLights:bool,
                                     [<OPT;DEF(false)>]includeGrips:bool,
                                     [<OPT;DEF(false)>]includeReferences:bool) : Guid ResizeArray =
@@ -505,15 +505,15 @@ module AutoOpenSelection =
                 rc.Add(i.Id)
         rc
 
-    ///<summary>Inverts the current object selection. The identifiers of the newly
+    /// <summary>Inverts the current object selection. The identifiers of the newly
     ///    selected objects are returned.</summary>
-    ///<param name="includeLights">(bool) Optional, default value: <c>false</c>
+    /// <param name="includeLights">(bool) Optional, default value: <c>false</c>
     ///    Include light objects. If omitted, light objects are not returned</param>
-    ///<param name="includeGrips">(bool) Optional, default value: <c>false</c>
+    /// <param name="includeGrips">(bool) Optional, default value: <c>false</c>
     ///    Include grips objects. If omitted, grips objects are not returned</param>
-    ///<param name="includeReferences">(bool) Optional, default value: <c>false</c>
+    /// <param name="includeReferences">(bool) Optional, default value: <c>false</c>
     ///    Include reference objects such as work session objects</param>
-    ///<returns>(Guid ResizeArray) identifiers of the newly selected objects.</returns>
+    /// <returns>(Guid ResizeArray) identifiers of the newly selected objects.</returns>
     static member InvertSelectedObjects([<OPT;DEF(false)>]includeLights:bool,
                                         [<OPT;DEF(false)>]includeGrips:bool,
                                         [<OPT;DEF(false)>]includeReferences:bool) : Guid ResizeArray =
@@ -534,13 +534,13 @@ module AutoOpenSelection =
         rc
 
 
-    ///<summary>Returns identifiers of the objects that were most recently created or changed
+    /// <summary>Returns identifiers of the objects that were most recently created or changed
     ///    by scripting a Rhino command using the Command function. It is important to
     ///    call this function immediately after calling the Command function as only the
     ///    most recently created or changed object identifiers will be returned.</summary>
-    ///<param name="select">(bool) Optional, default value: <c>false</c>
+    /// <param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select the object. If omitted, the object is not selected</param>
-    ///<returns>(Guid ResizeArray) identifiers of the most recently created or changed objects.</returns>
+    /// <returns>(Guid ResizeArray) identifiers of the most recently created or changed objects.</returns>
     static member LastCreatedObjects([<OPT;DEF(false)>]select:bool) : Guid ResizeArray =
         match State.CommandSerialNumbers with
         |None -> ResizeArray()
@@ -557,15 +557,15 @@ module AutoOpenSelection =
             rc
 
 
-    ///<summary>Returns the identifier of the last object in the document. The last object
+    /// <summary>Returns the identifier of the last object in the document. The last object
     ///    in the document is the first object created by the user.</summary>
-    ///<param name="select">(bool) Optional, default value: <c>false</c>
+    /// <param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select the object</param>
-    ///<param name="includeLights">(bool) Optional, default value: <c>false</c>
+    /// <param name="includeLights">(bool) Optional, default value: <c>false</c>
     ///    Include lights in the potential set</param>
-    ///<param name="includeGrips">(bool) Optional, default value: <c>false</c>
+    /// <param name="includeGrips">(bool) Optional, default value: <c>false</c>
     ///    Include grips in the potential set</param>
-    ///<returns>(Guid) identifier of the object.</returns>
+    /// <returns>(Guid) identifier of the object.</returns>
     static member LastObject( [<OPT;DEF(false)>]select:bool,
                               [<OPT;DEF(false)>]includeLights:bool,
                               [<OPT;DEF(false)>]includeGrips:bool) : Guid =
@@ -585,15 +585,15 @@ module AutoOpenSelection =
         firstobj.Id
 
 
-    ///<summary>Returns the identifier of the next object in the document.</summary>
-    ///<param name="objectId">(Guid) The identifier of the object from which to get the next object</param>
-    ///<param name="select">(bool) Optional, default value: <c>false</c>
+    /// <summary>Returns the identifier of the next object in the document.</summary>
+    /// <param name="objectId">(Guid) The identifier of the object from which to get the next object</param>
+    /// <param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select the object</param>
-    ///<param name="includeLights">(bool) Optional, default value: <c>false</c>
+    /// <param name="includeLights">(bool) Optional, default value: <c>false</c>
     ///    Include lights in the potential set</param>
-    ///<param name="includeGrips">(bool) Optional, default value: <c>false</c>
+    /// <param name="includeGrips">(bool) Optional, default value: <c>false</c>
     ///    Include grips in the potential set</param>
-    ///<returns>(Guid) identifier of the object.</returns>
+    /// <returns>(Guid) identifier of the object.</returns>
     static member NextObject( objectId:Guid,
                               [<OPT;DEF(false)>]select:bool,
                               [<OPT;DEF(false)>]includeLights:bool,
@@ -615,13 +615,13 @@ module AutoOpenSelection =
 
 
 
-    ///<summary>Returns identifiers of all normal objects in the document. Normal objects
+    /// <summary>Returns identifiers of all normal objects in the document. Normal objects
     ///    are visible, can be snapped to, and are independent of selection state.</summary>
-    ///<param name="includeLights">(bool) Optional, default value: <c>false</c>
+    /// <param name="includeLights">(bool) Optional, default value: <c>false</c>
     ///    Include light objects. If omitted, light objects are not returned</param>
-    ///<param name="includeGrips">(bool) Optional, default value: <c>false</c>
+    /// <param name="includeGrips">(bool) Optional, default value: <c>false</c>
     ///    Include grips objects. If omitted, grips objects are not returned</param>
-    ///<returns>(Guid ResizeArray) identifier of normal objects.</returns>
+    /// <returns>(Guid ResizeArray) identifier of normal objects.</returns>
     static member NormalObjects([<OPT;DEF(false)>]includeLights:bool, [<OPT;DEF(false)>]includeGrips:bool) : Guid ResizeArray =
         let iter = DocObjects.ObjectEnumeratorSettings()
         iter.NormalObjects <- true
@@ -633,13 +633,13 @@ module AutoOpenSelection =
 
 
 
-    ///<summary>Returns identifiers of all objects based on color.</summary>
-    ///<param name="color">(Drawing.Color) Color to get objects by</param>
-    ///<param name="select">(bool) Optional, default value: <c>false</c>
+    /// <summary>Returns identifiers of all objects based on color.</summary>
+    /// <param name="color">(Drawing.Color) Color to get objects by</param>
+    /// <param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select the objects</param>
-    ///<param name="includeLights">(bool) Optional, default value: <c>false</c>
+    /// <param name="includeLights">(bool) Optional, default value: <c>false</c>
     ///    Include lights in the set</param>
-    ///<returns>(Guid ResizeArray) identifiers of objects of the selected color.</returns>
+    /// <returns>(Guid ResizeArray) identifiers of objects of the selected color.</returns>
     static member ObjectsByColor( color:Drawing.Color,
                                   [<OPT;DEF(false)>]select:bool,
                                   [<OPT;DEF(false)>]includeLights:bool) : Guid ResizeArray =
@@ -650,11 +650,11 @@ module AutoOpenSelection =
         rhinoobjects |> RArr.mapSeq _.Id
 
 
-    ///<summary>Returns identifiers of all objects based on the objects' group name.</summary>
-    ///<param name="groupName">(string) Name of the group</param>
-    ///<param name="select">(bool) Optional, default value: <c>false</c>
+    /// <summary>Returns identifiers of all objects based on the objects' group name.</summary>
+    /// <param name="groupName">(string) Name of the group</param>
+    /// <param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select the objects</param>
-    ///<returns>(Guid ResizeArray) identifiers for objects in the group.</returns>
+    /// <returns>(Guid ResizeArray) identifiers for objects in the group.</returns>
     static member ObjectsByGroup(groupName:string, [<OPT;DEF(false)>]select:bool) : Guid ResizeArray =
         let groupinstance = State.Doc.Groups.FindName(groupName)
         if isNull groupinstance then
@@ -669,11 +669,11 @@ module AutoOpenSelection =
             rhinoobjects  |> RArr.mapArr _.Id
 
 
-    ///<summary>Returns identifiers of all objects based on the objects' layer name.</summary>
-    ///<param name="layerName">(string) Name of the layer</param>
-    ///<param name="select">(bool) Optional, default value: <c>false</c>
+    /// <summary>Returns identifiers of all objects based on the objects' layer name.</summary>
+    /// <param name="layerName">(string) Name of the layer</param>
+    /// <param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select the objects</param>
-    ///<returns>(Guid ResizeArray) identifiers for objects in the specified layer.</returns>
+    /// <returns>(Guid ResizeArray) identifiers for objects in the specified layer.</returns>
     static member ObjectsByLayer(layerName:string, [<OPT;DEF(false)>]select:bool) : Guid ResizeArray =
         let layer = RhinoScriptSyntax.CoerceLayer(layerName)
         let rhinoobjects = State.Doc.Objects.FindByLayer(layer)
@@ -686,15 +686,15 @@ module AutoOpenSelection =
 
 
 
-    ///<summary>Returns identifiers of all objects based on user-assigned name.</summary>
-    ///<param name="name">(string) Name of the object or objects</param>
-    ///<param name="select">(bool) Optional, default value: <c>false</c>
+    /// <summary>Returns identifiers of all objects based on user-assigned name.</summary>
+    /// <param name="name">(string) Name of the object or objects</param>
+    /// <param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select the objects</param>
-    ///<param name="includeLights">(bool) Optional, default value: <c>false</c>
+    /// <param name="includeLights">(bool) Optional, default value: <c>false</c>
     ///    Include light objects</param>
-    ///<param name="includeReferences">(bool) Optional, default value: <c>false</c>
+    /// <param name="includeReferences">(bool) Optional, default value: <c>false</c>
     ///    Include reference objects such as work session objects</param>
-    ///<returns>(Guid ResizeArray) identifiers for objects with the specified name.</returns>
+    /// <returns>(Guid ResizeArray) identifiers for objects with the specified name.</returns>
     static member ObjectsByName( name:string,
                                  [<OPT;DEF(false)>]select:bool,
                                  [<OPT;DEF(false)>]includeLights:bool,
@@ -714,8 +714,8 @@ module AutoOpenSelection =
             State.Doc.Views.Redraw()
         ids
 
-    ///<summary>Returns identifiers of all objects based on the objects' geometry type.</summary>
-    ///<param name="geometryType">(int) The type(s) of geometry objects (points, Curves, Surfaces,
+    /// <summary>Returns identifiers of all objects based on the objects' geometry type.</summary>
+    /// <param name="geometryType">(int) The type(s) of geometry objects (points, Curves, Surfaces,
     ///    Meshes, etc.) that can be selected. Object types can be
     ///    added together as bit-coded flags to filter several different kinds of geometry.
     ///      Value        Description
@@ -739,9 +739,9 @@ module AutoOpenSelection =
     ///        268435456   Phantom
     ///        536870912   Clipping Plane
     ///        1073741824  Extrusion</param>
-    ///<param name="select">(bool) Optional, default value: <c>false</c>
+    /// <param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select the objects</param>
-    ///<param name="state">(int) Optional, default value: <c>0</c>
+    /// <param name="state">(int) Optional, default value: <c>0</c>
     ///    The object state (normal, locked, and hidden). Object states can be
     ///    added together to filter several different states of geometry.
     ///      Value     Description
@@ -749,7 +749,7 @@ module AutoOpenSelection =
     ///      1         Normal objects
     ///      2         Locked objects
     ///      4         Hidden objects</param>
-    ///<returns>(Guid ResizeArray) identifiers of object that fit the specified type(s).</returns>
+    /// <returns>(Guid ResizeArray) identifiers of object that fit the specified type(s).</returns>
     static member ObjectsByType( geometryType:int,
                                  [<OPT;DEF(false)>]select:bool,
                                  [<OPT;DEF(0)>]state:int) : Guid ResizeArray =
@@ -809,36 +809,36 @@ module AutoOpenSelection =
         objectIds
 
 
-    ///<summary>Returns the identifiers of all objects that are currently selected.</summary>
-    ///<param name="includeLights">(bool) Optional, default value: <c>false</c>
+    /// <summary>Returns the identifiers of all objects that are currently selected.</summary>
+    /// <param name="includeLights">(bool) Optional, default value: <c>false</c>
     ///    Include light objects</param>
-    ///<param name="includeGrips">(bool) Optional, default value: <c>false</c>
+    /// <param name="includeGrips">(bool) Optional, default value: <c>false</c>
     ///    Include grip objects</param>
-    ///<returns>(Guid ResizeArray) identifiers of selected objects.</returns>
+    /// <returns>(Guid ResizeArray) identifiers of selected objects.</returns>
     static member SelectedObjects([<OPT;DEF(false)>]includeLights:bool, [<OPT;DEF(false)>]includeGrips:bool) : Guid ResizeArray =
         State.Doc.Objects.GetSelectedObjects(includeLights, includeGrips)
         |> RArr.mapSeq _.Id
 
 
-    ///<summary>Unselects all objects in the document.</summary>
-    ///<returns>(int) The number of objects that were unselected.</returns>
+    /// <summary>Unselects all objects in the document.</summary>
+    /// <returns>(int) The number of objects that were unselected.</returns>
     static member UnselectAllObjects() : int =
         let rc = State.Doc.Objects.UnselectAll()
         if rc>0 then State.Doc.Views.Redraw()
         rc
 
 
-    ///<summary>Return identifiers of all objects that are visible in a specified view.
+    /// <summary>Return identifiers of all objects that are visible in a specified view.
     /// This function is the same as rs.VisibleObjects in Rhino Python.
     /// use rs.ShownObjects to get all objects that are not hidden or on turned-off layers. .</summary>
-    ///<param name="view">(string) Optional, The view to use. If omitted, the current active view is used</param>
-    ///<param name="select">(bool) Optional, default value: <c>false</c>
+    /// <param name="view">(string) Optional, The view to use. If omitted, the current active view is used</param>
+    /// <param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select the objects</param>
-    ///<param name="includeLights">(bool) Optional, default value: <c>false</c>
+    /// <param name="includeLights">(bool) Optional, default value: <c>false</c>
     ///    Include light objects</param>
-    ///<param name="includeGrips">(bool) Optional, default value: <c>false</c>
+    /// <param name="includeGrips">(bool) Optional, default value: <c>false</c>
     ///    Include grip objects</param>
-    ///<returns>(Guid ResizeArray) identifiers of the visible objects.</returns>
+    /// <returns>(Guid ResizeArray) identifiers of the visible objects.</returns>
     static member VisibleObjectsInView(   [<OPT;DEF(null:string)>]view:string,
                                           [<OPT;DEF(false)>]select:bool,
                                           [<OPT;DEF(false)>]includeLights:bool,
@@ -865,15 +865,15 @@ module AutoOpenSelection =
         RhinoSync.DoSync get
 
 
-    ///<summary>Picks objects using either a window or crossing selection.</summary>
-    ///<param name="corner1">(Point3d) Corner1 of selection window</param>
-    ///<param name="corner2">(Point3d) Corner2 of selection window</param>
-    ///<param name="view">(string) Optional, View to perform the selection in</param>
-    ///<param name="select">(bool) Optional, default value: <c>false</c>
+    /// <summary>Picks objects using either a window or crossing selection.</summary>
+    /// <param name="corner1">(Point3d) Corner1 of selection window</param>
+    /// <param name="corner2">(Point3d) Corner2 of selection window</param>
+    /// <param name="view">(string) Optional, View to perform the selection in</param>
+    /// <param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select picked objects</param>
-    ///<param name="inWindow">(bool) Optional, default value: <c>true</c>
+    /// <param name="inWindow">(bool) Optional, default value: <c>true</c>
     ///    If False, then a crossing window selection is performed</param>
-    ///<returns>(Guid ResizeArray) identifiers of selected objects.</returns>
+    /// <returns>(Guid ResizeArray) identifiers of selected objects.</returns>
     static member WindowPick( corner1:Point3d,
                               corner2:Point3d,
                               [<OPT;DEF(null:string)>]view:string,

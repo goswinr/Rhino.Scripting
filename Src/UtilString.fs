@@ -15,12 +15,12 @@ module internal Util =
     let inline ifZero2 a b =  if b = 0.0 then a else b
 
 
-    ///<summary>Checks if a string is a ASCII string for use in Rhino Object Names or User Dictionary keys and values.
+    /// <summary>Checks if a string is a ASCII string for use in Rhino Object Names or User Dictionary keys and values.
     /// Only allows chars between Unicode points 32 till 126 (ASCII) </summary>
     /// May not include line returns, tabs, and leading or trailing whitespace.
-    ///<param name="name">(string) The string to check.</param>
-    ///<param name="allowEmpty">(bool) set to true to make empty strings pass. </param>    
-    ///<returns>(bool) true if the string is a valid name.</returns>
+    /// <param name="name">(string) The string to check.</param>
+    /// <param name="allowEmpty">(bool) set to true to make empty strings pass. </param>    
+    /// <returns>(bool) true if the string is a valid name.</returns>
     let isASCIIStringId( name:string, allowEmpty:bool) : bool = 
         if isNull name then false
         elif allowEmpty && name = "" then true
@@ -38,12 +38,12 @@ module internal Util =
                             false
                 loop 0
     
-    ///<summary>Checks if a string is a good string for use in Rhino Object Names or User Dictionary keys and values.
+    /// <summary>Checks if a string is a good string for use in Rhino Object Names or User Dictionary keys and values.
     /// A good string may not include line returns, tabs, and leading or trailing whitespace.
     /// Confusing or ambiguous Unicode characters that look like ASCII but are some other Unicode are also not allowed. </summary>
-    ///<param name="name">(string) The string to check.</param>
-    ///<param name="allowEmpty">(bool) set to true to make empty strings pass. </param>   
-    ///<returns>(bool) true if the string is a valid name.</returns>
+    /// <param name="name">(string) The string to check.</param>
+    /// <param name="allowEmpty">(bool) set to true to make empty strings pass. </param>   
+    /// <returns>(bool) true if the string is a valid name.</returns>
     let isGoodStringId( name:string, allowEmpty:bool) : bool = 
         if isNull name then false
         elif allowEmpty && name = "" then true
@@ -102,12 +102,12 @@ module internal Util =
                 loop 0
 
 
-    ///<summary>Checks if a string is a acceptable string for use in Rhino Object Names or User Dictionary keys and values.
+    /// <summary>Checks if a string is a acceptable string for use in Rhino Object Names or User Dictionary keys and values.
     /// A acceptable string may not include line returns, tabs, and leading or trailing whitespace.
     /// Confusing or ambiguous Unicode characters that look like ASCII are allowed. </summary>
-    ///<param name="name">(string) The string to check.</param>
-    ///<param name="allowEmpty">(bool) set to true to make empty strings pass. </param>    
-    ///<returns>(bool) true if the string is a valid name.</returns>
+    /// <param name="name">(string) The string to check.</param>
+    /// <param name="allowEmpty">(bool) set to true to make empty strings pass. </param>    
+    /// <returns>(bool) true if the string is a valid name.</returns>
     let isAcceptableStringId(name:string, allowEmpty:bool ) : bool = 
         if isNull name then false
         elif allowEmpty && name = "" then true

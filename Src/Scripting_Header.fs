@@ -2,7 +2,6 @@
 
 open Rhino
 
-
 // leave all these open statements here! even if they are unused, they are needed when all files are combined into one during the build.
 open System
 open System.Globalization
@@ -11,13 +10,6 @@ open Microsoft.FSharp.Core.LanguagePrimitives
 open Rhino.Geometry
 open Rhino.ApplicationSettings
 open Rhino.Scripting.RhinoScriptingUtils
-
-
-
-
-
-
-
 
 
 // ------- Abbreviations so that declarations are not so long:
@@ -65,23 +57,22 @@ type RhinoScriptSyntax private () =
             raise ( OperationCanceledException("Esc key was pressed and caught via RhinoScriptSyntax.EscapeTest()"))
 
 
-    ///<summary>Clamps a value between a lower and an upper bound.</summary>
-    ///<param name="minVal">(float) The lower bound</param>
-    ///<param name="maxVal">(float) The upper bound</param>
-    ///<param name="value">(float) The value to clamp</param>
-    ///<returns>(float) The clamped value.</returns>
+    /// <summary>Clamps a value between a lower and an upper bound.</summary>
+    /// <param name="minVal">(float) The lower bound.</param>
+    /// <param name="maxVal">(float) The upper bound.</param>
+    /// <param name="value">(float) The value to clamp.</param>
+    /// <returns>(float) The clamped value.</returns>
     static member Clamp (minVal:float, maxVal:float, value:float) : float =
         if minVal > maxVal then  RhinoScriptingException.Raise "RhinoScriptSyntax.Clamp: minValue %A must be less than maxValue %A" minVal maxVal
         max minVal (min maxVal value)
 
-
-    ///<summary>Like the Python 'xrange' function for integers this creates a range of floating point values.
-    ///    The last or stop value will NOT be included in range as per python semantics, this is different from F# semantics on range expressions.
-    ///    Use FsEx.UtilMath.floatRange(...) to include stop value in range.</summary>
-    ///<param name="start">(float) first value of range</param>
-    ///<param name="stop">(float) end of range (The last value will not be included in range, Python semantics.)</param>
-    ///<param name="step">(float) step size between two values</param>
-    ///<returns>(float seq) a lazy seq of floats.</returns>
+    /// <summary>Like the Python 'xrange' function for integers, this creates a range of floating point values.
+    /// The last or stop value will NOT be included in the range as per Python semantics; this is different from F# semantics on range expressions.
+    /// Use FsEx.UtilMath.floatRange(...) to include the stop value in the range.</summary>
+    /// <param name="start">(float) The first value of the range.</param>
+    /// <param name="stop">(float) The end of the range. The last value will not be included in the range (Python semantics).</param>
+    /// <param name="step">(float) The step size between two values.</param>
+    /// <returns>(float seq) A lazy sequence of floats.</returns>
     static member FxrangePython (start:float, stop:float, step:float) : float seq =
         if isNanOrInf start then RhinoScriptingException.Raise "RhinoScriptSyntax.FxrangePython: NaN or Infinity, start=%f, step=%f, stop=%f" start step stop
         if isNanOrInf step  then RhinoScriptingException.Raise "RhinoScriptSyntax.FxrangePython: NaN or Infinity, start=%f, step=%f, stop=%f" start step stop
@@ -103,25 +94,25 @@ type RhinoScriptSyntax private () =
                         yield! floatRange (start, (i + 1.0), steps) } // tail recursive !
             floatRange (start, 0.0, steps)
 
-    ///<summary>Like the Python 'range' function for integers this creates a range of floating point values.
-    ///    This last or stop value will NOT be included in range as per python semantics, this is different from F# semantics on range expressions.
-    ///    Use FsEx.UtilMath.floatRange(...) to include stop value in range.</summary>
-    ///<param name="start">(float) first value of range</param>
-    ///<param name="stop">(float) end of range( The last value will not be included in range, Python semantics.)</param>
-    ///<param name="step">(float) step size between two values</param>
-    ///<returns>(float ResizeArray).</returns>
+    /// <summary>Like the Python 'range' function for integers, this creates a range of floating point values.
+    /// The last or stop value will NOT be included in the range as per Python semantics; this is different from F# semantics on range expressions.
+    /// Use FsEx.UtilMath.floatRange(...) to include the stop value in the range.</summary>
+    /// <param name="start">(float) The first value of the range.</param>
+    /// <param name="stop">(float) The end of the range. The last value will not be included in the range (Python semantics).</param>
+    /// <param name="step">(float) The step size between two values.</param>
+    /// <returns>(float ResizeArray) A resizable array of floats.</returns>
     static member FrangePython (start:float, stop:float, step:float) : float ResizeArray =
         RhinoScriptSyntax.FxrangePython (start, stop, step) |> ResizeArray
 
-    ///<summary>Adds any geometry object (struct or class) to the Rhino document.
-    /// works not only on any subclass of GeometryBase but also on Point3d, Line, Arc and similar structs </summary>
-    ///<param name="geo">the Geometry</param>
-    ///<param name="layerIndex">(int) LayerIndex</param>
-    ///<param name="objectName">(string) Default Value: <c>""</c>, object name</param>
-    ///<param name="userTextKeysAndValues">(string*string seq) Default Value: <c>[]</c>, list of key value pairs for user text</param>
-    ///<param name="stringSafetyCheck">(bool) Optional, default value: <c>true</c>. Check object name and usertext do not include line returns, tabs, and leading or trailing whitespace.</param>
-    ///<param name="collapseParents">(bool) Optional, default value: <c>false</c>. Collapse parent layers in Layer UI </param>
-    ///<returns>(Guid) The Guid of the added Object.</returns>
+    /// <summary>Adds any geometry object (struct or class) to the Rhino document.
+    /// Works not only on any subclass of GeometryBase but also on Point3d, Line, Arc, and similar structs.</summary>
+    /// <param name="geo">The geometry object.</param>
+    /// <param name="layerIndex">(int) The layer index.</param>
+    /// <param name="objectName">(string) Default value: <c>""</c>. The object name.</param>
+    /// <param name="userTextKeysAndValues">(string*string seq) Default value: <c>[]</c>. List of key-value pairs for user text.</param>
+    /// <param name="stringSafetyCheck">(bool) Optional, default value: <c>true</c>. Checks that object name and user text do not include line returns, tabs, or leading/trailing whitespace.</param>
+    /// <param name="collapseParents">(bool) Optional, default value: <c>false</c>. Collapse parent layers in the Layer UI.</param>
+    /// <returns>(Guid) The Guid of the added object.</returns>
     static member Add (  geo:'T
                       ,  layerIndex:int // don't make it  optional , so that method overload resolution works for rs.Add(..)
                       ,  [<OPT;DEF("")>]objectName:string
@@ -159,7 +150,7 @@ type RhinoScriptSyntax private () =
         | :? Point3f     as pt->   State.Doc.Objects.AddPoint(pt,attr)
         | :? Line        as ln->   State.Doc.Objects.AddLine(ln,attr)
         | :? Arc         as a->    State.Doc.Objects.AddArc(a,attr)
-        | :? Circle      as c->    State.Doc.Objects.AddCircle(c,attr)
+        | :? Circle      as c->   State.Doc.Objects.AddCircle(c,attr)
         | :? Ellipse     as e->    State.Doc.Objects.AddEllipse(e,attr)
         | :? Polyline    as pl ->  State.Doc.Objects.AddPolyline(pl,attr)
         | :? Box         as b ->   State.Doc.Objects.AddBox(b,attr)
@@ -169,16 +160,16 @@ type RhinoScriptSyntax private () =
         | :? Cone        as c ->   State.Doc.Objects.AddSurface (c.ToNurbsSurface(),attr)
         | _ -> RhinoScriptingException.Raise $"RhinoScriptSyntax.Add: object of type {geo.GetType().FullName} not implemented yet"
 
-    ///<summary>Adds any geometry object (struct or class) to the Rhino document.
-    ///   Works not only on any subclass of GeometryBase but also on Point3d, Line, Arc and similar structs </summary>
-    ///<param name="geo">the Geometry</param>
-    ///<param name="layer">(string) Optional, Layer Name, parent layer separated by '::' </param>
-    ///<param name="objectName">(string) Optional, default value: <c>""</c>. The object name</param>
-    ///<param name="userTextKeysAndValues">(string*string seq) Optional, default value: <c>[]</c>. list of key value pairs for user text</param>
-    ///<param name="layerColor">(Drawing.Color) Optional, default value: <c>FsEx.Color.randomForRhino()</c>Color for layer. The layer color will NOT be changed even if the layer exists already</param>
-    ///<param name="stringSafetyCheck">(bool) Optional, default value: <c>true</c>. Check object name and usertext do not include line returns, tabs, and leading or trailing whitespace.</param>
-    ///<param name="collapseParents">(bool) Optional, default value: <c>false</c>. Collapse parent layers in Layer UI </param>
-    ///<returns>(Guid) The Guid of the added Object.</returns>
+    /// <summary>Adds any geometry object (struct or class) to the Rhino document.
+    /// Works not only on any subclass of GeometryBase but also on Point3d, Line, Arc, and similar structs.</summary>
+    /// <param name="geo">The geometry object.</param>
+    /// <param name="layer">(string) Optional. The layer name; parent layers separated by '::'.</param>
+    /// <param name="objectName">(string) Optional, default value: <c>""</c>. The object name.</param>
+    /// <param name="userTextKeysAndValues">(string*string seq) Optional, default value: <c>[]</c>. List of key-value pairs for user text.</param>
+    /// <param name="layerColor">(Drawing.Color) Optional, default value: <c>FsEx.Color.randomForRhino()</c>. The color for the layer. The layer color will NOT be changed if the layer already exists.</param>
+    /// <param name="stringSafetyCheck">(bool) Optional, default value: <c>true</c>. Checks that object name and user text do not include line returns, tabs, or leading/trailing whitespace.</param>
+    /// <param name="collapseParents">(bool) Optional, default value: <c>false</c>. Collapse parent layers in the Layer UI.</param>
+    /// <returns>(Guid) The Guid of the added object.</returns>
     static member Add (  geo:'T
                       ,  [<OPT;DEF("")>]layer:string
                       ,  [<OPT;DEF("")>]objectName:string
