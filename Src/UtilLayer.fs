@@ -96,6 +96,7 @@ module internal UtilLayer =
             |LayerFound   i -> i
 
 
+
     /// Creates all parent layers too if they are missing, uses same locked state and colors for all new layers.
     /// The collapseParents parameter only has an effect if layer is created, not if it exists already
     let internal getOrCreateLayer(name, colorForNewLayers, visible:LayerState, locked:LayerState, allowAllUnicode:bool, collapseParents:bool) : FoundOrCreatedIndex =
@@ -109,51 +110,57 @@ module internal UtilLayer =
                 match name.Split( [|"::"|], StringSplitOptions.None) with // TODO or use StringSplitOptions.RemoveEmptyEntries ??
                 | [| |] -> RhinoScriptingException.Raise "RhinoScriptSyntax.UtilLayer.getOrCreateLayer: Cannot get or create layer for name: '%s'" name
                 | ns ->
-                    let rec createLayer(nameList, prevId, prevIdx, root) : int =
-                        match nameList with
-                        | [] -> prevIdx // exit recursion
-                        | branch :: rest ->
-                            if String.IsNullOrWhiteSpace branch then // to cover for StringSplitOptions.None
-                                RhinoScriptingException.Raise "RhinoScriptSyntax.UtilLayer.getOrCreateLayer: A segment falls into String.IsNullOrWhiteSpace. Cannot get or create layer for name: '%s'" name
-                            let fullPath = if root="" then branch else root + "::" + branch
-                            match State.Doc.Layers.FindByFullPath(fullPath, RhinoMath.UnsetIntIndex) with
-                            | RhinoMath.UnsetIntIndex -> // actually create layer:
-                                failOnBadShortLayerName (branch, name, allowAllUnicode)   // only check non existing sub layer names
-                                let layer = DocObjects.Layer.GetDefaultLayerProperties()
-                                if prevId <> Guid.Empty then
-                                    layer.ParentLayerId <- prevId
-                                    if collapseParents then
-                                        State.Doc.Layers.[prevIdx].IsExpanded <- false
+                    RhinoSync.DoSync(fun () ->  // if not done sync the layer ui becomes unresponsive and might crash
+                        let rec createLayer(nameList, prevId, prevIdx, root) : int =
+                            match nameList with
+                            | [] -> prevIdx // exit recursion
+                            | branch :: rest ->
+                                if String.IsNullOrWhiteSpace branch then // to cover for StringSplitOptions.None
+                                    RhinoScriptingException.Raise "RhinoScriptSyntax.UtilLayer.getOrCreateLayer: A segment falls into String.IsNullOrWhiteSpace. Cannot get or create layer for name: '%s'" name
+                                let fullPath = if root="" then branch else root + "::" + branch
+                                match State.Doc.Layers.FindByFullPath(fullPath, RhinoMath.UnsetIntIndex) with
+                                | RhinoMath.UnsetIntIndex -> // actually create layer:
+                                    failOnBadShortLayerName (branch, name, allowAllUnicode)   // only check non existing sub layer names
+                                    let layer = DocObjects.Layer.GetDefaultLayerProperties()
+                                    if prevId <> Guid.Empty then
+                                        layer.ParentLayerId <- prevId
+                                        if collapseParents then
+                                            State.Doc.Layers.[prevIdx].IsExpanded <- false
 
-                                match visible with
-                                |ByParent -> ()
-                                |On  -> visibleSetTrue(layer, true)
-                                |Off -> visibleSetFalse(layer, true)
+                                    match visible with
+                                    |ByParent -> ()
+                                    |On  -> visibleSetTrue(layer, true)
+                                    |Off -> visibleSetFalse(layer, true)
 
-                                match locked with
-                                |ByParent -> ()
-                                |On  -> lockedSetTrue(layer, true)
-                                |Off -> lockedSetFalse(layer, true)
+                                    match locked with
+                                    |ByParent -> ()
+                                    |On  -> lockedSetTrue(layer, true)
+                                    |Off -> lockedSetFalse(layer, true)
 
-                                layer.Name <- branch
-                                layer.Color <- colorForNewLayers() // delay creation of (random) color till actually needed ( so random colors are not created, in most cases layer exists)
-                                let i = State.Doc.Layers.Add(layer)
-                                let id = State.Doc.Layers.[i].Id // just using layer.Id would be empty guid
-                                createLayer(rest , id , i,  fullPath)
+                                    layer.Name <- branch
+                                    layer.Color <- colorForNewLayers() // delay creation of (random) color till actually needed ( so random colors are not created, in most cases layer exists)
+                                    let i = State.Doc.Layers.Add(layer)
+                                    let id = State.Doc.Layers.[i].Id // just using layer.Id would be empty guid
+                                    createLayer(rest , id , i,  fullPath)
 
-                            | i ->
-                                createLayer(rest , State.Doc.Layers.[i].Id , i ,fullPath)
+                                | i ->
+                                    createLayer(rest , State.Doc.Layers.[i].Id , i ,fullPath)
 
-                    LayerCreated (createLayer( ns |> List.ofArray, Guid.Empty, 0, ""))
+                        LayerCreated (createLayer( ns |> List.ofArray, Guid.Empty, 0, ""))
+                    )
         | i -> LayerFound i
 
 
     /// creates layer with default name
     let internal createDefaultLayer(color, visible, locked) =
-        let layer = DocObjects.Layer.GetDefaultLayerProperties()
-        layer.Color <- color() // delay creation of (random) color till actually needed ( so random colors are not created, in most cases layer exists)
-        if layer.ParentLayerId <> Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.createDefaultLayer how can a new default layer have a parent ? %A" layer
-        layer.IsVisible <- visible
-        layer.IsLocked <- locked
-        State.Doc.Layers.Add(layer)
+        RhinoSync.DoSync(fun () ->
+            let layer = DocObjects.Layer.GetDefaultLayerProperties()
+            layer.Color <- color() // delay creation of (random) color till actually needed ( so random colors are not created, in most cases layer exists)
+            if layer.ParentLayerId <> Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.createDefaultLayer how can a new default layer have a parent ? %A" layer
+            layer.IsVisible <- visible
+            layer.IsLocked <- locked
+            State.Doc.Layers.Add(layer)
+        )
+
+
 

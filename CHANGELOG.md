@@ -8,9 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.11.0] - 2025-03-15
+## [0.11.0] - 2025-05-24
 ### Added
 - build for net7.0 too
+### Fixed
+- many typos in docstrings via copilot
+- create layers only on UI thread
 
 ## [0.10.1] - 2025-03-15
 ### Changed
@@ -78,7 +81,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - First public release
 
 [Unreleased]: https://github.com/goswinr/Rhino.Scripting/compare/0.11.0-net7...HEAD
-[0.11.0-net7]: https://github.com/goswinr/Rhino.Scripting/compare/0.10.1...0.11.0-net7
+[0.11.0]: https://github.com/goswinr/Rhino.Scripting/compare/0.10.1...0.11.0-net7
 [0.10.1]: https://github.com/goswinr/Rhino.Scripting/compare/0.10.0...0.10.1
 [0.10.0]: https://github.com/goswinr/Rhino.Scripting/compare/0.9.0...0.10.0
 [0.9.0]: https://github.com/goswinr/Rhino.Scripting/compare/0.8.2...0.9.0

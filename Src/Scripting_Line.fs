@@ -1,11 +1,8 @@
 ﻿namespace Rhino.Scripting
 
 open Rhino
-
 open System
-
 open Rhino.Geometry
-
 
 [<AutoOpen>]
 module AutoOpenLine =

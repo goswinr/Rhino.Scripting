@@ -33,12 +33,12 @@ type RhinoSync private () =
     static let mutable prettyFormatters: ResizeArray<obj -> option<string>> = null
 
     /// Red green blue text
-    static let mutable printColor : int-> int -> int -> string -> unit = //changed via reflection below from Fesh.Rhino
-        fun _ _ _ s -> Console.Write s
+    static let mutable printColor : int * int * int * string -> unit= //changed via reflection below from Fesh.Rhino
+        fun (_,_,_, s) -> Console.Write s
 
     /// Red green blue text
-    static let mutable printNewLineColor : int-> int -> int -> string -> unit = //changed via reflection below from Fesh.Rhino
-        fun _ _ _ s -> Console.WriteLine s
+    static let mutable printNewLineColor : int * int * int * string -> unit = //changed via reflection below from Fesh.Rhino
+        fun (_,_,_, s) -> Console.WriteLine s
 
     static let mutable clear : unit -> unit = // changed via reflection below from Fesh
         fun () -> ()
@@ -48,20 +48,27 @@ type RhinoSync private () =
         match allAss |> Array.tryFind (fun a -> a.GetName().Name = "Fesh") with
         | Some feshAssembly ->
             try
-                let printModule = feshAssembly.GetType("Fesh.Model.IFeshLogModule")
+                let printModule = feshAssembly.GetType "Fesh.Model.IFeshLogModule"
                 if notNull printModule then
-                    let pc = printModule.GetProperty("printColor" ).GetValue(feshAssembly)
-                    if notNull pc then
-                        let pct = pc :?>  int-> int -> int -> string -> unit
-                        printColor   <- pct
-                    let pnc = printModule.GetProperty("printnColor").GetValue(feshAssembly)
-                    if notNull pnc then
-                        let pct = pnc :?> int-> int -> int -> string -> unit
-                        printNewLineColor   <- pct
                     let cl = printModule.GetProperty("clear").GetValue(feshAssembly)
                     if notNull cl then
                         let clt = cl :?> unit -> unit
                         clear   <- clt
+
+                    try
+                        let pc = printModule.GetProperty( "printColorTupled" ).GetValue(feshAssembly)
+                        if notNull pc then
+                            let pct = pc :?>  int * int * int * string -> unit
+                            printColor   <- pct
+
+                        let pnc = printModule.GetProperty("printnColorTupled").GetValue(feshAssembly)
+                        if notNull pnc then
+                            let pct = pnc :?> int * int * int * string -> unit
+                            printNewLineColor   <- pct
+
+                    with ex ->
+                        eprintfn "The Fesh.Model.IFeshLogModule.clear was found but printColorTupled failed. The Error was: %A" ex
+
             with ex ->
                 eprintfn "The Fesh was found but setting up color printing failed. The Error was: %A" ex
         |None -> ()
@@ -69,7 +76,7 @@ type RhinoSync private () =
         match allAss |> Array.tryFind (fun a -> a.GetName().Name = "Pretty") with
         | Some prettyAssembly ->
             try
-                let prettySettings = prettyAssembly.GetType("Pretty.PrettySettings")
+                let prettySettings = prettyAssembly.GetType "Pretty.PrettySettings"
                 if notNull prettySettings then
                     let formatters = prettySettings.GetProperty("Formatters").GetValue(prettyAssembly) :?> ResizeArray<obj -> option<string>>
                     if notNull formatters then
@@ -77,7 +84,7 @@ type RhinoSync private () =
 
 
             with ex ->
-                eprintfn "The Pretty was found but setting up color printing failed. The Error was: %A" ex
+                eprintfn "An Assembly 'Pretty' was found but setting up color printing failed. The Error was: %A" ex
         |None -> ()
 
 
@@ -211,14 +218,14 @@ type RhinoSync private () =
     /// Prints in both RhinoApp.WriteLine and Console.WriteLine, or Fesh Editor with color if running.
     /// Red green blue text , NO new line
     static member PrintColor r g b s =
-        printColor r g b s
+        printColor (r, g, b, s)
         RhinoApp.Write s
         RhinoApp.Wait()
 
     /// Prints in both RhinoApp.WriteLine and Console.WriteLine, or Fesh Editor with color  if running.
     /// Red green blue text , with new line
     static member PrintnColor r g b s =
-        printNewLineColor r g b s
+        printNewLineColor (r, g, b, s)
         RhinoApp.WriteLine s
         RhinoApp.Wait()
 

@@ -2,7 +2,6 @@
 
 open Rhino
 
-
 // leave all these open statements here! even if they are unused, they are needed when all files are combined into one during the build.
 open System
 open System.Globalization
@@ -11,13 +10,6 @@ open Microsoft.FSharp.Core.LanguagePrimitives
 open Rhino.Geometry
 open Rhino.ApplicationSettings
 open Rhino.Scripting.RhinoScriptingUtils
-
-
-
-
-
-
-
 
 
 // ------- Abbreviations so that declarations are not so long:
@@ -66,22 +58,21 @@ type RhinoScriptSyntax private () =
 
 
     /// <summary>Clamps a value between a lower and an upper bound.</summary>
-    /// <param name="minVal">(float) The lower bound</param>
-    /// <param name="maxVal">(float) The upper bound</param>
-    /// <param name="value">(float) The value to clamp</param>
+    /// <param name="minVal">(float) The lower bound.</param>
+    /// <param name="maxVal">(float) The upper bound.</param>
+    /// <param name="value">(float) The value to clamp.</param>
     /// <returns>(float) The clamped value.</returns>
     static member Clamp (minVal:float, maxVal:float, value:float) : float =
         if minVal > maxVal then  RhinoScriptingException.Raise "RhinoScriptSyntax.Clamp: minValue %A must be less than maxValue %A" minVal maxVal
         max minVal (min maxVal value)
 
-
-    /// <summary>Like the Python 'xrange' function for integers this creates a range of floating point values.
-    ///    The last or stop value will NOT be included in range as per python semantics, this is different from F# semantics on range expressions.
-    ///    Use FsEx.UtilMath.floatRange(...) to include stop value in range.</summary>
-    /// <param name="start">(float) first value of range</param>
-    /// <param name="stop">(float) end of range (The last value will not be included in range, Python semantics.)</param>
-    /// <param name="step">(float) step size between two values</param>
-    /// <returns>(float seq) a lazy seq of floats.</returns>
+    /// <summary>Like the Python 'xrange' function for integers, this creates a range of floating point values.
+    /// The last or stop value will NOT be included in the range as per Python semantics; this is different from F# semantics on range expressions.
+    /// Use FsEx.UtilMath.floatRange(...) to include the stop value in the range.</summary>
+    /// <param name="start">(float) The first value of the range.</param>
+    /// <param name="stop">(float) The end of the range. The last value will not be included in the range (Python semantics).</param>
+    /// <param name="step">(float) The step size between two values.</param>
+    /// <returns>(float seq) A lazy sequence of floats.</returns>
     static member FxrangePython (start:float, stop:float, step:float) : float seq =
         if isNanOrInf start then RhinoScriptingException.Raise "RhinoScriptSyntax.FxrangePython: NaN or Infinity, start=%f, step=%f, stop=%f" start step stop
         if isNanOrInf step  then RhinoScriptingException.Raise "RhinoScriptSyntax.FxrangePython: NaN or Infinity, start=%f, step=%f, stop=%f" start step stop
@@ -103,25 +94,25 @@ type RhinoScriptSyntax private () =
                         yield! floatRange (start, (i + 1.0), steps) } // tail recursive !
             floatRange (start, 0.0, steps)
 
-    /// <summary>Like the Python 'range' function for integers this creates a range of floating point values.
-    ///    This last or stop value will NOT be included in range as per python semantics, this is different from F# semantics on range expressions.
-    ///    Use FsEx.UtilMath.floatRange(...) to include stop value in range.</summary>
-    /// <param name="start">(float) first value of range</param>
-    /// <param name="stop">(float) end of range( The last value will not be included in range, Python semantics.)</param>
-    /// <param name="step">(float) step size between two values</param>
-    /// <returns>(float ResizeArray).</returns>
+    /// <summary>Like the Python 'range' function for integers, this creates a range of floating point values.
+    /// The last or stop value will NOT be included in the range as per Python semantics; this is different from F# semantics on range expressions.
+    /// Use FsEx.UtilMath.floatRange(...) to include the stop value in the range.</summary>
+    /// <param name="start">(float) The first value of the range.</param>
+    /// <param name="stop">(float) The end of the range. The last value will not be included in the range (Python semantics).</param>
+    /// <param name="step">(float) The step size between two values.</param>
+    /// <returns>(float ResizeArray) A resizable array of floats.</returns>
     static member FrangePython (start:float, stop:float, step:float) : float ResizeArray =
         RhinoScriptSyntax.FxrangePython (start, stop, step) |> ResizeArray
 
     /// <summary>Adds any geometry object (struct or class) to the Rhino document.
-    /// works not only on any subclass of GeometryBase but also on Point3d, Line, Arc and similar structs </summary>
-    /// <param name="geo">the Geometry</param>
-    /// <param name="layerIndex">(int) LayerIndex</param>
-    /// <param name="objectName">(string) Default Value: <c>""</c>, object name</param>
-    /// <param name="userTextKeysAndValues">(string*string seq) Default Value: <c>[]</c>, list of key value pairs for user text</param>
-    /// <param name="stringSafetyCheck">(bool) Optional, default value: <c>true</c>. Check object name and usertext do not include line returns, tabs, and leading or trailing whitespace.</param>
-    /// <param name="collapseParents">(bool) Optional, default value: <c>false</c>. Collapse parent layers in Layer UI </param>
-    /// <returns>(Guid) The Guid of the added Object.</returns>
+    /// Works not only on any subclass of GeometryBase but also on Point3d, Line, Arc, and similar structs.</summary>
+    /// <param name="geo">The geometry object.</param>
+    /// <param name="layerIndex">(int) The layer index.</param>
+    /// <param name="objectName">(string) Default value: <c>""</c>. The object name.</param>
+    /// <param name="userTextKeysAndValues">(string*string seq) Default value: <c>[]</c>. List of key-value pairs for user text.</param>
+    /// <param name="stringSafetyCheck">(bool) Optional, default value: <c>true</c>. Checks that object name and user text do not include line returns, tabs, or leading/trailing whitespace.</param>
+    /// <param name="collapseParents">(bool) Optional, default value: <c>false</c>. Collapse parent layers in the Layer UI.</param>
+    /// <returns>(Guid) The Guid of the added object.</returns>
     static member Add (  geo:'T
                       ,  layerIndex:int // don't make it  optional , so that method overload resolution works for rs.Add(..)
                       ,  [<OPT;DEF("")>]objectName:string
@@ -159,7 +150,7 @@ type RhinoScriptSyntax private () =
         | :? Point3f     as pt->   State.Doc.Objects.AddPoint(pt,attr)
         | :? Line        as ln->   State.Doc.Objects.AddLine(ln,attr)
         | :? Arc         as a->    State.Doc.Objects.AddArc(a,attr)
-        | :? Circle      as c->    State.Doc.Objects.AddCircle(c,attr)
+        | :? Circle      as c->   State.Doc.Objects.AddCircle(c,attr)
         | :? Ellipse     as e->    State.Doc.Objects.AddEllipse(e,attr)
         | :? Polyline    as pl ->  State.Doc.Objects.AddPolyline(pl,attr)
         | :? Box         as b ->   State.Doc.Objects.AddBox(b,attr)
@@ -170,15 +161,15 @@ type RhinoScriptSyntax private () =
         | _ -> RhinoScriptingException.Raise $"RhinoScriptSyntax.Add: object of type {geo.GetType().FullName} not implemented yet"
 
     /// <summary>Adds any geometry object (struct or class) to the Rhino document.
-    ///   Works not only on any subclass of GeometryBase but also on Point3d, Line, Arc and similar structs </summary>
-    /// <param name="geo">the Geometry</param>
-    /// <param name="layer">(string) Optional, Layer Name, parent layer separated by '::' </param>
-    /// <param name="objectName">(string) Optional, default value: <c>""</c>. The object name</param>
-    /// <param name="userTextKeysAndValues">(string*string seq) Optional, default value: <c>[]</c>. list of key value pairs for user text</param>
-    /// <param name="layerColor">(Drawing.Color) Optional, default value: <c>FsEx.Color.randomForRhino()</c>Color for layer. The layer color will NOT be changed even if the layer exists already</param>
-    /// <param name="stringSafetyCheck">(bool) Optional, default value: <c>true</c>. Check object name and usertext do not include line returns, tabs, and leading or trailing whitespace.</param>
-    /// <param name="collapseParents">(bool) Optional, default value: <c>false</c>. Collapse parent layers in Layer UI </param>
-    /// <returns>(Guid) The Guid of the added Object.</returns>
+    /// Works not only on any subclass of GeometryBase but also on Point3d, Line, Arc, and similar structs.</summary>
+    /// <param name="geo">The geometry object.</param>
+    /// <param name="layer">(string) Optional. The layer name; parent layers separated by '::'.</param>
+    /// <param name="objectName">(string) Optional, default value: <c>""</c>. The object name.</param>
+    /// <param name="userTextKeysAndValues">(string*string seq) Optional, default value: <c>[]</c>. List of key-value pairs for user text.</param>
+    /// <param name="layerColor">(Drawing.Color) Optional, default value: <c>FsEx.Color.randomForRhino()</c>. The color for the layer. The layer color will NOT be changed if the layer already exists.</param>
+    /// <param name="stringSafetyCheck">(bool) Optional, default value: <c>true</c>. Checks that object name and user text do not include line returns, tabs, or leading/trailing whitespace.</param>
+    /// <param name="collapseParents">(bool) Optional, default value: <c>false</c>. Collapse parent layers in the Layer UI.</param>
+    /// <returns>(Guid) The Guid of the added object.</returns>
     static member Add (  geo:'T
                       ,  [<OPT;DEF("")>]layer:string
                       ,  [<OPT;DEF("")>]objectName:string
@@ -230,9 +221,9 @@ type RhinoScriptSyntax private () =
 
 
 
-    /// <summary>Attempt to get a Guids from input.</summary>
-    /// <param name="objectId">object , Guid or string</param>
-    /// <returns>a Guid Option.</returns>
+    /// <summary>Attempt to get a Guid from input.</summary>
+    /// <param name="objectId">Object, Guid, or string.</param>
+    /// <returns>A Guid option.</returns>
     static member TryCoerceGuid (objectId:'T) : Guid option=
         match box objectId with
         | :? Guid  as g -> if Guid.Empty = g then None else Some g
@@ -241,9 +232,9 @@ type RhinoScriptSyntax private () =
         | :? string  as s -> let ok, g = Guid.TryParse s in  if ok then Some g else None
         | _ -> None
 
-    /// <summary>Attempt to get a Guids from input.</summary>
-    /// <param name="input">object , Guid or string</param>
-    /// <returns>Guid. Raises a RhinoScriptingException if coerce failed.</returns>
+    /// <summary>Attempt to get a Guid from input.</summary>
+    /// <param name="input">Object, Guid, or string.</param>
+    /// <returns>Guid. Raises a RhinoScriptingException if coercion failed.</returns>
     static member CoerceGuid(input:'T) : Guid =
         match box input with
         | :? Guid  as g -> if Guid.Empty = g then RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceGuid: Guid is Empty"  else g
@@ -254,17 +245,17 @@ type RhinoScriptSyntax private () =
         | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceGuid: %A can not be converted to a Guid" input
 
 
-    /// <summary>Attempt to get RhinoObject from the document with a given objectId.</summary>
-    /// <param name="objectId">object Identifier (Guid or string)</param>
-    /// <returns>a RhinoObject Option</returns>
+    /// <summary>Attempt to get a RhinoObject from the document with a given objectId.</summary>
+    /// <param name="objectId">Object identifier (Guid or string).</param>
+    /// <returns>A RhinoObject option.</returns>
     static member TryCoerceRhinoObject (objectId:Guid) : DocObjects.RhinoObject option =
         match State.Doc.Objects.FindId(objectId) with
         | null -> None
         | o    -> Some o
 
-    /// <summary>Attempt to get RhinoObject from the document with a given objectId.</summary>
-    /// <param name="objectId">(Guid) Object Identifier </param>
-    /// <returns>a RhinoObject, Raises a RhinoScriptingException if coerce failed.</returns>
+    /// <summary>Attempt to get a RhinoObject from the document with a given objectId.</summary>
+    /// <param name="objectId">(Guid) Object identifier.</param>
+    /// <returns>A RhinoObject. Raises a RhinoScriptingException if coercion failed.</returns>
     static member CoerceRhinoObject(objectId:Guid) : DocObjects.RhinoObject =
         match RhinoScriptSyntax.TryCoerceRhinoObject objectId with
         |Some o -> o
@@ -272,15 +263,15 @@ type RhinoScriptSyntax private () =
             if Guid.Empty = objectId then    RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceRhinoObject failed on empty Guid"
             else                             RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceRhinoObject: The Guid %O was not found in the Current Object table." objectId
 
-    /// <summary>Attempt to get GeometryBase class from given Guid. Fails on empty Guid.</summary>
-    /// <param name="objectId">geometry Identifier (Guid)</param>
-    /// <returns>a Rhino.Geometry.GeometryBase Option</returns>
+    /// <summary>Attempt to get GeometryBase from a given Guid. Fails on empty Guid.</summary>
+    /// <param name="objectId">Geometry identifier (Guid).</param>
+    /// <returns>A Rhino.Geometry.GeometryBase option.</returns>
     static member TryCoerceGeometry (objectId:Guid) :GeometryBase option =
         match State.Doc.Objects.FindId(objectId) with
         | null -> None
         | o -> Some o.Geometry
 
-    /// <summary>Attempt to get GeometryBase class from given input.</summary>
+    /// <summary>Attempt to get GeometryBase from a given input.</summary>
     /// <param name="objectId">(Guid) geometry Identifier </param>
     /// <returns>(Rhino.Geometry.GeometryBase. Raises a RhinoScriptingException if coerce failed.</returns>
     static member CoerceGeometry(objectId:Guid) : GeometryBase =
@@ -291,7 +282,7 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Attempt to get Rhino LightObject from the document with a given objectId.</summary>
     /// <param name="objectId">(Guid) light Identifier</param>
-    /// <returns>a Rhino.Geometry.Light. Option.</returns>
+    /// <returns>A Rhino.Geometry.Light. Option.</returns>
     static member TryCoerceLight (objectId:Guid) : Light option =
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :? Geometry.Light as l -> Some l
@@ -299,7 +290,7 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Attempt to get Rhino LightObject from the document with a given objectId.</summary>
     /// <param name="objectId">(Guid) light Identifier</param>
-    /// <returns>a  Rhino.Geometry.Light. Raises a RhinoScriptingException if coerce failed.</returns>
+    /// <returns>A  Rhino.Geometry.Light. Raises a RhinoScriptingException if coerce failed.</returns>
     static member CoerceLight (objectId:Guid) : Light =
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :? Geometry.Light as l -> l
@@ -308,7 +299,7 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Attempt to get Mesh class from given Guid. Fails on empty Guid.</summary>
     /// <param name="objectId">Mesh Identifier (Guid)</param>
-    /// <returns>a Rhino.Geometry.Surface Option.</returns>
+    /// <returns>A Rhino.Geometry.Surface Option.</returns>
     static member TryCoerceMesh (objectId:Guid) : Mesh option =
         match State.Doc.Objects.FindId(objectId) with
             | null -> None
@@ -327,7 +318,7 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Attempt to get Surface class from given Guid. Fails on empty Guid.</summary>
     /// <param name="objectId">Surface Identifier (Guid)</param>
-    /// <returns>a Rhino.Geometry.Surface Option.</returns>
+    /// <returns>A Rhino.Geometry.Surface Option.</returns>
     static member TryCoerceSurface (objectId:Guid) : Surface option =
         match State.Doc.Objects.FindId(objectId) with
         | null -> None
@@ -356,7 +347,7 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Attempt to get a Polysurface or Brep class from given Guid. Works on Extrusions too. Fails on empty Guid.</summary>
     /// <param name="objectId">Polysurface Identifier (Guid)</param>
-    /// <returns>a Rhino.Geometry.Mesh Option.</returns>
+    /// <returns>A Rhino.Geometry.Mesh Option.</returns>
     static member TryCoerceBrep (objectId:Guid) : Brep option =
         match State.Doc.Objects.FindId(objectId) with
             | null -> None
@@ -377,7 +368,7 @@ type RhinoScriptSyntax private () =
     /// <summary>Attempt to get Curve geometry from the document with a given objectId.</summary>
     /// <param name="objectId">objectId (Guid or string) to be RhinoScriptSyntax.Coerced into a Curve</param>
     /// <param name="segmentIndex">(int) Optional, index of segment to retrieve. To ignore segmentIndex give -1 as argument</param>
-    /// <returns>a Rhino.Geometry.Curve Option.</returns>
+    /// <returns>A Rhino.Geometry.Curve Option.</returns>
     static member TryCoerceCurve(objectId:Guid,[<OPT;DEF(-1)>]segmentIndex:int) : Curve option =
         let geo = RhinoScriptSyntax.CoerceGeometry objectId
         if segmentIndex < 0 then
@@ -442,7 +433,7 @@ type RhinoScriptSyntax private () =
     /// <summary>Attempt to get Rhino Arc Geometry using the current Documents Absolute Tolerance.
     /// does not return circles as arcs.</summary>
     /// <param name="arc">Guid, RhinoObject or Curve </param>
-    /// <returns>a Geometry.Arc Option.</returns>
+    /// <returns>A Geometry.Arc Option.</returns>
     static member TryCoerceArc(arc:'T) : Arc option=
         match box arc with
         | :? Arc as a -> Some(a)
@@ -473,7 +464,7 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Attempt to get Rhino Circle Geometry using the current Documents Absolute Tolerance.</summary>
     /// <param name="cir">Guid, RhinoObject or Curve </param>
-    /// <returns>a Geometry.Circle Option.</returns>
+    /// <returns>A Geometry.Circle Option.</returns>
     static member TryCoerceCircle(cir:'T) : Circle option=
         match box cir with
         | :? Circle as a -> Some(a)
@@ -502,7 +493,7 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Attempt to get Rhino Ellipse Geometry using the current Documents Absolute Tolerance.</summary>
     /// <param name="cir">Guid, RhinoObject or Curve </param>
-    /// <returns>a Geometry.Ellipse Option.</returns>
+    /// <returns>A Geometry.Ellipse Option.</returns>
     static member TryCoerceEllipse(cir:'T) : Ellipse option=
         match box cir with
         | :? Ellipse as a -> Some(a)
@@ -531,7 +522,7 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Attempt to get Rhino Polyline Geometry.</summary>
     /// <param name="poly">Guid, RhinoObject or Curve </param>
-    /// <returns>a Geometry.Polyline Option.</returns>
+    /// <returns>A Geometry.Polyline Option.</returns>
     static member TryCoercePolyline(poly:'T) : Polyline option=
         match box poly with
         | :? Polyline as a -> Some(a)
@@ -553,7 +544,7 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Attempt to get Rhino Polyline Geometry.</summary>
     /// <param name="poly">Guid, RhinoObject or Curve </param>
-    /// <returns>a Geometry.Polyline Option.</returns>
+    /// <returns>A Geometry.Polyline Option.</returns>
     static member CoercePolyline(poly:'T) : Polyline =
         match RhinoScriptSyntax.TryCoercePolyline poly with
         |None -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoercePolyline failed on: %s " (Pretty.str poly)
@@ -608,7 +599,7 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Attempt to get Rhino View Object from the name of the view, can be a standard or page view.</summary>
     /// <param name="nameOrId">(string or Guid) Name or Guid the view, empty string will return the Active view</param>
-    /// <returns>a State.Doc.View Option.</returns>
+    /// <returns>A State.Doc.View Option.</returns>
     static member TryCoerceView (nameOrId:'T) : Option<Display.RhinoView> =
         match box nameOrId with
         | :? Guid as g ->
@@ -635,7 +626,7 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Attempt to get Rhino View Object from the name of the view, can be a standard or page view.</summary>
     /// <param name="nameOrId">(string or Guid) Name or Guid the view, empty string will return the Active view</param>
-    /// <returns>a State.Doc.View object. Raises a RhinoScriptingException if coerce failed.</returns>
+    /// <returns>A State.Doc.View object. Raises a RhinoScriptingException if coerce failed.</returns>
     static member CoerceView (nameOrId:'T) : Display.RhinoView =
         match box nameOrId with
         | :? Guid as g ->
@@ -667,7 +658,7 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Attempt to get Rhino Page (or Layout) View Object from the name of the Layout.</summary>
     /// <param name="nameOrId">(string) Name of the Layout</param>
-    /// <returns>a State.Doc.View object. Raises a RhinoScriptingException if coerce failed.</returns>
+    /// <returns>A State.Doc.View object. Raises a RhinoScriptingException if coerce failed.</returns>
     static member CoercePageView (nameOrId:'T) : Display.RhinoPageView =
         match box nameOrId with
         | :? Guid as g ->
@@ -689,7 +680,7 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Attempt to get Detail view rectangle Geometry.</summary>
     /// <param name="objectId">(Guid) objectId of Detail object</param>
-    /// <returns>a Geometry.DetailView. Raises a RhinoScriptingException if coerce failed.</returns>
+    /// <returns>A Geometry.DetailView. Raises a RhinoScriptingException if coerce failed.</returns>
     static member CoerceDetailView (objectId:Guid) : DetailView =
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :?  DetailView as a -> a
@@ -697,7 +688,7 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Attempt to get Detail view rectangle Object.</summary>
     /// <param name="objectId">(Guid) objectId of Detail object</param>
-    /// <returns>a DocObjects.DetailViewObject. Raises a RhinoScriptingException if coerce failed.</returns>
+    /// <returns>A DocObjects.DetailViewObject. Raises a RhinoScriptingException if coerce failed.</returns>
     static member CoerceDetailViewObject (objectId:Guid) : DocObjects.DetailViewObject =
         match RhinoScriptSyntax.CoerceRhinoObject objectId with
         | :?  DocObjects.DetailViewObject as a -> a
@@ -709,7 +700,7 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Attempt to get TextDot Geometry.</summary>
     /// <param name="objectId">(Guid) objectId of TextDot object</param>
-    /// <returns>a Geometry.TextDot. Raises a RhinoScriptingException if coerce failed.</returns>
+    /// <returns>A Geometry.TextDot. Raises a RhinoScriptingException if coerce failed.</returns>
     static member CoerceTextDot (objectId:Guid) : TextDot =
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :?  TextDot as a -> a
@@ -717,7 +708,7 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Attempt to get TextEntity Geometry (for the text Object use rs.CoerceTextObject) .</summary>
     /// <param name="objectId">(Guid) objectId of TextEntity object</param>
-    /// <returns>a Geometry.TextEntity. Raises a RhinoScriptingException if coerce failed.</returns>
+    /// <returns>A Geometry.TextEntity. Raises a RhinoScriptingException if coerce failed.</returns>
     static member CoerceTextEntity (objectId:Guid) : TextEntity =
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :?  TextEntity as a -> a
@@ -734,7 +725,7 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Attempt to get Hatch Geometry.</summary>
     /// <param name="objectId">(Guid) objectId of Hatch object</param>
-    /// <returns>a Geometry.CoerceHatch. Raises a RhinoScriptingException if coerce failed.</returns>
+    /// <returns>A Geometry.CoerceHatch. Raises a RhinoScriptingException if coerce failed.</returns>
     static member CoerceHatch (objectId:Guid) : Hatch =
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :?  Hatch as a -> a
@@ -779,7 +770,7 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Converts input into a Rhino.Geometry.Point3d if possible.</summary>
     /// <param name="pt">Input to convert, Point3d, Vector3d, Point3f, Vector3f, str, Guid, or seq</param>
-    /// <returns>a Rhino.Geometry.Point3d, Raises a RhinoScriptingException if coerce failed.</returns>
+    /// <returns>A Rhino.Geometry.Point3d, Raises a RhinoScriptingException if coerce failed.</returns>
     static member Coerce3dPoint(pt:'T) : Point3d =
         let inline  point3dOf3(x:^x, y:^y, z:^z) =
             try Point3d(float (x), float(y), float(z))
@@ -818,7 +809,7 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Attempt to get Rhino Point Object.</summary>
     /// <param name="objectId">(Guid) objectId of Point object</param>
-    /// <returns>a DocObjects.PointObject, Raises a RhinoScriptingException if coerce failed.</returns>
+    /// <returns>A DocObjects.PointObject, Raises a RhinoScriptingException if coerce failed.</returns>
     static member CoercePointObject (objectId:Guid) : DocObjects.PointObject =
         match RhinoScriptSyntax.CoerceRhinoObject objectId with
         | :?  DocObjects.PointObject as a -> a
@@ -826,7 +817,7 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Convert input into a Rhino.Geometry.Point2d if possible.</summary>
     /// <param name="point">input to convert, Point3d, Vector3d, Point3f, Vector3f, str, Guid, or seq</param>
-    /// <returns>a Rhino.Geometry.Point2d, Raises a RhinoScriptingException if coerce failed.</returns>
+    /// <returns>A Rhino.Geometry.Point2d, Raises a RhinoScriptingException if coerce failed.</returns>
     static member Coerce2dPoint(point:'T) : Point2d =
         match box point with
         | :? Point2d    as point -> point
@@ -929,7 +920,7 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Attempt to get Rhino PointCloud Geometry.</summary>
     /// <param name="objectId">(Guid) objectId of PointCloud object</param>
-    /// <returns>a Geometry.PointCloud. Raises a RhinoScriptingException if coerce failed.</returns>
+    /// <returns>A Geometry.PointCloud. Raises a RhinoScriptingException if coerce failed.</returns>
     static member CoercePointCloud (objectId:Guid) : PointCloud =
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :?  PointCloud as a -> a
@@ -1003,11 +994,11 @@ type RhinoScriptSyntax private () =
 
 
 
-    /// <summary>Add a new layer to the document. If it does not exist yet.
-    /// By default Ambiguous Unicode characters are not allowed in layer name. This can be changed via optional parameter.
-    /// If layers or parent layers exist already color, visibility and locking parameters are ignored.</summary>
-    /// <param name="name">(string) Optional, The name of the new layer. If omitted, Rhino automatically  generates the layer name.</param>
-    /// <param name="color">(Drawing.Color) Optional, A Red-Green-Blue color value. If omitted a random (non yellow)  color wil be chosen.</param>
+    /// <summary>Adds a new layer to the document. If it does not exist yet.
+    /// By default, ambiguous Unicode characters are not allowed in the layer name. This can be changed via optional parameter.
+    /// If layers or parent layers exist already, color, visibility, and locking parameters are ignored.</summary>
+    /// <param name="name">(string) Optional. The name of the new layer. If omitted, Rhino automatically generates the layer name.</param>
+    /// <param name="color">(Drawing.Color) Optional. A Red-Green-Blue color value. If omitted, a random (non-yellow) color will be chosen.</param>
     /// <param name="visible">(int) Optional, default value: <c>2</c>
     ///   Layer visibility:
     ///   0 = explicitly Off (even if parent is already Off)
@@ -1017,11 +1008,11 @@ type RhinoScriptSyntax private () =
     ///   Layer locking state:
     ///   0 = Unlocked this and parents
     ///   1 = explicitly Locked (even if parent is already Locked)
-    ///   2 = inherited from parent, or Unlocked default</param>
-    /// <param name="parent">(string) Optional, Name of existing or non existing parent layer. </param>
-    /// <param name="allowAllUnicode">(bool) Optional, Allow ambiguous Unicode characters too </param>
-    /// <param name="collapseParents">(bool) Optional, Collapse parent layers in Layer UI </param>
-    /// <returns>(int) The index in the layer table. Do Doc.Layers.[i].FullPath to get the full name of the new layer.
+    ///   2 = inherited from parent, or Unlocked by default</param>
+    /// <param name="parent">(string) Optional. Name of existing or non-existing parent layer.</param>
+    /// <param name="allowAllUnicode">(bool) Optional. Allow ambiguous Unicode characters too.</param>
+    /// <param name="collapseParents">(bool) Optional. Collapse parent layers in Layer UI.</param>
+    /// <returns>(int) The index in the layer table. Use Doc.Layers.[i].FullPath to get the full name of the new layer.
     /// E.g. The function rs.Add can then take this layer index.</returns>
     static member AddLayer( [<OPT;DEF(null:string)>]name:string
                           , [<OPT;DEF(Drawing.Color())>]color:Drawing.Color
@@ -1780,7 +1771,7 @@ type RhinoScriptSyntax private () =
 
 
 
-    /// <summary>Add new command alias to Rhino Command aliases can be added manually by
+    /// <summary>Add new command alias to Rhino. Command aliases can be added manually by
     ///    using Rhino's Options command and modifying the contents of the Aliases tab.</summary>
     /// <param name="alias">(string) Name of new command alias. Cannot match command names or existing
     ///    aliases</param>
@@ -1793,7 +1784,7 @@ type RhinoScriptSyntax private () =
 
 
     /// <summary>Add new path to Rhino's search path list. Search paths can be added by
-    ///    using Rhino's Options command and modifying the contents of the files tab.</summary>
+    ///    using Rhino's Options command and modifying the contents of the Files tab.</summary>
     /// <param name="folder">(string) A valid folder, or path, to add</param>
     /// <param name="index">(int) Optional, Zero-based position in the search path list to insert.
     ///    If omitted, path will be appended to the end of the search path list.</param>
@@ -1826,7 +1817,7 @@ type RhinoScriptSyntax private () =
             ApplicationSettings.CommandAliasList.SetMacro(alias, macro)
             |> ignore<bool>)
     /// <summary>Returns an array of command alias names.</summary>
-    /// <returns>(string array) an array of command alias names.</returns>
+    /// <returns>(string array) An array of command alias names.</returns>
     static member AliasNames() : array<string> =
         RhinoSync.DoSync (fun () ->
             ApplicationSettings.CommandAliasList.GetNames())
@@ -2058,7 +2049,7 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Removes existing path from Rhino's search path list. Search path items
     ///    can be removed manually by using Rhino's options command and modifying the
-    ///    contents of the files tab.</summary>
+    ///    contents of the Files tab.</summary>
     /// <param name="folder">(string) A folder to remove</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
     static member DeleteSearchPath(folder:string) : bool =
@@ -2896,10 +2887,10 @@ type RhinoScriptSyntax private () =
         | _ -> false
 
 
-    /// <summary>Checks if that a block definition is being used by an inserted instance.</summary>
+    /// <summary>Checks if a block definition is being used by an inserted instance.</summary>
     /// <param name="blockName">(string) Name of an existing block definition</param>
     /// <param name="whereToLook">(int) Optional, default value: <c>0</c>
-    ///    One of the following values
+    ///    One of the following values:
     ///    0 = Check for top level references in active document
     ///    1 = Check for top level and nested references in active document
     ///    2 = Check for references in other instance definitions</param>
@@ -2930,10 +2921,10 @@ type RhinoScriptSyntax private () =
         State.Doc.InstanceDefinitions.Modify(instDef, newName, description, quiet=false)
 
 
-    /// <summary>Replace the objects inside an existing block definition.</summary>
+    /// <summary>Replaces the objects inside an existing block definition.</summary>
     /// <param name="blockName">(string) Name of an existing block definition</param>
-    /// <param name="newObjects">(string) Objects for replacing existing objects, can be partially the same as current objects too</param>
-    /// <param name="deleteInput">(bool) Optional, default value: <c>true</c> delete the input objects from document, so that they only exist in the block definition.</param>
+    /// <param name="newObjects">(Guid seq) Objects for replacing existing objects, can be partially the same as current objects too</param>
+    /// <param name="deleteInput">(bool) Optional, default value: <c>true</c>. Delete the input objects from document, so that they only exist in the block definition.</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
     static member ReplaceBlockObjects(blockName:string, newObjects:seq<Guid>,[<OPT;DEF(true)>]deleteInput:bool) : bool =
         let instDef = State.Doc.InstanceDefinitions.Find(blockName)
@@ -2951,13 +2942,11 @@ type RhinoScriptSyntax private () =
 
 
 
-    /// <summary>Adds an arc Curve to the document.</summary>
-    /// <param name="plane">(Plane) Plane on which the arc will lie. The origin of the Plane will be
-    ///    the center point of the arc. x-axis of the Plane defines the 0 angle
-    ///    direction</param>
-    /// <param name="radius">(float) Radius of the arc</param>
-    /// <param name="angleDegrees">(float) Interval of arc in degrees</param>
-    /// <returns>(Guid) objectId of the new Curve object.</returns>
+    /// <summary>Adds an arc curve to the document.</summary>
+    /// <param name="plane">(Plane) Plane on which the arc will lie. The origin of the plane will be the center point of the arc. The x-axis of the plane defines the 0 angle direction.</param>
+    /// <param name="radius">(float) Radius of the arc.</param>
+    /// <param name="angleDegrees">(float) Interval of arc in degrees.</param>
+    /// <returns>(Guid) ObjectId of the new curve object.</returns>
     static member AddArc(plane:Plane, radius:float, angleDegrees:float) : Guid =
         let radians = toRadians(angleDegrees)
         let arc = Arc(plane, radius, radians)
@@ -2967,11 +2956,11 @@ type RhinoScriptSyntax private () =
         rc
 
 
-    /// <summary>Adds a 3-point arc Curve to the document.</summary>
-    /// <param name="start">(Point3d) Start of the arc</param>
-    /// <param name="ende">(Point3d) Endpoint of the arc</param>
-    /// <param name="pointOnArc">(Point3d) A point on the arc</param>
-    /// <returns>(Guid) objectId of the new Curve object.</returns>
+    /// <summary>Adds a 3-point arc curve to the document.</summary>
+    /// <param name="start">(Point3d) Start of the arc.</param>
+    /// <param name="ende">(Point3d) Endpoint of the arc.</param>
+    /// <param name="pointOnArc">(Point3d) A point on the arc.</param>
+    /// <returns>(Guid) ObjectId of the new curve object.</returns>
     static member AddArc3Pt(start:Point3d, ende:Point3d, pointOnArc:Point3d) : Guid =
         let arc = Arc(start, pointOnArc, ende)
         let rc = State.Doc.Objects.AddArc(arc)
@@ -2980,12 +2969,11 @@ type RhinoScriptSyntax private () =
         rc
 
 
-    /// <summary>Adds an arc Curve, created from a start point, a start direction, and an
-    ///    end point, to the document.</summary>
-    /// <param name="start">(Point3d) The starting point of the arc</param>
-    /// <param name="direction">(Vector3d) The arc direction at start</param>
-    /// <param name="ende">(Point3d) The ending point of the arc</param>
-    /// <returns>(Guid) objectId of the new Curve object.</returns>
+    /// <summary>Adds an arc curve, created from a start point, a start direction, and an end point, to the document.</summary>
+    /// <param name="start">(Point3d) The starting point of the arc.</param>
+    /// <param name="direction">(Vector3d) The arc direction at start.</param>
+    /// <param name="ende">(Point3d) The ending point of the arc.</param>
+    /// <returns>(Guid) ObjectId of the new curve object.</returns>
     static member AddArcPtTanPt(start:Point3d, direction:Vector3d, ende:Point3d) : Guid =
         let arc = Arc(start, direction, ende)
         let rc = State.Doc.Objects.AddArc(arc)
@@ -2994,15 +2982,12 @@ type RhinoScriptSyntax private () =
         rc
 
 
-    /// <summary>Makes a Curve blend between two Curves.</summary>
-    /// <param name="curves">(Guid * Guid) List of two Curves</param>
-    /// <param name="parameters">(float * float) List of two Curve parameters defining the blend end points</param>
-    /// <param name="reverses">(bool * bool) List of two boolean values specifying to use the natural or opposite direction of the Curve</param>
-    /// <param name="continuities">(int * int) List of two numbers specifying continuity at end points
-    ///    0 = position
-    ///    1 = tangency
-    ///    2 = curvature</param>
-    /// <returns>(Guid) identifier of new Curve.</returns>
+    /// <summary>Makes a curve blend between two curves.</summary>
+    /// <param name="curves">(Guid * Guid) Tuple of two curves.</param>
+    /// <param name="parameters">(float * float) Tuple of two curve parameters defining the blend end points.</param>
+    /// <param name="reverses">(bool * bool) Tuple of two boolean values specifying to use the natural or opposite direction of the curve.</param>
+    /// <param name="continuities">(int * int) Tuple of two numbers specifying continuity at end points: 0 = position, 1 = tangency, 2 = curvature.</param>
+    /// <returns>(Guid) Identifier of new curve.</returns>
     static member AddBlendCurve(curves:Guid * Guid, parameters:float * float, reverses:bool * bool, continuities:int * int) : Guid =
         let crv0 = RhinoScriptSyntax.CoerceCurve (fst curves)
         let crv1 = RhinoScriptSyntax.CoerceCurve (snd curves)
@@ -3015,10 +3000,10 @@ type RhinoScriptSyntax private () =
         rc
 
 
-    /// <summary>Adds a circle Curve to the document.</summary>
+    /// <summary>Adds a circle curve to the document.</summary>
     /// <param name="plane">(Plane) Plane on which the circle will lie.</param>
-    /// <param name="radius">(float) The radius of the circle</param>
-    /// <returns>(Guid) objectId of the new Curve object.</returns>
+    /// <param name="radius">(float) The radius of the circle.</param>
+    /// <returns>(Guid) ObjectId of the new curve object.</returns>
     static member AddCircle(plane:Plane, radius:float) : Guid =
         let circle = Circle(plane, radius)
         let rc = State.Doc.Objects.AddCircle(circle)
@@ -3026,10 +3011,10 @@ type RhinoScriptSyntax private () =
         State.Doc.Views.Redraw()
         rc
 
-    /// <summary>Adds a circle Curve to the document.</summary>
-    /// <param name="center">(Point3d) Center of circle will lie. Plane wil be world XY </param>
-    /// <param name="radius">(float) The radius of the circle</param>
-    /// <returns>(Guid) ObjectId of the new Curve object.</returns>
+    /// <summary>Adds a circle curve to the document.</summary>
+    /// <param name="center">(Point3d) Center of the circle. Plane will be world XY.</param>
+    /// <param name="radius">(float) The radius of the circle.</param>
+    /// <returns>(Guid) ObjectId of the new curve object.</returns>
     static member AddCircle(center:Point3d, radius:float) : Guid =
         let circle = Circle(center, radius)
         let rc = State.Doc.Objects.AddCircle(circle)
@@ -3037,11 +3022,11 @@ type RhinoScriptSyntax private () =
         State.Doc.Views.Redraw()
         rc
 
-    /// <summary>Adds a 3-point circle Curve to the document.</summary>
-    /// <param name="first">(Point3d) First point on the circle'</param>
-    /// <param name="second">(Point3d) Second point on the circle'</param>
-    /// <param name="third">(Point3d) Third point on the circle'</param>
-    /// <returns>(Guid) objectId of the new Curve object.</returns>
+    /// <summary>Adds a 3-point circle curve to the document.</summary>
+    /// <param name="first">(Point3d) First point on the circle.</param>
+    /// <param name="second">(Point3d) Second point on the circle.</param>
+    /// <param name="third">(Point3d) Third point on the circle.</param>
+    /// <returns>(Guid) ObjectId of the new curve object.</returns>
     static member AddCircle3Pt(first:Point3d, second:Point3d, third:Point3d) : Guid =
         let circle = Circle(first, second, third)
         let rc = State.Doc.Objects.AddCircle(circle)
@@ -3050,11 +3035,10 @@ type RhinoScriptSyntax private () =
         rc
 
 
-    /// <summary>Adds a control points Curve object to the document.</summary>
-    /// <param name="points">(Point3d seq) A list of points</param>
-    /// <param name="degree">(int) Optional, default value: <c>3</c>
-    ///    Degree of the Curve</param>
-    /// <returns>(Guid) objectId of the new Curve object.</returns>
+    /// <summary>Adds a control points curve object to the document.</summary>
+    /// <param name="points">(Point3d seq) A list of points.</param>
+    /// <param name="degree">(int) Optional, default value: <c>3</c>. Degree of the curve.</param>
+    /// <returns>(Guid) ObjectId of the new curve object.</returns>
     static member AddCurve(points:Point3d seq, [<OPT;DEF(3)>]degree:int) : Guid =
         let  curve = Curve.CreateControlPointCurve(points, degree)
         if isNull curve then RhinoScriptingException.Raise "RhinoScriptSyntax.AddCurve: Unable to create control point curve from given points.  points:'%A' degree:'%A'" points degree
@@ -3064,12 +3048,11 @@ type RhinoScriptSyntax private () =
         rc
 
 
-    /// <summary>Adds an elliptical Curve to the document.</summary>
-    /// <param name="plane">(Plane) The Plane on which the ellipse will lie. The origin of
-    ///    the Plane will be the center of the ellipse</param>
-    /// <param name="radiusX">(float) radius in the X axis direction</param>
-    /// <param name="radiusY">(float) radius in the Y axis direction</param>
-    /// <returns>(Guid) objectId of the new Curve object.</returns>
+    /// <summary>Adds an elliptical curve to the document.</summary>
+    /// <param name="plane">(Plane) The plane on which the ellipse will lie. The origin of the plane will be the center of the ellipse.</param>
+    /// <param name="radiusX">(float) Radius in the X axis direction.</param>
+    /// <param name="radiusY">(float) Radius in the Y axis direction.</param>
+    /// <returns>(Guid) ObjectId of the new curve object.</returns>
     static member AddEllipse(plane:Plane, radiusX:float, radiusY:float) : Guid =
         let ellipse = Ellipse(plane, radiusX, radiusY)
         let rc = State.Doc.Objects.AddEllipse(ellipse)
@@ -3078,11 +3061,11 @@ type RhinoScriptSyntax private () =
         rc
 
 
-    /// <summary>Adds a 3-point elliptical Curve to the document.</summary>
-    /// <param name="center">(Point3d) Center point of the ellipse</param>
-    /// <param name="second">(Point3d) End point of the x axis</param>
-    /// <param name="third">(Point3d) End point of the y axis</param>
-    /// <returns>(Guid) objectId of the new Curve object.</returns>
+    /// <summary>Adds a 3-point elliptical curve to the document.</summary>
+    /// <param name="center">(Point3d) Center point of the ellipse.</param>
+    /// <param name="second">(Point3d) End point of the x axis.</param>
+    /// <param name="third">(Point3d) End point of the y axis.</param>
+    /// <returns>(Guid) ObjectId of the new curve object.</returns>
     static member AddEllipse3Pt(center:Point3d, second:Point3d, third:Point3d) : Guid =
         let  ellipse = Ellipse(center, second, third)
         let  rc = State.Doc.Objects.AddEllipse(ellipse)
@@ -3091,16 +3074,13 @@ type RhinoScriptSyntax private () =
         rc
 
 
-    /// <summary>Adds a fillet Curve between two Curve objects.</summary>
-    /// <param name="curveA">(Guid) Identifier of the first Curve object</param>
-    /// <param name="curveB">(Guid) Identifier of the second Curve object</param>
-    /// <param name="radius">(float) Optional, default value: <c>1.0</c>
-    ///    Fillet radius</param>
-    /// <param name="basePointA">(Point3d) Optional, Base point of the first Curve. If omitted,
-    ///    starting point of the Curve is used</param>
-    /// <param name="basePointB">(Point3d) Optional, Base point of the second Curve. If omitted,
-    ///    starting point of the Curve is used</param>
-    /// <returns>(Guid) objectId of the new Curve object.</returns>
+    /// <summary>Adds a fillet curve between two curve objects.</summary>
+    /// <param name="curveA">(Guid) Identifier of the first curve object.</param>
+    /// <param name="curveB">(Guid) Identifier of the second curve object.</param>
+    /// <param name="radius">(float) Optional, default value: <c>1.0</c>. Fillet radius.</param>
+    /// <param name="basePointA">(Point3d) Optional. Base point of the first curve. If omitted, starting point of the curve is used.</param>
+    /// <param name="basePointB">(Point3d) Optional. Base point of the second curve. If omitted, starting point of the curve is used.</param>
+    /// <returns>(Guid) ObjectId of the new curve object.</returns>
     static member AddFilletCurve(curveA:Guid, curveB:Guid, [<OPT;DEF(1.0)>]radius:float, [<OPT;DEF(Point3d())>]basePointA:Point3d, [<OPT;DEF(Point3d())>]basePointB:Point3d) : Guid =
         //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
         let basePointA = if basePointA = Point3d.Origin then Point3d.Unset else basePointA
@@ -3128,13 +3108,10 @@ type RhinoScriptSyntax private () =
         rc
 
 
-    /// <summary>Adds an interpolated Curve object that lies on a specified
-    ///    Surface. Note, this function will not create periodic Curves,
-    ///    but it will create closed Curves.</summary>
-    /// <param name="surfaceId">(Guid) Identifier of the Surface to create the Curve on</param>
-    /// <param name="points">(Point3d seq) List of 3D points that lie on the specified Surface.
-    ///    The list must contain at least 2 points</param>
-    /// <returns>(Guid) objectId of the new Curve object.</returns>
+    /// <summary>Adds an interpolated curve object that lies on a specified surface. Note, this function will not create periodic curves, but it will create closed curves.</summary>
+    /// <param name="surfaceId">(Guid) Identifier of the surface to create the curve on.</param>
+    /// <param name="points">(Point3d seq) List of 3D points that lie on the specified surface. The list must contain at least 2 points.</param>
+    /// <returns>(Guid) ObjectId of the new curve object.</returns>
     static member AddInterpCrvOnSrf(surfaceId:Guid, points:Point3d seq) : Guid =
         let  surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let  tolerance = State.Doc.ModelAbsoluteTolerance
@@ -3146,13 +3123,10 @@ type RhinoScriptSyntax private () =
         rc
 
 
-    /// <summary>Adds an interpolated Curve object based on Surface parameters,
-    ///    that lies on a specified Surface. Note, this function will not
-    ///    create periodic Curves, but it will create closed Curves.</summary>
-    /// <param name="surfaceId">(Guid) Identifier of the Surface to create the Curve on</param>
-    /// <param name="points">(Point2d seq) A list of 2D Surface parameters. The list must contain
-    ///    at least 2 sets of parameters</param>
-    /// <returns>(Guid) objectId of the new Curve object.</returns>
+    /// <summary>Adds an interpolated curve object based on surface parameters, that lies on a specified surface. Note, this function will not create periodic curves, but it will create closed curves.</summary>
+    /// <param name="surfaceId">(Guid) Identifier of the surface to create the curve on.</param>
+    /// <param name="points">(Point2d seq) A list of 2D surface parameters. The list must contain at least 2 sets of parameters.</param>
+    /// <returns>(Guid) ObjectId of the new curve object.</returns>
     static member AddInterpCrvOnSrfUV(surfaceId:Guid, points:Point2d seq) : Guid =
         let mutable surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let mutable tolerance = State.Doc.ModelAbsoluteTolerance
@@ -3164,27 +3138,27 @@ type RhinoScriptSyntax private () =
         rc
 
 
-    /// <summary>Adds an interpolated Curve object to the document. Options exist to make
+    ///<summary>Adds an interpolated Curve object to the document. Options exist to make
     ///    a periodic Curve or to specify the tangent at the endpoints. The resulting
     ///    Curve is a non-rational NURBS Curve of the specified degree.</summary>
-    /// <param name="points">(Point3d seq) A list containing 3D points to interpolate. For periodic Curves,
+    ///<param name="points">(Point3d seq) A list containing 3D points to interpolate. For periodic Curves,
     ///    if the final point is a duplicate of the initial point, it is
     ///    ignored. The number of control points must be bigger than 'degree' number</param>
-    /// <param name="degree">(int) Optional, default value: <c>3</c>
+    ///<param name="degree">(int) Optional, default value: <c>3</c>
     ///    Periodic Curves must have a degree bigger than 1. For knot-style = 1 or 2,
     ///    the degree must be 3. For knot-style = 4 or 5, the degree must be odd</param>
-    /// <param name="knotStyle">(int) Optional, default value: <c>0</c>
+    ///<param name="knotStyle">(int) Optional, default value: <c>0</c>
     ///    0 Uniform knots. Parameter spacing between consecutive knots is 1.0.
     ///    1 Chord length spacing. Requires degree = 3 with arrCV1 and arrCVn1 specified.
     ///    2 Sqrt (chord length). Requires degree = 3 with arrCV1 and arrCVn1 specified.
     ///    3 Periodic with uniform spacing.
     ///    4 Periodic with chord length spacing. Requires an odd degree value.
     ///    5 Periodic with sqrt (chord length) spacing. Requires an odd degree value</param>
-    /// <param name="startTangent">(Vector3d) Optional, A vector that specifies a tangency condition at the
+    ///<param name="startTangent">(Vector3d) Optional, A vector that specifies a tangency condition at the
     ///    beginning of the Curve. If the Curve is periodic, this argument must be omitted</param>
-    /// <param name="endTangent">(Vector3d) Optional, 3d vector that specifies a tangency condition at the
+    ///<param name="endTangent">(Vector3d) Optional, 3d vector that specifies a tangency condition at the
     ///    end of the Curve. If the Curve is periodic, this argument must be omitted</param>
-    /// <returns>(Guid) objectId of the new Curve object.</returns>
+    ///<returns>(Guid) objectId of the new Curve object.</returns>
     static member AddInterpCurve(   points:Point3d seq,
                                     [<OPT;DEF(3)>]degree:int,
                                     [<OPT;DEF(0)>]knotStyle:int,
@@ -3201,24 +3175,24 @@ type RhinoScriptSyntax private () =
         rc
 
 
-    /// <summary>Adds a line Curve to the current model.</summary>
-    /// <param name="start">(Point3d) Startpoint of the line</param>
-    /// <param name="ende">(Point3d) Endpoint of the line</param>
-    /// <returns>(Guid) objectId of the new Curve object.</returns>
+    /// <summary>Adds a line curve to the current model.</summary>
+    /// <param name="start">(Point3d) Startpoint of the line.</param>
+    /// <param name="ende">(Point3d) Endpoint of the line.</param>
+    /// <returns>(Guid) ObjectId of the new curve object.</returns>
     static member AddLine(start:Point3d, ende:Point3d) : Guid =
         let  rc = State.Doc.Objects.AddLine(start, ende)
         if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddLine: Unable to add line to document. start:%s ende:%s" start.Pretty ende.Pretty
         State.Doc.Views.Redraw()
         rc
 
-    /// <summary>Adds a line Curve to the current model.</summary>
-    /// <param name="startX">(float) Startpoint of the line: X position</param>
-    /// <param name="startY">(float) Startpoint of the line: Y position</param>
-    /// <param name="startZ">(float) Startpoint of the line: Z position</param>
-    /// <param name="endX">(float) Endpoint of the line: X position</param>
-    /// <param name="endY">(float) Endpoint of the line: Y position</param>
-    /// <param name="endZ">(float) Endpoint of the line:Z position</param>
-    /// <returns>(Guid) objectId of the new Curve object.</returns>
+    /// <summary>Adds a line curve to the current model.</summary>
+    /// <param name="startX">(float) Startpoint of the line: X position.</param>
+    /// <param name="startY">(float) Startpoint of the line: Y position.</param>
+    /// <param name="startZ">(float) Startpoint of the line: Z position.</param>
+    /// <param name="endX">(float) Endpoint of the line: X position.</param>
+    /// <param name="endY">(float) Endpoint of the line: Y position.</param>
+    /// <param name="endZ">(float) Endpoint of the line:Z position.</param>
+    /// <returns>(Guid) ObjectId of the new curve object.</returns>
     static member AddLine(startX,startY,startZ,endX,endY,endZ:float) : Guid =
         let start = Point3d(startX,startY,startZ)
         let ende = Point3d(endX,endY,endZ)
@@ -3227,12 +3201,12 @@ type RhinoScriptSyntax private () =
         State.Doc.Views.Redraw()
         rc
 
-    /// <summary>Adds a 2D Line Curve to the current model at z level 0.0</summary>
-    /// <param name="startX">(float) Startpoint of the line: X position</param>
-    /// <param name="startY">(float) Startpoint of the line: Y position</param>
-    /// <param name="endX">(float) Endpoint of the line: X position</param>
-    /// <param name="endY">(float) Endpoint of the line: Y position</param>
-    /// <returns>(Guid) objectId of the new Curve object.</returns>
+    /// <summary>Adds a 2D line curve to the current model at z level 0.0</summary>
+    /// <param name="startX">(float) Startpoint of the line: X position.</param>
+    /// <param name="startY">(float) Startpoint of the line: Y position.</param>
+    /// <param name="endX">(float) Endpoint of the line: X position.</param>
+    /// <param name="endY">(float) Endpoint of the line: Y position.</param>
+    /// <returns>(Guid) ObjectId of the new curve object.</returns>
     static member AddLine2D(startX,startY,endX,endY:float) : Guid =
         let start = Point3d(startX,startY,0.0)
         let ende = Point3d(endX,endY,0.0)
@@ -3242,12 +3216,12 @@ type RhinoScriptSyntax private () =
         rc
 
     /// <summary>Creates a NURBS Curve geometry, but does not add or draw it to the document.</summary>
-    /// <param name="points">(Point3d seq) A list containing 3D control points</param>
+    /// <param name="points">(Point3d seq) A list containing 3D control points.</param>
     /// <param name="knots">(float seq) Knot values for the Curve. The number of elements in knots must
-    ///    equal the number of elements in points plus degree minus 1</param>
-    /// <param name="degree">(int) Degree of the Curve. must be greater than of equal to 1</param>
+    ///    equal the number of elements in points plus degree minus 1.</param>
+    /// <param name="degree">(int) Degree of the Curve. must be greater than of equal to 1.</param>
     /// <param name="weights">(float seq) Optional, Weight values for the Curve. Number of elements should
-    ///    equal the number of elements in points. Values must be greater than 0</param>
+    ///    equal the number of elements in points. Values must be greater than 0.</param>
     /// <returns>(NurbsCurve) a NurbsCurve geometry.</returns>
     static member CreateNurbsCurve(points:Point3d seq, knots:float seq, degree:int, [<OPT;DEF(null: float seq)>]weights:float seq) : NurbsCurve =
         let cvcount = Seq.length(points)
@@ -3276,12 +3250,12 @@ type RhinoScriptSyntax private () =
         nc
 
     /// <summary>Adds a NURBS Curve object to the document.</summary>
-    /// <param name="points">(Point3d seq) A list containing 3D control points</param>
+    /// <param name="points">(Point3d seq) A list containing 3D control points.</param>
     /// <param name="knots">(float seq) Knot values for the Curve. The number of elements in knots must
-    ///    equal the number of elements in points plus degree minus 1</param>
-    /// <param name="degree">(int) Degree of the Curve. must be greater than of equal to 1</param>
+    ///    equal the number of elements in points plus degree minus 1.</param>
+    /// <param name="degree">(int) Degree of the Curve. must be greater than of equal to 1.</param>
     /// <param name="weights">(float seq) Optional, Weight values for the Curve. Number of elements should
-    ///    equal the number of elements in points. Values must be greater than 0</param>
+    ///    equal the number of elements in points. Values must be greater than 0.</param>
     /// <returns>(Guid) The identifier of the new object.</returns>
     static member AddNurbsCurve(points:Point3d seq, knots:float seq, degree:int, [<OPT;DEF(null: float seq)>]weights:float seq) : Guid =
         let nc = RhinoScriptSyntax.CreateNurbsCurve(points, knots, degree, weights)
@@ -3294,8 +3268,8 @@ type RhinoScriptSyntax private () =
     /// <summary>Adds a Polyline Curve.</summary>
     /// <param name="points">(Point3d seq) List of 3D points. The list must contain at least two points. If the
     ///    list contains less than four points, then the first point and
-    ///    last point must be different</param>
-    /// <returns>(Guid) objectId of the new Curve object.</returns>
+    ///    last point must be different.</param>
+    /// <returns>(Guid) ObjectId of the new curve object.</returns>
     static member AddPolyline(points:Point3d seq) : Guid =
         let pl = Polyline(points)
         //pl.DeleteShortSegments(State.Doc.ModelAbsoluteTolerance) |> ignore<bool>
@@ -3313,7 +3287,7 @@ type RhinoScriptSyntax private () =
     ///    if the endpoint is already closer than State.Doc.ModelAbsoluteTolerance to the start it wil be set to start point
     ///    else an additional point will be added with the same position as start.</summary>
     /// <param name="points">(Point3d seq) List of 3D points. The list must contain at least three points.</param>
-    /// <returns>(Guid) objectId of the new Curve object.</returns>
+    /// <returns>(Guid) ObjectId of the new curve object.</returns>
     static member AddPolylineClosed(points:Point3d seq) : Guid =
         let pl = Polyline(points)
         if pl.Count < 3 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPolylineClosed: Unable to add closed polyline to document from points:%s'%A'" Environment.NewLine (Pretty.str points)
@@ -3338,7 +3312,7 @@ type RhinoScriptSyntax private () =
     ///    x and y axes</param>
     /// <param name="height">(float) Height of rectangle as measured along the Plane's
     ///    x and y axes</param>
-    /// <returns>(Guid) objectId of new rectangle.</returns>
+    /// <returns>(Guid) ObjectId of new rectangle.</returns>
     static member AddRectangle(plane:Plane, width:float, height:float) : Guid =
         let rect = Rectangle3d(plane, width, height)
         let poly = rect.ToPolyline()
@@ -3348,15 +3322,15 @@ type RhinoScriptSyntax private () =
         rc
 
 
-    /// <summary>Adds a spiral or helical Curve to the document.</summary>
-    /// <param name="point0">(Point3d) Helix axis start point or center of spiral</param>
-    /// <param name="point1">(Point3d) Helix axis end point or point normal on spiral Plane</param>
+    /// <summary>Adds a spiral or helical curve to the document.</summary>
+    /// <param name="point0">(Point3d) Helix axis start point or center of spiral.</param>
+    /// <param name="point1">(Point3d) Helix axis end point or point normal on spiral Plane.</param>
     /// <param name="pitch">(float) Distance between turns. If 0, then a spiral. If > 0 then the
-    ///    distance between helix "threads"</param>
-    /// <param name="turns">(float) Number of turns</param>
-    /// <param name="radius0">(float) Starting radius of spiral</param>
-    /// <param name="radius1">(float) Optional, Ending radius of spiral. If omitted, the starting radius is used for the complete spiral</param>
-    /// <returns>(Guid) objectId of new Curve.</returns>
+    ///    distance between helix "threads".</param>
+    /// <param name="turns">(float) Number of turns.</param>
+    /// <param name="radius0">(float) Starting radius of spiral.</param>
+    /// <param name="radius1">(float) Optional, Ending radius of spiral. If omitted, the starting radius is used for the complete spiral.</param>
+    /// <returns>(Guid) ObjectId of new curve.</returns>
     static member AddSpiral(point0:Point3d, point1:Point3d, pitch:float, turns:float, radius0:float, [<OPT;DEF(0.0)>]radius1:float) : Guid =
         let dir = point1 - point0
         let plane = Plane(point0, dir)
@@ -3375,7 +3349,7 @@ type RhinoScriptSyntax private () =
     /// <param name="curveId">(Guid) Identifier of a closed planar Curve object</param>
     /// <param name="param0">(float) First parameters on the source Curve</param>
     /// <param name="param1">(float) Second parameters on the source Curve</param>
-    /// <returns>(Guid) objectId of the new Curve object.</returns>
+    /// <returns>(Guid) ObjectId of the new curve object.</returns>
     static member AddSubCrv(curveId:Guid, param0:float, param1:float) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve (curveId)
         let trimcurve = curve.Trim(param0, param1)
@@ -3492,7 +3466,7 @@ type RhinoScriptSyntax private () =
     /// <param name="curveId">(Guid) Identifier of a Curve object</param>
     /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
     ///    Maximum allowable distance between start and end point</param>
-    /// <returns>(Guid) objectId of the new Curve object.</returns>
+    /// <returns>(Guid) ObjectId of the new Curve object.</returns>
     static member CloseCurve(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         if curve.IsClosed then  curveId
@@ -4127,9 +4101,9 @@ type RhinoScriptSyntax private () =
     /// <param name="curveA">(Guid) Identifier of the first Curve object</param>
     /// <param name="curveB">(Guid) Identifier of the second Curve object</param>
     /// <param name="radius">(float) The fillet radius</param>
-    /// <param name="basePointA">(Point3d) Optional, The base point on the first Curve.
+    /// <param name="basePointA">(Point3d) Optional. The base point on the first Curve.
     ///    If omitted, the starting point of the Curve is used</param>
-    /// <param name="basePointB">(Point3d) Optional, The base point on the second Curve. If omitted,
+    /// <param name="basePointB">(Point3d) Optional. The base point on the second Curve. If omitted,
     ///    the starting point of the Curve is used</param>
     /// <returns>(Point3d * Point3d * Plane)
     ///    . The list elements are as follows:
@@ -4270,7 +4244,7 @@ type RhinoScriptSyntax private () =
 
 
     /// <summary>Returns the normal direction of the Plane in which a planar Curve object lies.</summary>
-    /// <param name="curveId">(Guid) Identifier of the Curve object</param>
+    /// <param name="curveId">(Guid) Identifier of a Curve object</param>
     /// <param name="segmentIndex">(int) Optional, The Curve segment if CurveId identifies a PolyCurve</param>
     /// <returns>(Vector3d) The 3D normal vector.</returns>
     static member CurveNormal(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Vector3d =
@@ -4405,7 +4379,7 @@ type RhinoScriptSyntax private () =
 
 
     /// <summary>Returns the start point of a Curve object.</summary>
-    /// <param name="curveId">(Guid) Identifier of the Curve object</param>
+    /// <param name="curveId">(Guid) Identifier of a Curve object</param>
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(Point3d) The 3D starting point of the Curve.</returns>
     static member CurveStartPoint(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
@@ -4413,7 +4387,7 @@ type RhinoScriptSyntax private () =
         curve.PointAtStart
 
     /// <summary>Sets the start point of a Curve object.</summary>
-    /// <param name="curveId">(Guid) Identifier of the Curve object</param>
+    /// <param name="curveId">(Guid) Identifier of a Curve object</param>
     /// <param name="point">(Point3d) New start point</param>
     /// <returns>(unit).</returns>
     static member CurveStartPoint(curveId:Guid, point:Point3d) : unit =
@@ -4471,7 +4445,7 @@ type RhinoScriptSyntax private () =
     ///        for Curve at (n, 6).</returns>
     static member CurveSurfaceIntersection(curveId:Guid, surfaceId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(0.0)>]angleTolerance:float) : (int*Point3d*Point3d*Point3d*Point3d*float*float*float*float*float*float) ResizeArray =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
-        let surface = RhinoScriptSyntax.CoerceSurface surfaceId
+        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let tolerance0 = Util.ifZero1 tolerance State.Doc.ModelAbsoluteTolerance
         let angleTolerance0 = Util.ifZero1 (toRadians(angleTolerance)) State.Doc.ModelAngleToleranceRadians
         let  rc = Intersect.Intersection.CurveSurface(curve, surface, tolerance0, angleTolerance0)
@@ -4624,7 +4598,7 @@ type RhinoScriptSyntax private () =
     /// If length is more than Curve length it fails.</summary>
     /// <param name="curve">(Geometry.Curve) Curve geometry</param>
     /// <param name="length">(float) The length of each segment</param>
-    /// <returns>( float array) a list containing division parameters.</returns>
+    /// <returns>( float array) a list containing 3D division parameters.</returns>
     static member DivideCurveLength(curve:Curve, length:float) :  float [] =
         let rc = curve.DivideByLength(length, includeEnds=true)
         if isNull rc then
@@ -4639,7 +4613,7 @@ type RhinoScriptSyntax private () =
     /// If length is more than Curve length it fails.</summary>
     /// <param name="curveId">(Guid) Identifier of the Curve object</param>
     /// <param name="length">(float) The length of each segment</param>
-    /// <returns>( float array) a list containing division parameters.</returns>
+    /// <returns>( float array) a list containing 3D division parameters.</returns>
     static member DivideCurveLength(curveId:Guid, length:float) :  float [] =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let rc = curve.DivideByLength(length, includeEnds=true)
@@ -4738,7 +4712,7 @@ type RhinoScriptSyntax private () =
     ///    2 = extend from both the start and the end of the Curve</param>
     /// <param name="boundaryCurveIds">(Guid seq) Curve, Surface, and Polysurface objects to extend to</param>
     /// <param name="replaceInput">(bool) Optional, Default Value <c>false</c> Replace input or add new?</param>
-    /// <returns>(Guid) The identifier of the new object or original Curve ( depending on 'replaceInput').</returns>
+    /// <returns>(Guid) The identifier of the new or modified Curve.</returns>
     static member ExtendCurve(  curveId:Guid,
                                 extensionType:int,
                                 side:int,
@@ -4934,6 +4908,7 @@ type RhinoScriptSyntax private () =
     static member InsertCurveKnot(curveId:Guid, parameter:float, [<OPT;DEF(false)>]symmetrical:bool) : bool =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         if not <| curve.Domain.IncludesParameter(parameter) then  false
+
         else
             let nc = curve.ToNurbsCurve()
             if isNull nc then  false
@@ -5282,7 +5257,7 @@ type RhinoScriptSyntax private () =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let tol = State.Doc.ModelAbsoluteTolerance
         let curves = curve.OffsetOnSurface(surface, parameter, tol)
-        if isNull curves  then  RhinoScriptingException.Raise "RhinoScriptSyntax.OffsetCurveOnSurfaceUV failed. curveId:'%s' surfaceId:'%s' parameter:'%A'" (Pretty.str curveId) (Pretty.str surfaceId) parameter
+        if isNull curves then  RhinoScriptingException.Raise "RhinoScriptSyntax.OffsetCurveOnSurfaceUV failed. curveId:'%s' surfaceId:'%s' parameter:'%A'" (Pretty.str curveId) (Pretty.str surfaceId) parameter
         let rc = curves  |> RArr.mapSeq  State.Doc.Objects.AddCurve
         rc
 
@@ -5298,7 +5273,7 @@ type RhinoScriptSyntax private () =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let tol = State.Doc.ModelAbsoluteTolerance
         let curves = curve.OffsetOnSurface(surface, distance, tol)
-        if isNull curves  then  RhinoScriptingException.Raise "RhinoScriptSyntax.OffsetCurveOnSurface failed. curveId:'%s' surfaceId:'%s' distance:'%A'" (Pretty.str curveId) (Pretty.str surfaceId) distance
+        if isNull curves then  RhinoScriptingException.Raise "RhinoScriptSyntax.OffsetCurveOnSurface failed. curveId:'%s' surfaceId:'%s' distance:'%A'" (Pretty.str curveId) (Pretty.str surfaceId) distance
         let curves = curves  |> RArr.mapSeq (fun curve -> curve.ExtendOnSurface(Rhino.Geometry.CurveEnd.Both, surface) )//https://github.com/mcneel/rhinoscriptsyntax/pull/186
         let rc = curves  |> RArr.mapSeq  State.Doc.Objects.AddCurve
         State.Doc.Views.Redraw()
@@ -5306,13 +5281,13 @@ type RhinoScriptSyntax private () =
 
 
 
-    /// <summary>Determines the relationship between the regions bounded by two coplanar simple closed Curves.</summary>
-    /// <param name="curveA">(Guid) identifier of the first  planar, closed Curve</param>
-    /// <param name="curveB">(Guid) identifier of the second planar, closed Curve</param>
-    /// <param name="plane">(Plane) Optional, default value: <c>Plane.WorldXY</c>
+    ///<summary>Determines the relationship between the regions bounded by two coplanar simple closed Curves.</summary>
+    ///<param name="curveA">(Guid) identifier of the first  planar, closed Curve</param>
+    ///<param name="curveB">(Guid) identifier of the second planar, closed Curve</param>
+    ///<param name="plane">(Plane) Optional, default value: <c>Plane.WorldXY</c>
     ///    Test Plane. If omitted, the Plane.WorldXY Plane is used</param>
-    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c></param>
-    /// <returns>(int) a number identifying the relationship
+    ///<param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c></param>
+    ///<returns>(int) a number identifying the relationship
     ///    0 = the regions bounded by the Curves are disjoint
     ///    1 = the two Curves intersect
     ///    2 = the region bounded by CurveA is inside of CurveB
@@ -5326,13 +5301,13 @@ type RhinoScriptSyntax private () =
         int(rc)
 
 
-    /// <summary>Determines if two coplanar Curves intersect.</summary>
-    /// <param name="curveA">(Guid) identifier of the first  planar Curve</param>
-    /// <param name="curveB">(Guid) identifier of the second planar Curve</param>
-    /// <param name="plane">(Plane) Optional, default value: <c>Plane.WorldXY</c>
+    ///<summary>Determines if two coplanar Curves intersect.</summary>
+    ///<param name="curveA">(Guid) identifier of the first  planar Curve</param>
+    ///<param name="curveB">(Guid) identifier of the second planar Curve</param>
+    ///<param name="plane">(Plane) Optional, default value: <c>Plane.WorldXY</c>
     ///    Test Plane. If omitted, the Plane.WorldXY Plane is used</param>
-    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c></param>
-    /// <returns>(bool) True if the Curves intersect; otherwise False.</returns>
+    ///<param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c></param>
+    ///<returns>(bool) True if the Curves intersect; otherwise False.</returns>
     static member PlanarCurveCollision(curveA:Guid, curveB:Guid, [<OPT;DEF(Plane())>]plane:Plane, [<OPT;DEF(0.0)>]tolerance:float) : bool =
         let curveA = RhinoScriptSyntax.CoerceCurve curveA
         let curveB = RhinoScriptSyntax.CoerceCurve curveB
@@ -5341,14 +5316,14 @@ type RhinoScriptSyntax private () =
         Curve.PlanarCurveCollision(curveA, curveB, plane0, tolerance0)
 
 
-    /// <summary>Determines if a point is inside of a closed Curve, on a closed Curve, or
+    ///<summary>Determines if a point is inside of a closed Curve, on a closed Curve, or
     ///    outside of a closed Curve.</summary>
-    /// <param name="point">(Point3d) Text point</param>
-    /// <param name="curve">(Guid) Identifier of a Curve object</param>
-    /// <param name="plane">(Plane) Optional, default value: <c>Plane.WorldXY</c>
+    ///<param name="point">(Point3d) Text point</param>
+    ///<param name="curve">(Guid) Identifier of a Curve object</param>
+    ///<param name="plane">(Plane) Optional, default value: <c>Plane.WorldXY</c>
     ///    Plane containing the closed Curve and point. If omitted, Plane.WorldXY  is used</param>
-    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c></param>
-    /// <returns>(int) number identifying the result
+    ///<param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c></param>
+    ///<returns>(int) number identifying the result
     ///    0 = point is outside of the Curve
     ///    1 = point is inside of the Curve
     ///    2 = point is on the Curve.</returns>
@@ -5364,11 +5339,11 @@ type RhinoScriptSyntax private () =
         else 2
 
 
-    /// <summary>Returns the number of Curve segments that make up a PolyCurve.</summary>
-    /// <param name="curveId">(Guid) The object's identifier</param>
-    /// <param name="segmentIndex">(int) Optional,
+    ///<summary>Returns the number of Curve segments that make up a PolyCurve.</summary>
+    ///<param name="curveId">(Guid) The object's identifier</param>
+    ///<param name="segmentIndex">(int) Optional,
     ///    If `curveId` identifies a PolyCurve object, then `segmentIndex` identifies the Curve segment of the PolyCurve to query</param>
-    /// <returns>(int) The number of Curve segments in a PolyCurve.</returns>
+    ///<returns>(int) The number of Curve segments in a PolyCurve.</returns>
     static member PolyCurveCount(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : int =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         match curve with
@@ -5376,11 +5351,11 @@ type RhinoScriptSyntax private () =
         | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.PolyCurveCount: CurveId does not reference a PolyCurve. curveId:'%s' segmentIndex:'%A'" (Pretty.str curveId) segmentIndex
 
 
-    /// <summary>Returns the vertices of a Polyline Curve.</summary>
-    /// <param name="curveId">(Guid) The object's identifier</param>
-    /// <param name="segmentIndex">(int) Optional,
+    ///<summary>Returns the vertices of a Polyline Curve.</summary>
+    ///<param name="curveId">(Guid) The object's identifier</param>
+    ///<param name="segmentIndex">(int) Optional,
     ///    If CurveId identifies a PolyCurve object, then segmentIndex identifies the Curve segment of the PolyCurve to query</param>
-    /// <returns>(Point3d ResizeArray) an list of Point3d vertex points.</returns>
+    ///<returns>(Point3d ResizeArray) an list of Point3d vertex points.</returns>
     static member PolylineVertices(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d ResizeArray =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let rc, polyline = curve.TryGetPolyline()
@@ -5391,11 +5366,11 @@ type RhinoScriptSyntax private () =
         else RhinoScriptingException.Raise "RhinoScriptSyntax.PolylineVertices: CurveId does not <| reference a polyline. curveId:'%s' segmentIndex:'%A'" (Pretty.str curveId) segmentIndex
 
 
-    /// <summary>Projects one or more Curves onto one or more Surfaces or Meshes.</summary>
-    /// <param name="curveIds">(Guid seq) Identifiers of Curves to project</param>
-    /// <param name="meshIds">(Guid seq) Identifiers of Meshes to project onto</param>
-    /// <param name="direction">(Vector3d) Projection direction</param>
-    /// <returns>(Guid ResizeArray) list of identifiers for the resulting Curves.</returns>
+    ///<summary>Projects one or more Curves onto one or more Surfaces or Meshes.</summary>
+    ///<param name="curveIds">(Guid seq) Identifiers of Curves to project</param>
+    ///<param name="meshIds">(Guid seq) Identifiers of Meshes to project onto</param>
+    ///<param name="direction">(Vector3d) Projection direction</param>
+    ///<returns>(Guid ResizeArray) list of identifiers for the resulting Curves.</returns>
     static member ProjectCurveToMesh(curveIds:Guid seq, meshIds:Guid seq, direction:Vector3d) : Guid ResizeArray =
         let curves = curveIds |> RArr.mapSeq RhinoScriptSyntax.CoerceCurve
         let meshes =  meshIds |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
@@ -5406,11 +5381,11 @@ type RhinoScriptSyntax private () =
         ids
 
 
-    /// <summary>Projects one or more Curves onto one or more Surfaces or Polysurfaces.</summary>
-    /// <param name="curveIds">(Guid seq) Identifiers of Curves to project</param>
-    /// <param name="surfaceIds">(Guid seq) Identifiers of Surfaces to project onto</param>
-    /// <param name="direction">(Vector3d) Projection direction</param>
-    /// <returns>(Guid ResizeArray) list of identifiers.</returns>
+    ///<summary>Projects one or more Curves onto one or more Surfaces or Polysurfaces.</summary>
+    ///<param name="curveIds">(Guid seq) Identifiers of Curves to project</param>
+    ///<param name="surfaceIds">(Guid seq) Identifiers of Surfaces to project onto</param>
+    ///<param name="direction">(Vector3d) Projection direction</param>
+    ///<returns>(Guid ResizeArray) list of identifiers.</returns>
     static member ProjectCurveToSurface(curveIds:Guid seq, surfaceIds:Guid seq, direction:Vector3d) : Guid ResizeArray =
         let curves = curveIds  |> RArr.mapSeq  RhinoScriptSyntax.CoerceCurve
         let breps = surfaceIds  |> RArr.mapSeq  RhinoScriptSyntax.CoerceBrep
@@ -5421,12 +5396,12 @@ type RhinoScriptSyntax private () =
         ids
 
 
-    /// <summary>Rebuilds a Curve to a given degree and control point count. For more
+    ///<summary>Rebuilds a Curve to a given degree and control point count. For more
     ///    information, see the Rhino help for the Rebuild command.</summary>
-    /// <param name="curveId">(Guid) Identifier of the Curve object</param>
-    /// <param name="degree">(int) New degree (must be greater than 0)</param>
-    /// <param name="pointCount">(int) New point count, which must be bigger than degree</param>
-    /// <returns>(bool) True of False indicating success or failure.</returns>
+    ///<param name="curveId">(Guid) Identifier of the Curve object</param>
+    ///<param name="degree">(int) New degree (must be greater than 0)</param>
+    ///<param name="pointCount">(int) New point count, which must be bigger than degree</param>
+    ///<returns>(bool) True of False indicating success or failure.</returns>
     static member RebuildCurve(curveId:Guid, degree:int, pointCount:int) : bool =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         if degree<1 then  RhinoScriptingException.Raise "RhinoScriptSyntax.RebuildCurve: Degree must be greater than 0. curveId:'%s' degree:'%A' pointCount:'%A'" (Pretty.str curveId) degree pointCount
@@ -5438,12 +5413,12 @@ type RhinoScriptSyntax private () =
             true
 
 
-    /// <summary>Deletes a knot from a Curve object.</summary>
-    /// <param name="curve">(Guid) The reference of the source object</param>
-    /// <param name="parameter">(float) The parameter on the Curve. Note, if the parameter is not equal to one
+    ///<summary>Deletes a knot from a Curve object.</summary>
+    ///<param name="curve">(Guid) The reference of the source object</param>
+    ///<param name="parameter">(float) The parameter on the Curve. Note, if the parameter is not equal to one
     ///    of the existing knots, then the knot closest to the specified parameter
     ///    will be removed</param>
-    /// <returns>(bool) True of False indicating success or failure.</returns>
+    ///<returns>(bool) True of False indicating success or failure.</returns>
     static member RemoveCurveKnot(curve:Guid, parameter:float) : bool =
         let curveInst = RhinoScriptSyntax.CoerceCurve curve
         let success, nParam = curveInst.GetCurveParameterFromNurbsFormParameter(parameter)
@@ -5460,9 +5435,9 @@ type RhinoScriptSyntax private () =
                     true
 
 
-    /// <summary>Reverses the direction of a Curve object. Same as Rhino's Dir command.</summary>
-    /// <param name="curveId">(Guid) Identifier of the Curve object</param>
-    /// <returns>(bool) True or False indicating success or failure.</returns>
+    ///<summary>Reverses the direction of a Curve object. Same as Rhino's Dir command.</summary>
+    ///<param name="curveId">(Guid) Identifier of the Curve object</param>
+    ///<returns>(bool) True or False indicating success or failure.</returns>
     static member ReverseCurve(curveId:Guid) : bool =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         if curve.Reverse() then
@@ -5472,7 +5447,7 @@ type RhinoScriptSyntax private () =
             false
 
 
-    /// <summary>Replace a Curve with a geometrically equivalent PolyCurve.
+    ///<summary>Replace a Curve with a geometrically equivalent PolyCurve.
     ///    The PolyCurve will have the following properties:
     ///      - All the PolyCurve segments are lines, polylines, arcs, or NURBS Curves.
     ///      - The NURBS Curves segments do not have fully multiple interior knots.
@@ -5481,8 +5456,8 @@ type RhinoScriptSyntax private () =
     ///      - Adjacent co-linear or co-circular segments are combined.
     ///      - Segments that meet with G1-continuity have there ends tuned up so that they meet with G1-continuity to within machine precision.
     ///      - If the PolyCurve is a polyline, a Polyline will be created.</summary>
-    /// <param name="curveId">(Guid) The object's identifier</param>
-    /// <param name="flags">(int) Optional, default value: <c>0</c>
+    ///<param name="curveId">(Guid) The object's identifier</param>
+    ///<param name="flags">(int) Optional, default value: <c>0</c>
     ///    The simplification methods to use. By default, all methods are used (flags = 0)
     ///    Value Description
     ///    0     Use all methods.
@@ -5492,7 +5467,7 @@ type RhinoScriptSyntax private () =
     ///    8     Do not replace rational NURBS Curves with constant denominator with an equivalent non-rational NURBS Curve.
     ///    16    Do not adjust Curves at G1-joins.
     ///    32    Do not merge adjacent co-linear lines or co-circular arcs or combine consecutive line segments into a polyline</param>
-    /// <returns>(bool) True or False.</returns>
+    ///<returns>(bool) True or False.</returns>
     static member SimplifyCurve(curveId:Guid, [<OPT;DEF(0)>]flags:int) : bool =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let mutable flagsDefault = 63
@@ -5515,13 +5490,13 @@ type RhinoScriptSyntax private () =
             false
 
 
-    /// <summary>Splits, or divides, a Curve at a specified parameter. The parameter must
+    ///<summary>Splits, or divides, a Curve at a specified parameter. The parameter must
     ///    be in the interior of the Curve's domain.</summary>
-    /// <param name="curveId">(Guid) The Curve to split</param>
-    /// <param name="parameter">(float seq) One or more parameters to split the Curve at</param>
-    /// <param name="deleteInput">(bool) Optional, default value: <c>true</c>
+    ///<param name="curveId">(Guid) The Curve to split</param>
+    ///<param name="parameter">(float seq) One or more parameters to split the Curve at</param>
+    ///<param name="deleteInput">(bool) Optional, default value: <c>true</c>
     ///    Delete the input Curve</param>
-    /// <returns>(Guid ResizeArray) list of new Curves.</returns>
+    ///<returns>(Guid ResizeArray) list of new Curves.</returns>
     static member SplitCurve(curveId:Guid, parameter:float seq, [<OPT;DEF(true)>]deleteInput:bool) : Guid ResizeArray =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let newcurves = curve.Split(parameter)
@@ -5534,16 +5509,16 @@ type RhinoScriptSyntax private () =
         rc
 
 
-    /// <summary>Trims a Curve by removing portions of the Curve outside a specified interval.</summary>
-    /// <param name="curveId">(Guid) The Curve to trim</param>
-    /// <param name="interval">(float * float) Two numbers identifying the interval to keep. Portions of
+    ///<summary>Trims a Curve by removing portions of the Curve outside a specified interval.</summary>
+    ///<param name="curveId">(Guid) The Curve to trim</param>
+    ///<param name="interval">(float * float) Two numbers identifying the interval to keep. Portions of
     ///    the Curve before domain[0] and after domain[1] will be removed. If the
     ///    input Curve is open, the interval must be increasing. If the input
     ///    Curve is closed and the interval is decreasing, then the portion of
     ///    the Curve across the start and end of the Curve is returned</param>
-    /// <param name="deleteInput">(bool) Optional, default value: <c>true</c>
+    ///<param name="deleteInput">(bool) Optional, default value: <c>true</c>
     ///    Delete the input Curve. If omitted the input Curve is deleted</param>
-    /// <returns>(Guid) identifier of the new Curve.</returns>
+    ///<returns>(Guid) identifier of the new Curve.</returns>
     static member TrimCurve(curveId:Guid, interval:float * float, [<OPT;DEF(true)>]deleteInput:bool) : Guid  =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let newCurve = curve.Trim(fst interval, snd interval)
@@ -5556,10 +5531,10 @@ type RhinoScriptSyntax private () =
         rc
 
 
-    /// <summary>Changes the degree of a Curve object. For more information see the Rhino help file for the ChangeDegree command.</summary>
-    /// <param name="curveId">(Guid) The object's identifier</param>
-    /// <param name="degree">(int) The new degree</param>
-    /// <returns>(bool) True of False indicating success or failure.</returns>
+    ///<summary>Changes the degree of a Curve object. For more information see the Rhino help file for the ChangeDegree command.</summary>
+    ///<param name="curveId">(Guid) The object's identifier</param>
+    ///<param name="degree">(int) The new degree</param>
+    ///<returns>(bool) True of False indicating success or failure.</returns>
     static member ChangeCurveDegree(curveId:Guid, degree:int) : bool =
         let curve = RhinoScriptSyntax.CoerceCurve curveId
         let nc = curve.ToNurbsCurve()
@@ -5571,19 +5546,19 @@ type RhinoScriptSyntax private () =
             false
 
 
-    /// <summary>Creates Curves between two open or closed input Curves.</summary>
-    /// <param name="fromCurveId">(Guid) Identifier of the first Curve object</param>
-    /// <param name="toCurveId">(Guid) Identifier of the second Curve object</param>
-    /// <param name="numberOfCurves">(int) Optional, default value: <c>1</c>
+    ///<summary>Creates Curves between two open or closed input Curves.</summary>
+    ///<param name="fromCurveId">(Guid) Identifier of the first Curve object</param>
+    ///<param name="toCurveId">(Guid) Identifier of the second Curve object</param>
+    ///<param name="numberOfCurves">(int) Optional, default value: <c>1</c>
     ///    The number of Curves to create. The default is 1</param>
-    /// <param name="method">(int) Optional, default value: <c>0</c>
+    ///<param name="method">(int) Optional, default value: <c>0</c>
     ///    The method for refining the output Curves, where:
     ///    0: (Default) Uses the control points of the Curves for matching. So the first control point of first Curve is matched to first control point of the second Curve.
     ///    1: Refits the output Curves like using the FitCurve method. Both the input Curve and the output Curve will have the same structure. The resulting Curves are usually more complex than input unless input Curves are compatible.
     ///    2: Input Curves are divided to the specified number of points on the Curve, corresponding points define new points that output Curves go through. If you are making one tween Curve, the method essentially does the following: divides the two Curves into an equal number of points, finds the midpoint between the corresponding points on the Curves, and interpolates the tween Curve through those points</param>
-    /// <param name="sampleNumber">(int) Optional, default value: <c>10</c>
+    ///<param name="sampleNumber">(int) Optional, default value: <c>10</c>
     ///    The number of samples points to use if method is 2. The default is 10</param>
-    /// <returns>(Guid ResizeArray) The identifiers of the new tween objects.</returns>
+    ///<returns>(Guid ResizeArray) The identifiers of the new tween objects.</returns>
     static member AddTweenCurves(fromCurveId:Guid, toCurveId:Guid, [<OPT;DEF(1)>]numberOfCurves:int, [<OPT;DEF(0)>]method:int, [<OPT;DEF(10)>]sampleNumber:int) : Guid ResizeArray =
         let curve0 = RhinoScriptSyntax.CoerceCurve fromCurveId
         let curve1 = RhinoScriptSyntax.CoerceCurve toCurveId
@@ -5613,11 +5588,11 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Adds an aligned dimension object to the document. An aligned dimension
     ///    is a linear dimension lined up with two points.</summary>
-    /// <param name="startPoint">(Point3d) First point of dimension</param>
-    /// <param name="endPoint">(Point3d) Second point of dimension</param>
-    /// <param name="pointOnDimensionLine">(Point3d) Location point of dimension line</param>
-    /// <param name="style">(string) Optional, default value: <c>""</c> Name of dimension style</param>
-    /// <returns>(Guid) identifier of new dimension.</returns>
+    /// <param name="startPoint">(Point3d) First point of the dimension.</param>
+    /// <param name="endPoint">(Point3d) Second point of the dimension.</param>
+    /// <param name="pointOnDimensionLine">(Point3d) Location point of the dimension line.</param>
+    /// <param name="style">(string) Optional, default value: <c>""</c>. Name of the dimension style.</param>
+    /// <returns>(Guid) Identifier of the new dimension.</returns>
     static member AddAlignedDimension(  startPoint:Point3d,
                                         endPoint:Point3d,
                                         pointOnDimensionLine:Point3d,  // TODO allow Point3d.Unset an then draw dim in XY plane
@@ -5645,7 +5620,7 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Adds a new dimension style to the document. The new dimension style will
     ///    be initialized with the current default dimension style properties.</summary>
-    /// <param name="dimStyleName">(string) Name of the new dimension style</param>
+    /// <param name="dimStyleName">(string) Name of the new dimension style.</param>
     /// <returns>(unit) void, nothing.</returns>
     static member AddDimStyle(dimStyleName:string) : unit =
         let index = State.Doc.DimStyles.Add(dimStyleName)
@@ -5654,13 +5629,13 @@ type RhinoScriptSyntax private () =
 
 
     /// <summary>Adds a leader to the document. Leader objects are planar.
-    ///    The 3D points passed will define the Plane if no Plane given.
-    ///    If there are only two Points the World XY plane is used.</summary>
-    /// <param name="points">(Point3d seq) List of (at least 2) 3D points</param>
-    /// <param name="text">(string) Leader's text</param>
-    /// <param name="plane">(Geometry.Plane) Optional, default value: <c>defined by points arg</c>
-    ///    If points will be projected to this Plane</param>
-    /// <returns>(Guid) identifier of the new leader.</returns>
+    ///    The 3D points passed will define the plane if no plane is given.
+    ///    If there are only two points, the World XY plane is used.</summary>
+    /// <param name="points">(Point3d seq) List of (at least 2) 3D points.</param>
+    /// <param name="text">(string) Leader's text.</param>
+    /// <param name="plane">(Geometry.Plane) Optional, default value: <c>defined by points arg</c>.
+    ///    Points will be projected to this plane if provided.</param>
+    /// <returns>(Guid) Identifier of the new leader.</returns>
     static member AddLeader( points:Point3d seq,
                              text:string,
                              [<OPT;DEF(Plane())>]plane:Plane) : Guid =
@@ -6385,21 +6360,16 @@ type RhinoScriptSyntax private () =
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
 
-    /// <summary>Create a bitmap preview image of the current model.</summary>
-    /// <param name="fileName">(string) Name of the bitmap file to create</param>
-    /// <param name="view">(string) Optional, Title of the view. If omitted, the active view is used</param>
-    /// <param name="width">(int) Optional, default value: <c>0</c>
-    /// integer that specifies width of the bitmap in pixel. if only width given height will be scaled to keep screen ratio</param>
-    /// <param name="height">(int) Optional, default value: <c>0</c>
-    /// integer that specifies height of the bitmap in pixel. if only height given width will be scaled to keep screen ratio</param>
-    /// <param name="flags">(int) Optional, default value: <c>0</c>
-    ///    Bitmap creation flags. Can be the combination of:
+    /// <summary>Creates a bitmap preview image of the current model.</summary>
+    /// <param name="fileName">(string) Name of the bitmap file to create.</param>
+    /// <param name="view">(string) Optional. Title of the view. If omitted, the active view is used.</param>
+    /// <param name="width">(int) Optional, default value: <c>0</c>. Integer that specifies the width of the bitmap in pixels. If only width is given, height will be scaled to keep screen ratio.</param>
+    /// <param name="height">(int) Optional, default value: <c>0</c>. Integer that specifies the height of the bitmap in pixels. If only height is given, width will be scaled to keep screen ratio.</param>
+    /// <param name="flags">(int) Optional, default value: <c>0</c>. Bitmap creation flags. Can be a combination of:
     ///    1 = honor object highlighting
-    ///    2 = draw construction Plane
+    ///    2 = draw construction plane
     ///    4 = use ghosted shading</param>
-    /// <param name="wireframe">(bool) Optional, default value: <c>false</c>
-    ///    If True then a wire-frame preview image. If False,
-    ///    a rendered image will be created</param>
+    /// <param name="wireframe">(bool) Optional, default value: <c>false</c>. If True, then a wireframe preview image. If False, a rendered image will be created.</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
     static member CreatePreviewImage(   fileName:string,
                                         [<OPT;DEF("")>]view:string,
@@ -7064,19 +7034,15 @@ type RhinoScriptSyntax private () =
 
 
     /// <summary>Creates a picture frame and adds it to the document.</summary>
-    /// <param name="plane">(Plane) The Plane in which the PictureFrame will be created. The bottom-left corner of picture will be at Plane's origin. The width will be in the Plane's X axis direction, and the height will be in the Plane's Y axis direction</param>
-    /// <param name="filename">(string) The path to a bitmap or image file</param>
-    /// <param name="width">(float) Optional, If both dblWidth and dblHeight are 0.0 or skipped, then the width and height of the PictureFrame will be the width and height of the image. If dblWidth = 0 and dblHeight is > 0, or if dblWidth > 0 and dblHeight = 0, then the non-zero value is assumed to be an aspect ratio of the image's width or height, which ever one is = 0. If both dblWidth and dblHeight are > 0, then these are assumed to be the width and height of in the current unit system</param>
-    /// <param name="height">(float) Optional, If both dblWidth and dblHeight are  0.0 or skied, then the width and height of the PictureFrame will be the width and height of the image. If dblWidth = 0 and dblHeight is > 0, or if dblWidth > 0 and dblHeight = 0, then the non-zero value is assumed to be an aspect ratio of the image's width or height, which ever one is = 0. If both dblWidth and dblHeight are > 0, then these are assumed to be the width and height of in the current unit system</param>
-    /// <param name="selfIllumination">(bool) Optional, default value: <c>true</c>
-    ///    If True, then the image mapped to the picture frame Plane always displays at full intensity and is not affected by light or shadow</param>
-    /// <param name="embed">(bool) Optional, default value: <c>false</c>
-    ///    If True, then the function adds the image to Rhino's internal bitmap table, thus making the document self-contained</param>
-    /// <param name="useAlpha">(bool) Optional, default value: <c>false</c>
-    ///    If False, the picture frame is created without any transparency texture. If True, a transparency texture is created with a "mask texture" set to alpha, and an instance of the diffuse texture in the source texture slot</param>
-    /// <param name="makeMesh">(bool) Optional, default value: <c>false</c>
-    ///    If True, the function will make a PictureFrame object from a Mesh rather than a Plane Surface</param>
-    /// <returns>(Guid) object identifier.</returns>
+    /// <param name="plane">(Plane) The plane in which the PictureFrame will be created. The bottom-left corner of the picture will be at the plane's origin. The width will be in the plane's X axis direction, and the height will be in the plane's Y axis direction.</param>
+    /// <param name="filename">(string) The path to a bitmap or image file.</param>
+    /// <param name="width">(float) Optional. If both width and height are 0.0 or skipped, then the width and height of the PictureFrame will be the width and height of the image. If width = 0 and height > 0, or if width > 0 and height = 0, then the non-zero value is assumed to be an aspect ratio of the image's width or height, whichever one is 0. If both width and height are > 0, then these are assumed to be the width and height in the current unit system.</param>
+    /// <param name="height">(float) Optional. If both width and height are 0.0 or skipped, then the width and height of the PictureFrame will be the width and height of the image. If width = 0 and height > 0, or if width > 0 and height = 0, then the non-zero value is assumed to be an aspect ratio of the image's width or height, whichever one is 0. If both width and height are > 0, then these are assumed to be the width and height in the current unit system.</param>
+    /// <param name="selfIllumination">(bool) Optional, default value: <c>true</c>. If True, then the image mapped to the picture frame plane always displays at full intensity and is not affected by light or shadow.</param>
+    /// <param name="embed">(bool) Optional, default value: <c>false</c>. If True, then the function adds the image to Rhino's internal bitmap table, thus making the document self-contained.</param>
+    /// <param name="useAlpha">(bool) Optional, default value: <c>false</c>. If False, the picture frame is created without any transparency texture. If True, a transparency texture is created with a "mask texture" set to alpha, and an instance of the diffuse texture in the source texture slot.</param>
+    /// <param name="makeMesh">(bool) Optional, default value: <c>false</c>. If True, the function will make a PictureFrame object from a mesh rather than a plane surface.</param>
+    /// <returns>(Guid) Object identifier.</returns>
     static member AddPictureFrame(  plane:Plane,
                                     filename:string,
                                     [<OPT;DEF(0.0)>]width:float,
@@ -7961,13 +7927,13 @@ type RhinoScriptSyntax private () =
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
 
-    /// <summary>Enables or disables an object's grips. For Curves and Surfaces, these are
+    /// <summary>Enables or disables an object's grips. For curves and surfaces, these are
     ///    also called control points.</summary>
-    /// <param name="objectId">(Guid) Identifier of the object</param>
-    /// <param name="enable">(bool) Optional, default value: <c>true</c>
-    ///    If True, the specified object's grips will be turned on.
-    ///    If False, they will be turned off</param>
-    /// <returns>(bool) True on success, False on failure.</returns>
+    /// <param name="objectId">(Guid) Identifier of the object.</param>
+    /// <param name="enable">(bool) Optional, default value: <c>true</c>.
+    ///    If true, the specified object's grips will be turned on.
+    ///    If false, they will be turned off.</param>
+    /// <returns>(bool) True on success, false on failure.</returns>
     static member EnableObjectGrips(objectId:Guid, [<OPT;DEF(true)>]enable:bool) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if enable <> rhobj.GripsOn then
@@ -7977,12 +7943,12 @@ type RhinoScriptSyntax private () =
 
 
     /// <summary>Prompts the user to pick a single object grip. Fails if selection is empty.</summary>
-    /// <param name="message">(string) Optional, Prompt for picking</param>
-    /// <param name="preselect">(bool) Optional, default value: <c>false</c>
-    ///    Allow for selection of pre-selected object grip</param>
-    /// <param name="select">(bool) Optional, default value: <c>false</c>
-    ///    Select the picked object grip</param>
-    /// <returns>(Guid * int * Point3d) of a grip record.
+    /// <param name="message">(string) Optional. Prompt for picking.</param>
+    /// <param name="preselect">(bool) Optional, default value: <c>false</c>.
+    ///    Allow for selection of preselected object grip.</param>
+    /// <param name="select">(bool) Optional, default value: <c>false</c>.
+    ///    Select the picked object grip.</param>
+    /// <returns>(Guid * int * Point3d) A grip record tuple:
     ///    [0] = identifier of the object that owns the grip
     ///    [1] = index value of the grip
     ///    [2] = location of the grip.</returns>
@@ -8007,13 +7973,13 @@ type RhinoScriptSyntax private () =
 
 
 
-    /// <summary>Prompts user to pick one or more object grips from one or more objects.</summary>
-    /// <param name="message">(string) Optional, Prompt for picking</param>
-    /// <param name="preselect">(bool) Optional, default value: <c>false</c>
-    ///    Allow for selection of pre-selected object grips</param>
-    /// <param name="select">(bool) Optional, default value: <c>false</c>
-    ///    Select the picked object grips</param>
-    /// <returns>((Guid * int * Point3d) ResizeArray) containing one or more grip records. Each grip record is a tuple
+    /// <summary>Prompts the user to pick one or more object grips from one or more objects.</summary>
+    /// <param name="message">(string) Optional. Prompt for picking.</param>
+    /// <param name="preselect">(bool) Optional, default value: <c>false</c>.
+    ///    Allow for selection of preselected object grips.</param>
+    /// <param name="select">(bool) Optional, default value: <c>false</c>.
+    ///    Select the picked object grips.</param>
+    /// <returns>((Guid * int * Point3d) ResizeArray) containing one or more grip records. Each grip record is a tuple:
     ///    [n][0] = identifier of the object that owns the grip
     ///    [n][1] = index value of the grip
     ///    [n][2] = location of the grip.</returns>
@@ -8063,12 +8029,12 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Returns the next grip index from a specified grip index of an object.</summary>
     /// <param name="objectId">(Guid) Identifier of the object</param>
-    /// <param name="index">(int) Zero based grip index from which to get the next grip index</param>
-    /// <param name="direction">(int ) Optional, default value: <c>0</c>
+    /// <param name="index">(int) Zero-based grip index from which to get the next grip index</param>
+    /// <param name="direction">(int) Optional, default value: <c>0</c>
     ///    Direction to get the next grip index (0 = U, 1 = V)</param>
     /// <param name="enable">(bool) Optional, default value: <c>true</c>
-    ///    If True, the next grip index found will be selected</param>
-    /// <returns>(int) index of the next grip.</returns>
+    ///    If true, the next grip index found will be selected</param>
+    /// <returns>(int) Index of the next grip.</returns>
     static member NextObjectGrip( objectId:Guid,
                                   index:int,
                                   [<OPT;DEF(0)>]direction:int ,
@@ -8079,7 +8045,7 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Returns number of grips owned by an object.</summary>
     /// <param name="objectId">(Guid) Identifier of the object</param>
-    /// <returns>(int) number of grips.</returns>
+    /// <returns>(int) Number of grips.</returns>
     static member ObjectGripCount(objectId:Guid) : int =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let grips = rhobj.GetGrips()
@@ -8121,8 +8087,8 @@ type RhinoScriptSyntax private () =
     /// <summary>Returns the location of all grips owned by an object. The
     /// locations of the grips are returned in a list of Point3d with each position
     /// in the list corresponding to that grip's index. To modify the locations of
-    /// the grips, you must provide a list of points that contain the same number
-    /// of points at grips.</summary>
+    /// the grips, you must provide a list of points that contains the same number
+    /// of points as grips.</summary>
     /// <param name="objectId">(Guid) Identifier of the object</param>
     /// <returns>(Point3d ResizeArray) The current location of all grips.</returns>
     static member ObjectGripLocations(objectId:Guid) : Point3d ResizeArray = //GET
@@ -8136,8 +8102,8 @@ type RhinoScriptSyntax private () =
     /// <summary>Modifies the location of all grips owned by an object. The
     /// locations of the grips are returned in a list of Point3d with each position
     /// in the list corresponding to that grip's index. To modify the locations of
-    /// the grips, you must provide a list of points that contain the same number
-    /// of points at grips.</summary>
+    /// the grips, you must provide a list of points that contains the same number
+    /// of points as grips.</summary>
     /// <param name="objectId">(Guid) Identifier of the object</param>
     /// <param name="points">(Point3d seq) List of 3D points identifying the new grip locations</param>
     /// <returns>(unit) void, nothing.</returns>
@@ -8156,7 +8122,7 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Checks if an object's grips are turned on.</summary>
     /// <param name="objectId">(Guid) Identifier of the object</param>
-    /// <returns>(bool) True or False indicating Grips state.</returns>
+    /// <returns>(bool) True or false indicating grips state.</returns>
     static member ObjectGripsOn(objectId:Guid) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.GripsOn
@@ -8165,7 +8131,7 @@ type RhinoScriptSyntax private () =
     /// <summary>Checks if an object's grips are turned on and at least one grip
     ///    is selected.</summary>
     /// <param name="objectId">(Guid) Identifier of the object</param>
-    /// <returns>(bool) True or False indicating success or failure.</returns>
+    /// <returns>(bool) True or false indicating success or failure.</returns>
     static member ObjectGripsSelected(objectId:Guid) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if not rhobj.GripsOn then false
@@ -8180,12 +8146,12 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Returns the previous grip index from a specified grip index of an object.</summary>
     /// <param name="objectId">(Guid) Identifier of the object</param>
-    /// <param name="index">(int) Zero based grip index from which to get the previous grip index</param>
+    /// <param name="index">(int) Zero-based grip index from which to get the previous grip index</param>
     /// <param name="direction">(int) Optional, default value: <c>0</c>
-    ///    Direction to get the next grip index (0 = U, 1 = V)</param>
+    ///    Direction to get the previous grip index (0 = U, 1 = V)</param>
     /// <param name="enable">(bool) Optional, default value: <c>true</c>
-    ///    If True, the next grip index found will be selected</param>
-    /// <returns>(int) index of the next grip.</returns>
+    ///    If true, the previous grip index found will be selected</param>
+    /// <returns>(int) Index of the previous grip.</returns>
     static member PrevObjectGrip( objectId:Guid,
                                   index:int,
                                   [<OPT;DEF(0)>]direction:int,
@@ -8197,7 +8163,7 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Returns a list of grip indices identifying an object's selected grips.</summary>
     /// <param name="objectId">(Guid) Identifier of the object</param>
-    /// <returns>(int ResizeArray) list of indices.</returns>
+    /// <returns>(int ResizeArray) List of indices.</returns>
     static member SelectedObjectGrips(objectId:Guid) : int ResizeArray =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let rc = ResizeArray()
@@ -8212,10 +8178,10 @@ type RhinoScriptSyntax private () =
 
 
     /// <summary>Selects a single grip owned by an object. If the object's grips are
-    ///    not turned on, the grips will not be selected.</summary>
+    ///    not turned on, the grip will not be selected.</summary>
     /// <param name="objectId">(Guid) Identifier of the object</param>
     /// <param name="index">(int) Index of the grip to select</param>
-    /// <returns>(bool) True or False indicating success or failure.</returns>
+    /// <returns>(bool) True or false indicating success or failure.</returns>
     static member SelectObjectGrip(objectId:Guid, index:int) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if not rhobj.GripsOn then false
@@ -8253,10 +8219,10 @@ type RhinoScriptSyntax private () =
 
 
     /// <summary>Unselects a single grip owned by an object. If the object's grips are
-    ///    not turned on, the grips will not be unselected.</summary>
+    ///    not turned on, the grip will not be unselected.</summary>
     /// <param name="objectId">(Guid) Identifier of the object</param>
     /// <param name="index">(int) Index of the grip to unselect</param>
-    /// <returns>(bool) True or False indicating success or failure.</returns>
+    /// <returns>(bool) True or false indicating success or failure.</returns>
     static member UnselectObjectGrip(objectId:Guid, index:int) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if not rhobj.GripsOn then false
@@ -8298,9 +8264,8 @@ type RhinoScriptSyntax private () =
 
 
     /// <summary>Adds a new empty group to the document.</summary>
-    /// <param name="groupName">(string) Optional, Name of the new group. If omitted, Rhino automatically
-    ///    generates the group name</param>
-    /// <returns>(string) name of the new group.</returns>
+    /// <param name="groupName">(string) Optional. Name of the new group. If omitted, Rhino automatically generates the group name.</param>
+    /// <returns>(string) Name of the new group.</returns>
     static member AddGroup([<OPT;DEF(null:string)>]groupName:string) : string =
         let mutable index = -1
         if isNull groupName then
@@ -8312,8 +8277,8 @@ type RhinoScriptSyntax private () =
         rc
 
     /// <summary>Adds one or more objects to an existing group.</summary>
-    /// <param name="objectIds">(Guid seq) List of Strings or Guids representing the object identifiers</param>
-    /// <param name="groupName">(string) The name of an existing group</param>
+    /// <param name="objectIds">(Guid seq) List of Guids representing the object identifiers.</param>
+    /// <param name="groupName">(string) The name of an existing group.</param>
     /// <returns>(unit) void, nothing.</returns>
     static member AddObjectsToGroup(objectIds:Guid seq, groupName:string) : unit = //PLURAL
         let index = State.Doc.Groups.Find(groupName)
@@ -8322,8 +8287,8 @@ type RhinoScriptSyntax private () =
         if not <|  State.Doc.Groups.AddToGroup(index, objectIds) then RhinoScriptingException.Raise "RhinoScriptSyntax.AddObjectsToGroup failed '%s' and %A" groupName objectIds
 
 
-    /// <summary>Adds two or more objects to new group.</summary>
-    /// <param name="objectIds">(Guid seq) List of Strings or Guids representing the object identifiers</param>
+    /// <summary>Adds two or more objects to a new group.</summary>
+    /// <param name="objectIds">(Guid seq) List of Guids representing the object identifiers.</param>
     /// <returns>(unit) void, nothing.</returns>
     static member GroupObjects(objectIds:Guid seq) : unit =
         let index = State.Doc.Groups.Add()
@@ -8331,9 +8296,9 @@ type RhinoScriptSyntax private () =
         if not <|  State.Doc.Groups.AddToGroup(index, objectIds) then RhinoScriptingException.Raise "RhinoScriptSyntax.GroupObjects failed on %A"  objectIds
         //State.Doc.Groups.GroupName(index)
 
-    /// <summary>Adds two or more objects to new group, sets group name.</summary>
-    /// <param name="objectIds">(Guid seq) List of Strings or Guids representing the object identifiers</param>
-    /// <param name="groupName">(string) The name of group to create</param>
+    /// <summary>Adds two or more objects to a new group, sets group name.</summary>
+    /// <param name="objectIds">(Guid seq) List of Guids representing the object identifiers.</param>
+    /// <param name="groupName">(string) The name of the group to create.</param>
     /// <returns>(unit) void, nothing.</returns>
     static member GroupObjects(objectIds:Guid seq, groupName:string) : unit =
         let index = State.Doc.Groups.Add( groupName )
@@ -8343,8 +8308,8 @@ type RhinoScriptSyntax private () =
         //State.Doc.Groups.GroupName(index)
 
     /// <summary>Adds a single object to an existing group.</summary>
-    /// <param name="objectId">(Guid) String or Guid representing the object identifier</param>
-    /// <param name="groupName">(string) The name of an existing group</param>
+    /// <param name="objectId">(Guid) Guid representing the object identifier.</param>
+    /// <param name="groupName">(string) The name of an existing group.</param>
     /// <returns>(unit) void, nothing.</returns>
     static member AddObjectToGroup(objectId:Guid, groupName:string) : unit =
         let index = State.Doc.Groups.Find(groupName)
@@ -8352,9 +8317,8 @@ type RhinoScriptSyntax private () =
         if not <|  State.Doc.Groups.AddToGroup(index, objectId) then RhinoScriptingException.Raise "RhinoScriptSyntax.AddObjectToGroup failed '%s' and %A" groupName objectId
 
 
-    /// <summary>Removes an existing group from the document. Reference groups cannot be
-    ///    removed. Deleting a group does not delete the member objects.</summary>
-    /// <param name="groupName">(string) The name of an existing group</param>
+    /// <summary>Removes an existing group from the document. Reference groups cannot be removed. Deleting a group does not delete the member objects.</summary>
+    /// <param name="groupName">(string) The name of an existing group.</param>
     /// <returns>(unit) void, nothing.</returns>
     static member DeleteGroup(groupName:string) : unit =
         let index = State.Doc.Groups.Find(groupName)
@@ -8546,12 +8510,12 @@ type RhinoScriptSyntax private () =
 
 
     /// <summary>Creates one or more new Hatch objects from a list of closed planar Curves.</summary>
-    /// <param name="curves">(Curve seq) Geometry of the closed planar Curves that defines the boundary of the Hatch objects</param>
-    /// <param name="hatchPattern">(string) Optional, Name of the Hatch pattern to be used by the Hatch object.  If omitted, the current Hatch pattern will be used</param>
-    /// <param name="scale">(float) Optional, default value: <c>1.0</c>  Hatch pattern scale factor</param>
-    /// <param name="rotation">(float) Optional, default value: <c>0.0</c>  Hatch pattern rotation angle in degrees</param>
-    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>  Tolerance for Hatch fills</param>
-    /// <returns>(Guid ResizeArray) identifiers of the newly created Hatch.</returns>
+    /// <param name="curves">(Curve seq) Geometry of the closed planar Curves that define the boundary of the Hatch objects</param>
+    /// <param name="hatchPattern">(string) Optional. Name of the Hatch pattern to be used by the Hatch object. If omitted, the current Hatch pattern will be used.</param>
+    /// <param name="scale">(float) Optional, default value: <c>1.0</c>. Hatch pattern scale factor.</param>
+    /// <param name="rotation">(float) Optional, default value: <c>0.0</c>. Hatch pattern rotation angle in degrees.</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>. Tolerance for Hatch fills.</param>
+    /// <returns>(Guid ResizeArray) Identifiers of the newly created Hatches.</returns>
     static member AddHatches( curves:Curve seq,
                               [<OPT;DEF(null:string)>]hatchPattern:string,
                               [<OPT;DEF(1.0)>]scale:float,
@@ -8587,13 +8551,13 @@ type RhinoScriptSyntax private () =
         State.Doc.Views.Redraw()
         ids
 
-    /// <summary>Creates one  Hatch objects from one closed planar Curve.</summary>
-    /// <param name="curve">(Curve) Curve Geometry of the closed planar Curve that defines the boundary of the Hatch object</param>
-    /// <param name="hatchPattern">(string) Optional, Name of the Hatch pattern to be used by the Hatch object. If omitted, the current Hatch pattern will be used</param>
-    /// <param name="scale">(float) Optional, default value: <c>1.0</c>   Hatch pattern scale factor</param>
-    /// <param name="rotation">(float) Optional, default value: <c>0.0</c> Hatch pattern rotation angle in degrees</param>
-    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c> Tolerance for Hatch fills</param>
-    /// <returns>(Guid) identifier of the newly created Hatch.</returns>
+    /// <summary>Creates one Hatch object from one closed planar Curve.</summary>
+    /// <param name="curve">(Curve) Geometry of the closed planar Curve that defines the boundary of the Hatch object</param>
+    /// <param name="hatchPattern">(string) Optional. Name of the Hatch pattern to be used by the Hatch object. If omitted, the current Hatch pattern will be used.</param>
+    /// <param name="scale">(float) Optional, default value: <c>1.0</c>. Hatch pattern scale factor.</param>
+    /// <param name="rotation">(float) Optional, default value: <c>0.0</c>. Hatch pattern rotation angle in degrees.</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>. Tolerance for Hatch fills.</param>
+    /// <returns>(Guid) Identifier of the newly created Hatch.</returns>
     static member AddHatch(   curve:Curve,
                               [<OPT;DEF(null:string)>]hatchPattern:string,
                               [<OPT;DEF(1.0)>]scale:float,
@@ -8609,12 +8573,12 @@ type RhinoScriptSyntax private () =
 
 
     /// <summary>Creates one or more new Hatch objects from a list of closed planar Curves.</summary>
-    /// <param name="curveIds">(Guid seq) Identifiers of the closed planar Curves that defines the   boundary of the Hatch objects</param>
-    /// <param name="hatchPattern">(string) Optional, Name of the Hatch pattern to be used by the Hatch object. If omitted, the current Hatch pattern will be used</param>
-    /// <param name="scale">(float) Optional, default value: <c>1.0</c>   Hatch pattern scale factor</param>
-    /// <param name="rotation">(float) Optional, default value: <c>0.0</c> Hatch pattern rotation angle in degrees</param>
-    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c> Tolerance for Hatch fills</param>
-    /// <returns>(Guid ResizeArray) identifiers of the newly created Hatch.</returns>
+    /// <param name="curveIds">(Guid seq) Identifiers of the closed planar Curves that define the boundary of the Hatch objects</param>
+    /// <param name="hatchPattern">(string) Optional. Name of the Hatch pattern to be used by the Hatch object. If omitted, the current Hatch pattern will be used.</param>
+    /// <param name="scale">(float) Optional, default value: <c>1.0</c>. Hatch pattern scale factor.</param>
+    /// <param name="rotation">(float) Optional, default value: <c>0.0</c>. Hatch pattern rotation angle in degrees.</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>. Tolerance for Hatch fills.</param>
+    /// <returns>(Guid ResizeArray) Identifiers of the newly created Hatches.</returns>
     static member AddHatches(  curveIds:Guid seq,
                               [<OPT;DEF(null:string)>]hatchPattern:string,
                               [<OPT;DEF(1.0)>]scale:float,
@@ -8628,11 +8592,11 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Creates a new Hatch object from a closed planar Curve object.</summary>
     /// <param name="curveId">(Guid) Identifier of the closed planar Curve that defines the boundary of the Hatch object</param>
-    /// <param name="hatchPattern">(string) Optional, Name of the Hatch pattern to be used by the Hatch object. If omitted, the current Hatch pattern will be used</param>
-    /// <param name="scale">(float) Optional, default value: <c>1.0</c>  Hatch pattern scale factor</param>
-    /// <param name="rotation">(float) Optional, default value: <c>0.0</c> Hatch pattern rotation angle in degrees</param>
-    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c> Tolerance for Hatch fills</param>
-    /// <returns>(Guid) identifier of the newly created Hatch.</returns>
+    /// <param name="hatchPattern">(string) Optional. Name of the Hatch pattern to be used by the Hatch object. If omitted, the current Hatch pattern will be used.</param>
+    /// <param name="scale">(float) Optional, default value: <c>1.0</c>. Hatch pattern scale factor.</param>
+    /// <param name="rotation">(float) Optional, default value: <c>0.0</c>. Hatch pattern rotation angle in degrees.</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>. Tolerance for Hatch fills.</param>
+    /// <returns>(Guid) Identifier of the newly created Hatch.</returns>
     static member AddHatch( curveId:Guid,
                             [<OPT;DEF(null:string)>]hatchPattern:string,
                             [<OPT;DEF(1.0)>]scale:float,
@@ -8917,7 +8881,7 @@ type RhinoScriptSyntax private () =
     /// <summary>Adds a new directional light object to the document.</summary>
     /// <param name="startPoint">(Point3d) Starting point of the light</param>
     /// <param name="endPoint">(Point3d) Ending point and direction of the light</param>
-    /// <returns>(Guid) identifier of the new object.</returns>
+    /// <returns>(Guid) Identifier of the new object.</returns>
     static member AddDirectionalLight(startPoint:Point3d, endPoint:Point3d) : Guid =
         let start =  startPoint
         let ende =  endPoint
@@ -8935,8 +8899,8 @@ type RhinoScriptSyntax private () =
     /// <summary>Adds a new linear light object to the document.</summary>
     /// <param name="startPoint">(Point3d) Starting point of the light</param>
     /// <param name="endPoint">(Point3d) Ending point and direction of the light</param>
-    /// <param name="lightWidth">(float) Optional, Width of the light</param>
-    /// <returns>(Guid) identifier of the new object.</returns>
+    /// <param name="lightWidth">(float) Optional, width of the light</param>
+    /// <returns>(Guid) Identifier of the new object.</returns>
     static member AddLinearLight( startPoint:Point3d,
                                   endPoint:Point3d,
                                   [<OPT;DEF(0.0)>]lightWidth:float) : Guid =
@@ -9414,16 +9378,16 @@ type RhinoScriptSyntax private () =
 
 
 
-    /// <summary>Finds the point on an FINITE line that is closest to a test point.</summary>
+    /// <summary>Finds the point on a finite line that is closest to a test point.</summary>
     /// <param name="line">(Geometry.Line) The finite line</param>
     /// <param name="testPoint">(Point3d) List of 3 numbers or Point3d. The test point</param>
     /// <returns>(Point3d) The point on the finite line that is closest to the test point.</returns>
     static member LineClosestPointFinite(line:Line, testPoint:Point3d) : Point3d =
-        line.ClosestPoint(testPoint, true)
+        line.ClosestPoint(testPoint, limitToFiniteSegment=true)
 
 
 
-    /// <summary>Finds the point on an INFINITE line (ray) that is closest to a test point.</summary>
+    /// <summary>Finds the point on an infinite line (ray) that is closest to a test point.</summary>
     /// <param name="line">(Geometry.Line) The line to be considered infinite</param>
     /// <param name="testPoint">(Point3d) The test point</param>
     /// <returns>(Point3d) The point on the infinite line (ray) that is closest to the test point.</returns>
@@ -9434,10 +9398,10 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Calculates the intersection of a line and a cylinder.</summary>
     /// <param name="line">(Geometry.Line) The line to intersect</param>
-    /// <param name="cylinderPlane">(Plane) Base Plane of the cylinder</param>
+    /// <param name="cylinderPlane">(Plane) Base plane of the cylinder</param>
     /// <param name="cylinderHeight">(float) Height of the cylinder</param>
     /// <param name="cylinderRadius">(float) Radius of the cylinder</param>
-    /// <returns>(Point3d array) list of intersection points (0, 1, or 2 points).</returns>
+    /// <returns>(Point3d array) List of intersection points (0, 1, or 2 points).</returns>
     static member LineCylinderIntersection(line:Line, cylinderPlane:Plane, cylinderHeight:float, cylinderRadius:float) : Point3d array =
         let circle = Geometry.Circle( cylinderPlane, cylinderRadius )
         if not <| circle.IsValid then  RhinoScriptingException.Raise "RhinoScriptSyntax.LineCylinderIntersection: Unable to create valid circle with given plane && radius.  line:'%A' cylinderPlane:'%A' cylinderHeight:'%A' cylinderRadius:'%A'" line cylinderPlane cylinderHeight cylinderRadius
@@ -9456,10 +9420,10 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Determines if the shortest distance from a line to a point or another
     ///    line is greater than a specified distance.</summary>
-    /// <param name="line">(Geometry.Line) a Geometry.Line</param>
+    /// <param name="line">(Geometry.Line) A Geometry.Line</param>
     /// <param name="distance">(float) The distance</param>
     /// <param name="point">(Point3d) The test point</param>
-    /// <returns>(bool) True if the shortest distance from the line to the other project is
+    /// <returns>(bool) True if the shortest distance from the line to the other object is
     ///    greater than distance, False otherwise.</returns>
     static member LineIsFartherThan(line:Line, distance:float, point:Point3d) : bool =
         let minDist = line.MinimumDistanceTo(point)
@@ -9581,15 +9545,15 @@ type RhinoScriptSyntax private () =
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
 
-    /// <summary>Verifies the existence of a line-type in the document.</summary>
-    /// <param name="name">(string) The name of an existing line-type</param>
+    /// <summary>Verifies the existence of a linetype in the document.</summary>
+    /// <param name="name">(string) The name of an existing linetype</param>
     /// <returns>(bool) True or False.</returns>
     static member IsLinetype(name:string) : bool =
         notNull <| State.Doc.Linetypes.FindName(name)
 
 
-    /// <summary>Checks if an existing line-type is from a reference file.</summary>
-    /// <param name="name">(string) The name of an existing line-type</param>
+    /// <summary>Checks if an existing linetype is from a reference file.</summary>
+    /// <param name="name">(string) The name of an existing linetype</param>
     /// <returns>(bool) True or False.</returns>
     static member IsLinetypeReference(name:string) : bool =
         let lt = State.Doc.Linetypes.FindName(name)
@@ -9597,14 +9561,14 @@ type RhinoScriptSyntax private () =
         lt.IsReference
 
 
-    /// <summary>Returns number of line-types in the document.</summary>
-    /// <returns>(int) The number of line-types in the document.</returns>
+    /// <summary>Returns the number of linetypes in the document.</summary>
+    /// <returns>(int) The number of linetypes in the document.</returns>
     static member LinetypeCount() : int =
         State.Doc.Linetypes.Count
 
 
-    /// <summary>Returns names of all line-types in the document.</summary>
-    /// <returns>(string ResizeArray) list of line-type names.</returns>
+    /// <summary>Returns names of all linetypes in the document.</summary>
+    /// <returns>(string ResizeArray) List of linetype names.</returns>
     static member LinetypeNames() : string ResizeArray =
         let count = State.Doc.Linetypes.Count
         let rc = ResizeArray()
@@ -9619,7 +9583,7 @@ type RhinoScriptSyntax private () =
 
 
 
-    /// <summary>Add material to a layer and returns the new material's index. If the
+    /// <summary>Adds a material to a layer and returns the new material's index. If the
     ///    layer already has a material, then the layer's current material index is
     ///    returned.</summary>
     /// <param name="layer">(string) Name of an existing layer.</param>
@@ -9633,10 +9597,10 @@ type RhinoScriptSyntax private () =
             State.Doc.Views.Redraw()
             materialindex
 
-    /// <summary>Adds material to an object and returns the new material's index. If the
+    /// <summary>Adds a material to an object and returns the new material's index. If the
     ///    object already has a material, the object's current material index is returned.</summary>
     /// <param name="objectId">(Guid) Identifier of an object.</param>
-    /// <returns>(int) material index of the object.</returns>
+    /// <returns>(int) Material index of the object.</returns>
     static member AddMaterialToObject(objectId:Guid) : int =
         let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let mutable attr = rhinoObject.Attributes
@@ -9653,9 +9617,9 @@ type RhinoScriptSyntax private () =
             materialindex
 
 
-    /// <summary>Copies definition of a source material to a destination material.</summary>
-    /// <param name="sourceIndex">(int) Source index of materials to copy.</param>
-    /// <param name="destinationIndex">(int) Destination index materials to copy.</param>
+    /// <summary>Copies the definition of a source material to a destination material.</summary>
+    /// <param name="sourceIndex">(int) Source index of material to copy.</param>
+    /// <param name="destinationIndex">(int) Destination index of material to copy to.</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
     static member CopyMaterial(sourceIndex:int, destinationIndex:int) : bool =
         if sourceIndex = destinationIndex then true // originally false
@@ -9947,16 +9911,16 @@ type RhinoScriptSyntax private () =
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
 
-    /// <summary>Add a Mesh object to the document.</summary>
-    /// <param name="vertices">(Point3d seq) List of 3D points defining the vertices of the Mesh</param>
+    /// <summary>Adds a Mesh object to the document.</summary>
+    /// <param name="vertices">(Point3d seq) List of 3D points defining the vertices of the mesh</param>
     /// <param name="faceVertices">(int IList seq) List containing lists of 3 or 4 numbers that define the
-    ///    vertex indices for each face of the Mesh. If the third a fourth vertex
+    ///    vertex indices for each face of the mesh. If the third a fourth vertex
     ///    indices of a face are identical, a triangular face will be created</param>
-    /// <param name="vertexNormals">(Vector3f seq) Optional, List of 3D vectors defining the vertex normals of
-    ///    the Mesh. Note, for every vertex, there must be a corresponding vertex normal</param>
-    /// <param name="textureCoordinates">(Point2f seq) Optional, List of 2D texture coordinates. For every
+    /// <param name="vertexNormals">(Vector3f seq) Optional, list of 3D vectors defining the vertex normals of
+    ///    the mesh. Note, for every vertex, there must be a corresponding vertex normal</param>
+    /// <param name="textureCoordinates">(Point2f seq) Optional, list of 2D texture coordinates. For every
     ///    vertex, there must be a corresponding texture coordinate</param>
-    /// <param name="vertexColors">(Drawing.Color seq) Optional, A list of color values. For every vertex,
+    /// <param name="vertexColors">(Drawing.Color seq) Optional, a list of color values. For every vertex,
     ///    there must be a corresponding vertex color.</param>
     /// <returns>(Guid) Identifier of the new object.</returns>
     static member AddMesh( vertices:Point3d seq, //TODO how to construct Ngon Mesh ???
@@ -10003,16 +9967,16 @@ type RhinoScriptSyntax private () =
         State.Doc.Views.Redraw()
         rc
 
-    /// <summary>Add a Mesh object to the document.</summary>
-    /// <param name="vertices">(Point3d seq) List of 3D points defining the vertices of the Mesh</param>
+    /// <summary>Adds a Mesh object to the document.</summary>
+    /// <param name="vertices">(Point3d seq) List of 3D points defining the vertices of the mesh</param>
     /// <param name="faceVertices">(int*int*int*int seq) Tuple  of  4 integers that define the
-    ///    vertex indices for each face of the Mesh. If the third a fourth vertex
+    ///    vertex indices for each face of the mesh. If the third a fourth vertex
     ///    indices of a face are identical, a triangular face will be created</param>
-    /// <param name="vertexNormals">(Vector3f seq) Optional, List of 3D vectors defining the vertex normals of
-    ///    the Mesh. Note, for every vertex, there must be a corresponding vertex normal</param>
-    /// <param name="textureCoordinates">(Point2f seq) Optional, List of 2D texture coordinates. For every
+    /// <param name="vertexNormals">(Vector3f seq) Optional, list of 3D vectors defining the vertex normals of
+    ///    the mesh. Note, for every vertex, there must be a corresponding vertex normal</param>
+    /// <param name="textureCoordinates">(Point2f seq) Optional, list of 2D texture coordinates. For every
     ///    vertex, there must be a corresponding texture coordinate</param>
-    /// <param name="vertexColors">(Drawing.Color seq) Optional, A list of color values. For every vertex,
+    /// <param name="vertexColors">(Drawing.Color seq) Optional, a list of color values. For every vertex,
     ///    there must be a corresponding vertex color.</param>
     /// <returns>(Guid) Identifier of the new object.</returns>
     static member AddMesh( vertices:Point3d seq, //TODO how to construct Ngon Mesh ???
@@ -10842,12 +10806,12 @@ type RhinoScriptSyntax private () =
 
 
     /// <summary>Moves, scales, or rotates a list of objects given a 4x4 transformation
-    ///    matrix. The matrix acts on the left. To transform Geometry objects instead of DocObjects or Guids use their .Transform(xForm) member.</summary>
+    ///    matrix. The matrix acts on the left. To transform geometry objects instead of DocObjects or Guids use their .Transform(xForm) member.</summary>
     /// <param name="objectIds">(Guid seq) List of object identifiers</param>
     /// <param name="matrix">(Transform) The transformation matrix (4x4 array of numbers)</param>
     /// <param name="copy">(bool) Optional, default value: <c>false</c>
     ///    Copy the objects</param>
-    /// <returns>(Guid ResizeArray) ids identifying the newly transformed objects.</returns>
+    /// <returns>(Guid ResizeArray) IDs identifying the newly transformed objects.</returns>
     static member TransformObjects( objectIds:Guid seq,
                                     matrix:Transform,
                                     [<OPT;DEF(false)>]copy:bool) : Guid ResizeArray =   //PLURAL
@@ -10861,7 +10825,7 @@ type RhinoScriptSyntax private () =
         rc
 
     /// <summary>Moves, scales, or rotates an object given a 4x4 transformation matrix.
-    ///    The matrix acts on the left. To transform Geometry objects instead of DocObjects or Guids use their .Transform(xForm) member.</summary>
+    ///    The matrix acts on the left. To transform geometry objects instead of DocObjects or Guids use their .Transform(xForm) member.</summary>
     /// <param name="objectId">(Guid) The identifier of the object</param>
     /// <param name="matrix">(Transform) The transformation matrix (4x4 array of numbers)</param>
     /// <param name="copy">(bool) Optional, default value: <c>false</c>
@@ -10875,9 +10839,9 @@ type RhinoScriptSyntax private () =
         res
 
 
-    /// <summary>Copies object from one location to another, or in-place.</summary>
+    /// <summary>Copies an object from one location to another, or in-place.</summary>
     /// <param name="objectId">(Guid) Object to copy</param>
-    /// <param name="translation">(Vector3d) Optional, additional Translation vector to apply</param>
+    /// <param name="translation">(Vector3d) Optional, additional translation vector to apply</param>
     /// <returns>(Guid) objectId for the copy.</returns>
     static member CopyObject(objectId:Guid, [<OPT;DEF(Vector3d())>]translation:Vector3d) : Guid =
         let translation =
@@ -10893,8 +10857,8 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Copies one or more objects from one location to another, or in-place.</summary>
     /// <param name="objectIds">(Guid seq) List of objects to copy</param>
-    /// <param name="translation">(Vector3d) Optional, Vector3d representing translation vector to apply to copied set</param>
-    /// <returns>(Guid ResizeArray) identifiers for the copies.</returns>
+    /// <param name="translation">(Vector3d) Optional, translation vector to apply to copied set</param>
+    /// <returns>(Guid ResizeArray) Identifiers for the copies.</returns>
     static member CopyObjects(objectIds:Guid seq, [<OPT;DEF(Vector3d())>]translation:Vector3d) : Guid ResizeArray = //PLURAL
         let translation =
             if not translation.IsZero then
@@ -12245,8 +12209,8 @@ type RhinoScriptSyntax private () =
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
 
-    /// <summary>Returns the distance from a 3D point to a Plane.</summary>
-    /// <param name="plane">(Plane) The Plane</param>
+    /// <summary>Returns the distance from a 3D point to a plane.</summary>
+    /// <param name="plane">(Plane) The plane</param>
     /// <param name="point">(Point3d) List of 3 numbers or Point3d</param>
     /// <returns>(float) The distance.</returns>
     static member DistanceToPlane(plane:Plane, point:Point3d) : float =
@@ -12255,8 +12219,8 @@ type RhinoScriptSyntax private () =
         plane.DistanceTo(point)
 
 
-    /// <summary>Evaluates a Plane at a U, V parameter.</summary>
-    /// <param name="plane">(Plane) The Plane to evaluate</param>
+    /// <summary>Evaluates a plane at a U, V parameter.</summary>
+    /// <param name="plane">(Plane) The plane to evaluate</param>
     /// <param name="u">(float) U parameter to evaluate</param>
     /// <param name="v">(float) V parameter to evaluate</param>
     /// <returns>(Point3d) Point3d.</returns>
@@ -12265,11 +12229,11 @@ type RhinoScriptSyntax private () =
         plane.PointAt(u, v)
 
 
-    /// <summary>Calculates the intersection of three Planes.</summary>
-    /// <param name="plane1">(Plane) The 1st Plane to intersect</param>
-    /// <param name="plane2">(Plane) The 2nd Plane to intersect</param>
-    /// <param name="plane3">(Plane) The 3rd Plane to intersect</param>
-    /// <returns>(Point3d) The intersection point between the 3 Planes.</returns>
+    /// <summary>Calculates the intersection of three planes.</summary>
+    /// <param name="plane1">(Plane) The first plane to intersect</param>
+    /// <param name="plane2">(Plane) The second plane to intersect</param>
+    /// <param name="plane3">(Plane) The third plane to intersect</param>
+    /// <returns>(Point3d) The intersection point between the three planes.</returns>
     static member IntersectPlanes( plane1:Plane,
                                    plane2:Plane,
                                    plane3:Plane) : Point3d =
@@ -12281,10 +12245,10 @@ type RhinoScriptSyntax private () =
         else RhinoScriptingException.Raise "RhinoScriptSyntax.IntersectPlanes failed, are they parallel? %A; %A; %A" plane1 plane2 plane3
 
 
-    /// <summary>Moves the origin of a Plane.</summary>
-    /// <param name="plane">(Plane) Plane </param>
+    /// <summary>Moves the origin of a plane.</summary>
+    /// <param name="plane">(Plane) The plane</param>
     /// <param name="origin">(Point3d) Point3d or list of three numbers</param>
-    /// <returns>(Plane) moved Plane.</returns>
+    /// <returns>(Plane) Moved plane.</returns>
     static member MovePlane(plane:Plane, origin:Point3d) : Plane =
         //plane = RhinoScriptSyntax.CoercePlane(plane)
         //origin = RhinoScriptSyntax.Coerce3dPoint(origin)
@@ -12292,9 +12256,9 @@ type RhinoScriptSyntax private () =
         rc.Origin <- origin
         rc
 
-    /// <summary>Flip this Plane by swapping out the X and Y axes and inverting the Z axis.</summary>
-    /// <param name="plane">(Plane) Plane </param>
-    /// <returns>(Plane) moved Plane.</returns>
+    /// <summary>Flips this plane by swapping out the X and Y axes and inverting the Z axis.</summary>
+    /// <param name="plane">(Plane) The plane</param>
+    /// <returns>(Plane) Flipped plane.</returns>
     static member FlipPlane(plane:Plane) : Plane =
         let pl = Plane(plane)
         pl.Flip()
@@ -12539,10 +12503,10 @@ type RhinoScriptSyntax private () =
 
 
     /// <summary>Compares two vectors to see if they are parallel within one degree or custom tolerance.</summary>
-    /// <param name="vector1">(Vector3d) Vector1 of the vectors to compare</param>
-    /// <param name="vector2">(Vector3d) Vector2 of the vectors to compare</param>
+    /// <param name="vector1">(Vector3d) First of the vectors to compare</param>
+    /// <param name="vector2">(Vector3d) Second of the vectors to compare</param>
     /// <param name="toleranceDegree">(float) Optional, default value: <c>1.0</c>
-    ///    Angle Tolerance in degree</param>
+    ///    Angle tolerance in degrees</param>
     /// <returns>(int) The value represents
     ///     -1 = the vectors are anti-parallel
     ///      0 = the vectors are not parallel
@@ -12555,10 +12519,10 @@ type RhinoScriptSyntax private () =
 
 
     /// <summary>Compares two vectors to see if they are perpendicular.</summary>
-    /// <param name="vector1">(Vector3d) Vector1 of the vectors to compare</param>
-    /// <param name="vector2">(Vector3d) Vector2 of the vectors to compare</param>
+    /// <param name="vector1">(Vector3d) First of the vectors to compare</param>
+    /// <param name="vector2">(Vector3d) Second of the vectors to compare</param>
     /// <param name="toleranceDegree">(float) Optional, default value: <c>1.0</c>
-    ///    Angle Tolerance in degree</param>
+    ///    Angle tolerance in degrees</param>
     /// <returns>(bool) True if vectors are perpendicular, otherwise False.</returns>
     static member IsVectorPerpendicularTo(  vector1:Vector3d,
                                             vector2:Vector3d,
@@ -12583,8 +12547,8 @@ type RhinoScriptSyntax private () =
 
 
     /// <summary>Adds a 3D point or a 3D vector to a 3D point.</summary>
-    /// <param name="point1">(Point3d) Point1 of the points to add</param>
-    /// <param name="point2">(Point3d) Point2 of the points to add</param>
+    /// <param name="point1">(Point3d) First of the points to add</param>
+    /// <param name="point2">(Point3d) Second of the points to add</param>
     /// <returns>(Point3d) The resulting 3D point.</returns>
     static member PointAdd(point1:Point3d, point2:Point3d) : Point3d =
         point1 + point2
@@ -14115,7 +14079,7 @@ type RhinoScriptSyntax private () =
     /// <param name="fixEdges">(bool) Optional, default value: <c>false</c>
     ///    Clamps the edges of the starting Surface in place. This option is useful if you are using a
     ///    Curve or points for deforming an existing Surface, and you do not want the edges of the starting Surface
-    ///    to move. The default if False</param>
+    ///    to move. The default is False</param>
     /// <returns>(Guid) Identifier of the new Surface object.</returns>
     static member AddPatch( objectIds:Guid seq,
                               startSurfaceId: Guid,
@@ -14162,7 +14126,7 @@ type RhinoScriptSyntax private () =
     /// <param name="fixEdges">(bool) Optional, default value: <c>false</c>
     ///    Clamps the edges of the starting Surface in place. This option is useful if you are using a
     ///    Curve or points for deforming an existing Surface, and you do not want the edges of the starting Surface
-    ///    to move. The default if False</param>
+    ///    to move. The default is False</param>
     /// <returns>(Guid) Identifier of the new Surface object.</returns>
     static member AddPatch( objectIds:Guid seq,
                             uvSpans: int * int ,
@@ -15447,11 +15411,11 @@ type RhinoScriptSyntax private () =
                                   [<OPT;DEF(10)>]pointcountV:int ) : bool =
 
         let surface = RhinoScriptSyntax.CoerceSurface(objectId)
-        let newsurf = surface.Rebuild( degreeU, degreeV, pointcountU, pointcountV )
-        if newsurf|> isNull  then false
+        let newsrf = surface.Rebuild( degreeU, degreeV, pointcountU, pointcountV )
+        if newsrf|> isNull  then false
         else
             //objectId = RhinoScriptSyntax.CoerceGuid(objectId)
-            let rc = State.Doc.Objects.Replace(objectId, newsurf)
+            let rc = State.Doc.Objects.Replace(objectId, newsrf)
             if rc then State.Doc.Views.Redraw()
             rc
 
@@ -16017,6 +15981,9 @@ type RhinoScriptSyntax private () =
         surface.NormalAt(u,v)
 
 
+
+
+
     /// <summary>Converts Surface parameter to a normalized Surface parameter; one that
     ///    ranges between 0.0 and 1.0 in both the U and V directions.</summary>
     /// <param name="surfaceId">(Guid) The Surface's identifier</param>
@@ -16170,9 +16137,8 @@ type RhinoScriptSyntax private () =
             r.Add (mp.CentroidCoordinatesMomentsOfInertia.X, mp.CentroidCoordinatesMomentsOfInertia.Y, mp.CentroidCoordinatesMomentsOfInertia.Z)                //  [10]    Area Moments of Inertia about the Centroid Coordinate Axes.
             r.Add (mp.CentroidCoordinatesMomentsOfInertiaError.X, mp.CentroidCoordinatesMomentsOfInertiaError.Y, mp.CentroidCoordinatesMomentsOfInertiaError.Z) //  [11]    The absolute (+/-) error bound for the Area Moments of Inertia about the Centroid Coordinate Axes.
             r.Add (mp.CentroidCoordinatesRadiiOfGyration.X, mp.CentroidCoordinatesRadiiOfGyration.Y, mp.CentroidCoordinatesRadiiOfGyration.Z)                   //  [12]    Area Radii of Gyration about the Centroid Coordinate Axes.
-            r.Add (0., 0., 0.) //need to add error calc to RhinoCommon                                                                                          //  [13]    The absolute (+/-) error bound for the Area Radii of Gyration about the Centroid Coordinate Axes</returns>
+            r.Add (0., 0., 0.) //need to add error calc to RhinoCommon                                                                                          //  [13]    The absolute (+/-) error bound for the Area Radii of Gyration about the Centroid Coordinate Axes.
             r
-
 
 
     /// <summary>Returns list of weight values assigned to the control points of a Surface.
@@ -16394,8 +16360,8 @@ type RhinoScriptSyntax private () =
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
 
-    /// <summary>Closes a currently open tool-bar collection.</summary>
-    /// <param name="name">(string) Name of a currently open tool-bar collection</param>
+    /// <summary>Closes a currently open toolbar collection.</summary>
+    /// <param name="name">(string) Name of a currently open toolbar collection</param>
     /// <param name="prompt">(bool) Optional, default value: <c>false</c>
     ///    If True, user will be prompted to save the collection file
     ///    if it has been modified prior to closing</param>
@@ -16406,9 +16372,9 @@ type RhinoScriptSyntax private () =
         else false
 
 
-    /// <summary>Hides a previously visible tool-bar group in an open tool-bar collection.</summary>
-    /// <param name="name">(string) Name of a currently open tool-bar file</param>
-    /// <param name="toolbarGroup">(string) Name of a tool-bar group to hide</param>
+    /// <summary>Hides a previously visible toolbar group in an open toolbar collection.</summary>
+    /// <param name="name">(string) Name of a currently open toolbar file</param>
+    /// <param name="toolbarGroup">(string) Name of a toolbar group to hide</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
     static member HideToolbar(name:string, toolbarGroup:string) : bool =
         let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
@@ -16423,11 +16389,11 @@ type RhinoScriptSyntax private () =
             false
 
 
-    /// <summary>Verifies a tool-bar (or tool-bar group) exists in an open collection file.</summary>
-    /// <param name="name">(string) Name of a currently open tool-bar file</param>
-    /// <param name="toolbar">(string) Name of a tool-bar group</param>
+    /// <summary>Verifies a toolbar (or toolbar group) exists in an open collection file.</summary>
+    /// <param name="name">(string) Name of a currently open toolbar file</param>
+    /// <param name="toolbar">(string) Name of a toolbar group</param>
     /// <param name="group">(bool) Optional, default value: <c>false</c>
-    ///    If tool-bar parameter is referring to a tool-bar group</param>
+    ///    If toolbar parameter is referring to a toolbar group</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
     static member IsToolbar(name:string, toolbar:string, [<OPT;DEF(false)>]group:bool) : bool =
        let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
@@ -16442,18 +16408,18 @@ type RhinoScriptSyntax private () =
            false
 
 
-    /// <summary>Checks if a tool-bar collection is open.</summary>
-    /// <param name="file">(string) Full path to a tool-bar collection file</param>
-    /// <returns>(string) Rhino-assigned name of the tool-bar collection.</returns>
+    /// <summary>Checks if a toolbar collection is open.</summary>
+    /// <param name="file">(string) Full path to a toolbar collection file</param>
+    /// <returns>(string) Rhino-assigned name of the toolbar collection.</returns>
     static member IsToolbarCollection(file:string) : string =
         let tbfile = RhinoApp.ToolbarFiles.FindByPath(file)
         if notNull tbfile then  tbfile.Name
         else ""
 
 
-    /// <summary>Checks if a tool-bar group in an open tool-bar collection is visible.</summary>
-    /// <param name="name">(string) Name of a currently open tool-bar file</param>
-    /// <param name="toolbarGroup">(string) Name of a tool-bar group</param>
+    /// <summary>Checks if a toolbar group in an open toolbar collection is visible.</summary>
+    /// <param name="name">(string) Name of a currently open toolbar file</param>
+    /// <param name="toolbarGroup">(string) Name of a toolbar group</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
     static member IsToolbarDocked(name:string, toolbarGroup:string) : bool =
         let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
@@ -16464,9 +16430,9 @@ type RhinoScriptSyntax private () =
         else RhinoScriptingException.Raise "RhinoScriptSyntax.IsToolbarDocked failed on name '%s'" name
 
 
-    /// <summary>Checks if a tool-bar group in an open tool-bar collection is visible.</summary>
-    /// <param name="name">(string) Name of a currently open tool-bar file</param>
-    /// <param name="toolbarGroup">(string) Name of a tool-bar group</param>
+    /// <summary>Checks if a toolbar group in an open toolbar collection is visible.</summary>
+    /// <param name="name">(string) Name of a currently open toolbar file</param>
+    /// <param name="toolbarGroup">(string) Name of a toolbar group</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
     static member IsToolbarVisible(name:string, toolbarGroup:string) : bool =
         let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
@@ -16487,7 +16453,7 @@ type RhinoScriptSyntax private () =
 
 
     /// <summary>Saves an open tool-bar collection to disk.</summary>
-    /// <param name="name">(string) Name of a currently open tool-bar file</param>
+    /// <param name="name">(string) Name of a currently open toolbar file</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
     static member SaveToolbarCollection(name:string) : bool =
         let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
@@ -16496,7 +16462,7 @@ type RhinoScriptSyntax private () =
 
 
     /// <summary>Saves an open tool-bar collection to a different disk file.</summary>
-    /// <param name="name">(string) Name of a currently open tool-bar file</param>
+    /// <param name="name">(string) Name of a currently open toolbar file</param>
     /// <param name="file">(string) Full path to file name to save to</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
     static member SaveToolbarCollectionAs(name:string, file:string) : bool =
@@ -16506,8 +16472,8 @@ type RhinoScriptSyntax private () =
 
 
     /// <summary>Shows a previously hidden tool-bar group in an open tool-bar collection.</summary>
-    /// <param name="name">(string) Name of a currently open tool-bar file</param>
-    /// <param name="toolbarGroup">(string) Name of a tool-bar group to show</param>
+    /// <param name="name">(string) Name of a currently open toolbar file</param>
+    /// <param name="toolbarGroup">(string) Name of a toolbar group to show</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
     static member ShowToolbar(name:string, toolbarGroup:string) : bool =
         let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
@@ -16602,8 +16568,8 @@ type RhinoScriptSyntax private () =
 
 
     /// <summary>Returns a change of basis transformation matrix or None on error.</summary>
-    /// <param name="initialPlane">(Plane) The initial Plane</param>
-    /// <param name="finalPlane">(Plane) The final Plane</param>
+    /// <param name="initialPlane">(Plane) The initial plane</param>
+    /// <param name="finalPlane">(Plane) The final plane</param>
     /// <returns>(Transform) The 4x4 transformation matrix.</returns>
     static member XformChangeBasis(initialPlane:Plane, finalPlane:Plane) : Transform =
         let xForm = Transform.ChangeBasis(initialPlane, finalPlane)
@@ -16611,7 +16577,7 @@ type RhinoScriptSyntax private () =
         xForm
 
 
-    /// <summary>Returns a change of basis transformation matrix of None on error.</summary>
+    /// <summary>Returns a change of basis transformation matrix or None on error.</summary>
     /// <param name="x0">(Vector3d) X of initial basis</param>
     /// <param name="y0">(Vector3d) Y of initial basis</param>
     /// <param name="z0">(Vector3d) Z of initial basis</param>
@@ -16864,7 +16830,7 @@ type RhinoScriptSyntax private () =
 
 
     /// <summary>Returns a zero transformation matrix.</summary>
-    /// <returns>(Transform) a zero transformation matrix.</returns>
+    /// <returns>(Transform) A zero transformation matrix.</returns>
     static member XformZero() : Transform =
         Transform()
 
@@ -16929,10 +16895,10 @@ type RhinoScriptSyntax private () =
 
 
     /// <summary>Returns all user text keys stored on an object.</summary>
-    /// <param name="objectId">(Guid) The object's identifies</param>
+    /// <param name="objectId">(Guid) The object's identifier</param>
     /// <param name="attachedToGeometry">(bool) Optional, default value: <c>false</c>
     ///    Location on the object to retrieve the user text</param>
-    /// <returns>(string ResizeArray) all keys.</returns>
+    /// <returns>(string ResizeArray) All keys.</returns>
     static member GetUserTextKeys(objectId:Guid, [<OPT;DEF(false)>]attachedToGeometry:bool) : string ResizeArray =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let uss =
@@ -16946,12 +16912,12 @@ type RhinoScriptSyntax private () =
         r
 
 
-    /// <summary>Returns user text stored on an object, fails if non existing.</summary>
-    /// <param name="objectId">(Guid) The object's identifies</param>
+    /// <summary>Returns user text stored on an object, fails if non-existing.</summary>
+    /// <param name="objectId">(Guid) The object's identifier</param>
     /// <param name="key">(string) The key name</param>
     /// <param name="attachedToGeometry">(bool) Optional, default value: <c>false</c>
     ///    Location on the object to retrieve the user text</param>
-    /// <returns>(string) if key is specified, the associated value,fails if non existing.</returns>
+    /// <returns>(string) If key is specified, the associated value. Fails if non-existing.</returns>
     static member GetUserText(objectId:Guid, key:string, [<OPT;DEF(false)>]attachedToGeometry:bool) : string =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let s =
@@ -16981,12 +16947,12 @@ type RhinoScriptSyntax private () =
             RhinoScriptingException.Raise "%s" (err.ToString())
         s
 
-    /// <summary>Returns user text stored on an object, returns Option.None if non existing.</summary>
-    /// <param name="objectId">(Guid) The object's identifies</param>
+    /// <summary>Returns user text stored on an object, returns Option.None if non-existing.</summary>
+    /// <param name="objectId">(Guid) The object's identifier</param>
     /// <param name="key">(string) The key name</param>
     /// <param name="attachedToGeometry">(bool) Optional, default value: <c>false</c>
     ///    Location on the object to retrieve the user text</param>
-    /// <returns>(string Option) if key is specified, Some(value) else None .</returns>
+    /// <returns>(string Option) If key is specified, Some(value) else None.</returns>
     static member TryGetUserText(objectId:Guid, key:string, [<OPT;DEF(false)>]attachedToGeometry:bool) : string Option=
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let s =
@@ -16996,10 +16962,10 @@ type RhinoScriptSyntax private () =
         else Some s
 
     /// <summary>Checks if a User Text key is stored on an object.</summary>
-    /// <param name="objectId">(Guid) The object's identifies</param>
+    /// <param name="objectId">(Guid) The object's identifier</param>
     /// <param name="key">(string) The key name</param>
     /// <param name="attachedToGeometry">(bool) Optional, default value: <c>false</c> Location on the object to retrieve the user text</param>
-    /// <returns>(bool) if key exist true.</returns>
+    /// <returns>(bool) If key exists, true.</returns>
     static member HasUserText(objectId:Guid, key:string, [<OPT;DEF(false)>]attachedToGeometry:bool) : bool =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if attachedToGeometry then
@@ -17053,14 +17019,14 @@ type RhinoScriptSyntax private () =
     /// <returns>(unit) void, nothing.</returns>
     static member SetDocumentUserText(key:string, value:string, [<OPT;DEF(false)>]allowAllUnicode:bool) : unit =
         if not <|  RhinoScriptSyntax.IsGoodStringId( key, allowEmpty=false) then
-                RhinoScriptingException.Raise "RhinoScriptSyntax.SetDocumentUserText the string '%s' cannot be used as key. See RhinoScriptSyntax.IsGoodStringId. You may be able bypass this restrictions in Rhino.Scripting by using RhinoCommon directly." key
+                RhinoScriptingException.Raise "RhinoScriptSyntax.SetDocumentUserText the string '%s' cannot be used as key. See RhinoScriptSyntax.IsGoodStringId. You may be able to bypass these restrictions in Rhino.Scripting by using RhinoCommon directly." key
 
         if allowAllUnicode then
             if not <| Util.isAcceptableStringId( value, true) then
                 RhinoScriptingException.Raise "RhinoScriptSyntax.SetDocumentUserText the string '%s' cannot be used as value. See RhinoScriptSyntax.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." value
         else
             if not <|  RhinoScriptSyntax.IsGoodStringId( value, allowEmpty=true) then
-                RhinoScriptingException.Raise "RhinoScriptSyntax.SetDocumentUserText the string '%s' cannot be used as value. You may be able bypass this restrictions by using the optional argument: allowAllUnicode=true" value
+                RhinoScriptingException.Raise "RhinoScriptSyntax.SetDocumentUserText the string '%s' cannot be used as value. You may be able to bypass these restrictions by using the optional argument: allowAllUnicode=true" value
         State.Doc.Strings.SetString(key, value) |> ignore<string>
 
 
@@ -17072,7 +17038,7 @@ type RhinoScriptSyntax private () =
         let p = State.Doc.Strings.SetString(key, null)
         if isNull p then RhinoScriptingException.Raise "RhinoScriptSyntax.DeleteDocumentUserText failed,  key '%s' does not exist"  key
 
-    /// <summary>Sets a user text stored on an object. Key and value must noy contain ambiguous Unicode characters.</summary>
+    /// <summary>Sets a user text stored on an object. Key and value must not contain ambiguous Unicode characters.</summary>
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <param name="key">(string) The key name to set. Cannot be an empty string.</param>
     /// <param name="value">(string) The string value to set. Can be an empty string. Use rs.DeleteUserText to delete keys</param>
@@ -17088,8 +17054,7 @@ type RhinoScriptSyntax private () =
             if not <| Util.isAcceptableStringId( value, true) then
                 RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText the string '%s' cannot be used as value. See RhinoScriptSyntax.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." value
         else
-            if not <|  RhinoScriptSyntax.IsGoodStringId( value, allowEmpty=true) then
-                RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText the string '%s' cannot be used as value. You may be able bypass this restrictions by using the optional argument: allowAllUnicode=true" value
+            if not <|  RhinoScriptSyntax.IsGoodStringId( value, allowEmpty=true) then                RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText the string '%s' cannot be used as value. You may be able to bypass these restrictions by using the optional argument: allowAllUnicode=true" value
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if attachToGeometry then
             if not <| obj.Geometry.SetUserString(key, value) then
@@ -17100,7 +17065,7 @@ type RhinoScriptSyntax private () =
 
         obj.CommitChanges() |> ignore<bool> // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
 
-    /// <summary>Sets or removes user text stored on multiple objects. Key and value must noy contain ambiguous Unicode characters.</summary>
+    /// <summary>Sets or removes user text stored on multiple objects. Key and value must not contain ambiguous Unicode characters.</summary>
     /// <param name="objectIds">(Guid seq) The object identifiers</param>
     /// <param name="key">(string) The key name to set. Cannot be an empty string.</param>
     /// <param name="value">(string) The string value to set. Can be an empty string. Use rs.DeleteUserText to delete keys</param>
@@ -17116,8 +17081,7 @@ type RhinoScriptSyntax private () =
             if not <| Util.isAcceptableStringId( value, true) then
                 RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText the string '%s' cannot be used as value. See RhinoScriptSyntax.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." value
         else
-            if not <|  RhinoScriptSyntax.IsGoodStringId( value, allowEmpty=true) then
-                RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText the string '%s' cannot be used as value. You may be able bypass this restrictions by using the optional argument: allowAllUnicode=true" value
+            if not <|  RhinoScriptSyntax.IsGoodStringId( value, allowEmpty=true) then                RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText the string '%s' cannot be used as value. You may be able to bypass these restrictions by using the optional argument: allowAllUnicode=true" value
 
         for objectId in objectIds do
             let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
@@ -17141,7 +17105,7 @@ type RhinoScriptSyntax private () =
         obj.CommitChanges() |> ignore<bool>  // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
 
 
-    /// <summary>Removes user text stored on multiple objects.If the key exists.</summary>
+    /// <summary>Removes user text stored on multiple objects. If the key exists.</summary>
     /// <param name="objectIds">(Guid seq) The object identifiers</param>
     /// <param name="key">(string) The key name to delete</param>
     /// <param name="attachToGeometry">(bool) Optional, default value: <c>false</c> Location on the object to delete the user text from</param>
@@ -17158,11 +17122,11 @@ type RhinoScriptSyntax private () =
 
 
     /// <summary>Display browse-for-folder dialog allowing the user to select a folder.</summary>
-    /// <param name="folder">(string) Optional, A default folder</param>
-    /// <param name="message">(string) Optional, A prompt or message</param>
-    /// <param name="title">(string) Optional, A dialog box title</param>
-    /// <returns>(string) selected folder or None if selection was canceled.
-    /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
+    /// <param name="folder">(string) Optional, a default folder</param>
+    /// <param name="message">(string) Optional, a prompt or message</param>
+    /// <param name="title">(string) Optional, a dialog box title</param>
+    /// <returns>(string) Selected folder or None if selection was cancelled.
+    /// A RhinoUserInteractionException is raised if input is cancelled via Esc key.</returns>
     static member BrowseForFolder(  [<OPT;DEF(null:string)>]folder:string,
                                     [<OPT;DEF(null:string)>]message:string,
                                     [<OPT;DEF(null:string)>]title:string) : string =
@@ -17197,10 +17161,10 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Displays a list of items in a checkable-style list dialog box.</summary>
     /// <param name="items">((string*bool) seq) A list of tuples containing a string and a boolean check state</param>
-    /// <param name="message">(string) Optional, A prompt or message</param>
-    /// <param name="title">(string) Optional, A dialog box title</param>
+    /// <param name="message">(string) Optional, a prompt or message</param>
+    /// <param name="title">(string) Optional, a dialog box title</param>
     /// <returns>((string*bool) ResizeArray) Option of tuples containing the input string in items along with their new boolean check value.
-    /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
+    /// A RhinoUserInteractionException is raised if input is cancelled via Esc key.</returns>
     static member CheckListBox( items:(string*bool) seq,
                                 [<OPT;DEF(null:string)>]message:string,
                                 [<OPT;DEF(null:string)>]title:string) :ResizeArray<string*bool> =
@@ -18327,14 +18291,14 @@ type RhinoScriptSyntax private () =
 
 
 
-    /// <summary>Return true if the script is being executed in the context of Rhino(currently always true).</summary>
-    /// <returns>(bool) true if the script is being executed in the context of Rhino(currently always true).</returns>
+    /// <summary>Return true if the script is being executed in the context of Rhino (currently always true).</summary>
+    /// <returns>(bool) True if the script is being executed in the context of Rhino (currently always true).</returns>
     static member ContextIsRhino() : bool =
         true //TODO implement correctly
 
 
-    /// <summary>Return true if the script is being executed in a grasshopper component(currently always false).</summary>
-    /// <returns>(bool) true if the script is being executed in a grasshopper component(currently always false).</returns>
+    /// <summary>Return true if the script is being executed in a Grasshopper component (currently always false).</summary>
+    /// <returns>(bool) True if the script is being executed in a Grasshopper component (currently always false).</returns>
     static member ContextIsGrasshopper() : bool =
         false //TODO implement correctly
 
@@ -18370,9 +18334,9 @@ type RhinoScriptSyntax private () =
     /// <summary>Measures the angle between two lines.</summary>
     /// <param name="line1">(Line) List of 6 numbers or 2 Point3d</param>
     /// <param name="line2">(Line) List of 6 numbers or 2 Point3d</param>
-    /// <returns>(float * float) containing the following elements .
-    ///    0 The angle in degrees.
-    ///    1 The reflex angle in degrees.</returns>
+    /// <returns>(float * float) containing the following elements:
+    ///    0 = The angle in degrees.
+    ///    1 = The reflex angle in degrees.</returns>
     static member Angle2(line1:Line, line2:Line) : float * float =
         let vec0 = line1.To - line1.From
         let vec1 = line2.To - line2.From
@@ -18816,7 +18780,7 @@ type RhinoScriptSyntax private () =
     ///    5 = parallel front view
     ///    6 = parallel back view
     ///    7 = perspective view</param>
-    /// <returns>(Guid) identifier of the newly created detail.</returns>
+    /// <returns>(Guid) Identifier of the newly created detail.</returns>
     static member AddDetail( layoutName:string,
                              corner1:Point2d,
                              corner2:Point2d,
@@ -18834,7 +18798,7 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Adds a new page layout view.</summary>
     /// <param name="title">(string) Optional, Title of new layout</param>
-    /// <param name="width">(float)  Optional, width  of paper for the new layout</param>
+    /// <param name="width">(float)  Optional, width of paper for the new layout</param>
     /// <param name="height">(float) Optional, height of paper for the new layout</param>
     /// <returns>(Guid*string) Id and Name of new layout.</returns>
     static member AddLayout([<OPT;DEF(null:string)>]title:string,
@@ -18847,9 +18811,9 @@ type RhinoScriptSyntax private () =
         else RhinoScriptingException.Raise "RhinoScriptSyntax.AddLayout failed for %A %A" title (width, height)
 
 
-    /// <summary>Adds new named construction Plane to the document.</summary>
-    /// <param name="cPlaneName">(string) The name of the new named construction Plane</param>
-    /// <param name="plane">(Plane) The construction Plane</param>
+    /// <summary>Adds new named construction plane to the document.</summary>
+    /// <param name="cPlaneName">(string) The name of the new named construction plane</param>
+    /// <param name="plane">(Plane) The construction plane</param>
     /// <returns>(unit) void, nothing.</returns>
     static member AddNamedCPlane(cPlaneName:string, plane:Plane) : unit =
         if isNull cPlaneName then RhinoScriptingException.Raise "RhinoScriptSyntax.AddNamedCPlane: cPlaneName = null.  plane:'%A'"  plane

@@ -5,10 +5,6 @@ open Rhino.Scripting.RhinoScriptingUtils
 open System
 
 
-
-
-
-
 [<AutoOpen>]
 module AutoOpenLayer =
 
