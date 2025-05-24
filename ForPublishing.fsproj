@@ -3,11 +3,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFramework>net48</TargetFramework>
-	  <!-- net7 fails: https://discourse.mcneel.com/t/rhinocommon-with-net7-0-target/200460/2 -->
-	  <!-- <TargetFrameworks>net48;net7.0</TargetFrameworks> -->
-	  <!-- <NoWarn>NU1701</NoWarn>   to suppress warning about RhinoCommon targeting only for net48 -->
-	  <!-- <UseWindowsForms>true</UseWindowsForms>  use Eto Forms instead -->
+	  <TargetFrameworks>net48;net7.0</TargetFrameworks>
 
     <LangVersion>preview</LangVersion>
     <NeutralLanguage>en</NeutralLanguage>
@@ -31,7 +27,7 @@
     <Description>A complete re-implementation of the RhinoPython scripting syntax in F#. For Rhino 7.0 or higher.</Description>
 
     <Configuration>Release</Configuration>
-    <PlatformTarget>x64</PlatformTarget> <!-- x64 is required e.g by Rhino, dont us just 'Platform' node -->
+    <PlatformTarget>x64</PlatformTarget> <!-- x64 is required e.g by Rhino, don't us just 'Platform' node -->
     <OtherFlags>$(OtherFlags) --warnon:3390</OtherFlags>  <!-- warnon:3390: is to verify xml docstrings https://devblogs.microsoft.com/dotnet/announcing-f-5/#improved-compiler-analysis-for-library-authors -->
     <OtherFlags>$(OtherFlags) --warnon:1182</OtherFlags>  <!-- warnon:1182: warn on unused variables -->
 
@@ -72,7 +68,7 @@
 
   <ItemGroup>
     <PackageReference Include="FSharp.Core" Version="6.0.7" /> <!-- so that dependabot does not fail, even though it is set to be excluded -->
-    <PackageReference Include="RhinoCommon" Version="7.0.20314.3001" PrivateAssets="All" ExcludeAssets="runtime" />
+    <PackageReference Include="RhinoCommon" Version="8.19.25098.10001-rc" PrivateAssets="All" ExcludeAssets="runtime" />
     <PackageReference Include="Ionide.KeepAChangelog.Tasks" Version="0.1.8" PrivateAssets="All"  />
     <PackageReference Include="Eto.Forms" Version="2.9.0" PrivateAssets="All" /> <!-- so it works on Mac too and doesn't need Mac.Mono https://discourse.mcneel.com/t/rhino-for-mac-wip-goodbye-mono-hello-net-6/131925 -->
 
