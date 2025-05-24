@@ -102,8 +102,8 @@ module AutoOpenUserData =
 
         if isNull s then
             let err = Text.StringBuilder()
-            let addLn (s:String) = err.AppendLine s |> ignore
-            let add (s:String) = err.Append s |> ignore
+            let addLn (s:String) = err.AppendLine s |> ignore<Text.StringBuilder>
+            let add (s:String) = err.Append s |> ignore<Text.StringBuilder>
             addLn <| sprintf "RhinoScriptSyntax.GetUserText key: '%s' does not exist on %s" key (Pretty.str objectId)
             let ks = RhinoScriptSyntax.GetUserTextKeys(objectId, attachedToGeometry=false)
             if ks.Count = 0 then
@@ -184,7 +184,7 @@ module AutoOpenUserData =
     ///<returns>(unit) void, nothing.</returns>
     static member SetDocumentData(section:string, entry:string, value:string) : unit =
         // TODO verify input strings
-        State.Doc.Strings.SetString(section, entry, value) |> ignore
+        State.Doc.Strings.SetString(section, entry, value) |> ignore<string>
 
 
     ///<summary>Sets a user text stored in the document.</summary>
@@ -203,7 +203,7 @@ module AutoOpenUserData =
         else
             if not <|  RhinoScriptSyntax.IsGoodStringId( value, allowEmpty=true) then
                 RhinoScriptingException.Raise "RhinoScriptSyntax.SetDocumentUserText the string '%s' cannot be used as value. You may be able bypass this restrictions by using the optional argument: allowAllUnicode=true" value
-        State.Doc.Strings.SetString(key, value) |> ignore
+        State.Doc.Strings.SetString(key, value) |> ignore<string>
 
 
     ///<summary>Removes user text stored in the document.</summary>
@@ -240,7 +240,7 @@ module AutoOpenUserData =
             if not <| obj.Attributes.SetUserString(key, value) then
                 RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' value '%s'" (Pretty.str objectId) key value
 
-        obj.CommitChanges() |> ignore // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
+        obj.CommitChanges() |> ignore<bool> // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
 
     ///<summary>Sets or removes user text stored on multiple objects. Key and value must noy contain ambiguous Unicode characters.</summary>
     ///<param name="objectIds">(Guid seq) The object identifiers</param>
@@ -269,7 +269,7 @@ module AutoOpenUserData =
             else
                 if not <| obj.Attributes.SetUserString(key, value) then
                     RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' value '%s'" (Pretty.str objectId) key value
-            obj.CommitChanges() |> ignore  // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
+            obj.CommitChanges() |> ignore<bool>  // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
 
     ///<summary>Removes user text stored on an object. If the key exists.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
@@ -278,9 +278,9 @@ module AutoOpenUserData =
     ///<returns>(unit) void, nothing.</returns>
     static member DeleteUserText(objectId:Guid, key:string,  [<OPT;DEF(false)>]attachToGeometry:bool) : unit =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        if attachToGeometry then obj.Geometry.SetUserString  (key, null) |> ignore // returns false if key does not exist yet, otherwise true
-        else                     obj.Attributes.SetUserString(key, null) |> ignore
-        obj.CommitChanges() |> ignore  // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
+        if attachToGeometry then obj.Geometry.SetUserString  (key, null) |> ignore<bool> // returns false if key does not exist yet, otherwise true
+        else                     obj.Attributes.SetUserString(key, null) |> ignore<bool>
+        obj.CommitChanges() |> ignore<bool>  // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
 
 
     ///<summary>Removes user text stored on multiple objects.If the key exists.</summary>
@@ -291,8 +291,8 @@ module AutoOpenUserData =
     static member DeleteUserText(objectIds:Guid seq, key:string,  [<OPT;DEF(false)>]attachToGeometry:bool) : unit = //PLURAL
         for objectId in objectIds do
             let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-            if attachToGeometry then  obj.Geometry.SetUserString  (key, null) |> ignore // returns false if key does not exist yet, otherwise true
-            else                      obj.Attributes.SetUserString(key, null) |> ignore
-            obj.CommitChanges() |> ignore  // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
+            if attachToGeometry then  obj.Geometry.SetUserString  (key, null) |> ignore<bool> // returns false if key does not exist yet, otherwise true
+            else                      obj.Attributes.SetUserString(key, null) |> ignore<bool>
+            obj.CommitChanges() |> ignore<bool>  // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
 
 

@@ -55,7 +55,7 @@ module PrettyFormat =
     /// Assumes a string that represent a float or int with '.' as decimal separator and no other input formatting
     let internal addThousandSeparators (s:string) =
         let b = Text.StringBuilder(s.Length + s.Length / 3 + 1)
-        let inline add (c:char) = b.Append(c) |> ignore
+        let inline add (c:char) = b.Append(c) |> ignore<Text.StringBuilder>
 
         let inline doBeforeComma st en =
             for i=st to en-1 do // don't go to last one because it shall never get a separator
@@ -237,11 +237,11 @@ module AutoOpenRsUtils =
 
     /// Apply function, like |> , but ignore result.
     /// Return original input.
-    /// let inline (|>!) x f =  f x |> ignore ; x
+    /// let inline (|>!) x f =  f x |> ignore<bool> ; x
     /// Be aware of correct indenting see:
     /// https://stackoverflow.com/questions/64784154/indentation-change-after-if-else-expression-not-taken-into-account
     let inline ( |>! ) x f =
-        f x |> ignore //https://twitter.com/GoswinR/status/1316988132932407296
+        f x |> ignore<bool> //https://twitter.com/GoswinR/status/1316988132932407296
         x
 
         /// Null coalescing:

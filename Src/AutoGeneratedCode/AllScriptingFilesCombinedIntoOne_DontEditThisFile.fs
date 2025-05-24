@@ -1082,7 +1082,7 @@ type RhinoScriptSyntax private () =
             if createLayerIfMissing then  UtilLayer.getOrCreateLayer(layer, UtilLayer.randomLayerColor, UtilLayer.ByParent, UtilLayer.ByParent, allowAllUnicode,collapseParents).Index
             else                          RhinoScriptSyntax.CoerceLayer(layer).Index
         obj.Attributes.LayerIndex <- layerIndex
-        obj.CommitChanges() |> ignore
+        obj.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the layer of multiple objects, optionally creates layer if it does not exist yet.</summary>
@@ -1103,7 +1103,7 @@ type RhinoScriptSyntax private () =
         for objectId in objectIds do
             let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             obj.Attributes.LayerIndex <- layerIndex
-            obj.CommitChanges() |> ignore
+            obj.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the layer of an object.</summary>
@@ -1115,7 +1115,7 @@ type RhinoScriptSyntax private () =
         if layerIndex < 0 || layerIndex >= State.Doc.Layers.Count then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectLayer: Setting it via index failed. bad index '%d' (max %d) on: %s " layerIndex State.Doc.Layers.Count (Pretty.str objectId)
         if State.Doc.Layers.[layerIndex].IsDeleted then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectLayer: Setting it via index failed.  index '%d' is deleted.  on: %s " layerIndex  (Pretty.str objectId)
         obj.Attributes.LayerIndex <- layerIndex
-        obj.CommitChanges() |> ignore
+        obj.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the layer of multiple objects, optionally creates layer if it does not exist yet.</summary>
@@ -1128,7 +1128,7 @@ type RhinoScriptSyntax private () =
         for objectId in objectIds do
             let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             obj.Attributes.LayerIndex <- layerIndex
-            obj.CommitChanges() |> ignore
+            obj.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
     ///<summary>Changes the Name of a layer if than name is yet non existing. Fails if layer exists already. Currently only ASCII characters are allowed.</summary>
@@ -1443,11 +1443,11 @@ type RhinoScriptSyntax private () =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         layer.IsVisible <- visible
         if visible && forcevisibleOrDonotpersist then
-            State.Doc.Layers.ForceLayerVisible(layer.Id) |> ignore
+            State.Doc.Layers.ForceLayerVisible(layer.Id) |> ignore<bool>
         if not visible && not forcevisibleOrDonotpersist then
             if layer.ParentLayerId <> Guid.Empty then
                 layer.SetPersistentVisibility(visible)
-            // layer.CommitChanges() |> ignore //obsolete !!
+            // layer.CommitChanges() |> ignore<bool> //obsolete !!
         State.Doc.Views.Redraw()
     *)
 
@@ -1682,7 +1682,7 @@ type RhinoScriptSyntax private () =
         let mutable nonEmptyIndex = -1
         let rec addLoop(g:Guid)=
             if g <> Guid.Empty then
-                taken.Add(g)|> ignore
+                taken.Add(g)|> ignore<bool>
                 addLoop (Layers.FindId(g).ParentLayerId) // recurse
 
         for o in State.Doc.Objects do
@@ -1700,14 +1700,14 @@ type RhinoScriptSyntax private () =
         //or try to set it to another one thats not empty
         elif taken.Count > 0  && taken.DoesNotContain c && nonEmptyIndex > -1 then
             // change current layer to a non empty one:
-            Layers.SetCurrentLayerIndex(nonEmptyIndex, quiet=true ) |> ignore
+            Layers.SetCurrentLayerIndex(nonEmptyIndex, quiet=true ) |> ignore<bool>
 
         // now delete them all
         for i = Layers.Count - 1 downto 0 do
             let l = Layers.[i]
             if not l.IsDeleted then
                 if taken.DoesNotContain (l.Id) then
-                    Layers.Delete(i, quiet=true) |> ignore // more than one layer might fail to delete if current layer is nested in parents
+                    Layers.Delete(i, quiet=true) |> ignore<bool> // more than one layer might fail to delete if current layer is nested in parents
                     //if i <> Layers.CurrentLayerIndex then
                     //    if not <| Layers.Delete(i, quiet=true) then
                     //        //if Layers |> Seq.filter ( fun l -> not l.IsDeleted) |> Seq.length > 1 then
@@ -1824,11 +1824,9 @@ type RhinoScriptSyntax private () =
     static member AliasMacro(alias:string, macro:string) : unit = //SET
         RhinoSync.DoSync (fun () ->
             ApplicationSettings.CommandAliasList.SetMacro(alias, macro)
-            |> ignore)
-
-
-    ///<summary>Returns a array of command alias names.</summary>
-    ///<returns>(string array) a array of command alias names.</returns>
+            |> ignore<bool>)
+    ///<summary>Returns an array of command alias names.</summary>
+    ///<returns>(string array) an array of command alias names.</returns>
     static member AliasNames() : array<string> =
         RhinoSync.DoSync (fun () ->
             ApplicationSettings.CommandAliasList.GetNames())
@@ -2391,9 +2389,7 @@ type RhinoScriptSyntax private () =
         let objectId = Rhino.PlugIns.PlugIn.IdFromName(plugin)
         if objectId<>Guid.Empty then  objectId
         else RhinoScriptingException.Raise "RhinoScriptSyntax.PlugInId: Plugin %s not found" plugin
-
-
-    ///<summary>Returns a array of registered Rhino plug-ins.</summary>
+    ///<summary>Returns an array of registered Rhino plug-ins.</summary>
     ///<param name="types">(int) Optional, default value: <c>0</c>
     ///    The type of plug-ins to return.
     ///    0 = all
@@ -2406,7 +2402,7 @@ type RhinoScriptSyntax private () =
     ///<param name="status">(int) Optional, default value: <c>0</c>
     /// 0 = both loaded and unloaded,
     /// 1 = loaded,
-    /// 2 = unloaded. If omitted both status is returned</param>
+    /// 2 = unloaded. If omitted both statuses are returned</param>
     ///<returns>(string array) array of registered Rhino plug-ins.</returns>
     static member PlugIns([<OPT;DEF(0)>]types:int, [<OPT;DEF(0)>]status:int) : array<string> =
         let mutable filter = Rhino.PlugIns.PlugInType.Any
@@ -2470,11 +2466,10 @@ type RhinoScriptSyntax private () =
     static member SearchPathList() : array<string> =
         ApplicationSettings.FileSettings.GetSearchPaths()
 
-
     ///<summary>Sends a string of printable characters to Rhino's Commandline.</summary>
     ///<param name="keys">(string) A string of characters to send to the Commandline</param>
     ///<param name="addReturn">(bool) Optional, default value: <c>true</c>
-    ///    Append a return character to the end of the string. If omitted an return character will be added (True)</param>
+    ///    Append a return character to the end of the string. If omitted a return character will be added (True)</param>
     ///<returns>(unit) void, nothing.</returns>
     static member SendKeystrokes(keys:string, [<OPT;DEF(true)>]addReturn:bool) : unit =
         RhinoSync.DoSync (fun () ->
@@ -2541,7 +2536,8 @@ type RhinoScriptSyntax private () =
     static member StatusBarProgressMeterUpdate(position:int, [<OPT;DEF(true)>]absolute:bool) : unit =
         RhinoSync.DoSync (fun () ->
             UI.StatusBar.UpdateProgressMeter(position, absolute)
-            |> ignore)
+            |> ignore<int>
+            )
 
 
     ///<summary>Hide the progress meter.</summary>
@@ -2640,7 +2636,7 @@ type RhinoScriptSyntax private () =
                 rc <- State.Doc.InstanceDefinitions.Add(name, "", basePoint, geometry, attrs)
             if rc >= 0 then
                 if deleteInput then
-                    for obj in objects do State.Doc.Objects.Delete(obj, quiet=true) |>ignore
+                    for obj in objects do State.Doc.Objects.Delete(obj, quiet=true) |> ignore<bool>
                 State.Doc.Views.Redraw()
         name
 
@@ -2687,7 +2683,7 @@ type RhinoScriptSyntax private () =
     static member BlockDescription(blockName:string, description:string) : unit = //SET
         let instDef = State.Doc.InstanceDefinitions.Find(blockName)
         if isNull instDef then  RhinoScriptingException.Raise "RhinoScriptSyntax.BlockDescription:'%s' does not exist in InstanceDefinitionsTable" blockName
-        State.Doc.InstanceDefinitions.Modify( instDef, instDef.Name, description, true ) |>ignore
+        State.Doc.InstanceDefinitions.Modify( instDef, instDef.Name, description, true ) |> ignore<bool>
 
 
     ///<summary>Counts number of instances of the block in the document.
@@ -2769,7 +2765,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(int) The number of objects that make up a block definition.</returns>
     static member BlockObjectCount(blockName:string) : int =
         let instDef = State.Doc.InstanceDefinitions.Find(blockName)
-        if isNull instDef then  RhinoScriptingException.Raise "RhinoScriptSyntax.BlockObjectCount:'%s' does not exist in InstanceDefinitionsTable" blockName
+        if isNull instDef then  RhinoScriptingException.Raise "RhinoScriptSyntax.BlockObjectCount: '%s' does not exist in InstanceDefinitionsTable" blockName
         instDef.ObjectCount
 
 
@@ -2884,7 +2880,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(bool) True or False.</returns>
     static member IsBlockEmbedded(blockName:string) : bool =
         let instDef = State.Doc.InstanceDefinitions.Find(blockName)
-        if isNull instDef then  RhinoScriptingException.Raise "RhinoScriptSyntax.IsBlockEmbedded '%s' does not exist in InstanceDefinitionsTable" blockName
+        if isNull instDef then  RhinoScriptingException.Raise "RhinoScriptSyntax.IsBlockEmbedded: '%s' does not exist in InstanceDefinitionsTable" blockName
         match int( instDef.UpdateType) with
         | 1  -> true //DocObjects.InstanceDefinitionUpdateType.Embedded
         | 2  -> true //DocObjects.InstanceDefinitionUpdateType.LinkedAndEmbedded
@@ -2910,7 +2906,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(bool) True or False.</returns>
     static member IsBlockInUse(blockName:string, [<OPT;DEF(0)>]whereToLook:int) : bool =
         let instDef = State.Doc.InstanceDefinitions.Find(blockName)
-        if isNull instDef then  RhinoScriptingException.Raise "RhinoScriptSyntax.IsBlockInUse '%s' does not exist in InstanceDefinitionsTable" blockName
+        if isNull instDef then  RhinoScriptingException.Raise "RhinoScriptSyntax.IsBlockInUse: '%s' does not exist in InstanceDefinitionsTable" blockName
         instDef.InUse(whereToLook)
 
 
@@ -2919,7 +2915,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(bool) True or False.</returns>
     static member IsBlockReference(blockName:string) : bool =
         let instDef = State.Doc.InstanceDefinitions.Find(blockName)
-        if isNull instDef then  RhinoScriptingException.Raise "RhinoScriptSyntax.IsBlockReference '%s' does not exist in InstanceDefinitionsTable" blockName
+        if isNull instDef then  RhinoScriptingException.Raise "RhinoScriptSyntax.IsBlockReference: '%s' does not exist in InstanceDefinitionsTable" blockName
         instDef.IsReference
 
 
@@ -2929,7 +2925,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(bool) True or False indicating success or failure.</returns>
     static member RenameBlock(blockName:string, newName:string) : bool =
         let instDef = State.Doc.InstanceDefinitions.Find(blockName)
-        if isNull instDef then  RhinoScriptingException.Raise "RhinoScriptSyntax.RenameBlock '%s' does not exist in InstanceDefinitionsTable" blockName
+        if isNull instDef then  RhinoScriptingException.Raise "RhinoScriptSyntax.RenameBlock: '%s' does not exist in InstanceDefinitionsTable" blockName
         let description = instDef.Description
         State.Doc.InstanceDefinitions.Modify(instDef, newName, description, quiet=false)
 
@@ -3272,10 +3268,10 @@ type RhinoScriptSyntax private () =
             if Seq.length(weights)<>cvcount then
                 RhinoScriptingException.Raise "RhinoScriptSyntax.CreateNurbsCurve:Number of elements in weights should equal the number of elements in points.  points:'%A' knots:'%A' degree:'%A' weights:'%A'" points knots degree weights
             for i,(p, w)  in Seq.indexed (Seq.zip points weights) do
-                nc.Points.SetPoint(i, p, w) |> ignore
+                nc.Points.SetPoint(i, p, w) |> ignore<bool>
         else
             for i, p in Seq.indexed points do
-                nc.Points.SetPoint(i, p) |> ignore
+                nc.Points.SetPoint(i, p) |> ignore<bool>
         if not nc.IsValid then RhinoScriptingException.Raise "RhinoScriptSyntax.CreateNurbsCurve:Unable to create curve.  points:'%A' knots:'%A' degree:'%A' weights:'%A'" points knots degree weights
         nc
 
@@ -3302,7 +3298,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Guid) objectId of the new Curve object.</returns>
     static member AddPolyline(points:Point3d seq) : Guid =
         let pl = Polyline(points)
-        //pl.DeleteShortSegments(State.Doc.ModelAbsoluteTolerance) |>ignore
+        //pl.DeleteShortSegments(State.Doc.ModelAbsoluteTolerance) |> ignore<bool>
         let rc = State.Doc.Objects.AddPolyline(pl)
         if rc = Guid.Empty then
             for i,pt in Seq.indexed(points) do
@@ -3325,7 +3321,7 @@ type RhinoScriptSyntax private () =
             pl.[pl.Count-1] <- pl.First
         else
             pl.Add pl.First
-        //pl.DeleteShortSegments(State.Doc.ModelAbsoluteTolerance) |>ignore
+        //pl.DeleteShortSegments(State.Doc.ModelAbsoluteTolerance) |> ignore<bool>
         let rc = State.Doc.Objects.AddPolyline(pl)
         if rc = Guid.Empty then
             for i,pt in Seq.indexed(points) do
@@ -3580,7 +3576,7 @@ type RhinoScriptSyntax private () =
             else s <- length / curveLength
             let dupe = if not fromStart then curve.Duplicate() :?> Curve else curve
             if notNull dupe then
-                if not fromStart then  dupe.Reverse() |> ignore
+                if not fromStart then  dupe.Reverse() |> ignore<bool>
                 let rc, t = dupe.NormalizedLengthParameter(s)
                 if rc then
                     let pt = dupe.PointAt(t)
@@ -4423,7 +4419,7 @@ type RhinoScriptSyntax private () =
     static member CurveStartPoint(curveId:Guid, point:Point3d) : unit =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         if not <|curve.SetStartPoint(point) then RhinoScriptingException.Raise "RhinoScriptSyntax.CurveStartPoint failed on '%A' and '%A'" point curveId
-        State.Doc.Objects.Replace(curveId, curve) |> ignore
+        State.Doc.Objects.Replace(curveId, curve) |> ignore<bool>
         State.Doc.Views.Redraw()
 
 
@@ -4704,7 +4700,7 @@ type RhinoScriptSyntax private () =
             for piece in pieces do
                 rc.Add(State.Doc.Objects.AddCurve(piece))
             if deleteInput then
-                State.Doc.Objects.Delete(curveId, quiet=true) |>ignore
+                State.Doc.Objects.Delete(curveId, quiet=true) |> ignore<bool>
         if rc.Count>0 then  State.Doc.Views.Redraw()
         rc
 
@@ -4724,7 +4720,7 @@ type RhinoScriptSyntax private () =
                 for piece in pieces do
                     rc.Add(State.Doc.Objects.AddCurve(piece))
                 if deleteInput then
-                    State.Doc.Objects.Delete(curveId, quiet=true) |>ignore
+                    State.Doc.Objects.Delete(curveId, quiet=true) |> ignore<bool>
         if rc.Count>0 then  State.Doc.Views.Redraw()
         rc
 
@@ -5175,7 +5171,7 @@ type RhinoScriptSyntax private () =
         let rc = newCurves  |> RArr.mapSeq  State.Doc.Objects.AddCurve
         if deleteInput then
             for objectId in curveIds do
-                State.Doc.Objects.Delete(objectId, quiet=false) |> ignore
+                State.Doc.Objects.Delete(objectId, quiet=false) |> ignore<bool>
         State.Doc.Views.Redraw()
         rc
 
@@ -5437,7 +5433,7 @@ type RhinoScriptSyntax private () =
         let newCurve = curve.Rebuild(pointCount, degree, preserveTangents=false)
         if isNull newCurve then  false
         else
-            State.Doc.Objects.Replace(curveId, newCurve) |> ignore
+            State.Doc.Objects.Replace(curveId, newCurve) |> ignore<bool>
             State.Doc.Views.Redraw()
             true
 
@@ -5459,7 +5455,7 @@ type RhinoScriptSyntax private () =
                 let success = nCurve.Knots.RemoveKnotAt(nParam)
                 if not <| success then  false
                 else
-                    State.Doc.Objects.Replace(curve, nCurve)|> ignore
+                    State.Doc.Objects.Replace(curve, nCurve)|> ignore<bool>
                     State.Doc.Views.Redraw()
                     true
 
@@ -5470,7 +5466,7 @@ type RhinoScriptSyntax private () =
     static member ReverseCurve(curveId:Guid) : bool =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         if curve.Reverse() then
-            State.Doc.Objects.Replace(curveId, curve)|> ignore
+            State.Doc.Objects.Replace(curveId, curve)|> ignore<bool>
             true
         else
             false
@@ -5512,7 +5508,7 @@ type RhinoScriptSyntax private () =
         let angTol = State.Doc.ModelAngleToleranceRadians
         let newCurve = curve.Simplify(flags0, tol, angTol)
         if notNull newCurve then
-            State.Doc.Objects.Replace(curveId, newCurve)|> ignore
+            State.Doc.Objects.Replace(curveId, newCurve)|> ignore<bool>
             State.Doc.Views.Redraw()
             true
         else
@@ -5533,7 +5529,7 @@ type RhinoScriptSyntax private () =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(curveId)
         let rc =  newcurves |> RArr.mapArr (fun crv ->  State.Doc.Objects.AddCurve(crv, rhobj.Attributes) )
         if deleteInput then
-            State.Doc.Objects.Delete(curveId, quiet=true)|> ignore
+            State.Doc.Objects.Delete(curveId, quiet=true)|> ignore<bool>
         State.Doc.Views.Redraw()
         rc
 
@@ -5555,7 +5551,7 @@ type RhinoScriptSyntax private () =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(curveId)
         let rc = State.Doc.Objects.AddCurve(newCurve, rhobj.Attributes)
         if deleteInput then
-            State.Doc.Objects.Delete(curveId, quiet=true)|> ignore
+            State.Doc.Objects.Delete(curveId, quiet=true)|> ignore<bool>
         State.Doc.Views.Redraw()
         rc
 
@@ -5781,7 +5777,7 @@ type RhinoScriptSyntax private () =
         if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimensionStyle set failed.  objectId:'%s' dimStyleName:'%s'" (Pretty.str objectId) dimStyleName
         let mutable annotation = annotationObject.Geometry:?> AnnotationBase
         annotation.DimensionStyleId <- ds.Id
-        annotationObject.CommitChanges() |> ignore
+        annotationObject.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the dimension style of multiple dimension objects.</summary>
@@ -5795,7 +5791,7 @@ type RhinoScriptSyntax private () =
             let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
             let mutable annotation = annotationObject.Geometry:?> AnnotationBase
             annotation.DimensionStyleId <- ds.Id
-            annotationObject.CommitChanges() |> ignore
+            annotationObject.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
     ///<summary>Returns the text displayed by a dimension object.</summary>
@@ -5824,7 +5820,7 @@ type RhinoScriptSyntax private () =
         let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
         let geo = annotationObject.Geometry :?> AnnotationBase
         geo.PlainText <- usertext
-        annotationObject.CommitChanges() |> ignore
+        annotationObject.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the user text string of multiple dimension objects. The user
@@ -5837,7 +5833,7 @@ type RhinoScriptSyntax private () =
             let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
             let geo = annotationObject.Geometry :?> AnnotationBase
             geo.PlainText <- usertext
-            annotationObject.CommitChanges() |> ignore
+            annotationObject.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
     ///<summary>Returns the value of a dimension object.</summary>
@@ -6361,7 +6357,7 @@ type RhinoScriptSyntax private () =
                 let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
                 g.PlainText <- text               // TODO or use rich text?
                 if not <| State.Doc.Objects.Replace(objectId,g) then RhinoScriptingException.Raise "RhinoScriptSyntax.LeaderText: Objects.Replace(objectId,g) get failed. objectId:'%s'" (Pretty.str objectId)
-                annotationObject.CommitChanges() |> ignore
+                annotationObject.CommitChanges() |> ignore<bool>
                 State.Doc.Views.Redraw()
             | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.LeaderText set failed for  %s"  (Pretty.str objectId)
 
@@ -7205,12 +7201,12 @@ type RhinoScriptSyntax private () =
             if DocObjects.Font.FromQuartetProperties(qn, bold, false) |> isNull then
                 RhinoScriptingException.Raise "RhinoScriptSyntax.AddText failed. text:'%s' plane:'%s' height:'%g' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane.Pretty height font fontStyle horizontalAlignment verticalAlignment
             else
-                te.SetBold(bold)|> ignore
+                te.SetBold(bold)|> ignore<bool>
         if italic <> quartetItalicProp then
             if DocObjects.Font.FromQuartetProperties(qn, false, italic) |> isNull then
                 RhinoScriptingException.Raise "RhinoScriptSyntax.AddText failed. text:'%s' plane:'%s' height:'%g' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane.Pretty height font fontStyle horizontalAlignment verticalAlignment
             else
-                te.SetItalic(italic)|> ignore
+                te.SetItalic(italic)|> ignore<bool>
 
         te.TextHorizontalAlignment <- LanguagePrimitives.EnumOfValue horizontalAlignment
         te.TextVerticalAlignment <- LanguagePrimitives.EnumOfValue verticalAlignment
@@ -7454,7 +7450,7 @@ type RhinoScriptSyntax private () =
         let curves = (rhobj.Geometry:?>TextEntity).Explode()
         let attr = rhobj.Attributes
         let rc = curves  |> RArr.mapArr ( fun curve -> State.Doc.Objects.AddCurve(curve, attr) )
-        if delete then State.Doc.Objects.Delete(rhobj, quiet=true) |>ignore
+        if delete then State.Doc.Objects.Delete(rhobj, quiet=true) |> ignore<bool>
         State.Doc.Views.Redraw()
         rc
 
@@ -7543,7 +7539,7 @@ type RhinoScriptSyntax private () =
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.PointCloudHidePoints length of hidden values does not match point cloud point count"
 
-        (RhinoScriptSyntax.CoerceRhinoObject objectId).CommitChanges() |> ignore
+        (RhinoScriptSyntax.CoerceRhinoObject objectId).CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
 
@@ -7570,7 +7566,7 @@ type RhinoScriptSyntax private () =
             for i, c in Seq.indexed colors do pc.[i].Color <- c
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.PointCloudPointColors length of color values does not match PointCloud point count"
-        (RhinoScriptSyntax.CoerceRhinoObject objectId).CommitChanges() |> ignore
+        (RhinoScriptSyntax.CoerceRhinoObject objectId).CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
 
@@ -7995,7 +7991,7 @@ type RhinoScriptSyntax private () =
                                  [<OPT;DEF(false)>]select:bool) : Guid * int * Point3d =
         let get () =
             if not preselect then
-                State.Doc.Objects.UnselectAll() |> ignore
+                State.Doc.Objects.UnselectAll() |> ignore<int>
                 State.Doc.Views.Redraw()
             let grip = ref null
             let rc = Input.RhinoGet.GetGrip(grip, message)
@@ -8004,7 +8000,7 @@ type RhinoScriptSyntax private () =
                 RhinoScriptingException.Raise "RhinoScriptSyntax.GetObjectGrip User failed to select a Grip for : %s " message
             else
                 if select then
-                    grip.Select(true, true)|> ignore
+                    grip.Select(true, true)|> ignore<int>
                     State.Doc.Views.Redraw()
                 (grip.OwnerId, grip.Index, grip.CurrentLocation)
         RhinoSync.DoSyncRedrawHideEditor get
@@ -8026,7 +8022,7 @@ type RhinoScriptSyntax private () =
                                   [<OPT;DEF(false)>]select:bool) : ResizeArray<Guid * int * Point3d> =
         let get () =
             if not preselect then
-                State.Doc.Objects.UnselectAll() |> ignore
+                State.Doc.Objects.UnselectAll() |> ignore<int>
                 State.Doc.Views.Redraw()
             let grips = ref null
             let re = Input.RhinoGet.GetGrips(grips, message)
@@ -8038,7 +8034,7 @@ type RhinoScriptSyntax private () =
                     let index = grip.Index
                     let location = grip.CurrentLocation
                     rc.Add((objectId, index, location))
-                    if select then grip.Select(true, true)|>ignore
+                    if select then grip.Select(true, true)|> ignore<int>
                 if select then State.Doc.Views.Redraw()
             rc
         RhinoSync.DoSyncRedrawHideEditor get
@@ -8060,7 +8056,7 @@ type RhinoScriptSyntax private () =
                     else
                         grip.NeighborGrip(0, i, 0, wrap=false)
                 if notNull ng && enable then
-                    ng.Select(true) |> ignore // TODO needs sync ? apparently not needed!
+                    ng.Select(true) |> ignore<int> // TODO needs sync ? apparently not needed!
                     State.Doc.Views.Redraw()
                 Ok ng
 
@@ -8118,7 +8114,7 @@ type RhinoScriptSyntax private () =
             RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripLocation failed.  objectId:'%s' index:'%A' point:'%A'" (Pretty.str objectId) index point
         let grip = grips.[index]
         grip.CurrentLocation <-  point
-        State.Doc.Objects.GripUpdate(rhobj, true)|> ignore
+        State.Doc.Objects.GripUpdate(rhobj, true)|> ignore<DocObjects.RhinoObject>
         State.Doc.Views.Redraw()
 
 
@@ -8153,7 +8149,7 @@ type RhinoScriptSyntax private () =
         if Seq.length(points) = Seq.length(grips) then
             for pt, grip in Seq.zip points grips do
                 grip.CurrentLocation <- pt
-            State.Doc.Objects.GripUpdate(rhobj, true)|> ignore
+            State.Doc.Objects.GripUpdate(rhobj, true)|> ignore<DocObjects.RhinoObject>
             State.Doc.Views.Redraw()
 
 
@@ -8521,31 +8517,31 @@ type RhinoScriptSyntax private () =
 
     static member private InitHatchPatterns() : unit = // TODO, optimize so that this init is ony done once ?
         if isNull <| State.Doc.HatchPatterns.FindName(DocObjects.HatchPattern.Defaults.Solid.Name) then
-            State.Doc.HatchPatterns.Add(DocObjects.HatchPattern.Defaults.Solid) |> ignore
+            State.Doc.HatchPatterns.Add(DocObjects.HatchPattern.Defaults.Solid) |> ignore<int>
 
         if isNull <| State.Doc.HatchPatterns.FindName(DocObjects.HatchPattern.Defaults.Hatch1.Name) then
-            State.Doc.HatchPatterns.Add(DocObjects.HatchPattern.Defaults.Hatch1)|> ignore
+            State.Doc.HatchPatterns.Add(DocObjects.HatchPattern.Defaults.Hatch1)|> ignore<int>
 
         if isNull <| State.Doc.HatchPatterns.FindName(DocObjects.HatchPattern.Defaults.Hatch2.Name) then
-            State.Doc.HatchPatterns.Add(DocObjects.HatchPattern.Defaults.Hatch2)|> ignore
+            State.Doc.HatchPatterns.Add(DocObjects.HatchPattern.Defaults.Hatch2)|> ignore<int>
 
         if isNull <| State.Doc.HatchPatterns.FindName(DocObjects.HatchPattern.Defaults.Hatch3.Name) then
-            State.Doc.HatchPatterns.Add(DocObjects.HatchPattern.Defaults.Hatch3)|> ignore
+            State.Doc.HatchPatterns.Add(DocObjects.HatchPattern.Defaults.Hatch3)|> ignore<int>
 
         if isNull <| State.Doc.HatchPatterns.FindName(DocObjects.HatchPattern.Defaults.Dash.Name) then
-            State.Doc.HatchPatterns.Add(DocObjects.HatchPattern.Defaults.Dash)|> ignore
+            State.Doc.HatchPatterns.Add(DocObjects.HatchPattern.Defaults.Dash)|> ignore<int>
 
         if isNull <| State.Doc.HatchPatterns.FindName(DocObjects.HatchPattern.Defaults.Grid.Name) then
-            State.Doc.HatchPatterns.Add(DocObjects.HatchPattern.Defaults.Grid)|> ignore
+            State.Doc.HatchPatterns.Add(DocObjects.HatchPattern.Defaults.Grid)|> ignore<int>
 
         if isNull <| State.Doc.HatchPatterns.FindName(DocObjects.HatchPattern.Defaults.Grid60.Name) then
-            State.Doc.HatchPatterns.Add(DocObjects.HatchPattern.Defaults.Grid60)|> ignore
+            State.Doc.HatchPatterns.Add(DocObjects.HatchPattern.Defaults.Grid60)|> ignore<int>
 
         if isNull <| State.Doc.HatchPatterns.FindName(DocObjects.HatchPattern.Defaults.Plus.Name) then
-            State.Doc.HatchPatterns.Add(DocObjects.HatchPattern.Defaults.Plus)|> ignore
+            State.Doc.HatchPatterns.Add(DocObjects.HatchPattern.Defaults.Plus)|> ignore<int>
 
         if isNull <| State.Doc.HatchPatterns.FindName(DocObjects.HatchPattern.Defaults.Squares.Name) then
-            State.Doc.HatchPatterns.Add(DocObjects.HatchPattern.Defaults.Squares)|> ignore
+            State.Doc.HatchPatterns.Add(DocObjects.HatchPattern.Defaults.Squares)|> ignore<int>
 
 
 
@@ -8714,7 +8710,7 @@ type RhinoScriptSyntax private () =
                 let g = State.Doc.Objects.AddBrep(c, attr)
                 if g<>Guid.Empty then rc.Add(g)
             | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.ExplodeHatch: drawing of %A objects after exploding not implemented" piece.ObjectType //TODO test with hatch patterns that have points
-        if delete then State.Doc.Objects.Delete(rhobj)|> ignore
+        if delete then State.Doc.Objects.Delete(rhobj)|> ignore<bool>
         rc
 
 
@@ -8737,7 +8733,7 @@ type RhinoScriptSyntax private () =
         let newPattern = State.Doc.HatchPatterns.FindName(hatchPattern)
         if newPattern|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.HatchPattern failed.  hatchId:'%s' hatchPattern:'%A'" (Pretty.str hatchId) hatchPattern
         hatchObj.HatchGeometry.PatternIndex <- newPattern.Index
-        hatchObj.CommitChanges() |> ignore
+        hatchObj.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
     ///<summary>Changes multiple Hatch objects's Hatch pattern.</summary>
@@ -8752,7 +8748,7 @@ type RhinoScriptSyntax private () =
             let newPattern = State.Doc.HatchPatterns.FindName(hatchPattern)
             if newPattern|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.HatchPattern failed.  hatchId:'%s' hatchPattern:'%A'" (Pretty.str hatchId) hatchPattern
             hatchObj.HatchGeometry.PatternIndex <- newPattern.Index
-            hatchObj.CommitChanges() |> ignore
+            hatchObj.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
 
@@ -8821,7 +8817,7 @@ type RhinoScriptSyntax private () =
         if rotation <> rc then
             let rotation = RhinoMath.ToRadians(rotation)
             hatchObj.HatchGeometry.PatternRotation <- rotation
-            hatchObj.CommitChanges() |> ignore
+            hatchObj.CommitChanges() |> ignore<bool>
             State.Doc.Views.Redraw()
 
     ///<summary>Modifies the rotation applied to the Hatch pattern when
@@ -8837,7 +8833,7 @@ type RhinoScriptSyntax private () =
             if rotation <> rc then
                 let rotation = RhinoMath.ToRadians(rotation)
                 hatchObj.HatchGeometry.PatternRotation <- rotation
-                hatchObj.CommitChanges() |> ignore
+                hatchObj.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
 
@@ -8860,7 +8856,7 @@ type RhinoScriptSyntax private () =
         let rc = hatchObj.HatchGeometry.PatternScale
         if scale <> rc then
             hatchObj.HatchGeometry.PatternScale <- scale
-            hatchObj.CommitChanges() |> ignore
+            hatchObj.CommitChanges() |> ignore<bool>
             State.Doc.Views.Redraw()
 
     ///<summary>Modifies the scale applied to the Hatch pattern when it is
@@ -8874,7 +8870,7 @@ type RhinoScriptSyntax private () =
             let rc = hatchObj.HatchGeometry.PatternScale
             if scale <> rc then
                 hatchObj.HatchGeometry.PatternScale <- scale
-                hatchObj.CommitChanges() |> ignore
+                hatchObj.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
 
@@ -8963,7 +8959,7 @@ type RhinoScriptSyntax private () =
         light.Width <- -light.Width
         let mutable plane = Plane(light.Location, light.Direction)
         let xAxis = plane.XAxis
-        xAxis.Unitize() |> ignore
+        xAxis.Unitize() |> ignore<bool>
         plane.XAxis <- xAxis
         light.Width <- xAxis * ( min width ( v.Length/20.0))
         //light.Location <- start - light.Direction
@@ -9001,7 +8997,7 @@ type RhinoScriptSyntax private () =
         let length = pty-origin
         let width = ptx-origin
         let normal = Vector3d.CrossProduct(width, length)
-        normal.Unitize() |> ignore
+        normal.Unitize() |> ignore<bool>
         let light = new Light()
         light.LightStyle <- LightStyle.WorldRectangular
         light.Location <- origin
@@ -9646,14 +9642,14 @@ type RhinoScriptSyntax private () =
         let mutable attr = rhinoObject.Attributes
         if attr.MaterialSource <> DocObjects.ObjectMaterialSource.MaterialFromObject then
             attr.MaterialSource <- DocObjects.ObjectMaterialSource.MaterialFromObject
-            State.Doc.Objects.ModifyAttributes(rhinoObject, attr, true)|> ignore
+            State.Doc.Objects.ModifyAttributes(rhinoObject, attr, true)|> ignore<bool>
             attr <- rhinoObject.Attributes
         let mutable materialindex = attr.MaterialIndex
         if materialindex> -1 then materialindex
         else
             materialindex <- State.Doc.Materials.Add()
             attr.MaterialIndex <- materialindex
-            State.Doc.Objects.ModifyAttributes(rhinoObject, attr, true)|> ignore
+            State.Doc.Objects.ModifyAttributes(rhinoObject, attr, true)|> ignore<bool>
             materialindex
 
 
@@ -9706,7 +9702,7 @@ type RhinoScriptSyntax private () =
             if notNull rhobj then
                 rhobj.Attributes.MaterialIndex <- source
                 rhobj.Attributes.MaterialSource <- DocObjects.ObjectMaterialSource.MaterialFromObject
-                rhobj.CommitChanges() |> ignore
+                rhobj.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
 
@@ -9733,7 +9729,7 @@ type RhinoScriptSyntax private () =
             let texture = new DocObjects.Texture()
             texture.FileName <- filename
             if not <| mat.SetTexture(texture,DocObjects.TextureType.Bump) then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
-            mat.CommitChanges() |> ignore
+            mat.CommitChanges() |> ignore<bool>
             State.Doc.Views.Redraw()
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
@@ -9756,7 +9752,7 @@ type RhinoScriptSyntax private () =
         let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialColor failed.  materialIndex:'%A' color:'%A'" materialIndex color
         mat.DiffuseColor <- color
-        mat.CommitChanges() |> ignore
+        mat.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
 
@@ -9781,7 +9777,7 @@ type RhinoScriptSyntax private () =
             let texture = new DocObjects.Texture()
             texture.FileName <- filename
             if not <| mat.SetTexture(texture,DocObjects.TextureType.Emap)then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialEnvironmentMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
-            mat.CommitChanges() |> ignore
+            mat.CommitChanges() |> ignore<bool>
             State.Doc.Views.Redraw()
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialEnvironmentMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
@@ -9805,7 +9801,7 @@ type RhinoScriptSyntax private () =
         let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialName failed.  materialIndex:'%A' name:'%A'" materialIndex name
         mat.Name <- name
-        mat.CommitChanges() |> ignore
+        mat.CommitChanges() |> ignore<bool>
 
 
 
@@ -9826,7 +9822,7 @@ type RhinoScriptSyntax private () =
         let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialReflectiveColor failed.  materialIndex:'%A' color:'%A'" materialIndex color
         mat.ReflectionColor <- color
-        mat.CommitChanges() |> ignore
+        mat.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
 
@@ -9850,7 +9846,7 @@ type RhinoScriptSyntax private () =
         let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialShine failed.  materialIndex:'%A' shine:'%A'" materialIndex shine
         mat.Shine <- shine
-        mat.CommitChanges() |> ignore
+        mat.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
 
@@ -9876,7 +9872,7 @@ type RhinoScriptSyntax private () =
             let texture = new DocObjects.Texture()
             texture.FileName <- filename
             if not <| mat.SetTexture(texture,DocObjects.TextureType.Bitmap) then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTexture failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
-            mat.CommitChanges() |> ignore
+            mat.CommitChanges() |> ignore<bool>
             State.Doc.Views.Redraw()
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTexture failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
@@ -9901,7 +9897,7 @@ type RhinoScriptSyntax private () =
         let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTransparency failed.  materialIndex:'%A' transparency:'%A'" materialIndex transparency
         mat.Transparency <- transparency
-        mat.CommitChanges() |> ignore
+        mat.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
 
@@ -9928,7 +9924,7 @@ type RhinoScriptSyntax private () =
             let texture = new DocObjects.Texture()
             texture.FileName <- filename
             if not <| mat.SetTexture(texture,DocObjects.TextureType.Transparency)then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTransparencyMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
-            mat.CommitChanges() |> ignore
+            mat.CommitChanges() |> ignore<bool>
             State.Doc.Views.Redraw()
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTransparencyMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
@@ -9970,14 +9966,14 @@ type RhinoScriptSyntax private () =
                            [<OPT;DEF(null:Drawing.Color seq)>]vertexColors:Drawing.Color seq) : Guid =
         let mesh = new Mesh()
         for pt in vertices do
-            mesh.Vertices.Add(pt) |> ignore
+            mesh.Vertices.Add(pt) |> ignore<int>
 
         for face in faceVertices do
             let l = Seq.length(face)
             if l = 3 then
-                mesh.Faces.AddFace(face.[0], face.[1], face.[2]) |> ignore
+                mesh.Faces.AddFace(face.[0], face.[1], face.[2]) |> ignore<int>
             elif l = 4 then
-                mesh.Faces.AddFace(face.[0], face.[1], face.[2], face.[3]) |> ignore
+                mesh.Faces.AddFace(face.[0], face.[1], face.[2], face.[3]) |> ignore<int>
             else
                 RhinoScriptingException.Raise "RhinoScriptSyntax.AddMesh: Expected 3 or 4 indices for a face but got %d" l
 
@@ -9986,14 +9982,14 @@ type RhinoScriptSyntax private () =
             let normals = Array.zeroCreate count
             for i, normal in Seq.indexed(vertexNormals) do
                 normals.[i] <- normal
-            mesh.Normals.SetNormals(normals)    |> ignore
+            mesh.Normals.SetNormals(normals)    |> ignore<bool>
 
         if notNull textureCoordinates then
             let count = Seq.length(textureCoordinates)
             let tcs = Array.zeroCreate count
             for i, tc in Seq.indexed(textureCoordinates) do
                 tcs.[i] <-  tc
-            mesh.TextureCoordinates.SetTextureCoordinates(tcs)  |> ignore
+            mesh.TextureCoordinates.SetTextureCoordinates(tcs)  |> ignore<bool>
 
         if notNull vertexColors then
             let count = Seq.length(vertexColors)
@@ -10026,28 +10022,28 @@ type RhinoScriptSyntax private () =
                            [<OPT;DEF(null:Drawing.Color seq)>]vertexColors:Drawing.Color seq) : Guid =
         let mesh = new Mesh()
         for pt in vertices do
-            mesh.Vertices.Add(pt) |> ignore
+            mesh.Vertices.Add(pt) |> ignore<int>
 
         for face in faceVertices do
             let a,b,c,d = face
             if c = d then
-                mesh.Faces.AddFace(a,b,c) |> ignore
+                mesh.Faces.AddFace(a,b,c) |> ignore<int>
             else
-                mesh.Faces.AddFace(a,b,c,d) |> ignore
+                mesh.Faces.AddFace(a,b,c,d) |> ignore<int>
 
         if notNull vertexNormals then
             let count = Seq.length(vertexNormals)
             let normals = Array.zeroCreate count
             for i, normal in Seq.indexed(vertexNormals) do
                 normals.[i] <- normal
-            mesh.Normals.SetNormals(normals)    |> ignore
+            mesh.Normals.SetNormals(normals)    |> ignore<bool>
 
         if notNull textureCoordinates then
             let count = Seq.length(textureCoordinates)
             let tcs = Array.zeroCreate count
             for i, tc in Seq.indexed(textureCoordinates) do
                 tcs.[i] <-  tc
-            mesh.TextureCoordinates.SetTextureCoordinates(tcs)  |> ignore
+            mesh.TextureCoordinates.SetTextureCoordinates(tcs)  |> ignore<bool>
 
         if notNull vertexColors then
             let count = Seq.length(vertexColors)
@@ -10071,11 +10067,11 @@ type RhinoScriptSyntax private () =
     ///<returns>(Guid) The identifier of the new Mesh.</returns>
     static member AddMeshQuad(pointA:Point3d , pointB:Point3d , pointC: Point3d , pointD: Point3d) : Guid =
           let mesh = new Mesh()
-          mesh.Vertices.Add(pointA) |> ignore
-          mesh.Vertices.Add(pointB) |> ignore
-          mesh.Vertices.Add(pointC) |> ignore
-          mesh.Vertices.Add(pointD) |> ignore
-          mesh.Faces.AddFace(0,1,2,3) |> ignore
+          mesh.Vertices.Add(pointA) |> ignore<int>
+          mesh.Vertices.Add(pointB) |> ignore<int>
+          mesh.Vertices.Add(pointC) |> ignore<int>
+          mesh.Vertices.Add(pointD) |> ignore<int>
+          mesh.Faces.AddFace(0,1,2,3) |> ignore<int>
           let rc = State.Doc.Objects.AddMesh(mesh)
           if rc = Guid.Empty then  RhinoScriptingException.Raise "RhinoScriptSyntax.AddMeshQuad failed.  points:'%A, %A, %A and %A" pointA pointB pointC pointD
           State.Doc.Views.Redraw()
@@ -10088,10 +10084,10 @@ type RhinoScriptSyntax private () =
     ///<returns>(Guid) The identifier of the new Mesh.</returns>
     static member AddMeshTriangle(pointA:Point3d , pointB:Point3d , pointC: Point3d ) : Guid =
           let mesh = new Mesh()
-          mesh.Vertices.Add(pointA) |> ignore
-          mesh.Vertices.Add(pointB) |> ignore
-          mesh.Vertices.Add(pointC) |> ignore
-          mesh.Faces.AddFace(0,1,2) |> ignore
+          mesh.Vertices.Add(pointA) |> ignore<int>
+          mesh.Vertices.Add(pointB) |> ignore<int>
+          mesh.Vertices.Add(pointC) |> ignore<int>
+          mesh.Faces.AddFace(0,1,2) |> ignore<int>
           let rc = State.Doc.Objects.AddMesh(mesh)
           if rc = Guid.Empty then  RhinoScriptingException.Raise "RhinoScriptSyntax.AddMeshTriangle failed.  points:'%A, %A and %A" pointA pointB pointC
           State.Doc.Views.Redraw()
@@ -10177,7 +10173,7 @@ type RhinoScriptSyntax private () =
                         let objectId = State.Doc.Objects.AddMesh(submesh)
                         if objectId <> Guid.Empty then rc.Add(objectId)
                 if delete then
-                    State.Doc.Objects.Delete(meshid, true)|> ignore
+                    State.Doc.Objects.Delete(meshid, true)|> ignore<bool>
         if rc.Count>0 then State.Doc.Views.Redraw()
         rc
 
@@ -10250,7 +10246,7 @@ type RhinoScriptSyntax private () =
         if deleteInput then
             for objectId in objectIds do
                 //guid = RhinoScriptSyntax.CoerceGuid(objectId)
-                State.Doc.Objects.Delete(objectId, true) |> ignore
+                State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
         State.Doc.Views.Redraw()
         rc
 
@@ -10298,7 +10294,7 @@ type RhinoScriptSyntax private () =
         if deleteInput then
             for objectId in Seq.append input0 input1 do
                 //id = RhinoScriptSyntax.CoerceGuid(objectId)
-                State.Doc.Objects.Delete(objectId, true) |> ignore
+                State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
         State.Doc.Views.Redraw()
         rc
 
@@ -10323,7 +10319,7 @@ type RhinoScriptSyntax private () =
         if deleteInput then
             for objectId in Seq.append input0 input1 do
                 //id = RhinoScriptSyntax.CoerceGuid(objectId)
-                State.Doc.Objects.Delete(objectId, true) |> ignore
+                State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
         State.Doc.Views.Redraw()
         rc
 
@@ -10348,7 +10344,7 @@ type RhinoScriptSyntax private () =
             if objectId <> Guid.Empty then rc.Add(objectId)
         if deleteInput then
             for objectId in Seq.append input0 input1 do
-                State.Doc.Objects.Delete(objectId, true) |> ignore
+                State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
         State.Doc.Views.Redraw()
         rc
 
@@ -10369,7 +10365,7 @@ type RhinoScriptSyntax private () =
             if objectId <> Guid.Empty then rc.Add(objectId)
         if rc.Count>0 && deleteInput then
             for objectId in meshIds do
-                State.Doc.Objects.Delete(objectId, true) |> ignore
+                State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
         State.Doc.Views.Redraw()
         rc
 
@@ -10420,7 +10416,7 @@ type RhinoScriptSyntax private () =
     static member MeshFaceNormals(meshId:Guid) : Vector3d ResizeArray =
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
         if mesh.FaceNormals.Count <> mesh.Faces.Count then
-            mesh.FaceNormals.ComputeFaceNormals() |> ignore
+            mesh.FaceNormals.ComputeFaceNormals() |> ignore<bool>
         let rc = ResizeArray()
         for i = 0 to mesh.FaceNormals.Count - 1 do
             let normal = mesh.FaceNormals.[i]
@@ -10632,7 +10628,7 @@ type RhinoScriptSyntax private () =
             rc <- mesh.Faces.ConvertQuadsToTriangles()
             if rc  then
                 //id = RhinoScriptSyntax.CoerceGuid(objectId)
-                State.Doc.Objects.Replace(objectId, mesh) |> ignore
+                State.Doc.Objects.Replace(objectId, mesh) |> ignore<bool>
                 State.Doc.Views.Redraw()
         rc
 
@@ -10655,7 +10651,7 @@ type RhinoScriptSyntax private () =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let attr = rhobj.Attributes
         let ids  = breps |> RArr.mapSeq (fun brep -> State.Doc.Objects.AddBrep(brep, attr) )
-        if deleteInput then State.Doc.Objects.Delete(rhobj, quiet=true)|> ignore
+        if deleteInput then State.Doc.Objects.Delete(rhobj, quiet=true)|> ignore<bool>
         State.Doc.Views.Redraw()
         ids
 
@@ -10694,8 +10690,8 @@ type RhinoScriptSyntax private () =
             if colorcount <> mesh.Vertices.Count then
                 RhinoScriptingException.Raise "RhinoScriptSyntax.MeshVertexColors: Length of colors must match vertex count.  meshId:'%s' colors:'%A'" (Pretty.str meshId) colors
             mesh.VertexColors.Clear()
-            for c in colors do mesh.VertexColors.Add(c) |> ignore
-        State.Doc.Objects.Replace(meshId, mesh) |> ignore
+            for c in colors do mesh.VertexColors.Add(c) |> ignore<int>
+        State.Doc.Objects.Replace(meshId, mesh) |> ignore<bool>
         State.Doc.Views.Redraw()
 
 
@@ -10823,7 +10819,7 @@ type RhinoScriptSyntax private () =
         let rc  = pieces |> RArr.mapArr State.Doc.Objects.AddMesh
         if rc.Count <> 0 && deleteInput then
             //id = RhinoScriptSyntax.CoerceGuid(objectId)
-            State.Doc.Objects.Delete(objectId, true) |> ignore
+            State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
         State.Doc.Views.Redraw()
         rc
 
@@ -10836,7 +10832,7 @@ type RhinoScriptSyntax private () =
         let rc = mesh.UnifyNormals()
         if rc>0 then
             //id = RhinoScriptSyntax.CoerceGuid(objectId)
-            State.Doc.Objects.Replace(objectId, mesh)|> ignore
+            State.Doc.Objects.Replace(objectId, mesh)|> ignore<bool>
             State.Doc.Views.Redraw()
         rc
 
@@ -11171,7 +11167,7 @@ type RhinoScriptSyntax private () =
         if vec.IsTiny() then RhinoScriptingException.Raise "RhinoScriptSyntax.MirrorObject Start and  end points are too close to each other.  objectId:'%s' startPoint:'%A' endPoint:'%A' copy:'%A'" (Pretty.str objectId) startPoint endPoint copy
         let normal = Plane.WorldXY.Normal
         let xv = Vector3d.CrossProduct(vec, normal)
-        xv.Unitize() |> ignore
+        xv.Unitize() |> ignore<bool>
         let xf = Transform.Mirror(startPoint, vec)
         let res = State.Doc.Objects.Transform(objectId, xf, not copy)
         if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.MirrorObject Cannot apply MirrorObject transform to objectId:'%s' startPoint:'%A' endPoint:'%A' copy:'%A'" (Pretty.str objectId) startPoint endPoint copy
@@ -11193,7 +11189,7 @@ type RhinoScriptSyntax private () =
         if vec.IsTiny() then RhinoScriptingException.Raise "RhinoScriptSyntax.MirrorObjects Start and  end points are too close to each other.  objectId:'%s' startPoint:'%A' endPoint:'%A' copy:'%A'" (Pretty.str objectIds) startPoint endPoint copy
         let normal = Plane.WorldXY.Normal
         let xv = Vector3d.CrossProduct(vec, normal)
-        xv.Unitize() |> ignore
+        xv.Unitize() |> ignore<bool>
         let xf = Transform.Mirror(startPoint, vec)
         let rc = ResizeArray()
         for objectId in objectIds do
@@ -11292,7 +11288,7 @@ type RhinoScriptSyntax private () =
         let source : DocObjects.ObjectColorSource = LanguagePrimitives.EnumOfValue source
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.Attributes.ColorSource <- source
-        rhobj.CommitChanges() |> ignore
+        rhobj.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the color source of multiple objects.</summary>
@@ -11308,7 +11304,7 @@ type RhinoScriptSyntax private () =
         for objectId in objectIds do
             let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             rhobj.Attributes.ColorSource <- source
-            rhobj.CommitChanges() |> ignore
+            rhobj.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
 
@@ -11404,7 +11400,7 @@ type RhinoScriptSyntax private () =
                     rhobj.Attributes.Space <- DocObjects.ActiveSpace.PageSpace
                 | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectLayout: Setting it failed, layout is not a Page view for '%s' and '%A'"  layout objectId
 
-            rhobj.CommitChanges() |> ignore
+            rhobj.CommitChanges() |> ignore<bool>
             State.Doc.Views.Redraw()
 
     ///<summary>Changes the layout or model space of an objects.</summary>
@@ -11442,7 +11438,7 @@ type RhinoScriptSyntax private () =
                     rhobj.Attributes.ViewportId <- lay.Value.MainViewport.Id
                     rhobj.Attributes.Space <- DocObjects.ActiveSpace.PageSpace
 
-                rhobj.CommitChanges() |> ignore
+                rhobj.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
 
@@ -11464,7 +11460,7 @@ type RhinoScriptSyntax private () =
         if newIndex <0 then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectLinetype: Setting it failed for '%A' and '%A'"  linetype objectId
         rhinoObject.Attributes.LinetypeSource <- DocObjects.ObjectLinetypeSource.LinetypeFromObject
         rhinoObject.Attributes.LinetypeIndex <- newIndex
-        rhinoObject.CommitChanges() |> ignore
+        rhinoObject.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the linetype of multiple object.</summary>
@@ -11478,7 +11474,7 @@ type RhinoScriptSyntax private () =
             let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             rhinoObject.Attributes.LinetypeSource <- DocObjects.ObjectLinetypeSource.LinetypeFromObject
             rhinoObject.Attributes.LinetypeIndex <- newIndex
-            rhinoObject.CommitChanges() |> ignore
+            rhinoObject.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
 
@@ -11506,7 +11502,7 @@ type RhinoScriptSyntax private () =
         if source <0 || source >3 || source = 2 then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectLinetypeSource: Setting it failed for '%A' and '%A'"  source objectId
         let source : DocObjects.ObjectLinetypeSource = LanguagePrimitives.EnumOfValue source
         rhinoObject.Attributes.LinetypeSource <- source
-        rhinoObject.CommitChanges() |> ignore
+        rhinoObject.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the linetype source of multiple objects.</summary>
@@ -11523,7 +11519,7 @@ type RhinoScriptSyntax private () =
         for objectId in objectIds do
             let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             rhinoObject.Attributes.LinetypeSource <- source
-            rhinoObject.CommitChanges() |> ignore
+            rhinoObject.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
 
@@ -11594,7 +11590,7 @@ type RhinoScriptSyntax private () =
         if source <0 || source >3 || source = 2 then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectMaterialSource: Setting it failed for '%A' and '%A'"  source objectId
         let source :DocObjects.ObjectMaterialSource  = LanguagePrimitives.EnumOfValue  source
         rhinoObject.Attributes.MaterialSource <- source
-        rhinoObject.CommitChanges() |> ignore
+        rhinoObject.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the rendering material source of multiple objects.</summary>
@@ -11610,7 +11606,7 @@ type RhinoScriptSyntax private () =
         for objectId in objectIds do
             let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             rhinoObject.Attributes.MaterialSource <- source
-            rhinoObject.CommitChanges() |> ignore
+            rhinoObject.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
 
@@ -11649,7 +11645,7 @@ type RhinoScriptSyntax private () =
         let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if RhinoScriptSyntax.IsGoodStringId( name, allowEmpty=true) then
             rhinoObject.Attributes.Name <- name
-            rhinoObject.CommitChanges() |> ignore
+            rhinoObject.CommitChanges() |> ignore<bool>
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectName: Setting it string '%s' cannot be used as Name. see RhinoScriptSyntax.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." name
 
@@ -11662,7 +11658,7 @@ type RhinoScriptSyntax private () =
             for objectId in objectIds do
                 let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
                 rhinoObject.Attributes.Name <- name
-                rhinoObject.CommitChanges() |> ignore
+                rhinoObject.CommitChanges() |> ignore<bool>
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectName: Setting it string '%s' cannot be used as Name. see RhinoScriptSyntax.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." name
 
@@ -11685,7 +11681,7 @@ type RhinoScriptSyntax private () =
         let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhinoObject.Attributes.PlotColorSource <- DocObjects.ObjectPlotColorSource.PlotColorFromObject
         rhinoObject.Attributes.PlotColor <- color
-        rhinoObject.CommitChanges() |> ignore
+        rhinoObject.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the print color of multiple objects.</summary>
@@ -11697,7 +11693,7 @@ type RhinoScriptSyntax private () =
             let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             rhinoObject.Attributes.PlotColorSource <- DocObjects.ObjectPlotColorSource.PlotColorFromObject
             rhinoObject.Attributes.PlotColor <- color
-            rhinoObject.CommitChanges() |> ignore
+            rhinoObject.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
     ///<summary>Returns the print color source of an object.</summary>
@@ -11723,7 +11719,7 @@ type RhinoScriptSyntax private () =
         let source : DocObjects.ObjectPlotColorSource = LanguagePrimitives.EnumOfValue source
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.Attributes.PlotColorSource <- source
-        rhobj.CommitChanges() |> ignore
+        rhobj.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the print color source of multiple objects.</summary>
@@ -11739,7 +11735,7 @@ type RhinoScriptSyntax private () =
         for objectId in objectIds do
             let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             rhobj.Attributes.PlotColorSource <- source
-            rhobj.CommitChanges() |> ignore
+            rhobj.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
     ///<summary>Returns the print width of an object.</summary>
@@ -11760,7 +11756,7 @@ type RhinoScriptSyntax private () =
         let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhinoObject.Attributes.PlotWeightSource <- DocObjects.ObjectPlotWeightSource.PlotWeightFromObject
         rhinoObject.Attributes.PlotWeight <- width
-        rhinoObject.CommitChanges() |> ignore
+        rhinoObject.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the print width of multiple objects.</summary>
@@ -11774,7 +11770,7 @@ type RhinoScriptSyntax private () =
             let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             rhinoObject.Attributes.PlotWeightSource <- DocObjects.ObjectPlotWeightSource.PlotWeightFromObject
             rhinoObject.Attributes.PlotWeight <- width
-            rhinoObject.CommitChanges() |> ignore
+            rhinoObject.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
 
@@ -11799,7 +11795,7 @@ type RhinoScriptSyntax private () =
     static member ObjectPrintWidthSource(objectId:Guid, source:int) : unit = //SET
         let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhinoObject.Attributes.PlotWeightSource <- LanguagePrimitives.EnumOfValue source
-        rhinoObject.CommitChanges() |> ignore
+        rhinoObject.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the print width source of multiple objects.</summary>
@@ -11813,7 +11809,7 @@ type RhinoScriptSyntax private () =
         for objectId in objectIds do
             let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             rhinoObject.Attributes.PlotWeightSource <- LanguagePrimitives.EnumOfValue source
-            rhinoObject.CommitChanges() |> ignore
+            rhinoObject.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
 
@@ -11904,8 +11900,8 @@ type RhinoScriptSyntax private () =
                             Rhino.Geometry.Transform.Identity
                     else
                         Rhino.Geometry.Transform.Identity
-                v0.Unitize()  |> ignore
-                v1.Unitize()  |> ignore
+                v0.Unitize()  |> ignore<bool>
+                v1.Unitize()  |> ignore<bool>
                 let xformRotate = Rhino.Geometry.Transform.Rotation(v0, v1, referencePts.[0])
                 xformMove * xformScale * xformRotate
 
@@ -12059,10 +12055,10 @@ type RhinoScriptSyntax private () =
                     let mutable redo = false
                     let lay = State.Doc.Layers.[rhobj.Attributes.LayerIndex]
                     if rhobj.IsHidden then
-                        if forceVisible then redo <- true ; State.Doc.Objects.Show(rhobj, ignoreLayerMode=true) |> ignore
+                        if forceVisible then redo <- true ; State.Doc.Objects.Show(rhobj, ignoreLayerMode=true) |> ignore<bool>
                         else RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObject failed on hidden object %s" (Pretty.str objectId)
                     elif rhobj.IsLocked then
-                        if forceVisible then redo <- true ; State.Doc.Objects.Unlock(rhobj, ignoreLayerMode=true) |> ignore
+                        if forceVisible then redo <- true ; State.Doc.Objects.Unlock(rhobj, ignoreLayerMode=true) |> ignore<bool>
                         else RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObject failed on locked object %s" (Pretty.str objectId)
                     elif not lay.IsVisible then
                         if forceVisible then redo <- true ; UtilLayer.visibleSetTrue(lay, true)
@@ -12096,10 +12092,10 @@ type RhinoScriptSyntax private () =
                         let mutable redo = false
                         let lay = State.Doc.Layers.[rhobj.Attributes.LayerIndex]
                         if rhobj.IsHidden then
-                            if forceVisible then redo <- true ; State.Doc.Objects.Show(rhobj, ignoreLayerMode=true) |> ignore
+                            if forceVisible then redo <- true ; State.Doc.Objects.Show(rhobj, ignoreLayerMode=true) |> ignore<bool>
                             else RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObjects failed on hidden object %s out of %d objects" (Pretty.str objectId) (Seq.length objectIds)
                         elif rhobj.IsLocked then
-                            if forceVisible then redo <- true ; State.Doc.Objects.Unlock(rhobj, ignoreLayerMode=true) |> ignore
+                            if forceVisible then redo <- true ; State.Doc.Objects.Unlock(rhobj, ignoreLayerMode=true) |> ignore<bool>
                             else RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObjects failed on locked object %s out of %d objects" (Pretty.str objectId) (Seq.length objectIds)
                         elif not lay.IsVisible then
                             if forceVisible then redo <- true ; UtilLayer.visibleSetTrue(lay, true)
@@ -12135,10 +12131,10 @@ type RhinoScriptSyntax private () =
        frame.Origin <- origin
        frame.ZAxis <- plane.Normal
        let yAxis = referencePoint-origin
-       yAxis.Unitize() |> ignore
+       yAxis.Unitize() |> ignore<bool>
        frame.YAxis <- yAxis
        let xAxis = Vector3d.CrossProduct(frame.ZAxis, frame.YAxis)
-       xAxis.Unitize() |> ignore
+       xAxis.Unitize() |> ignore<bool>
        frame.XAxis <- xAxis
        let worldPlane = Plane.WorldXY
        let cob = Transform.ChangeBasis(worldPlane, frame)
@@ -12170,10 +12166,10 @@ type RhinoScriptSyntax private () =
         frame.Origin <- origin
         frame.ZAxis <- plane.Normal
         let yAxis = referencePoint-origin
-        yAxis.Unitize() |> ignore
+        yAxis.Unitize() |> ignore<bool>
         frame.YAxis <- yAxis
         let xAxis = Vector3d.CrossProduct(frame.ZAxis, frame.YAxis)
-        xAxis.Unitize() |> ignore
+        xAxis.Unitize() |> ignore<bool>
         frame.XAxis <- xAxis
         let worldPlane = Plane.WorldXY
         let cob = Transform.ChangeBasis(worldPlane, frame)
@@ -12430,7 +12426,7 @@ type RhinoScriptSyntax private () =
         if not xAxis.IsZero then
             //x axis = RhinoScriptSyntax.Coerce3dvector(x axis)
             let xAxis = Vector3d(xAxis)//prevent original x axis parameter from being unitized too
-            xAxis.Unitize() |> ignore
+            xAxis.Unitize() |> ignore<bool>
             let yAxis = Vector3d.CrossProduct(rc.Normal, xAxis)
             rc <- Plane(origin, xAxis, yAxis)
         rc
@@ -12974,7 +12970,7 @@ type RhinoScriptSyntax private () =
             let objectIds = ResizeArray()
             for ob in es do
                 objectIds.Add ob.Id
-                if select then ob.Select(true) |> ignore   // TODO needs sync ? apparently not needed!
+                if select then ob.Select(true) |> ignore<int>   // TODO needs sync ? apparently not needed!
             if objectIds.Count > 0 && select then State.Doc.Views.Redraw()
             objectIds
 
@@ -12995,7 +12991,7 @@ type RhinoScriptSyntax private () =
             if not <| e.MoveNext() then RhinoScriptingException.Raise "RhinoScriptSyntax.FirstObject not found"
             let object = e.Current
             if isNull object then RhinoScriptingException.Raise "RhinoScriptSyntax.FirstObject not found(null)"
-            if select then object.Select(true) |> ignore // TODO needs sync ? apparently not needed!
+            if select then object.Select(true) |> ignore<int> // TODO needs sync ? apparently not needed!
             object.Id
 
 
@@ -13018,7 +13014,7 @@ type RhinoScriptSyntax private () =
                                     [<OPT;DEF(false)>]select:bool) : Guid * bool * DocObjects.SelectionMethod * Point3d * float * string =
         let get () =  // TODO Add check if already hidden, then don't even hide and show
             if not <| preselect then
-                State.Doc.Objects.UnselectAll() |> ignore
+                State.Doc.Objects.UnselectAll() |> ignore<int>
                 State.Doc.Views.Redraw()
             let go = new Input.Custom.GetObject()
             if notNull message then go.SetCommandPrompt(message)
@@ -13040,9 +13036,9 @@ type RhinoScriptSyntax private () =
                 let obj = go.Object(0).Object()
                 go.Dispose()
                 if not <| select && not <| preselect then
-                    State.Doc.Objects.UnselectAll()|> ignore
+                    State.Doc.Objects.UnselectAll()|> ignore<int>
                     State.Doc.Views.Redraw()
-                obj.Select(select)  |> ignore
+                obj.Select(select)  |> ignore<int>
                 (objectId, presel, selmethod, point, curveparameter, viewname)
         RhinoSync.DoSyncRedrawHideEditor get
 
@@ -13072,7 +13068,7 @@ type RhinoScriptSyntax private () =
                                     [<OPT;DEF(false)>]subObjects:bool) : Guid =
         let get () =
             if not  preselect then
-                State.Doc.Objects.UnselectAll() |> ignore
+                State.Doc.Objects.UnselectAll() |> ignore<int>
                 State.Doc.Views.Redraw()
             use go = new Input.Custom.GetObject()
             if notNull customFilter then go.SetCustomGeometryFilter(customFilter)
@@ -13089,11 +13085,11 @@ type RhinoScriptSyntax private () =
                 let obj = objref.Object()
                 //let presel = go.ObjectsWerePreselected
                 go.Dispose()
-                //if not <| select && not <| preselect then State.Doc.Objects.UnselectAll() |> ignore  State.Doc.Views.Redraw()
+                //if not <| select && not <| preselect then State.Doc.Objects.UnselectAll() |> ignore<int>  State.Doc.Views.Redraw()
                 if select then
-                    obj.Select(select)  |> ignore
+                    obj.Select(select)  |> ignore<int>
                 else
-                    State.Doc.Objects.UnselectAll() |> ignore
+                    State.Doc.Objects.UnselectAll() |> ignore<int>
                 State.Doc.Views.Redraw()
                 obj.Id
         RhinoSync.DoSyncRedrawHideEditor get
@@ -13131,7 +13127,7 @@ type RhinoScriptSyntax private () =
                                     [<OPT;DEF(null:Guid seq)>]objects:Guid seq) : Guid * bool * DocObjects.SelectionMethod * Point3d * string =
         let get () =
             if not <| preselect then
-                State.Doc.Objects.UnselectAll() |> ignore
+                State.Doc.Objects.UnselectAll() |> ignore<int>
                 State.Doc.Views.Redraw()
             use go = new Input.Custom.GetObject()
             if notNull objects then
@@ -13158,9 +13154,9 @@ type RhinoScriptSyntax private () =
                 let obj = go.Object(0).Object()
                 go.Dispose()
                 if not <| select && not <| presel then
-                    State.Doc.Objects.UnselectAll() |> ignore
+                    State.Doc.Objects.UnselectAll() |> ignore<int>
                     State.Doc.Views.Redraw()
-                obj.Select(select) |> ignore
+                obj.Select(select) |> ignore<int>
                 (objectId, presel, selmethod, point, viewname)
         RhinoSync.DoSyncRedrawHideEditor get
 
@@ -13203,7 +13199,7 @@ type RhinoScriptSyntax private () =
                                     [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter)  : ResizeArray<Guid> =
         let get () =
             if not <| preselect then
-                State.Doc.Objects.UnselectAll() |> ignore
+                State.Doc.Objects.UnselectAll() |> ignore<int>
                 State.Doc.Views.Redraw()
             use go = new Input.Custom.GetObject()
             if notNull objectsToSelectFrom then
@@ -13222,7 +13218,7 @@ type RhinoScriptSyntax private () =
                 RhinoUserInteractionException.Raise "No Object was selected in RhinoScriptSyntax.GetObjects(message=%A), Interaction result: %A" message res
             else
                 if not <| select && not <| go.ObjectsWerePreselected then
-                    State.Doc.Objects.UnselectAll() |> ignore
+                    State.Doc.Objects.UnselectAll() |> ignore<int>
                     State.Doc.Views.Redraw()
                 let rc = ResizeArray()
                 let count = go.ObjectCount
@@ -13230,7 +13226,7 @@ type RhinoScriptSyntax private () =
                     let objref = go.Object(i)
                     rc.Add(objref.ObjectId)
                     let obj = objref.Object()
-                    if select && notNull obj then obj.Select(select) |> ignore
+                    if select && notNull obj then obj.Select(select) |> ignore<int>
                 if printCount then PrettySetup.printfnBlue "RhinoScriptSyntax.GetObjects(...) returned %s" (RhinoScriptSyntax.ObjectDescription(rc))
                 rc
         RhinoSync.DoSyncRedrawHideEditor get
@@ -13273,7 +13269,7 @@ type RhinoScriptSyntax private () =
                                     [<OPT;DEF(null:Guid seq)>]objectsToSelectFrom:Guid seq) : (Guid*bool*DocObjects.SelectionMethod*Point3d*string) ResizeArray =
         let get () =
             if not <| preselect then
-                State.Doc.Objects.UnselectAll() |> ignore
+                State.Doc.Objects.UnselectAll() |> ignore<int>
                 State.Doc.Views.Redraw()
             use go = new Input.Custom.GetObject()
             if notNull objectsToSelectFrom then
@@ -13290,7 +13286,7 @@ type RhinoScriptSyntax private () =
                 RhinoUserInteractionException.Raise "No Object was selected in RhinoScriptSyntax.GetObjectsEx(message=%A), Interaction result: %A" message res
             else
                 if not <| select && not <| go.ObjectsWerePreselected then
-                    State.Doc.Objects.UnselectAll() |> ignore
+                    State.Doc.Objects.UnselectAll() |> ignore<int>
                     State.Doc.Views.Redraw()
                 let rc = ResizeArray()
                 let count = go.ObjectCount
@@ -13303,7 +13299,7 @@ type RhinoScriptSyntax private () =
                     let viewname = go.View().ActiveViewport.Name
                     rc.Add( (objectId, presel, selmethod, point, viewname))
                     let obj = objref.Object()
-                    if select && notNull obj then obj.Select(select) |> ignore
+                    if select && notNull obj then obj.Select(select) |> ignore<int>
                 if printCount then
                     rc
                     |> RArr.map ( fun (id, _, _, _, _) -> id )
@@ -13352,7 +13348,7 @@ type RhinoScriptSyntax private () =
                                     [<OPT;DEF(false)>]select:bool) : Guid * bool * DocObjects.SelectionMethod * Point3d * (float * float) * string =
         let get () =
             if not <| preselect then
-                State.Doc.Objects.UnselectAll() |> ignore
+                State.Doc.Objects.UnselectAll() |> ignore<int>
                 State.Doc.Views.Redraw()
             use go = new Input.Custom.GetObject()
             go.SetCommandPrompt(message)
@@ -13366,7 +13362,7 @@ type RhinoScriptSyntax private () =
             else
                 let objref = go.Object(0)
                 let rhobj = objref.Object()
-                rhobj.Select(select) |> ignore
+                rhobj.Select(select) |> ignore<int>
                 State.Doc.Views.Redraw()
                 let objectId = rhobj.Id
                 let prePicked = go.ObjectsWerePreselected
@@ -13381,7 +13377,7 @@ type RhinoScriptSyntax private () =
                 let name = view.ActiveViewport.Name
                 go.Dispose()
                 if not <| select && not <| prePicked then
-                    State.Doc.Objects.UnselectAll() |> ignore
+                    State.Doc.Objects.UnselectAll() |> ignore<int>
                     State.Doc.Views.Redraw()
                 (objectId, prePicked, selmethod, point, uv, name)
         RhinoSync.DoSyncRedrawHideEditor get
@@ -13461,9 +13457,9 @@ type RhinoScriptSyntax private () =
         for obj in rhobjs do
             if obj.IsSelected(false) <> 0 && obj.IsSelectable() then
                 rc.Add(obj.Id)
-                obj.Select(true) |> ignore // TODO needs sync ? apparently not needed!
+                obj.Select(true) |> ignore<int> // TODO needs sync ? apparently not needed!
             else
-                obj.Select(false) |> ignore
+                obj.Select(false) |> ignore<int>
         State.Doc.Views.Redraw()
         rc
 
@@ -13485,7 +13481,7 @@ type RhinoScriptSyntax private () =
                 let obj = State.Doc.Objects.Find(serialnumber)
                 if notNull obj && not <| obj.IsDeleted then
                     rc.Add(obj.Id)
-                if select then obj.Select(true) |> ignore // TODO needs sync ? apparently not needed!
+                if select then obj.Select(true) |> ignore<int> // TODO needs sync ? apparently not needed!
                 serialnumber <- serialnumber + 1u
                 if select && rc.Count > 1 then State.Doc.Views.Redraw()
             rc
@@ -13514,7 +13510,7 @@ type RhinoScriptSyntax private () =
         if isNull firstobj then
             RhinoScriptingException.Raise "RhinoScriptSyntax.LastObject failed.  select:'%A' includeLights:'%A' includeGrips:'%A'" select includeLights includeGrips
         if select then
-            firstobj.Select(true) |> ignore // TODO needs sync ? apparently not needed!
+            firstobj.Select(true) |> ignore<int> // TODO needs sync ? apparently not needed!
             State.Doc.Views.Redraw()
         firstobj.Id
 
@@ -13543,7 +13539,7 @@ type RhinoScriptSyntax private () =
         |> Option.defaultWith ( fun () -> RhinoScriptingException.Raise "RhinoScriptSyntax.NextObject not found for %A" (Pretty.str objectId))
         |> fun obj ->
             if select then
-                obj.Select(true) |> ignore // TODO needs sync ? apparently not needed!
+                obj.Select(true) |> ignore<int> // TODO needs sync ? apparently not needed!
                 State.Doc.Views.Redraw()
             obj.Id
 
@@ -13579,7 +13575,7 @@ type RhinoScriptSyntax private () =
                                   [<OPT;DEF(false)>]includeLights:bool) : Guid ResizeArray =
         let rhinoobjects = State.Doc.Objects.FindByDrawColor(color, includeLights)
         if select then
-            for obj in rhinoobjects do obj.Select(true)|> ignore // TODO needs sync ? apparently not needed!
+            for obj in rhinoobjects do obj.Select(true)|> ignore<int> // TODO needs sync ? apparently not needed!
             State.Doc.Views.Redraw()
         rhinoobjects |> RArr.mapSeq _.Id
 
@@ -13598,7 +13594,7 @@ type RhinoScriptSyntax private () =
             ResizeArray()
         else
             if select then
-                for obj in rhinoobjects do obj.Select(true) |> ignore // TODO needs sync ? apparently not needed!
+                for obj in rhinoobjects do obj.Select(true) |> ignore<int> // TODO needs sync ? apparently not needed!
                 State.Doc.Views.Redraw()
             rhinoobjects  |> RArr.mapArr _.Id
 
@@ -13614,7 +13610,7 @@ type RhinoScriptSyntax private () =
         if isNull rhinoobjects then ResizeArray()
         else
             if select then
-                for rhobj in rhinoobjects do rhobj.Select(true) |> ignore // TODO needs sync ? apparently not needed!
+                for rhobj in rhinoobjects do rhobj.Select(true) |> ignore<int> // TODO needs sync ? apparently not needed!
                 State.Doc.Views.Redraw()
             rhinoobjects  |> RArr.mapArr _.Id
 
@@ -13644,7 +13640,7 @@ type RhinoScriptSyntax private () =
         let objects = State.Doc.Objects.GetObjectList(settings)
         let ids = objects  |> RArr.mapSeq _.Id
         if ids.Count>0 && select then
-            for rhobj in objects do rhobj.Select(true) |> ignore // TODO needs sync ? apparently not needed!
+            for rhobj in objects do rhobj.Select(true) |> ignore<int> // TODO needs sync ? apparently not needed!
             State.Doc.Views.Redraw()
         ids
 
@@ -13737,7 +13733,7 @@ type RhinoScriptSyntax private () =
             elif objecttyp &&& geometryfilter <> DocObjects.ObjectType.None then
                 bFound <- true
             if bFound then
-                if select then object.Select(true) |> ignore // TODO needs sync ? apparently not needed!
+                if select then object.Select(true) |> ignore<int> // TODO needs sync ? apparently not needed!
                 objectIds.Add(object.Id)
         if objectIds.Count > 0 && select then State.Doc.Views.Redraw()
         objectIds
@@ -13792,7 +13788,7 @@ type RhinoScriptSyntax private () =
             for object in e do
                 let bbox = object.Geometry.GetBoundingBox(true)
                 if viewport.IsVisible(bbox) then
-                    if select then object.Select(true) |> ignore
+                    if select then object.Select(true) |> ignore<int>
                     objectIds.Add(object.Id)
             if objectIds.Count>0 && select then State.Doc.Views.Redraw()
             objectIds
@@ -13850,7 +13846,7 @@ type RhinoScriptSyntax private () =
                 for rhobjr in objects do
                     let rhobj = rhobjr.Object()
                     rc.Add(rhobj.Id)
-                    if select then rhobj.Select(true) |> ignore
+                    if select then rhobj.Select(true) |> ignore<int>
                 if select then State.Doc.Views.Redraw()
             rc
         RhinoSync.DoSyncRedrawHideEditor pick
@@ -14057,23 +14053,23 @@ type RhinoScriptSyntax private () =
             for i = 0 to pu - 1 do
                 for j = 0 to pv - 1 do
                     let cp = ControlPoint(points.[index], weights.[index])
-                    controlpoints.SetControlPoint(i, j, cp)|> ignore
+                    controlpoints.SetControlPoint(i, j, cp)|> ignore<bool>
                     index <- index + 1
         else
             for i = 0 to pu - 1 do
                 for j = 0 to pv - 1 do
                     let cp = ControlPoint(points.[index])
-                    controlpoints.SetControlPoint(i, j, cp)|> ignore
+                    controlpoints.SetControlPoint(i, j, cp)|> ignore<bool>
                     index <- index + 1
         index <- 0
         for i = 0 to pu - 1 do
             for j = 0 to pv - 1 do
                 if notNull weights then
                     let cp = ControlPoint(points.[index], weights.[index])
-                    controlpoints.SetControlPoint(i, j, cp)|> ignore
+                    controlpoints.SetControlPoint(i, j, cp)|> ignore<bool>
                 else
                     let cp = ControlPoint(points.[index])
-                    controlpoints.SetControlPoint(i, j, cp)|> ignore
+                    controlpoints.SetControlPoint(i, j, cp)|> ignore<bool>
                 index <- index + 1
 
         //add the knots
@@ -14600,8 +14596,8 @@ type RhinoScriptSyntax private () =
         if newbreps|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.BooleanDifference failed.  input0:'%A' input1:'%A' deleteInput:'%A'" input0 input1 deleteInput
         let rc  = newbreps |> RArr.mapArr State.Doc.Objects.AddBrep
         if deleteInput then
-            for objectId in input0 do State.Doc.Objects.Delete(objectId, true)|> ignore
-            for objectId in input1 do State.Doc.Objects.Delete(objectId, true)|> ignore
+            for objectId in input0 do State.Doc.Objects.Delete(objectId, true)|> ignore<bool>
+            for objectId in input1 do State.Doc.Objects.Delete(objectId, true)|> ignore<bool>
         State.Doc.Views.Redraw()
         rc
 
@@ -14624,8 +14620,8 @@ type RhinoScriptSyntax private () =
         if newbreps|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.BooleanIntersection failed.  input0:'%A' input1:'%A' deleteInput:'%A'" input0 input1 deleteInput
         let rc  = newbreps |> RArr.mapArr State.Doc.Objects.AddBrep
         if deleteInput then
-            for objectId in input0 do State.Doc.Objects.Delete(objectId, true)|> ignore
-            for objectId in input1 do State.Doc.Objects.Delete(objectId, true)|> ignore
+            for objectId in input0 do State.Doc.Objects.Delete(objectId, true)|> ignore<bool>
+            for objectId in input1 do State.Doc.Objects.Delete(objectId, true)|> ignore<bool>
         State.Doc.Views.Redraw()
         rc
 
@@ -14645,7 +14641,7 @@ type RhinoScriptSyntax private () =
         if newbreps|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.BooleanUnion failed.  input:'%A' deleteInput:'%A'" input deleteInput
         let rc  = newbreps |> RArr.mapArr State.Doc.Objects.AddBrep
         if  deleteInput then
-            for objectId in input do State.Doc.Objects.Delete(objectId, true)|> ignore
+            for objectId in input do State.Doc.Objects.Delete(objectId, true)|> ignore<bool>
         State.Doc.Views.Redraw()
         rc
 
@@ -14784,7 +14780,7 @@ type RhinoScriptSyntax private () =
         let edge = surface.ClosestSide(parameter|> fst, parameter|> snd)
         let newsrf = surface.Extend(edge, length, smooth)
         if notNull newsrf then
-            State.Doc.Objects.Replace(surfaceId, newsrf)|> ignore
+            State.Doc.Objects.Replace(surfaceId, newsrf)|> ignore<bool>
             State.Doc.Views.Redraw()
         else
             ()
@@ -14805,7 +14801,7 @@ type RhinoScriptSyntax private () =
                     let copyface = brep.Faces.[i].DuplicateFace(false)
                     let faceid = State.Doc.Objects.AddBrep(copyface)
                     if faceid <> Guid.Empty then ids.Add(faceid)
-                if  deleteInput then State.Doc.Objects.Delete(objectId, true) |> ignore
+                if  deleteInput then State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
         State.Doc.Views.Redraw()
         ids
 
@@ -14870,7 +14866,7 @@ type RhinoScriptSyntax private () =
             rc.Add(objectId)
         if copy then
             for index in faceIndices do brep.Faces.RemoveAt(index)
-            State.Doc.Objects.Replace(objectId, brep)|> ignore
+            State.Doc.Objects.Replace(objectId, brep)|> ignore<bool>
         State.Doc.Views.Redraw()
         rc
 
@@ -14995,7 +14991,7 @@ type RhinoScriptSyntax private () =
         let oldreverse = face.OrientationIsReversed
         if brep.IsSolid = false && oldreverse <> flip then
             brep.Flip()
-            State.Doc.Objects.Replace(surfaceId, brep)|> ignore
+            State.Doc.Objects.Replace(surfaceId, brep)|> ignore<bool>
             State.Doc.Views.Redraw()
 
     ///<summary>Changes the normal direction of multiple Surface. This feature can
@@ -15012,7 +15008,7 @@ type RhinoScriptSyntax private () =
             let oldreverse = face.OrientationIsReversed
             if brep.IsSolid = false && oldreverse <> flip then
                 brep.Flip()
-                State.Doc.Objects.Replace(surfaceId, brep)|> ignore
+                State.Doc.Objects.Replace(surfaceId, brep)|> ignore<bool>
         State.Doc.Views.Redraw()
 
 
@@ -15355,7 +15351,7 @@ type RhinoScriptSyntax private () =
         if  deleteInput then
             for objectId in objectIds do
                 //id = RhinoScriptSyntax.CoerceGuid(objectId)
-                State.Doc.Objects.Delete(objectId, true) |> ignore
+                State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
         State.Doc.Views.Redraw()
         rc
 
@@ -15376,7 +15372,7 @@ type RhinoScriptSyntax private () =
         if newsurf|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MakeSurfacePeriodic failed.  surfaceId:'%s' direction:'%A' deleteInput:'%A'" (Pretty.str surfaceId) direction deleteInput
         //id = RhinoScriptSyntax.CoerceGuid(surfaceId)
         if deleteInput then
-            State.Doc.Objects.Replace(surfaceId, newsurf)|> ignore
+            State.Doc.Objects.Replace(surfaceId, newsurf)|> ignore<bool>
             State.Doc.Views.Redraw()
             surfaceId
         else
@@ -15431,7 +15427,7 @@ type RhinoScriptSyntax private () =
         let curves = Curve.PullToBrepFace(curve, brep.Faces.[0], tol)
         let rc  = curves |> RArr.mapArr State.Doc.Objects.AddCurve
         if deleteInput  then
-            State.Doc.Objects.Delete(crvobj, true) |> ignore
+            State.Doc.Objects.Delete(crvobj, true) |> ignore<bool>
         State.Doc.Views.Redraw()
         rc
 
@@ -15482,7 +15478,7 @@ type RhinoScriptSyntax private () =
                 let success = knots.RemoveKnotsAt(nuparam, nvparam)
                 if not success then false
                 else
-                    State.Doc.Objects.Replace(surface, nsrf)|> ignore
+                    State.Doc.Objects.Replace(surface, nsrf)|> ignore<bool>
                     State.Doc.Views.Redraw()
                     true
 
@@ -15499,10 +15495,10 @@ type RhinoScriptSyntax private () =
         let brep = RhinoScriptSyntax.CoerceBrep(surfaceId)
         if brep.Faces.Count <> 1 then RhinoScriptingException.Raise "RhinoScriptSyntax.ReverseSurface failed.  surfaceId:'%s' direction:'%A'" (Pretty.str surfaceId) direction
         let face = brep.Faces.[0]
-        if direction &&& 1 <> 0 then            face.Reverse(0, true)|> ignore
-        if direction &&& 2 <> 0 then            face.Reverse(1, true)|> ignore
-        if direction &&& 4 <> 0 then            face.Transpose(true) |> ignore
-        State.Doc.Objects.Replace(surfaceId, brep)|> ignore
+        if direction &&& 1 <> 0 then            face.Reverse(0, true)|> ignore<Surface>
+        if direction &&& 2 <> 0 then            face.Reverse(1, true)|> ignore<Surface>
+        if direction &&& 4 <> 0 then            face.Transpose(true) |> ignore<Surface>
+        State.Doc.Objects.Replace(surfaceId, brep)|> ignore<bool>
         State.Doc.Views.Redraw()
 
 
@@ -15571,7 +15567,7 @@ type RhinoScriptSyntax private () =
             State.Doc.Views.Redraw()
             rc
         else
-            State.Doc.Objects.Replace(objectId, brep)|> ignore
+            State.Doc.Objects.Replace(objectId, brep)|> ignore<bool>
             State.Doc.Views.Redraw()
             objectId
 
@@ -15593,7 +15589,7 @@ type RhinoScriptSyntax private () =
         if isNull pieces then RhinoScriptingException.Raise "RhinoScriptSyntax.SplitBrep failed.  brepId:'%s' cutterId:'%s' deleteInput:'%A'" (Pretty.str brepId) (Pretty.str cutterId) deleteInput
         if deleteInput then
             //brepId = RhinoScriptSyntax.CoerceGuid(brepId)
-            State.Doc.Objects.Delete(brepId, true) |> ignore
+            State.Doc.Objects.Delete(brepId, true) |> ignore<bool>
         let rc  = pieces |> RArr.mapArr State.Doc.Objects.AddBrep
         State.Doc.Views.Redraw()
         rc
@@ -15931,17 +15927,17 @@ type RhinoScriptSyntax private () =
         | :?  DocObjects.BrepObject as rhinoObject ->
                 let dens = if density<0 then -1 else density
                 rhinoObject.Attributes.WireDensity <- dens
-                rhinoObject.CommitChanges() |> ignore
+                rhinoObject.CommitChanges() |> ignore<bool>
                 State.Doc.Views.Redraw()
         | :?  DocObjects.SurfaceObject as rhinoObject ->
                 let dens = if density<0 then -1 else density
                 rhinoObject.Attributes.WireDensity <- dens
-                rhinoObject.CommitChanges() |> ignore
+                rhinoObject.CommitChanges() |> ignore<bool>
                 State.Doc.Views.Redraw()
         | :?  DocObjects.ExtrusionObject as rhinoObject ->
                 let dens = if density<0 then -1 else density
                 rhinoObject.Attributes.WireDensity <- dens
-                rhinoObject.CommitChanges() |> ignore
+                rhinoObject.CommitChanges() |> ignore<bool>
                 State.Doc.Views.Redraw()
         | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceIsocurveDensity Get failed.  surfaceId:'%s' density:'%A'" (Pretty.str surfaceId) density
 
@@ -15963,15 +15959,15 @@ type RhinoScriptSyntax private () =
             | :?  DocObjects.BrepObject as rhinoObject ->
                     let dens = if density<0 then -1 else density
                     rhinoObject.Attributes.WireDensity <- dens
-                    rhinoObject.CommitChanges() |> ignore
+                    rhinoObject.CommitChanges() |> ignore<bool>
             | :?  DocObjects.SurfaceObject as rhinoObject ->
                     let dens = if density<0 then -1 else density
                     rhinoObject.Attributes.WireDensity <- dens
-                    rhinoObject.CommitChanges() |> ignore
+                    rhinoObject.CommitChanges() |> ignore<bool>
             | :?  DocObjects.ExtrusionObject as rhinoObject ->
                     let dens = if density<0 then -1 else density
                     rhinoObject.Attributes.WireDensity <- dens
-                    rhinoObject.CommitChanges() |> ignore
+                    rhinoObject.CommitChanges() |> ignore<bool>
             | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceIsocurveDensity Get failed.  surfaceId:'%s' density:'%A'" (Pretty.str surfaceId) density
         State.Doc.Views.Redraw()
 
@@ -16213,7 +16209,7 @@ type RhinoScriptSyntax private () =
             let rc = ResizeArray()
             for i = 0 to breps.Length - 1 do
                 if i = 0 then
-                    State.Doc.Objects.Replace(objectId, breps.[i]) |> ignore
+                    State.Doc.Objects.Replace(objectId, breps.[i]) |> ignore<bool>
                     rc.Add(objectId)
                 else
                     rc.Add(State.Doc.Objects.AddBrep(breps.[i], attrs))
@@ -16241,7 +16237,7 @@ type RhinoScriptSyntax private () =
             let rc = ResizeArray()
             for i = 0 to breps.Length - 1 do
                 if i = 0 then
-                    State.Doc.Objects.Replace(objectId, breps.[i]) |> ignore
+                    State.Doc.Objects.Replace(objectId, breps.[i]) |> ignore<bool>
                     rc.Add(objectId)
                 else
                     rc.Add(State.Doc.Objects.AddBrep(breps.[i], attrs))
@@ -16269,7 +16265,7 @@ type RhinoScriptSyntax private () =
         let newsurface = surface.Trim(u, v)
         if notNull newsurface then
             let rc = State.Doc.Objects.AddSurface(newsurface)
-            if deleteInput then  State.Doc.Objects.Delete(surfaceId, true) |> ignore
+            if deleteInput then  State.Doc.Objects.Delete(surfaceId, true) |> ignore<bool>
             State.Doc.Views.Redraw()
             rc
         else
@@ -16292,7 +16288,7 @@ type RhinoScriptSyntax private () =
         let newsurface = surface.Trim(u, v)
         if notNull newsurface then
             let rc = State.Doc.Objects.AddSurface(newsurface)
-            if deleteInput then  State.Doc.Objects.Delete(surfaceId, true) |> ignore
+            if deleteInput then  State.Doc.Objects.Delete(surfaceId, true) |> ignore<bool>
             State.Doc.Views.Redraw()
             rc
         else
@@ -16320,7 +16316,7 @@ type RhinoScriptSyntax private () =
         let newsurface = surface.Trim(u, v)
         if notNull newsurface then
             let rc = State.Doc.Objects.AddSurface(newsurface)
-            if deleteInput then  State.Doc.Objects.Delete(surfaceId, true) |> ignore
+            if deleteInput then  State.Doc.Objects.Delete(surfaceId, true) |> ignore<bool>
             State.Doc.Views.Redraw()
             rc
         else
@@ -16964,8 +16960,8 @@ type RhinoScriptSyntax private () =
 
         if isNull s then
             let err = Text.StringBuilder()
-            let addLn (s:String) = err.AppendLine s |> ignore
-            let add (s:String) = err.Append s |> ignore
+            let addLn (s:String) = err.AppendLine s |> ignore<Text.StringBuilder>
+            let add (s:String) = err.Append s |> ignore<Text.StringBuilder>
             addLn <| sprintf "RhinoScriptSyntax.GetUserText key: '%s' does not exist on %s" key (Pretty.str objectId)
             let ks = RhinoScriptSyntax.GetUserTextKeys(objectId, attachedToGeometry=false)
             if ks.Count = 0 then
@@ -17046,7 +17042,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(unit) void, nothing.</returns>
     static member SetDocumentData(section:string, entry:string, value:string) : unit =
         // TODO verify input strings
-        State.Doc.Strings.SetString(section, entry, value) |> ignore
+        State.Doc.Strings.SetString(section, entry, value) |> ignore<string>
 
 
     ///<summary>Sets a user text stored in the document.</summary>
@@ -17065,7 +17061,7 @@ type RhinoScriptSyntax private () =
         else
             if not <|  RhinoScriptSyntax.IsGoodStringId( value, allowEmpty=true) then
                 RhinoScriptingException.Raise "RhinoScriptSyntax.SetDocumentUserText the string '%s' cannot be used as value. You may be able bypass this restrictions by using the optional argument: allowAllUnicode=true" value
-        State.Doc.Strings.SetString(key, value) |> ignore
+        State.Doc.Strings.SetString(key, value) |> ignore<string>
 
 
     ///<summary>Removes user text stored in the document.</summary>
@@ -17102,7 +17098,7 @@ type RhinoScriptSyntax private () =
             if not <| obj.Attributes.SetUserString(key, value) then
                 RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' value '%s'" (Pretty.str objectId) key value
 
-        obj.CommitChanges() |> ignore // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
+        obj.CommitChanges() |> ignore<bool> // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
 
     ///<summary>Sets or removes user text stored on multiple objects. Key and value must noy contain ambiguous Unicode characters.</summary>
     ///<param name="objectIds">(Guid seq) The object identifiers</param>
@@ -17131,7 +17127,7 @@ type RhinoScriptSyntax private () =
             else
                 if not <| obj.Attributes.SetUserString(key, value) then
                     RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' value '%s'" (Pretty.str objectId) key value
-            obj.CommitChanges() |> ignore  // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
+            obj.CommitChanges() |> ignore<bool>  // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
 
     ///<summary>Removes user text stored on an object. If the key exists.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
@@ -17140,9 +17136,9 @@ type RhinoScriptSyntax private () =
     ///<returns>(unit) void, nothing.</returns>
     static member DeleteUserText(objectId:Guid, key:string,  [<OPT;DEF(false)>]attachToGeometry:bool) : unit =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        if attachToGeometry then obj.Geometry.SetUserString  (key, null) |> ignore // returns false if key does not exist yet, otherwise true
-        else                     obj.Attributes.SetUserString(key, null) |> ignore
-        obj.CommitChanges() |> ignore  // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
+        if attachToGeometry then obj.Geometry.SetUserString  (key, null) |> ignore<bool> // returns false if key does not exist yet, otherwise true
+        else                     obj.Attributes.SetUserString(key, null) |> ignore<bool>
+        obj.CommitChanges() |> ignore<bool>  // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
 
 
     ///<summary>Removes user text stored on multiple objects.If the key exists.</summary>
@@ -17153,9 +17149,9 @@ type RhinoScriptSyntax private () =
     static member DeleteUserText(objectIds:Guid seq, key:string,  [<OPT;DEF(false)>]attachToGeometry:bool) : unit = //PLURAL
         for objectId in objectIds do
             let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-            if attachToGeometry then  obj.Geometry.SetUserString  (key, null) |> ignore // returns false if key does not exist yet, otherwise true
-            else                      obj.Attributes.SetUserString(key, null) |> ignore
-            obj.CommitChanges() |> ignore  // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
+            if attachToGeometry then  obj.Geometry.SetUserString  (key, null) |> ignore<bool> // returns false if key does not exist yet, otherwise true
+            else                      obj.Attributes.SetUserString(key, null) |> ignore<bool>
+            obj.CommitChanges() |> ignore<bool>  // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
 
 
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
@@ -17299,7 +17295,7 @@ type RhinoScriptSyntax private () =
                 let name, off, on = item
                 let t = new Input.Custom.OptionToggle( initial, off, on )
                 toggles.Add(t)
-                go.AddOptionToggle(name, ref t) |> ignore
+                go.AddOptionToggle(name, ref t) |> ignore<int>
             let mutable getrc = go.Get()
             while getrc = Input.GetResult.Option do
                 getrc <- go.Get()
@@ -17484,7 +17480,7 @@ type RhinoScriptSyntax private () =
                 if  select then
                     for item in r do
                         let rhobj = State.Doc.Objects.FindId(t1 item)
-                        rhobj.Select(true)|> ignore
+                        rhobj.Select(true)|> ignore<int>
                     State.Doc.Views.Redraw()
                 r
         RhinoSync.DoSyncRedrawHideEditor get
@@ -17642,7 +17638,7 @@ type RhinoScriptSyntax private () =
                                 [<OPT;DEF(1)>]minCount:int,
                                 [<OPT;DEF(0)>]maxCount:int) : ResizeArray<int> =
         let get () =
-            State.Doc.Objects.UnselectAll() |> ignore
+            State.Doc.Objects.UnselectAll() |> ignore<int>
             State.Doc.Views.Redraw()
             use go = new Input.Custom.GetObject()
             go.SetCustomGeometryFilter(fun rhinoObject _ _ -> objectId = rhinoObject.Id)
@@ -17675,7 +17671,7 @@ type RhinoScriptSyntax private () =
                                     [<OPT;DEF(1)>]minCount:int,
                                     [<OPT;DEF(0)>]maxCount:int) : ResizeArray<int> =
         let get () =
-            State.Doc.Objects.UnselectAll() |> ignore
+            State.Doc.Objects.UnselectAll() |> ignore<int>
             State.Doc.Views.Redraw()
             use go = new Input.Custom.GetObject()
             go.SetCustomGeometryFilter(fun rhinoObject _ _ -> objectId = rhinoObject.Id)
@@ -17710,8 +17706,8 @@ type RhinoScriptSyntax private () =
                 gp.DrawLineFromPoint(basePoint, true)
                 gp.EnableDrawLineFromPoint(true)
                 if distance<>0.0 then gp.ConstrainDistanceFromBasePoint(distance)
-            if inPlane then gp.ConstrainToConstructionPlane(true)|> ignore
-            gp.Get() |> ignore
+            if inPlane then gp.ConstrainToConstructionPlane(true)|> ignore<bool>
+            gp.Get() |> ignore<Input.GetResult>
             if gp.CommandResult() <> Commands.Result.Success then
                 RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetPoint()"
             else
@@ -17733,8 +17729,8 @@ type RhinoScriptSyntax private () =
             let curve = RhinoScriptSyntax.CoerceCurve(curveId)
             use gp = new Input.Custom.GetPoint()
             gp.SetCommandPrompt(message)
-            gp.Constrain(curve, allowPickingPointOffObject=false) |> ignore
-            gp.Get() |> ignore
+            gp.Constrain(curve, allowPickingPointOffObject=false) |> ignore<bool>
+            gp.Get() |> ignore<Input.GetResult>
             if gp.CommandResult() <> Commands.Result.Success then
                 RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetPointOnCurve()"
             else
@@ -17773,15 +17769,15 @@ type RhinoScriptSyntax private () =
             gp.SetCommandPrompt(message)
             match RhinoScriptSyntax.CoerceGeometry surfaceId with
             | :? Surface as srf ->
-                gp.Constrain(srf, allowPickingPointOffObject=false) |> ignore
+                gp.Constrain(srf, allowPickingPointOffObject=false) |> ignore<bool>
 
             | :? Brep as brep ->
-                gp.Constrain(brep, -1, -1, allowPickingPointOffObject=false) |> ignore
+                gp.Constrain(brep, -1, -1, allowPickingPointOffObject=false) |> ignore<bool>
 
             | _ ->
                 RhinoScriptingException.Raise "RhinoScriptSyntax.GetPointOnSurface failed input is not surface or Polysurface.  surfaceId:'%s' message:'%A'" (Pretty.str surfaceId) message
 
-            gp.Get() |>ignore
+            gp.Get() |> ignore<Input.GetResult>
             if gp.CommandResult() <> Commands.Result.Success then
                 RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetPointOnSurface()"
             else
@@ -17814,9 +17810,9 @@ type RhinoScriptSyntax private () =
             if notNull message1 then gp.SetCommandPrompt(message1)
             gp.EnableDrawLineFromPoint( drawLines )
             if inPlane then
-                gp.ConstrainToConstructionPlane(true) |> ignore
+                gp.ConstrainToConstructionPlane(true) |> ignore<bool>
                 let plane = State.Doc.Views.ActiveView.ActiveViewport.ConstructionPlane()
-                gp.Constrain(plane, allowElevator=false) |> ignore
+                gp.Constrain(plane, allowElevator=false) |> ignore<bool>
             let mutable getres = gp.Get()
             if gp.CommandResult() <> Commands.Result.Success then RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetPoints()"
             else
@@ -17974,7 +17970,7 @@ type RhinoScriptSyntax private () =
             if notNull message then gs.SetCommandPrompt(message)
             if notNull defaultValString then gs.SetDefaultString(defaultValString)
             if notNull strings then
-                for s in strings do gs.AddOption(s) |> ignore
+                for s in strings do gs.AddOption(s) |> ignore<int>
             let result = gs.Get()
             if result = Input.GetResult.Cancel then
                 RhinoUserInteractionException.Raise "No text was given by user in RhinoScriptSyntax.GetString()"
@@ -18575,7 +18571,7 @@ type RhinoScriptSyntax private () =
     static member Polar(point:Point3d, angleDegrees:float, distance:float, [<OPT;DEF(Plane())>]plane:Plane) : Point3d =
         let angle = toRadians(angleDegrees)
         let mutable offset = plane.XAxis
-        offset.Unitize() |> ignore
+        offset.Unitize() |> ignore<bool>
         offset <- distance * offset
         let rc = point + offset
         let xForm = Transform.Rotation(angle, plane.ZAxis, point)
@@ -18942,7 +18938,7 @@ type RhinoScriptSyntax private () =
             with _ ->  RhinoScriptingException.Raise "RhinoScriptSyntax.DetailLock: Setting it failed. detailId is a %s  lock:'%A'" (Pretty.str detailId)  lock
         if lock <> detail.DetailGeometry.IsProjectionLocked then
             detail.DetailGeometry.IsProjectionLocked <- lock
-            detail.CommitChanges() |> ignore
+            detail.CommitChanges() |> ignore<bool>
 
 
 
@@ -18963,7 +18959,7 @@ type RhinoScriptSyntax private () =
         let modelUnits = State.Doc.ModelUnitSystem
         let pageUnits = State.Doc.PageUnitSystem
         if detail.DetailGeometry.SetScale(modelLength, modelUnits, pageLength, pageUnits) then
-            detail.CommitChanges() |> ignore
+            detail.CommitChanges() |> ignore<bool>
             State.Doc.Views.Redraw()
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.DetailScale failed.  detailId:'%s' modelLength:'%A' pageLength:'%A'" (Pretty.str detailId) modelLength pageLength
@@ -19187,10 +19183,10 @@ type RhinoScriptSyntax private () =
         let viewport = view.ActiveViewport
         let mutable angle =  RhinoMath.ToRadians( abs(angle))
         if ApplicationSettings.ViewSettings.RotateReverseKeyboard then angle <- -angle
-        if direction = 0 then viewport.KeyboardRotate(true, angle)       |> ignore
-        elif direction = 1 then viewport.KeyboardRotate(true, -angle)    |> ignore
-        elif direction = 2 then viewport.KeyboardRotate(false, -angle)   |> ignore
-        elif direction = 3 then viewport.KeyboardRotate(false, angle)    |> ignore
+        if direction = 0 then viewport.KeyboardRotate(true, angle)       |> ignore<bool>
+        elif direction = 1 then viewport.KeyboardRotate(true, -angle)    |> ignore<bool>
+        elif direction = 2 then viewport.KeyboardRotate(false, -angle)   |> ignore<bool>
+        elif direction = 3 then viewport.KeyboardRotate(false, angle)    |> ignore<bool>
         view.Redraw()
 
 
@@ -19294,8 +19290,8 @@ type RhinoScriptSyntax private () =
         let mutable angle = angle
         if ApplicationSettings.ViewSettings.RotateReverseKeyboard then angle <- -angle
         let axis = viewport.CameraLocation - viewport.CameraTarget
-        if direction = 0 then viewport.Rotate(angle, axis, viewport.CameraLocation) |> ignore
-        elif direction = 1 then viewport.Rotate(-angle, axis, viewport.CameraLocation)   |> ignore
+        if direction = 0 then viewport.Rotate(angle, axis, viewport.CameraLocation) |> ignore<bool>
+        elif direction = 1 then viewport.Rotate(-angle, axis, viewport.CameraLocation)   |> ignore<bool>
         view.Redraw()
 
 
@@ -19499,9 +19495,9 @@ type RhinoScriptSyntax private () =
     static member ViewProjection(view:string, mode:int) : unit = //SET
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
-        if mode = 1 then viewport.ChangeToParallelProjection(true) |> ignore
-        elif mode = 2 then viewport.ChangeToPerspectiveProjection(true, 35.)|> ignore
-        elif mode = 3 then viewport.ChangeToTwoPointPerspectiveProjection(35.)       |> ignore
+        if mode = 1 then viewport.ChangeToParallelProjection(true) |> ignore<bool>
+        elif mode = 2 then viewport.ChangeToPerspectiveProjection(true, 35.)|> ignore<bool>
+        elif mode = 3 then viewport.ChangeToTwoPointPerspectiveProjection(35.)       |> ignore<bool>
         view.Redraw()
 
 
@@ -19541,7 +19537,7 @@ type RhinoScriptSyntax private () =
         let oldradius = min frustop frusright
         let magnificationfactor = radius / oldradius
         let d = 1.0 / magnificationfactor
-        viewport.Magnify(d, mode) |> ignore
+        viewport.Magnify(d, mode) |> ignore<bool>
         view.Redraw()
 
 
@@ -19667,7 +19663,7 @@ type RhinoScriptSyntax private () =
         let view = RhinoScriptSyntax.CoerceView(view)
         let filename = view.ActiveViewport.WallpaperFilename
         let gray = view.ActiveViewport.WallpaperGrayscale
-        view.ActiveViewport.SetWallpaper(filename, gray, not hidden) |> ignore
+        view.ActiveViewport.SetWallpaper(filename, gray, not hidden) |> ignore<bool>
         view.Redraw()
 
 
@@ -19683,10 +19679,10 @@ type RhinoScriptSyntax private () =
                                    [<OPT;DEF(false)>]all:bool) : unit =
           if all then
               let views = State.Doc.Views.GetViewList(true, true)
-              for view in views do view.ActiveViewport.ZoomBoundingBox(boundingBox) |> ignore
+              for view in views do view.ActiveViewport.ZoomBoundingBox(boundingBox) |> ignore<bool>
           else
               let view = RhinoScriptSyntax.CoerceView(view)
-              view.ActiveViewport.ZoomBoundingBox(boundingBox) |> ignore
+              view.ActiveViewport.ZoomBoundingBox(boundingBox) |> ignore<bool>
           State.Doc.Views.Redraw()
 
 
@@ -19698,10 +19694,10 @@ type RhinoScriptSyntax private () =
     static member ZoomExtents([<OPT;DEF("")>]view:string, [<OPT;DEF(false)>]all:bool) : unit =
         if  all then
             let views = State.Doc.Views.GetViewList(true, true)
-            for view in views do view.ActiveViewport.ZoomExtents()|> ignore
+            for view in views do view.ActiveViewport.ZoomExtents()|> ignore<bool>
         else
             let view = RhinoScriptSyntax.CoerceView(view)
-            view.ActiveViewport.ZoomExtents()|> ignore
+            view.ActiveViewport.ZoomExtents()|> ignore<bool>
         State.Doc.Views.Redraw()
 
 
@@ -19713,10 +19709,10 @@ type RhinoScriptSyntax private () =
     static member ZoomSelected([<OPT;DEF("")>]view:string, [<OPT;DEF(false)>]all:bool) : unit =
         if all then
             let views = State.Doc.Views.GetViewList(true, true)
-            for view in views do view.ActiveViewport.ZoomExtentsSelected()|> ignore
+            for view in views do view.ActiveViewport.ZoomExtentsSelected()|> ignore<bool>
         else
             let view = RhinoScriptSyntax.CoerceView(view)
-            view.ActiveViewport.ZoomExtentsSelected()|> ignore
+            view.ActiveViewport.ZoomExtentsSelected()|> ignore<bool>
         State.Doc.Views.Redraw()
 
 

@@ -1,14 +1,9 @@
 namespace Rhino.Scripting
 
 open Rhino
-
 open System
-
 open Rhino.Geometry
 open Rhino.ApplicationSettings
-
-
-
 
 [<AutoOpen>]
 module AutoOpenApplication =
@@ -65,7 +60,7 @@ module AutoOpenApplication =
     static member AliasMacro(alias:string, macro:string) : unit = //SET
         RhinoSync.DoSync (fun () ->
             ApplicationSettings.CommandAliasList.SetMacro(alias, macro)
-            |> ignore)
+            |> ignore<bool>)
     ///<summary>Returns an array of command alias names.</summary>
     ///<returns>(string array) an array of command alias names.</returns>
     static member AliasNames() : array<string> =
@@ -777,7 +772,8 @@ module AutoOpenApplication =
     static member StatusBarProgressMeterUpdate(position:int, [<OPT;DEF(true)>]absolute:bool) : unit =
         RhinoSync.DoSync (fun () ->
             UI.StatusBar.UpdateProgressMeter(position, absolute)
-            |> ignore)
+            |> ignore<int>
+            )
 
 
     ///<summary>Hide the progress meter.</summary>

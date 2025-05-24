@@ -261,7 +261,7 @@ module AutoOpenUtility =
     static member Polar(point:Point3d, angleDegrees:float, distance:float, [<OPT;DEF(Plane())>]plane:Plane) : Point3d =
         let angle = toRadians(angleDegrees)
         let mutable offset = plane.XAxis
-        offset.Unitize() |> ignore
+        offset.Unitize() |> ignore<bool>
         offset <- distance * offset
         let rc = point + offset
         let xForm = Transform.Rotation(angle, plane.ZAxis, point)

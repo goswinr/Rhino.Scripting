@@ -101,7 +101,7 @@ module AutoOpenLayer =
             if createLayerIfMissing then  UtilLayer.getOrCreateLayer(layer, UtilLayer.randomLayerColor, UtilLayer.ByParent, UtilLayer.ByParent, allowAllUnicode,collapseParents).Index
             else                          RhinoScriptSyntax.CoerceLayer(layer).Index
         obj.Attributes.LayerIndex <- layerIndex
-        obj.CommitChanges() |> ignore
+        obj.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the layer of multiple objects, optionally creates layer if it does not exist yet.</summary>
@@ -122,7 +122,7 @@ module AutoOpenLayer =
         for objectId in objectIds do
             let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             obj.Attributes.LayerIndex <- layerIndex
-            obj.CommitChanges() |> ignore
+            obj.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the layer of an object.</summary>
@@ -134,7 +134,7 @@ module AutoOpenLayer =
         if layerIndex < 0 || layerIndex >= State.Doc.Layers.Count then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectLayer: Setting it via index failed. bad index '%d' (max %d) on: %s " layerIndex State.Doc.Layers.Count (Pretty.str objectId)
         if State.Doc.Layers.[layerIndex].IsDeleted then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectLayer: Setting it via index failed.  index '%d' is deleted.  on: %s " layerIndex  (Pretty.str objectId)
         obj.Attributes.LayerIndex <- layerIndex
-        obj.CommitChanges() |> ignore
+        obj.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the layer of multiple objects, optionally creates layer if it does not exist yet.</summary>
@@ -147,7 +147,7 @@ module AutoOpenLayer =
         for objectId in objectIds do
             let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             obj.Attributes.LayerIndex <- layerIndex
-            obj.CommitChanges() |> ignore
+            obj.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
     ///<summary>Changes the Name of a layer if than name is yet non existing. Fails if layer exists already. Currently only ASCII characters are allowed.</summary>
@@ -462,11 +462,11 @@ module AutoOpenLayer =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         layer.IsVisible <- visible
         if visible && forcevisibleOrDonotpersist then
-            State.Doc.Layers.ForceLayerVisible(layer.Id) |> ignore
+            State.Doc.Layers.ForceLayerVisible(layer.Id) |> ignore<bool>
         if not visible && not forcevisibleOrDonotpersist then
             if layer.ParentLayerId <> Guid.Empty then
                 layer.SetPersistentVisibility(visible)
-            // layer.CommitChanges() |> ignore //obsolete !!
+            // layer.CommitChanges() |> ignore<bool> //obsolete !!
         State.Doc.Views.Redraw()
     *)
 
@@ -701,7 +701,7 @@ module AutoOpenLayer =
         let mutable nonEmptyIndex = -1
         let rec addLoop(g:Guid)=
             if g <> Guid.Empty then
-                taken.Add(g)|> ignore
+                taken.Add(g)|> ignore<bool>
                 addLoop (Layers.FindId(g).ParentLayerId) // recurse
 
         for o in State.Doc.Objects do
@@ -719,14 +719,14 @@ module AutoOpenLayer =
         //or try to set it to another one thats not empty
         elif taken.Count > 0  && taken.DoesNotContain c && nonEmptyIndex > -1 then
             // change current layer to a non empty one:
-            Layers.SetCurrentLayerIndex(nonEmptyIndex, quiet=true ) |> ignore
+            Layers.SetCurrentLayerIndex(nonEmptyIndex, quiet=true ) |> ignore<bool>
 
         // now delete them all
         for i = Layers.Count - 1 downto 0 do
             let l = Layers.[i]
             if not l.IsDeleted then
                 if taken.DoesNotContain (l.Id) then
-                    Layers.Delete(i, quiet=true) |> ignore // more than one layer might fail to delete if current layer is nested in parents
+                    Layers.Delete(i, quiet=true) |> ignore<bool> // more than one layer might fail to delete if current layer is nested in parents
                     //if i <> Layers.CurrentLayerIndex then
                     //    if not <| Layers.Delete(i, quiet=true) then
                     //        //if Layers |> Seq.filter ( fun l -> not l.IsDeleted) |> Seq.length > 1 then

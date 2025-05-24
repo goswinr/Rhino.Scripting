@@ -196,7 +196,7 @@ module AutoOpenPlane =
         if not xAxis.IsZero then
             //x axis = RhinoScriptSyntax.Coerce3dvector(x axis)
             let xAxis = Vector3d(xAxis)//prevent original x axis parameter from being unitized too
-            xAxis.Unitize() |> ignore
+            xAxis.Unitize() |> ignore<bool>
             let yAxis = Vector3d.CrossProduct(rc.Normal, xAxis)
             rc <- Plane(origin, xAxis, yAxis)
         rc

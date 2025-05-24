@@ -40,14 +40,14 @@ module AutoOpenMaterial =
         let mutable attr = rhinoObject.Attributes
         if attr.MaterialSource <> DocObjects.ObjectMaterialSource.MaterialFromObject then
             attr.MaterialSource <- DocObjects.ObjectMaterialSource.MaterialFromObject
-            State.Doc.Objects.ModifyAttributes(rhinoObject, attr, true)|> ignore
+            State.Doc.Objects.ModifyAttributes(rhinoObject, attr, true)|> ignore<bool>
             attr <- rhinoObject.Attributes
         let mutable materialindex = attr.MaterialIndex
         if materialindex> -1 then materialindex
         else
             materialindex <- State.Doc.Materials.Add()
             attr.MaterialIndex <- materialindex
-            State.Doc.Objects.ModifyAttributes(rhinoObject, attr, true)|> ignore
+            State.Doc.Objects.ModifyAttributes(rhinoObject, attr, true)|> ignore<bool>
             materialindex
 
 
@@ -100,7 +100,7 @@ module AutoOpenMaterial =
             if notNull rhobj then
                 rhobj.Attributes.MaterialIndex <- source
                 rhobj.Attributes.MaterialSource <- DocObjects.ObjectMaterialSource.MaterialFromObject
-                rhobj.CommitChanges() |> ignore
+                rhobj.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
 
@@ -127,7 +127,7 @@ module AutoOpenMaterial =
             let texture = new DocObjects.Texture()
             texture.FileName <- filename
             if not <| mat.SetTexture(texture,DocObjects.TextureType.Bump) then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
-            mat.CommitChanges() |> ignore
+            mat.CommitChanges() |> ignore<bool>
             State.Doc.Views.Redraw()
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
@@ -150,7 +150,7 @@ module AutoOpenMaterial =
         let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialColor failed.  materialIndex:'%A' color:'%A'" materialIndex color
         mat.DiffuseColor <- color
-        mat.CommitChanges() |> ignore
+        mat.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
 
@@ -175,7 +175,7 @@ module AutoOpenMaterial =
             let texture = new DocObjects.Texture()
             texture.FileName <- filename
             if not <| mat.SetTexture(texture,DocObjects.TextureType.Emap)then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialEnvironmentMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
-            mat.CommitChanges() |> ignore
+            mat.CommitChanges() |> ignore<bool>
             State.Doc.Views.Redraw()
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialEnvironmentMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
@@ -199,7 +199,7 @@ module AutoOpenMaterial =
         let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialName failed.  materialIndex:'%A' name:'%A'" materialIndex name
         mat.Name <- name
-        mat.CommitChanges() |> ignore
+        mat.CommitChanges() |> ignore<bool>
 
 
 
@@ -220,7 +220,7 @@ module AutoOpenMaterial =
         let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialReflectiveColor failed.  materialIndex:'%A' color:'%A'" materialIndex color
         mat.ReflectionColor <- color
-        mat.CommitChanges() |> ignore
+        mat.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
 
@@ -244,7 +244,7 @@ module AutoOpenMaterial =
         let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialShine failed.  materialIndex:'%A' shine:'%A'" materialIndex shine
         mat.Shine <- shine
-        mat.CommitChanges() |> ignore
+        mat.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
 
@@ -270,7 +270,7 @@ module AutoOpenMaterial =
             let texture = new DocObjects.Texture()
             texture.FileName <- filename
             if not <| mat.SetTexture(texture,DocObjects.TextureType.Bitmap) then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTexture failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
-            mat.CommitChanges() |> ignore
+            mat.CommitChanges() |> ignore<bool>
             State.Doc.Views.Redraw()
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTexture failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
@@ -295,7 +295,7 @@ module AutoOpenMaterial =
         let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTransparency failed.  materialIndex:'%A' transparency:'%A'" materialIndex transparency
         mat.Transparency <- transparency
-        mat.CommitChanges() |> ignore
+        mat.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
 
@@ -322,7 +322,7 @@ module AutoOpenMaterial =
             let texture = new DocObjects.Texture()
             texture.FileName <- filename
             if not <| mat.SetTexture(texture,DocObjects.TextureType.Transparency)then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTransparencyMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
-            mat.CommitChanges() |> ignore
+            mat.CommitChanges() |> ignore<bool>
             State.Doc.Views.Redraw()
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTransparencyMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename

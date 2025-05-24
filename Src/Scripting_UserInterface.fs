@@ -155,7 +155,7 @@ module AutoOpenUserInterface =
                 let name, off, on = item
                 let t = new Input.Custom.OptionToggle( initial, off, on )
                 toggles.Add(t)
-                go.AddOptionToggle(name, ref t) |> ignore
+                go.AddOptionToggle(name, ref t) |> ignore<int>
             let mutable getrc = go.Get()
             while getrc = Input.GetResult.Option do
                 getrc <- go.Get()
@@ -340,7 +340,7 @@ module AutoOpenUserInterface =
                 if  select then
                     for item in r do
                         let rhobj = State.Doc.Objects.FindId(t1 item)
-                        rhobj.Select(true)|> ignore
+                        rhobj.Select(true)|> ignore<int>
                     State.Doc.Views.Redraw()
                 r
         RhinoSync.DoSyncRedrawHideEditor get
@@ -498,7 +498,7 @@ module AutoOpenUserInterface =
                                 [<OPT;DEF(1)>]minCount:int,
                                 [<OPT;DEF(0)>]maxCount:int) : ResizeArray<int> =
         let get () =
-            State.Doc.Objects.UnselectAll() |> ignore
+            State.Doc.Objects.UnselectAll() |> ignore<int>
             State.Doc.Views.Redraw()
             use go = new Input.Custom.GetObject()
             go.SetCustomGeometryFilter(fun rhinoObject _ _ -> objectId = rhinoObject.Id)
@@ -531,7 +531,7 @@ module AutoOpenUserInterface =
                                     [<OPT;DEF(1)>]minCount:int,
                                     [<OPT;DEF(0)>]maxCount:int) : ResizeArray<int> =
         let get () =
-            State.Doc.Objects.UnselectAll() |> ignore
+            State.Doc.Objects.UnselectAll() |> ignore<int>
             State.Doc.Views.Redraw()
             use go = new Input.Custom.GetObject()
             go.SetCustomGeometryFilter(fun rhinoObject _ _ -> objectId = rhinoObject.Id)
@@ -566,8 +566,8 @@ module AutoOpenUserInterface =
                 gp.DrawLineFromPoint(basePoint, true)
                 gp.EnableDrawLineFromPoint(true)
                 if distance<>0.0 then gp.ConstrainDistanceFromBasePoint(distance)
-            if inPlane then gp.ConstrainToConstructionPlane(true)|> ignore
-            gp.Get() |> ignore
+            if inPlane then gp.ConstrainToConstructionPlane(true)|> ignore<bool>
+            gp.Get() |> ignore<Input.GetResult>
             if gp.CommandResult() <> Commands.Result.Success then
                 RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetPoint()"
             else
@@ -589,8 +589,8 @@ module AutoOpenUserInterface =
             let curve = RhinoScriptSyntax.CoerceCurve(curveId)
             use gp = new Input.Custom.GetPoint()
             gp.SetCommandPrompt(message)
-            gp.Constrain(curve, allowPickingPointOffObject=false) |> ignore
-            gp.Get() |> ignore
+            gp.Constrain(curve, allowPickingPointOffObject=false) |> ignore<bool>
+            gp.Get() |> ignore<Input.GetResult>
             if gp.CommandResult() <> Commands.Result.Success then
                 RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetPointOnCurve()"
             else
@@ -629,15 +629,15 @@ module AutoOpenUserInterface =
             gp.SetCommandPrompt(message)
             match RhinoScriptSyntax.CoerceGeometry surfaceId with
             | :? Surface as srf ->
-                gp.Constrain(srf, allowPickingPointOffObject=false) |> ignore
+                gp.Constrain(srf, allowPickingPointOffObject=false) |> ignore<bool>
 
             | :? Brep as brep ->
-                gp.Constrain(brep, -1, -1, allowPickingPointOffObject=false) |> ignore
+                gp.Constrain(brep, -1, -1, allowPickingPointOffObject=false) |> ignore<bool>
 
             | _ ->
                 RhinoScriptingException.Raise "RhinoScriptSyntax.GetPointOnSurface failed input is not surface or Polysurface.  surfaceId:'%s' message:'%A'" (Pretty.str surfaceId) message
 
-            gp.Get() |>ignore
+            gp.Get() |> ignore<Input.GetResult>
             if gp.CommandResult() <> Commands.Result.Success then
                 RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetPointOnSurface()"
             else
@@ -670,9 +670,9 @@ module AutoOpenUserInterface =
             if notNull message1 then gp.SetCommandPrompt(message1)
             gp.EnableDrawLineFromPoint( drawLines )
             if inPlane then
-                gp.ConstrainToConstructionPlane(true) |> ignore
+                gp.ConstrainToConstructionPlane(true) |> ignore<bool>
                 let plane = State.Doc.Views.ActiveView.ActiveViewport.ConstructionPlane()
-                gp.Constrain(plane, allowElevator=false) |> ignore
+                gp.Constrain(plane, allowElevator=false) |> ignore<bool>
             let mutable getres = gp.Get()
             if gp.CommandResult() <> Commands.Result.Success then RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetPoints()"
             else
@@ -830,7 +830,7 @@ module AutoOpenUserInterface =
             if notNull message then gs.SetCommandPrompt(message)
             if notNull defaultValString then gs.SetDefaultString(defaultValString)
             if notNull strings then
-                for s in strings do gs.AddOption(s) |> ignore
+                for s in strings do gs.AddOption(s) |> ignore<int>
             let result = gs.Get()
             if result = Input.GetResult.Cancel then
                 RhinoUserInteractionException.Raise "No text was given by user in RhinoScriptSyntax.GetString()"

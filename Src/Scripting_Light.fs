@@ -65,7 +65,7 @@ module AutoOpenLight =
         light.Width <- -light.Width
         let mutable plane = Plane(light.Location, light.Direction)
         let xAxis = plane.XAxis
-        xAxis.Unitize() |> ignore
+        xAxis.Unitize() |> ignore<bool>
         plane.XAxis <- xAxis
         light.Width <- xAxis * ( min width ( v.Length/20.0))
         //light.Location <- start - light.Direction
@@ -103,7 +103,7 @@ module AutoOpenLight =
         let length = pty-origin
         let width = ptx-origin
         let normal = Vector3d.CrossProduct(width, length)
-        normal.Unitize() |> ignore
+        normal.Unitize() |> ignore<bool>
         let light = new Light()
         light.LightStyle <- LightStyle.WorldRectangular
         light.Location <- origin

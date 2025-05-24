@@ -56,7 +56,7 @@ module AutoOpenBlock =
                 rc <- State.Doc.InstanceDefinitions.Add(name, "", basePoint, geometry, attrs)
             if rc >= 0 then
                 if deleteInput then
-                    for obj in objects do State.Doc.Objects.Delete(obj, quiet=true) |>ignore
+                    for obj in objects do State.Doc.Objects.Delete(obj, quiet=true) |> ignore<bool>
                 State.Doc.Views.Redraw()
         name
 
@@ -103,7 +103,7 @@ module AutoOpenBlock =
     static member BlockDescription(blockName:string, description:string) : unit = //SET
         let instDef = State.Doc.InstanceDefinitions.Find(blockName)
         if isNull instDef then  RhinoScriptingException.Raise "RhinoScriptSyntax.BlockDescription:'%s' does not exist in InstanceDefinitionsTable" blockName
-        State.Doc.InstanceDefinitions.Modify( instDef, instDef.Name, description, true ) |>ignore
+        State.Doc.InstanceDefinitions.Modify( instDef, instDef.Name, description, true ) |> ignore<bool>
 
 
     ///<summary>Counts number of instances of the block in the document.

@@ -337,10 +337,10 @@ module AutoOpenCurve =
             if Seq.length(weights)<>cvcount then
                 RhinoScriptingException.Raise "RhinoScriptSyntax.CreateNurbsCurve:Number of elements in weights should equal the number of elements in points.  points:'%A' knots:'%A' degree:'%A' weights:'%A'" points knots degree weights
             for i,(p, w)  in Seq.indexed (Seq.zip points weights) do
-                nc.Points.SetPoint(i, p, w) |> ignore
+                nc.Points.SetPoint(i, p, w) |> ignore<bool>
         else
             for i, p in Seq.indexed points do
-                nc.Points.SetPoint(i, p) |> ignore
+                nc.Points.SetPoint(i, p) |> ignore<bool>
         if not nc.IsValid then RhinoScriptingException.Raise "RhinoScriptSyntax.CreateNurbsCurve:Unable to create curve.  points:'%A' knots:'%A' degree:'%A' weights:'%A'" points knots degree weights
         nc
 
@@ -367,7 +367,7 @@ module AutoOpenCurve =
     ///<returns>(Guid) objectId of the new Curve object.</returns>
     static member AddPolyline(points:Point3d seq) : Guid =
         let pl = Polyline(points)
-        //pl.DeleteShortSegments(State.Doc.ModelAbsoluteTolerance) |>ignore
+        //pl.DeleteShortSegments(State.Doc.ModelAbsoluteTolerance) |> ignore<bool>
         let rc = State.Doc.Objects.AddPolyline(pl)
         if rc = Guid.Empty then
             for i,pt in Seq.indexed(points) do
@@ -390,7 +390,7 @@ module AutoOpenCurve =
             pl.[pl.Count-1] <- pl.First
         else
             pl.Add pl.First
-        //pl.DeleteShortSegments(State.Doc.ModelAbsoluteTolerance) |>ignore
+        //pl.DeleteShortSegments(State.Doc.ModelAbsoluteTolerance) |> ignore<bool>
         let rc = State.Doc.Objects.AddPolyline(pl)
         if rc = Guid.Empty then
             for i,pt in Seq.indexed(points) do
@@ -645,7 +645,7 @@ module AutoOpenCurve =
             else s <- length / curveLength
             let dupe = if not fromStart then curve.Duplicate() :?> Curve else curve
             if notNull dupe then
-                if not fromStart then  dupe.Reverse() |> ignore
+                if not fromStart then  dupe.Reverse() |> ignore<bool>
                 let rc, t = dupe.NormalizedLengthParameter(s)
                 if rc then
                     let pt = dupe.PointAt(t)
@@ -1488,7 +1488,7 @@ module AutoOpenCurve =
     static member CurveStartPoint(curveId:Guid, point:Point3d) : unit =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         if not <|curve.SetStartPoint(point) then RhinoScriptingException.Raise "RhinoScriptSyntax.CurveStartPoint failed on '%A' and '%A'" point curveId
-        State.Doc.Objects.Replace(curveId, curve) |> ignore
+        State.Doc.Objects.Replace(curveId, curve) |> ignore<bool>
         State.Doc.Views.Redraw()
 
 
@@ -1769,7 +1769,7 @@ module AutoOpenCurve =
             for piece in pieces do
                 rc.Add(State.Doc.Objects.AddCurve(piece))
             if deleteInput then
-                State.Doc.Objects.Delete(curveId, quiet=true) |>ignore
+                State.Doc.Objects.Delete(curveId, quiet=true) |> ignore<bool>
         if rc.Count>0 then  State.Doc.Views.Redraw()
         rc
 
@@ -1789,7 +1789,7 @@ module AutoOpenCurve =
                 for piece in pieces do
                     rc.Add(State.Doc.Objects.AddCurve(piece))
                 if deleteInput then
-                    State.Doc.Objects.Delete(curveId, quiet=true) |>ignore
+                    State.Doc.Objects.Delete(curveId, quiet=true) |> ignore<bool>
         if rc.Count>0 then  State.Doc.Views.Redraw()
         rc
 
@@ -2240,7 +2240,7 @@ module AutoOpenCurve =
         let rc = newCurves  |> RArr.mapSeq  State.Doc.Objects.AddCurve
         if deleteInput then
             for objectId in curveIds do
-                State.Doc.Objects.Delete(objectId, quiet=false) |> ignore
+                State.Doc.Objects.Delete(objectId, quiet=false) |> ignore<bool>
         State.Doc.Views.Redraw()
         rc
 
@@ -2502,7 +2502,7 @@ module AutoOpenCurve =
         let newCurve = curve.Rebuild(pointCount, degree, preserveTangents=false)
         if isNull newCurve then  false
         else
-            State.Doc.Objects.Replace(curveId, newCurve) |> ignore
+            State.Doc.Objects.Replace(curveId, newCurve) |> ignore<bool>
             State.Doc.Views.Redraw()
             true
 
@@ -2524,7 +2524,7 @@ module AutoOpenCurve =
                 let success = nCurve.Knots.RemoveKnotAt(nParam)
                 if not <| success then  false
                 else
-                    State.Doc.Objects.Replace(curve, nCurve)|> ignore
+                    State.Doc.Objects.Replace(curve, nCurve)|> ignore<bool>
                     State.Doc.Views.Redraw()
                     true
 
@@ -2535,7 +2535,7 @@ module AutoOpenCurve =
     static member ReverseCurve(curveId:Guid) : bool =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         if curve.Reverse() then
-            State.Doc.Objects.Replace(curveId, curve)|> ignore
+            State.Doc.Objects.Replace(curveId, curve)|> ignore<bool>
             true
         else
             false
@@ -2577,7 +2577,7 @@ module AutoOpenCurve =
         let angTol = State.Doc.ModelAngleToleranceRadians
         let newCurve = curve.Simplify(flags0, tol, angTol)
         if notNull newCurve then
-            State.Doc.Objects.Replace(curveId, newCurve)|> ignore
+            State.Doc.Objects.Replace(curveId, newCurve)|> ignore<bool>
             State.Doc.Views.Redraw()
             true
         else
@@ -2598,7 +2598,7 @@ module AutoOpenCurve =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(curveId)
         let rc =  newcurves |> RArr.mapArr (fun crv ->  State.Doc.Objects.AddCurve(crv, rhobj.Attributes) )
         if deleteInput then
-            State.Doc.Objects.Delete(curveId, quiet=true)|> ignore
+            State.Doc.Objects.Delete(curveId, quiet=true)|> ignore<bool>
         State.Doc.Views.Redraw()
         rc
 
@@ -2620,7 +2620,7 @@ module AutoOpenCurve =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(curveId)
         let rc = State.Doc.Objects.AddCurve(newCurve, rhobj.Attributes)
         if deleteInput then
-            State.Doc.Objects.Delete(curveId, quiet=true)|> ignore
+            State.Doc.Objects.Delete(curveId, quiet=true)|> ignore<bool>
         State.Doc.Views.Redraw()
         rc
 

@@ -65,14 +65,14 @@ module AutoOpenPrettyExtensions =
                     |> Array.max
                 |]
             let b = Text.StringBuilder()
-            b.AppendLine "Rhino.Geometry.Transform:"  |> ignore
+            b.AppendLine "Rhino.Geometry.Transform:"  |> ignore<Text.StringBuilder>
             for i,s in Seq.indexed vs do
                 let coli = i%4
                 let len = cols.[coli]
-                b.Append("| ")  |> ignore
-                b.Append(s.PadLeft(len,' '))  |> ignore
+                b.Append("| ")  |> ignore<Text.StringBuilder>
+                b.Append(s.PadLeft(len,' '))  |> ignore<Text.StringBuilder>
                 if coli = 3 then
-                    b.AppendLine() |> ignore
+                    b.AppendLine() |> ignore<Text.StringBuilder>
             b.ToString()
 
 

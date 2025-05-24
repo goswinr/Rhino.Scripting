@@ -40,7 +40,7 @@ module AutoOpenSelection =
             let objectIds = ResizeArray()
             for ob in es do
                 objectIds.Add ob.Id
-                if select then ob.Select(true) |> ignore   // TODO needs sync ? apparently not needed!
+                if select then ob.Select(true) |> ignore<int>   // TODO needs sync ? apparently not needed!
             if objectIds.Count > 0 && select then State.Doc.Views.Redraw()
             objectIds
 
@@ -61,7 +61,7 @@ module AutoOpenSelection =
             if not <| e.MoveNext() then RhinoScriptingException.Raise "RhinoScriptSyntax.FirstObject not found"
             let object = e.Current
             if isNull object then RhinoScriptingException.Raise "RhinoScriptSyntax.FirstObject not found(null)"
-            if select then object.Select(true) |> ignore // TODO needs sync ? apparently not needed!
+            if select then object.Select(true) |> ignore<int> // TODO needs sync ? apparently not needed!
             object.Id
 
 
@@ -84,7 +84,7 @@ module AutoOpenSelection =
                                     [<OPT;DEF(false)>]select:bool) : Guid * bool * DocObjects.SelectionMethod * Point3d * float * string =
         let get () =  // TODO Add check if already hidden, then don't even hide and show
             if not <| preselect then
-                State.Doc.Objects.UnselectAll() |> ignore
+                State.Doc.Objects.UnselectAll() |> ignore<int>
                 State.Doc.Views.Redraw()
             let go = new Input.Custom.GetObject()
             if notNull message then go.SetCommandPrompt(message)
@@ -106,9 +106,9 @@ module AutoOpenSelection =
                 let obj = go.Object(0).Object()
                 go.Dispose()
                 if not <| select && not <| preselect then
-                    State.Doc.Objects.UnselectAll()|> ignore
+                    State.Doc.Objects.UnselectAll()|> ignore<int>
                     State.Doc.Views.Redraw()
-                obj.Select(select)  |> ignore
+                obj.Select(select)  |> ignore<int>
                 (objectId, presel, selmethod, point, curveparameter, viewname)
         RhinoSync.DoSyncRedrawHideEditor get
 
@@ -138,7 +138,7 @@ module AutoOpenSelection =
                                     [<OPT;DEF(false)>]subObjects:bool) : Guid =
         let get () =
             if not  preselect then
-                State.Doc.Objects.UnselectAll() |> ignore
+                State.Doc.Objects.UnselectAll() |> ignore<int>
                 State.Doc.Views.Redraw()
             use go = new Input.Custom.GetObject()
             if notNull customFilter then go.SetCustomGeometryFilter(customFilter)
@@ -155,11 +155,11 @@ module AutoOpenSelection =
                 let obj = objref.Object()
                 //let presel = go.ObjectsWerePreselected
                 go.Dispose()
-                //if not <| select && not <| preselect then State.Doc.Objects.UnselectAll() |> ignore  State.Doc.Views.Redraw()
+                //if not <| select && not <| preselect then State.Doc.Objects.UnselectAll() |> ignore<int>  State.Doc.Views.Redraw()
                 if select then
-                    obj.Select(select)  |> ignore
+                    obj.Select(select)  |> ignore<int>
                 else
-                    State.Doc.Objects.UnselectAll() |> ignore
+                    State.Doc.Objects.UnselectAll() |> ignore<int>
                 State.Doc.Views.Redraw()
                 obj.Id
         RhinoSync.DoSyncRedrawHideEditor get
@@ -197,7 +197,7 @@ module AutoOpenSelection =
                                     [<OPT;DEF(null:Guid seq)>]objects:Guid seq) : Guid * bool * DocObjects.SelectionMethod * Point3d * string =
         let get () =
             if not <| preselect then
-                State.Doc.Objects.UnselectAll() |> ignore
+                State.Doc.Objects.UnselectAll() |> ignore<int>
                 State.Doc.Views.Redraw()
             use go = new Input.Custom.GetObject()
             if notNull objects then
@@ -224,9 +224,9 @@ module AutoOpenSelection =
                 let obj = go.Object(0).Object()
                 go.Dispose()
                 if not <| select && not <| presel then
-                    State.Doc.Objects.UnselectAll() |> ignore
+                    State.Doc.Objects.UnselectAll() |> ignore<int>
                     State.Doc.Views.Redraw()
-                obj.Select(select) |> ignore
+                obj.Select(select) |> ignore<int>
                 (objectId, presel, selmethod, point, viewname)
         RhinoSync.DoSyncRedrawHideEditor get
 
@@ -269,7 +269,7 @@ module AutoOpenSelection =
                                     [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter)  : ResizeArray<Guid> =
         let get () =
             if not <| preselect then
-                State.Doc.Objects.UnselectAll() |> ignore
+                State.Doc.Objects.UnselectAll() |> ignore<int>
                 State.Doc.Views.Redraw()
             use go = new Input.Custom.GetObject()
             if notNull objectsToSelectFrom then
@@ -288,7 +288,7 @@ module AutoOpenSelection =
                 RhinoUserInteractionException.Raise "No Object was selected in RhinoScriptSyntax.GetObjects(message=%A), Interaction result: %A" message res
             else
                 if not <| select && not <| go.ObjectsWerePreselected then
-                    State.Doc.Objects.UnselectAll() |> ignore
+                    State.Doc.Objects.UnselectAll() |> ignore<int>
                     State.Doc.Views.Redraw()
                 let rc = ResizeArray()
                 let count = go.ObjectCount
@@ -296,7 +296,7 @@ module AutoOpenSelection =
                     let objref = go.Object(i)
                     rc.Add(objref.ObjectId)
                     let obj = objref.Object()
-                    if select && notNull obj then obj.Select(select) |> ignore
+                    if select && notNull obj then obj.Select(select) |> ignore<int>
                 if printCount then PrettySetup.printfnBlue "RhinoScriptSyntax.GetObjects(...) returned %s" (RhinoScriptSyntax.ObjectDescription(rc))
                 rc
         RhinoSync.DoSyncRedrawHideEditor get
@@ -339,7 +339,7 @@ module AutoOpenSelection =
                                     [<OPT;DEF(null:Guid seq)>]objectsToSelectFrom:Guid seq) : (Guid*bool*DocObjects.SelectionMethod*Point3d*string) ResizeArray =
         let get () =
             if not <| preselect then
-                State.Doc.Objects.UnselectAll() |> ignore
+                State.Doc.Objects.UnselectAll() |> ignore<int>
                 State.Doc.Views.Redraw()
             use go = new Input.Custom.GetObject()
             if notNull objectsToSelectFrom then
@@ -356,7 +356,7 @@ module AutoOpenSelection =
                 RhinoUserInteractionException.Raise "No Object was selected in RhinoScriptSyntax.GetObjectsEx(message=%A), Interaction result: %A" message res
             else
                 if not <| select && not <| go.ObjectsWerePreselected then
-                    State.Doc.Objects.UnselectAll() |> ignore
+                    State.Doc.Objects.UnselectAll() |> ignore<int>
                     State.Doc.Views.Redraw()
                 let rc = ResizeArray()
                 let count = go.ObjectCount
@@ -369,7 +369,7 @@ module AutoOpenSelection =
                     let viewname = go.View().ActiveViewport.Name
                     rc.Add( (objectId, presel, selmethod, point, viewname))
                     let obj = objref.Object()
-                    if select && notNull obj then obj.Select(select) |> ignore
+                    if select && notNull obj then obj.Select(select) |> ignore<int>
                 if printCount then
                     rc
                     |> RArr.map ( fun (id, _, _, _, _) -> id )
@@ -418,7 +418,7 @@ module AutoOpenSelection =
                                     [<OPT;DEF(false)>]select:bool) : Guid * bool * DocObjects.SelectionMethod * Point3d * (float * float) * string =
         let get () =
             if not <| preselect then
-                State.Doc.Objects.UnselectAll() |> ignore
+                State.Doc.Objects.UnselectAll() |> ignore<int>
                 State.Doc.Views.Redraw()
             use go = new Input.Custom.GetObject()
             go.SetCommandPrompt(message)
@@ -432,7 +432,7 @@ module AutoOpenSelection =
             else
                 let objref = go.Object(0)
                 let rhobj = objref.Object()
-                rhobj.Select(select) |> ignore
+                rhobj.Select(select) |> ignore<int>
                 State.Doc.Views.Redraw()
                 let objectId = rhobj.Id
                 let prePicked = go.ObjectsWerePreselected
@@ -447,7 +447,7 @@ module AutoOpenSelection =
                 let name = view.ActiveViewport.Name
                 go.Dispose()
                 if not <| select && not <| prePicked then
-                    State.Doc.Objects.UnselectAll() |> ignore
+                    State.Doc.Objects.UnselectAll() |> ignore<int>
                     State.Doc.Views.Redraw()
                 (objectId, prePicked, selmethod, point, uv, name)
         RhinoSync.DoSyncRedrawHideEditor get
@@ -527,9 +527,9 @@ module AutoOpenSelection =
         for obj in rhobjs do
             if obj.IsSelected(false) <> 0 && obj.IsSelectable() then
                 rc.Add(obj.Id)
-                obj.Select(true) |> ignore // TODO needs sync ? apparently not needed!
+                obj.Select(true) |> ignore<int> // TODO needs sync ? apparently not needed!
             else
-                obj.Select(false) |> ignore
+                obj.Select(false) |> ignore<int>
         State.Doc.Views.Redraw()
         rc
 
@@ -551,7 +551,7 @@ module AutoOpenSelection =
                 let obj = State.Doc.Objects.Find(serialnumber)
                 if notNull obj && not <| obj.IsDeleted then
                     rc.Add(obj.Id)
-                if select then obj.Select(true) |> ignore // TODO needs sync ? apparently not needed!
+                if select then obj.Select(true) |> ignore<int> // TODO needs sync ? apparently not needed!
                 serialnumber <- serialnumber + 1u
                 if select && rc.Count > 1 then State.Doc.Views.Redraw()
             rc
@@ -580,7 +580,7 @@ module AutoOpenSelection =
         if isNull firstobj then
             RhinoScriptingException.Raise "RhinoScriptSyntax.LastObject failed.  select:'%A' includeLights:'%A' includeGrips:'%A'" select includeLights includeGrips
         if select then
-            firstobj.Select(true) |> ignore // TODO needs sync ? apparently not needed!
+            firstobj.Select(true) |> ignore<int> // TODO needs sync ? apparently not needed!
             State.Doc.Views.Redraw()
         firstobj.Id
 
@@ -609,7 +609,7 @@ module AutoOpenSelection =
         |> Option.defaultWith ( fun () -> RhinoScriptingException.Raise "RhinoScriptSyntax.NextObject not found for %A" (Pretty.str objectId))
         |> fun obj ->
             if select then
-                obj.Select(true) |> ignore // TODO needs sync ? apparently not needed!
+                obj.Select(true) |> ignore<int> // TODO needs sync ? apparently not needed!
                 State.Doc.Views.Redraw()
             obj.Id
 
@@ -645,7 +645,7 @@ module AutoOpenSelection =
                                   [<OPT;DEF(false)>]includeLights:bool) : Guid ResizeArray =
         let rhinoobjects = State.Doc.Objects.FindByDrawColor(color, includeLights)
         if select then
-            for obj in rhinoobjects do obj.Select(true)|> ignore // TODO needs sync ? apparently not needed!
+            for obj in rhinoobjects do obj.Select(true)|> ignore<int> // TODO needs sync ? apparently not needed!
             State.Doc.Views.Redraw()
         rhinoobjects |> RArr.mapSeq _.Id
 
@@ -664,7 +664,7 @@ module AutoOpenSelection =
             ResizeArray()
         else
             if select then
-                for obj in rhinoobjects do obj.Select(true) |> ignore // TODO needs sync ? apparently not needed!
+                for obj in rhinoobjects do obj.Select(true) |> ignore<int> // TODO needs sync ? apparently not needed!
                 State.Doc.Views.Redraw()
             rhinoobjects  |> RArr.mapArr _.Id
 
@@ -680,7 +680,7 @@ module AutoOpenSelection =
         if isNull rhinoobjects then ResizeArray()
         else
             if select then
-                for rhobj in rhinoobjects do rhobj.Select(true) |> ignore // TODO needs sync ? apparently not needed!
+                for rhobj in rhinoobjects do rhobj.Select(true) |> ignore<int> // TODO needs sync ? apparently not needed!
                 State.Doc.Views.Redraw()
             rhinoobjects  |> RArr.mapArr _.Id
 
@@ -710,7 +710,7 @@ module AutoOpenSelection =
         let objects = State.Doc.Objects.GetObjectList(settings)
         let ids = objects  |> RArr.mapSeq _.Id
         if ids.Count>0 && select then
-            for rhobj in objects do rhobj.Select(true) |> ignore // TODO needs sync ? apparently not needed!
+            for rhobj in objects do rhobj.Select(true) |> ignore<int> // TODO needs sync ? apparently not needed!
             State.Doc.Views.Redraw()
         ids
 
@@ -803,7 +803,7 @@ module AutoOpenSelection =
             elif objecttyp &&& geometryfilter <> DocObjects.ObjectType.None then
                 bFound <- true
             if bFound then
-                if select then object.Select(true) |> ignore // TODO needs sync ? apparently not needed!
+                if select then object.Select(true) |> ignore<int> // TODO needs sync ? apparently not needed!
                 objectIds.Add(object.Id)
         if objectIds.Count > 0 && select then State.Doc.Views.Redraw()
         objectIds
@@ -858,7 +858,7 @@ module AutoOpenSelection =
             for object in e do
                 let bbox = object.Geometry.GetBoundingBox(true)
                 if viewport.IsVisible(bbox) then
-                    if select then object.Select(true) |> ignore
+                    if select then object.Select(true) |> ignore<int>
                     objectIds.Add(object.Id)
             if objectIds.Count>0 && select then State.Doc.Views.Redraw()
             objectIds
@@ -916,7 +916,7 @@ module AutoOpenSelection =
                 for rhobjr in objects do
                     let rhobj = rhobjr.Object()
                     rc.Add(rhobj.Id)
-                    if select then rhobj.Select(true) |> ignore
+                    if select then rhobj.Select(true) |> ignore<int>
                 if select then State.Doc.Views.Redraw()
             rc
         RhinoSync.DoSyncRedrawHideEditor pick

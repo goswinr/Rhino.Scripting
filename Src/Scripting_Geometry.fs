@@ -183,12 +183,12 @@ module AutoOpenGeometry =
             if DocObjects.Font.FromQuartetProperties(qn, bold, false) |> isNull then
                 RhinoScriptingException.Raise "RhinoScriptSyntax.AddText failed. text:'%s' plane:'%s' height:'%g' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane.Pretty height font fontStyle horizontalAlignment verticalAlignment
             else
-                te.SetBold(bold)|> ignore
+                te.SetBold(bold)|> ignore<bool>
         if italic <> quartetItalicProp then
             if DocObjects.Font.FromQuartetProperties(qn, false, italic) |> isNull then
                 RhinoScriptingException.Raise "RhinoScriptSyntax.AddText failed. text:'%s' plane:'%s' height:'%g' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane.Pretty height font fontStyle horizontalAlignment verticalAlignment
             else
-                te.SetItalic(italic)|> ignore
+                te.SetItalic(italic)|> ignore<bool>
 
         te.TextHorizontalAlignment <- LanguagePrimitives.EnumOfValue horizontalAlignment
         te.TextVerticalAlignment <- LanguagePrimitives.EnumOfValue verticalAlignment
@@ -432,7 +432,7 @@ module AutoOpenGeometry =
         let curves = (rhobj.Geometry:?>TextEntity).Explode()
         let attr = rhobj.Attributes
         let rc = curves  |> RArr.mapArr ( fun curve -> State.Doc.Objects.AddCurve(curve, attr) )
-        if delete then State.Doc.Objects.Delete(rhobj, quiet=true) |>ignore
+        if delete then State.Doc.Objects.Delete(rhobj, quiet=true) |> ignore<bool>
         State.Doc.Views.Redraw()
         rc
 
@@ -521,7 +521,7 @@ module AutoOpenGeometry =
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.PointCloudHidePoints length of hidden values does not match point cloud point count"
 
-        (RhinoScriptSyntax.CoerceRhinoObject objectId).CommitChanges() |> ignore
+        (RhinoScriptSyntax.CoerceRhinoObject objectId).CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
 
@@ -548,7 +548,7 @@ module AutoOpenGeometry =
             for i, c in Seq.indexed colors do pc.[i].Color <- c
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.PointCloudPointColors length of color values does not match PointCloud point count"
-        (RhinoScriptSyntax.CoerceRhinoObject objectId).CommitChanges() |> ignore
+        (RhinoScriptSyntax.CoerceRhinoObject objectId).CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
 

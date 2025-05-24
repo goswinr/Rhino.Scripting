@@ -344,7 +344,7 @@ module AutoOpenObject =
         if vec.IsTiny() then RhinoScriptingException.Raise "RhinoScriptSyntax.MirrorObject Start and  end points are too close to each other.  objectId:'%s' startPoint:'%A' endPoint:'%A' copy:'%A'" (Pretty.str objectId) startPoint endPoint copy
         let normal = Plane.WorldXY.Normal
         let xv = Vector3d.CrossProduct(vec, normal)
-        xv.Unitize() |> ignore
+        xv.Unitize() |> ignore<bool>
         let xf = Transform.Mirror(startPoint, vec)
         let res = State.Doc.Objects.Transform(objectId, xf, not copy)
         if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.MirrorObject Cannot apply MirrorObject transform to objectId:'%s' startPoint:'%A' endPoint:'%A' copy:'%A'" (Pretty.str objectId) startPoint endPoint copy
@@ -366,7 +366,7 @@ module AutoOpenObject =
         if vec.IsTiny() then RhinoScriptingException.Raise "RhinoScriptSyntax.MirrorObjects Start and  end points are too close to each other.  objectId:'%s' startPoint:'%A' endPoint:'%A' copy:'%A'" (Pretty.str objectIds) startPoint endPoint copy
         let normal = Plane.WorldXY.Normal
         let xv = Vector3d.CrossProduct(vec, normal)
-        xv.Unitize() |> ignore
+        xv.Unitize() |> ignore<bool>
         let xf = Transform.Mirror(startPoint, vec)
         let rc = ResizeArray()
         for objectId in objectIds do
@@ -465,7 +465,7 @@ module AutoOpenObject =
         let source : DocObjects.ObjectColorSource = LanguagePrimitives.EnumOfValue source
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.Attributes.ColorSource <- source
-        rhobj.CommitChanges() |> ignore
+        rhobj.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the color source of multiple objects.</summary>
@@ -481,7 +481,7 @@ module AutoOpenObject =
         for objectId in objectIds do
             let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             rhobj.Attributes.ColorSource <- source
-            rhobj.CommitChanges() |> ignore
+            rhobj.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
 
@@ -577,7 +577,7 @@ module AutoOpenObject =
                     rhobj.Attributes.Space <- DocObjects.ActiveSpace.PageSpace
                 | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectLayout: Setting it failed, layout is not a Page view for '%s' and '%A'"  layout objectId
 
-            rhobj.CommitChanges() |> ignore
+            rhobj.CommitChanges() |> ignore<bool>
             State.Doc.Views.Redraw()
 
     ///<summary>Changes the layout or model space of an objects.</summary>
@@ -615,7 +615,7 @@ module AutoOpenObject =
                     rhobj.Attributes.ViewportId <- lay.Value.MainViewport.Id
                     rhobj.Attributes.Space <- DocObjects.ActiveSpace.PageSpace
 
-                rhobj.CommitChanges() |> ignore
+                rhobj.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
 
@@ -637,7 +637,7 @@ module AutoOpenObject =
         if newIndex <0 then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectLinetype: Setting it failed for '%A' and '%A'"  linetype objectId
         rhinoObject.Attributes.LinetypeSource <- DocObjects.ObjectLinetypeSource.LinetypeFromObject
         rhinoObject.Attributes.LinetypeIndex <- newIndex
-        rhinoObject.CommitChanges() |> ignore
+        rhinoObject.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the linetype of multiple object.</summary>
@@ -651,7 +651,7 @@ module AutoOpenObject =
             let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             rhinoObject.Attributes.LinetypeSource <- DocObjects.ObjectLinetypeSource.LinetypeFromObject
             rhinoObject.Attributes.LinetypeIndex <- newIndex
-            rhinoObject.CommitChanges() |> ignore
+            rhinoObject.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
 
@@ -679,7 +679,7 @@ module AutoOpenObject =
         if source <0 || source >3 || source = 2 then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectLinetypeSource: Setting it failed for '%A' and '%A'"  source objectId
         let source : DocObjects.ObjectLinetypeSource = LanguagePrimitives.EnumOfValue source
         rhinoObject.Attributes.LinetypeSource <- source
-        rhinoObject.CommitChanges() |> ignore
+        rhinoObject.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the linetype source of multiple objects.</summary>
@@ -696,7 +696,7 @@ module AutoOpenObject =
         for objectId in objectIds do
             let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             rhinoObject.Attributes.LinetypeSource <- source
-            rhinoObject.CommitChanges() |> ignore
+            rhinoObject.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
 
@@ -767,7 +767,7 @@ module AutoOpenObject =
         if source <0 || source >3 || source = 2 then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectMaterialSource: Setting it failed for '%A' and '%A'"  source objectId
         let source :DocObjects.ObjectMaterialSource  = LanguagePrimitives.EnumOfValue  source
         rhinoObject.Attributes.MaterialSource <- source
-        rhinoObject.CommitChanges() |> ignore
+        rhinoObject.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the rendering material source of multiple objects.</summary>
@@ -783,7 +783,7 @@ module AutoOpenObject =
         for objectId in objectIds do
             let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             rhinoObject.Attributes.MaterialSource <- source
-            rhinoObject.CommitChanges() |> ignore
+            rhinoObject.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
 
@@ -822,7 +822,7 @@ module AutoOpenObject =
         let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if RhinoScriptSyntax.IsGoodStringId( name, allowEmpty=true) then
             rhinoObject.Attributes.Name <- name
-            rhinoObject.CommitChanges() |> ignore
+            rhinoObject.CommitChanges() |> ignore<bool>
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectName: Setting it string '%s' cannot be used as Name. see RhinoScriptSyntax.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." name
 
@@ -835,7 +835,7 @@ module AutoOpenObject =
             for objectId in objectIds do
                 let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
                 rhinoObject.Attributes.Name <- name
-                rhinoObject.CommitChanges() |> ignore
+                rhinoObject.CommitChanges() |> ignore<bool>
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectName: Setting it string '%s' cannot be used as Name. see RhinoScriptSyntax.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." name
 
@@ -858,7 +858,7 @@ module AutoOpenObject =
         let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhinoObject.Attributes.PlotColorSource <- DocObjects.ObjectPlotColorSource.PlotColorFromObject
         rhinoObject.Attributes.PlotColor <- color
-        rhinoObject.CommitChanges() |> ignore
+        rhinoObject.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the print color of multiple objects.</summary>
@@ -870,7 +870,7 @@ module AutoOpenObject =
             let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             rhinoObject.Attributes.PlotColorSource <- DocObjects.ObjectPlotColorSource.PlotColorFromObject
             rhinoObject.Attributes.PlotColor <- color
-            rhinoObject.CommitChanges() |> ignore
+            rhinoObject.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
     ///<summary>Returns the print color source of an object.</summary>
@@ -896,7 +896,7 @@ module AutoOpenObject =
         let source : DocObjects.ObjectPlotColorSource = LanguagePrimitives.EnumOfValue source
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.Attributes.PlotColorSource <- source
-        rhobj.CommitChanges() |> ignore
+        rhobj.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the print color source of multiple objects.</summary>
@@ -912,7 +912,7 @@ module AutoOpenObject =
         for objectId in objectIds do
             let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             rhobj.Attributes.PlotColorSource <- source
-            rhobj.CommitChanges() |> ignore
+            rhobj.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
     ///<summary>Returns the print width of an object.</summary>
@@ -933,7 +933,7 @@ module AutoOpenObject =
         let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhinoObject.Attributes.PlotWeightSource <- DocObjects.ObjectPlotWeightSource.PlotWeightFromObject
         rhinoObject.Attributes.PlotWeight <- width
-        rhinoObject.CommitChanges() |> ignore
+        rhinoObject.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the print width of multiple objects.</summary>
@@ -947,7 +947,7 @@ module AutoOpenObject =
             let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             rhinoObject.Attributes.PlotWeightSource <- DocObjects.ObjectPlotWeightSource.PlotWeightFromObject
             rhinoObject.Attributes.PlotWeight <- width
-            rhinoObject.CommitChanges() |> ignore
+            rhinoObject.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
 
@@ -972,7 +972,7 @@ module AutoOpenObject =
     static member ObjectPrintWidthSource(objectId:Guid, source:int) : unit = //SET
         let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhinoObject.Attributes.PlotWeightSource <- LanguagePrimitives.EnumOfValue source
-        rhinoObject.CommitChanges() |> ignore
+        rhinoObject.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the print width source of multiple objects.</summary>
@@ -986,7 +986,7 @@ module AutoOpenObject =
         for objectId in objectIds do
             let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             rhinoObject.Attributes.PlotWeightSource <- LanguagePrimitives.EnumOfValue source
-            rhinoObject.CommitChanges() |> ignore
+            rhinoObject.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
 
@@ -1077,8 +1077,8 @@ module AutoOpenObject =
                             Rhino.Geometry.Transform.Identity
                     else
                         Rhino.Geometry.Transform.Identity
-                v0.Unitize()  |> ignore
-                v1.Unitize()  |> ignore
+                v0.Unitize()  |> ignore<bool>
+                v1.Unitize()  |> ignore<bool>
                 let xformRotate = Rhino.Geometry.Transform.Rotation(v0, v1, referencePts.[0])
                 xformMove * xformScale * xformRotate
 
@@ -1232,10 +1232,10 @@ module AutoOpenObject =
                     let mutable redo = false
                     let lay = State.Doc.Layers.[rhobj.Attributes.LayerIndex]
                     if rhobj.IsHidden then
-                        if forceVisible then redo <- true ; State.Doc.Objects.Show(rhobj, ignoreLayerMode=true) |> ignore
+                        if forceVisible then redo <- true ; State.Doc.Objects.Show(rhobj, ignoreLayerMode=true) |> ignore<bool>
                         else RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObject failed on hidden object %s" (Pretty.str objectId)
                     elif rhobj.IsLocked then
-                        if forceVisible then redo <- true ; State.Doc.Objects.Unlock(rhobj, ignoreLayerMode=true) |> ignore
+                        if forceVisible then redo <- true ; State.Doc.Objects.Unlock(rhobj, ignoreLayerMode=true) |> ignore<bool>
                         else RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObject failed on locked object %s" (Pretty.str objectId)
                     elif not lay.IsVisible then
                         if forceVisible then redo <- true ; UtilLayer.visibleSetTrue(lay, true)
@@ -1269,10 +1269,10 @@ module AutoOpenObject =
                         let mutable redo = false
                         let lay = State.Doc.Layers.[rhobj.Attributes.LayerIndex]
                         if rhobj.IsHidden then
-                            if forceVisible then redo <- true ; State.Doc.Objects.Show(rhobj, ignoreLayerMode=true) |> ignore
+                            if forceVisible then redo <- true ; State.Doc.Objects.Show(rhobj, ignoreLayerMode=true) |> ignore<bool>
                             else RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObjects failed on hidden object %s out of %d objects" (Pretty.str objectId) (Seq.length objectIds)
                         elif rhobj.IsLocked then
-                            if forceVisible then redo <- true ; State.Doc.Objects.Unlock(rhobj, ignoreLayerMode=true) |> ignore
+                            if forceVisible then redo <- true ; State.Doc.Objects.Unlock(rhobj, ignoreLayerMode=true) |> ignore<bool>
                             else RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObjects failed on locked object %s out of %d objects" (Pretty.str objectId) (Seq.length objectIds)
                         elif not lay.IsVisible then
                             if forceVisible then redo <- true ; UtilLayer.visibleSetTrue(lay, true)
@@ -1308,10 +1308,10 @@ module AutoOpenObject =
        frame.Origin <- origin
        frame.ZAxis <- plane.Normal
        let yAxis = referencePoint-origin
-       yAxis.Unitize() |> ignore
+       yAxis.Unitize() |> ignore<bool>
        frame.YAxis <- yAxis
        let xAxis = Vector3d.CrossProduct(frame.ZAxis, frame.YAxis)
-       xAxis.Unitize() |> ignore
+       xAxis.Unitize() |> ignore<bool>
        frame.XAxis <- xAxis
        let worldPlane = Plane.WorldXY
        let cob = Transform.ChangeBasis(worldPlane, frame)
@@ -1343,10 +1343,10 @@ module AutoOpenObject =
         frame.Origin <- origin
         frame.ZAxis <- plane.Normal
         let yAxis = referencePoint-origin
-        yAxis.Unitize() |> ignore
+        yAxis.Unitize() |> ignore<bool>
         frame.YAxis <- yAxis
         let xAxis = Vector3d.CrossProduct(frame.ZAxis, frame.YAxis)
-        xAxis.Unitize() |> ignore
+        xAxis.Unitize() |> ignore<bool>
         frame.XAxis <- xAxis
         let worldPlane = Plane.WorldXY
         let cob = Transform.ChangeBasis(worldPlane, frame)

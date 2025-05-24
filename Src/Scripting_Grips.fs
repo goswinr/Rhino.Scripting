@@ -2,15 +2,14 @@
 namespace Rhino.Scripting
 
 open Rhino
-
 open System
-
 open Rhino.Geometry
 open Rhino.Scripting.RhinoScriptingUtils
 
 
 [<AutoOpen>]
 module AutoOpenGrips =
+
   type RhinoScriptSyntax with
     //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete)
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file.
@@ -49,7 +48,7 @@ module AutoOpenGrips =
                                  [<OPT;DEF(false)>]select:bool) : Guid * int * Point3d =
         let get () =
             if not preselect then
-                State.Doc.Objects.UnselectAll() |> ignore
+                State.Doc.Objects.UnselectAll() |> ignore<int>
                 State.Doc.Views.Redraw()
             let grip = ref null
             let rc = Input.RhinoGet.GetGrip(grip, message)
@@ -58,7 +57,7 @@ module AutoOpenGrips =
                 RhinoScriptingException.Raise "RhinoScriptSyntax.GetObjectGrip User failed to select a Grip for : %s " message
             else
                 if select then
-                    grip.Select(true, true)|> ignore
+                    grip.Select(true, true)|> ignore<int>
                     State.Doc.Views.Redraw()
                 (grip.OwnerId, grip.Index, grip.CurrentLocation)
         RhinoSync.DoSyncRedrawHideEditor get
@@ -80,7 +79,7 @@ module AutoOpenGrips =
                                   [<OPT;DEF(false)>]select:bool) : ResizeArray<Guid * int * Point3d> =
         let get () =
             if not preselect then
-                State.Doc.Objects.UnselectAll() |> ignore
+                State.Doc.Objects.UnselectAll() |> ignore<int>
                 State.Doc.Views.Redraw()
             let grips = ref null
             let re = Input.RhinoGet.GetGrips(grips, message)
@@ -92,7 +91,7 @@ module AutoOpenGrips =
                     let index = grip.Index
                     let location = grip.CurrentLocation
                     rc.Add((objectId, index, location))
-                    if select then grip.Select(true, true)|>ignore
+                    if select then grip.Select(true, true)|> ignore<int>
                 if select then State.Doc.Views.Redraw()
             rc
         RhinoSync.DoSyncRedrawHideEditor get
@@ -114,7 +113,7 @@ module AutoOpenGrips =
                     else
                         grip.NeighborGrip(0, i, 0, wrap=false)
                 if notNull ng && enable then
-                    ng.Select(true) |> ignore // TODO needs sync ? apparently not needed!
+                    ng.Select(true) |> ignore<int> // TODO needs sync ? apparently not needed!
                     State.Doc.Views.Redraw()
                 Ok ng
 
@@ -172,7 +171,7 @@ module AutoOpenGrips =
             RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripLocation failed.  objectId:'%s' index:'%A' point:'%A'" (Pretty.str objectId) index point
         let grip = grips.[index]
         grip.CurrentLocation <-  point
-        State.Doc.Objects.GripUpdate(rhobj, true)|> ignore
+        State.Doc.Objects.GripUpdate(rhobj, true)|> ignore<DocObjects.RhinoObject>
         State.Doc.Views.Redraw()
 
 
@@ -207,7 +206,7 @@ module AutoOpenGrips =
         if Seq.length(points) = Seq.length(grips) then
             for pt, grip in Seq.zip points grips do
                 grip.CurrentLocation <- pt
-            State.Doc.Objects.GripUpdate(rhobj, true)|> ignore
+            State.Doc.Objects.GripUpdate(rhobj, true)|> ignore<DocObjects.RhinoObject>
             State.Doc.Views.Redraw()
 
 

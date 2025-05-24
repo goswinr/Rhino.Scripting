@@ -215,23 +215,23 @@ module AutoOpenSurface =
             for i = 0 to pu - 1 do
                 for j = 0 to pv - 1 do
                     let cp = ControlPoint(points.[index], weights.[index])
-                    controlpoints.SetControlPoint(i, j, cp)|> ignore
+                    controlpoints.SetControlPoint(i, j, cp)|> ignore<bool>
                     index <- index + 1
         else
             for i = 0 to pu - 1 do
                 for j = 0 to pv - 1 do
                     let cp = ControlPoint(points.[index])
-                    controlpoints.SetControlPoint(i, j, cp)|> ignore
+                    controlpoints.SetControlPoint(i, j, cp)|> ignore<bool>
                     index <- index + 1
         index <- 0
         for i = 0 to pu - 1 do
             for j = 0 to pv - 1 do
                 if notNull weights then
                     let cp = ControlPoint(points.[index], weights.[index])
-                    controlpoints.SetControlPoint(i, j, cp)|> ignore
+                    controlpoints.SetControlPoint(i, j, cp)|> ignore<bool>
                 else
                     let cp = ControlPoint(points.[index])
-                    controlpoints.SetControlPoint(i, j, cp)|> ignore
+                    controlpoints.SetControlPoint(i, j, cp)|> ignore<bool>
                 index <- index + 1
 
         //add the knots
@@ -758,8 +758,8 @@ module AutoOpenSurface =
         if newbreps|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.BooleanDifference failed.  input0:'%A' input1:'%A' deleteInput:'%A'" input0 input1 deleteInput
         let rc  = newbreps |> RArr.mapArr State.Doc.Objects.AddBrep
         if deleteInput then
-            for objectId in input0 do State.Doc.Objects.Delete(objectId, true)|> ignore
-            for objectId in input1 do State.Doc.Objects.Delete(objectId, true)|> ignore
+            for objectId in input0 do State.Doc.Objects.Delete(objectId, true)|> ignore<bool>
+            for objectId in input1 do State.Doc.Objects.Delete(objectId, true)|> ignore<bool>
         State.Doc.Views.Redraw()
         rc
 
@@ -782,8 +782,8 @@ module AutoOpenSurface =
         if newbreps|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.BooleanIntersection failed.  input0:'%A' input1:'%A' deleteInput:'%A'" input0 input1 deleteInput
         let rc  = newbreps |> RArr.mapArr State.Doc.Objects.AddBrep
         if deleteInput then
-            for objectId in input0 do State.Doc.Objects.Delete(objectId, true)|> ignore
-            for objectId in input1 do State.Doc.Objects.Delete(objectId, true)|> ignore
+            for objectId in input0 do State.Doc.Objects.Delete(objectId, true)|> ignore<bool>
+            for objectId in input1 do State.Doc.Objects.Delete(objectId, true)|> ignore<bool>
         State.Doc.Views.Redraw()
         rc
 
@@ -803,7 +803,7 @@ module AutoOpenSurface =
         if newbreps|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.BooleanUnion failed.  input:'%A' deleteInput:'%A'" input deleteInput
         let rc  = newbreps |> RArr.mapArr State.Doc.Objects.AddBrep
         if  deleteInput then
-            for objectId in input do State.Doc.Objects.Delete(objectId, true)|> ignore
+            for objectId in input do State.Doc.Objects.Delete(objectId, true)|> ignore<bool>
         State.Doc.Views.Redraw()
         rc
 
@@ -942,7 +942,7 @@ module AutoOpenSurface =
         let edge = surface.ClosestSide(parameter|> fst, parameter|> snd)
         let newsrf = surface.Extend(edge, length, smooth)
         if notNull newsrf then
-            State.Doc.Objects.Replace(surfaceId, newsrf)|> ignore
+            State.Doc.Objects.Replace(surfaceId, newsrf)|> ignore<bool>
             State.Doc.Views.Redraw()
         else
             ()
@@ -963,7 +963,7 @@ module AutoOpenSurface =
                     let copyface = brep.Faces.[i].DuplicateFace(false)
                     let faceid = State.Doc.Objects.AddBrep(copyface)
                     if faceid <> Guid.Empty then ids.Add(faceid)
-                if  deleteInput then State.Doc.Objects.Delete(objectId, true) |> ignore
+                if  deleteInput then State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
         State.Doc.Views.Redraw()
         ids
 
@@ -1028,7 +1028,7 @@ module AutoOpenSurface =
             rc.Add(objectId)
         if copy then
             for index in faceIndices do brep.Faces.RemoveAt(index)
-            State.Doc.Objects.Replace(objectId, brep)|> ignore
+            State.Doc.Objects.Replace(objectId, brep)|> ignore<bool>
         State.Doc.Views.Redraw()
         rc
 
@@ -1153,7 +1153,7 @@ module AutoOpenSurface =
         let oldreverse = face.OrientationIsReversed
         if brep.IsSolid = false && oldreverse <> flip then
             brep.Flip()
-            State.Doc.Objects.Replace(surfaceId, brep)|> ignore
+            State.Doc.Objects.Replace(surfaceId, brep)|> ignore<bool>
             State.Doc.Views.Redraw()
 
     ///<summary>Changes the normal direction of multiple Surface. This feature can
@@ -1170,7 +1170,7 @@ module AutoOpenSurface =
             let oldreverse = face.OrientationIsReversed
             if brep.IsSolid = false && oldreverse <> flip then
                 brep.Flip()
-                State.Doc.Objects.Replace(surfaceId, brep)|> ignore
+                State.Doc.Objects.Replace(surfaceId, brep)|> ignore<bool>
         State.Doc.Views.Redraw()
 
 
@@ -1513,7 +1513,7 @@ module AutoOpenSurface =
         if  deleteInput then
             for objectId in objectIds do
                 //id = RhinoScriptSyntax.CoerceGuid(objectId)
-                State.Doc.Objects.Delete(objectId, true) |> ignore
+                State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
         State.Doc.Views.Redraw()
         rc
 
@@ -1534,7 +1534,7 @@ module AutoOpenSurface =
         if newsurf|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MakeSurfacePeriodic failed.  surfaceId:'%s' direction:'%A' deleteInput:'%A'" (Pretty.str surfaceId) direction deleteInput
         //id = RhinoScriptSyntax.CoerceGuid(surfaceId)
         if deleteInput then
-            State.Doc.Objects.Replace(surfaceId, newsurf)|> ignore
+            State.Doc.Objects.Replace(surfaceId, newsurf)|> ignore<bool>
             State.Doc.Views.Redraw()
             surfaceId
         else
@@ -1589,7 +1589,7 @@ module AutoOpenSurface =
         let curves = Curve.PullToBrepFace(curve, brep.Faces.[0], tol)
         let rc  = curves |> RArr.mapArr State.Doc.Objects.AddCurve
         if deleteInput  then
-            State.Doc.Objects.Delete(crvobj, true) |> ignore
+            State.Doc.Objects.Delete(crvobj, true) |> ignore<bool>
         State.Doc.Views.Redraw()
         rc
 
@@ -1640,7 +1640,7 @@ module AutoOpenSurface =
                 let success = knots.RemoveKnotsAt(nuparam, nvparam)
                 if not success then false
                 else
-                    State.Doc.Objects.Replace(surface, nsrf)|> ignore
+                    State.Doc.Objects.Replace(surface, nsrf)|> ignore<bool>
                     State.Doc.Views.Redraw()
                     true
 
@@ -1657,10 +1657,10 @@ module AutoOpenSurface =
         let brep = RhinoScriptSyntax.CoerceBrep(surfaceId)
         if brep.Faces.Count <> 1 then RhinoScriptingException.Raise "RhinoScriptSyntax.ReverseSurface failed.  surfaceId:'%s' direction:'%A'" (Pretty.str surfaceId) direction
         let face = brep.Faces.[0]
-        if direction &&& 1 <> 0 then            face.Reverse(0, true)|> ignore
-        if direction &&& 2 <> 0 then            face.Reverse(1, true)|> ignore
-        if direction &&& 4 <> 0 then            face.Transpose(true) |> ignore
-        State.Doc.Objects.Replace(surfaceId, brep)|> ignore
+        if direction &&& 1 <> 0 then            face.Reverse(0, true)|> ignore<Surface>
+        if direction &&& 2 <> 0 then            face.Reverse(1, true)|> ignore<Surface>
+        if direction &&& 4 <> 0 then            face.Transpose(true) |> ignore<Surface>
+        State.Doc.Objects.Replace(surfaceId, brep)|> ignore<bool>
         State.Doc.Views.Redraw()
 
 
@@ -1729,7 +1729,7 @@ module AutoOpenSurface =
             State.Doc.Views.Redraw()
             rc
         else
-            State.Doc.Objects.Replace(objectId, brep)|> ignore
+            State.Doc.Objects.Replace(objectId, brep)|> ignore<bool>
             State.Doc.Views.Redraw()
             objectId
 
@@ -1751,7 +1751,7 @@ module AutoOpenSurface =
         if isNull pieces then RhinoScriptingException.Raise "RhinoScriptSyntax.SplitBrep failed.  brepId:'%s' cutterId:'%s' deleteInput:'%A'" (Pretty.str brepId) (Pretty.str cutterId) deleteInput
         if deleteInput then
             //brepId = RhinoScriptSyntax.CoerceGuid(brepId)
-            State.Doc.Objects.Delete(brepId, true) |> ignore
+            State.Doc.Objects.Delete(brepId, true) |> ignore<bool>
         let rc  = pieces |> RArr.mapArr State.Doc.Objects.AddBrep
         State.Doc.Views.Redraw()
         rc
@@ -2089,17 +2089,17 @@ module AutoOpenSurface =
         | :?  DocObjects.BrepObject as rhinoObject ->
                 let dens = if density<0 then -1 else density
                 rhinoObject.Attributes.WireDensity <- dens
-                rhinoObject.CommitChanges() |> ignore
+                rhinoObject.CommitChanges() |> ignore<bool>
                 State.Doc.Views.Redraw()
         | :?  DocObjects.SurfaceObject as rhinoObject ->
                 let dens = if density<0 then -1 else density
                 rhinoObject.Attributes.WireDensity <- dens
-                rhinoObject.CommitChanges() |> ignore
+                rhinoObject.CommitChanges() |> ignore<bool>
                 State.Doc.Views.Redraw()
         | :?  DocObjects.ExtrusionObject as rhinoObject ->
                 let dens = if density<0 then -1 else density
                 rhinoObject.Attributes.WireDensity <- dens
-                rhinoObject.CommitChanges() |> ignore
+                rhinoObject.CommitChanges() |> ignore<bool>
                 State.Doc.Views.Redraw()
         | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceIsocurveDensity Get failed.  surfaceId:'%s' density:'%A'" (Pretty.str surfaceId) density
 
@@ -2121,15 +2121,15 @@ module AutoOpenSurface =
             | :?  DocObjects.BrepObject as rhinoObject ->
                     let dens = if density<0 then -1 else density
                     rhinoObject.Attributes.WireDensity <- dens
-                    rhinoObject.CommitChanges() |> ignore
+                    rhinoObject.CommitChanges() |> ignore<bool>
             | :?  DocObjects.SurfaceObject as rhinoObject ->
                     let dens = if density<0 then -1 else density
                     rhinoObject.Attributes.WireDensity <- dens
-                    rhinoObject.CommitChanges() |> ignore
+                    rhinoObject.CommitChanges() |> ignore<bool>
             | :?  DocObjects.ExtrusionObject as rhinoObject ->
                     let dens = if density<0 then -1 else density
                     rhinoObject.Attributes.WireDensity <- dens
-                    rhinoObject.CommitChanges() |> ignore
+                    rhinoObject.CommitChanges() |> ignore<bool>
             | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceIsocurveDensity Get failed.  surfaceId:'%s' density:'%A'" (Pretty.str surfaceId) density
         State.Doc.Views.Redraw()
 
@@ -2371,7 +2371,7 @@ module AutoOpenSurface =
             let rc = ResizeArray()
             for i = 0 to breps.Length - 1 do
                 if i = 0 then
-                    State.Doc.Objects.Replace(objectId, breps.[i]) |> ignore
+                    State.Doc.Objects.Replace(objectId, breps.[i]) |> ignore<bool>
                     rc.Add(objectId)
                 else
                     rc.Add(State.Doc.Objects.AddBrep(breps.[i], attrs))
@@ -2399,7 +2399,7 @@ module AutoOpenSurface =
             let rc = ResizeArray()
             for i = 0 to breps.Length - 1 do
                 if i = 0 then
-                    State.Doc.Objects.Replace(objectId, breps.[i]) |> ignore
+                    State.Doc.Objects.Replace(objectId, breps.[i]) |> ignore<bool>
                     rc.Add(objectId)
                 else
                     rc.Add(State.Doc.Objects.AddBrep(breps.[i], attrs))
@@ -2427,7 +2427,7 @@ module AutoOpenSurface =
         let newsurface = surface.Trim(u, v)
         if notNull newsurface then
             let rc = State.Doc.Objects.AddSurface(newsurface)
-            if deleteInput then  State.Doc.Objects.Delete(surfaceId, true) |> ignore
+            if deleteInput then  State.Doc.Objects.Delete(surfaceId, true) |> ignore<bool>
             State.Doc.Views.Redraw()
             rc
         else
@@ -2450,7 +2450,7 @@ module AutoOpenSurface =
         let newsurface = surface.Trim(u, v)
         if notNull newsurface then
             let rc = State.Doc.Objects.AddSurface(newsurface)
-            if deleteInput then  State.Doc.Objects.Delete(surfaceId, true) |> ignore
+            if deleteInput then  State.Doc.Objects.Delete(surfaceId, true) |> ignore<bool>
             State.Doc.Views.Redraw()
             rc
         else
@@ -2478,7 +2478,7 @@ module AutoOpenSurface =
         let newsurface = surface.Trim(u, v)
         if notNull newsurface then
             let rc = State.Doc.Objects.AddSurface(newsurface)
-            if deleteInput then  State.Doc.Objects.Delete(surfaceId, true) |> ignore
+            if deleteInput then  State.Doc.Objects.Delete(surfaceId, true) |> ignore<bool>
             State.Doc.Views.Redraw()
             rc
         else

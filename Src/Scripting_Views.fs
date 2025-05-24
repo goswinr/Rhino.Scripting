@@ -154,7 +154,7 @@ module AutoOpenViews =
             with _ ->  RhinoScriptingException.Raise "RhinoScriptSyntax.DetailLock: Setting it failed. detailId is a %s  lock:'%A'" (Pretty.str detailId)  lock
         if lock <> detail.DetailGeometry.IsProjectionLocked then
             detail.DetailGeometry.IsProjectionLocked <- lock
-            detail.CommitChanges() |> ignore
+            detail.CommitChanges() |> ignore<bool>
 
 
 
@@ -175,7 +175,7 @@ module AutoOpenViews =
         let modelUnits = State.Doc.ModelUnitSystem
         let pageUnits = State.Doc.PageUnitSystem
         if detail.DetailGeometry.SetScale(modelLength, modelUnits, pageLength, pageUnits) then
-            detail.CommitChanges() |> ignore
+            detail.CommitChanges() |> ignore<bool>
             State.Doc.Views.Redraw()
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.DetailScale failed.  detailId:'%s' modelLength:'%A' pageLength:'%A'" (Pretty.str detailId) modelLength pageLength
@@ -399,10 +399,10 @@ module AutoOpenViews =
         let viewport = view.ActiveViewport
         let mutable angle =  RhinoMath.ToRadians( abs(angle))
         if ApplicationSettings.ViewSettings.RotateReverseKeyboard then angle <- -angle
-        if direction = 0 then viewport.KeyboardRotate(true, angle)       |> ignore
-        elif direction = 1 then viewport.KeyboardRotate(true, -angle)    |> ignore
-        elif direction = 2 then viewport.KeyboardRotate(false, -angle)   |> ignore
-        elif direction = 3 then viewport.KeyboardRotate(false, angle)    |> ignore
+        if direction = 0 then viewport.KeyboardRotate(true, angle)       |> ignore<bool>
+        elif direction = 1 then viewport.KeyboardRotate(true, -angle)    |> ignore<bool>
+        elif direction = 2 then viewport.KeyboardRotate(false, -angle)   |> ignore<bool>
+        elif direction = 3 then viewport.KeyboardRotate(false, angle)    |> ignore<bool>
         view.Redraw()
 
 
@@ -506,8 +506,8 @@ module AutoOpenViews =
         let mutable angle = angle
         if ApplicationSettings.ViewSettings.RotateReverseKeyboard then angle <- -angle
         let axis = viewport.CameraLocation - viewport.CameraTarget
-        if direction = 0 then viewport.Rotate(angle, axis, viewport.CameraLocation) |> ignore
-        elif direction = 1 then viewport.Rotate(-angle, axis, viewport.CameraLocation)   |> ignore
+        if direction = 0 then viewport.Rotate(angle, axis, viewport.CameraLocation) |> ignore<bool>
+        elif direction = 1 then viewport.Rotate(-angle, axis, viewport.CameraLocation)   |> ignore<bool>
         view.Redraw()
 
 
@@ -711,9 +711,9 @@ module AutoOpenViews =
     static member ViewProjection(view:string, mode:int) : unit = //SET
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
-        if mode = 1 then viewport.ChangeToParallelProjection(true) |> ignore
-        elif mode = 2 then viewport.ChangeToPerspectiveProjection(true, 35.)|> ignore
-        elif mode = 3 then viewport.ChangeToTwoPointPerspectiveProjection(35.)       |> ignore
+        if mode = 1 then viewport.ChangeToParallelProjection(true) |> ignore<bool>
+        elif mode = 2 then viewport.ChangeToPerspectiveProjection(true, 35.)|> ignore<bool>
+        elif mode = 3 then viewport.ChangeToTwoPointPerspectiveProjection(35.)       |> ignore<bool>
         view.Redraw()
 
 
@@ -753,7 +753,7 @@ module AutoOpenViews =
         let oldradius = min frustop frusright
         let magnificationfactor = radius / oldradius
         let d = 1.0 / magnificationfactor
-        viewport.Magnify(d, mode) |> ignore
+        viewport.Magnify(d, mode) |> ignore<bool>
         view.Redraw()
 
 
@@ -879,7 +879,7 @@ module AutoOpenViews =
         let view = RhinoScriptSyntax.CoerceView(view)
         let filename = view.ActiveViewport.WallpaperFilename
         let gray = view.ActiveViewport.WallpaperGrayscale
-        view.ActiveViewport.SetWallpaper(filename, gray, not hidden) |> ignore
+        view.ActiveViewport.SetWallpaper(filename, gray, not hidden) |> ignore<bool>
         view.Redraw()
 
 
@@ -895,10 +895,10 @@ module AutoOpenViews =
                                    [<OPT;DEF(false)>]all:bool) : unit =
           if all then
               let views = State.Doc.Views.GetViewList(true, true)
-              for view in views do view.ActiveViewport.ZoomBoundingBox(boundingBox) |> ignore
+              for view in views do view.ActiveViewport.ZoomBoundingBox(boundingBox) |> ignore<bool>
           else
               let view = RhinoScriptSyntax.CoerceView(view)
-              view.ActiveViewport.ZoomBoundingBox(boundingBox) |> ignore
+              view.ActiveViewport.ZoomBoundingBox(boundingBox) |> ignore<bool>
           State.Doc.Views.Redraw()
 
 
@@ -910,10 +910,10 @@ module AutoOpenViews =
     static member ZoomExtents([<OPT;DEF("")>]view:string, [<OPT;DEF(false)>]all:bool) : unit =
         if  all then
             let views = State.Doc.Views.GetViewList(true, true)
-            for view in views do view.ActiveViewport.ZoomExtents()|> ignore
+            for view in views do view.ActiveViewport.ZoomExtents()|> ignore<bool>
         else
             let view = RhinoScriptSyntax.CoerceView(view)
-            view.ActiveViewport.ZoomExtents()|> ignore
+            view.ActiveViewport.ZoomExtents()|> ignore<bool>
         State.Doc.Views.Redraw()
 
 
@@ -925,10 +925,10 @@ module AutoOpenViews =
     static member ZoomSelected([<OPT;DEF("")>]view:string, [<OPT;DEF(false)>]all:bool) : unit =
         if all then
             let views = State.Doc.Views.GetViewList(true, true)
-            for view in views do view.ActiveViewport.ZoomExtentsSelected()|> ignore
+            for view in views do view.ActiveViewport.ZoomExtentsSelected()|> ignore<bool>
         else
             let view = RhinoScriptSyntax.CoerceView(view)
-            view.ActiveViewport.ZoomExtentsSelected()|> ignore
+            view.ActiveViewport.ZoomExtentsSelected()|> ignore<bool>
         State.Doc.Views.Redraw()
 
 

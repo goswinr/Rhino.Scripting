@@ -2,9 +2,7 @@
 namespace Rhino.Scripting
 
 open Rhino
-
 open System
-
 open Rhino.Geometry
 open Rhino.Scripting.RhinoScriptingUtils
 
@@ -21,31 +19,31 @@ module AutoOpenHatch =
 
     static member private InitHatchPatterns() : unit = // TODO, optimize so that this init is ony done once ?
         if isNull <| State.Doc.HatchPatterns.FindName(DocObjects.HatchPattern.Defaults.Solid.Name) then
-            State.Doc.HatchPatterns.Add(DocObjects.HatchPattern.Defaults.Solid) |> ignore
+            State.Doc.HatchPatterns.Add(DocObjects.HatchPattern.Defaults.Solid) |> ignore<int>
 
         if isNull <| State.Doc.HatchPatterns.FindName(DocObjects.HatchPattern.Defaults.Hatch1.Name) then
-            State.Doc.HatchPatterns.Add(DocObjects.HatchPattern.Defaults.Hatch1)|> ignore
+            State.Doc.HatchPatterns.Add(DocObjects.HatchPattern.Defaults.Hatch1)|> ignore<int>
 
         if isNull <| State.Doc.HatchPatterns.FindName(DocObjects.HatchPattern.Defaults.Hatch2.Name) then
-            State.Doc.HatchPatterns.Add(DocObjects.HatchPattern.Defaults.Hatch2)|> ignore
+            State.Doc.HatchPatterns.Add(DocObjects.HatchPattern.Defaults.Hatch2)|> ignore<int>
 
         if isNull <| State.Doc.HatchPatterns.FindName(DocObjects.HatchPattern.Defaults.Hatch3.Name) then
-            State.Doc.HatchPatterns.Add(DocObjects.HatchPattern.Defaults.Hatch3)|> ignore
+            State.Doc.HatchPatterns.Add(DocObjects.HatchPattern.Defaults.Hatch3)|> ignore<int>
 
         if isNull <| State.Doc.HatchPatterns.FindName(DocObjects.HatchPattern.Defaults.Dash.Name) then
-            State.Doc.HatchPatterns.Add(DocObjects.HatchPattern.Defaults.Dash)|> ignore
+            State.Doc.HatchPatterns.Add(DocObjects.HatchPattern.Defaults.Dash)|> ignore<int>
 
         if isNull <| State.Doc.HatchPatterns.FindName(DocObjects.HatchPattern.Defaults.Grid.Name) then
-            State.Doc.HatchPatterns.Add(DocObjects.HatchPattern.Defaults.Grid)|> ignore
+            State.Doc.HatchPatterns.Add(DocObjects.HatchPattern.Defaults.Grid)|> ignore<int>
 
         if isNull <| State.Doc.HatchPatterns.FindName(DocObjects.HatchPattern.Defaults.Grid60.Name) then
-            State.Doc.HatchPatterns.Add(DocObjects.HatchPattern.Defaults.Grid60)|> ignore
+            State.Doc.HatchPatterns.Add(DocObjects.HatchPattern.Defaults.Grid60)|> ignore<int>
 
         if isNull <| State.Doc.HatchPatterns.FindName(DocObjects.HatchPattern.Defaults.Plus.Name) then
-            State.Doc.HatchPatterns.Add(DocObjects.HatchPattern.Defaults.Plus)|> ignore
+            State.Doc.HatchPatterns.Add(DocObjects.HatchPattern.Defaults.Plus)|> ignore<int>
 
         if isNull <| State.Doc.HatchPatterns.FindName(DocObjects.HatchPattern.Defaults.Squares.Name) then
-            State.Doc.HatchPatterns.Add(DocObjects.HatchPattern.Defaults.Squares)|> ignore
+            State.Doc.HatchPatterns.Add(DocObjects.HatchPattern.Defaults.Squares)|> ignore<int>
 
 
 
@@ -214,7 +212,7 @@ module AutoOpenHatch =
                 let g = State.Doc.Objects.AddBrep(c, attr)
                 if g<>Guid.Empty then rc.Add(g)
             | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.ExplodeHatch: drawing of %A objects after exploding not implemented" piece.ObjectType //TODO test with hatch patterns that have points
-        if delete then State.Doc.Objects.Delete(rhobj)|> ignore
+        if delete then State.Doc.Objects.Delete(rhobj)|> ignore<bool>
         rc
 
 
@@ -237,7 +235,7 @@ module AutoOpenHatch =
         let newPattern = State.Doc.HatchPatterns.FindName(hatchPattern)
         if newPattern|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.HatchPattern failed.  hatchId:'%s' hatchPattern:'%A'" (Pretty.str hatchId) hatchPattern
         hatchObj.HatchGeometry.PatternIndex <- newPattern.Index
-        hatchObj.CommitChanges() |> ignore
+        hatchObj.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
     ///<summary>Changes multiple Hatch objects's Hatch pattern.</summary>
@@ -252,7 +250,7 @@ module AutoOpenHatch =
             let newPattern = State.Doc.HatchPatterns.FindName(hatchPattern)
             if newPattern|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.HatchPattern failed.  hatchId:'%s' hatchPattern:'%A'" (Pretty.str hatchId) hatchPattern
             hatchObj.HatchGeometry.PatternIndex <- newPattern.Index
-            hatchObj.CommitChanges() |> ignore
+            hatchObj.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
 
@@ -321,7 +319,7 @@ module AutoOpenHatch =
         if rotation <> rc then
             let rotation = RhinoMath.ToRadians(rotation)
             hatchObj.HatchGeometry.PatternRotation <- rotation
-            hatchObj.CommitChanges() |> ignore
+            hatchObj.CommitChanges() |> ignore<bool>
             State.Doc.Views.Redraw()
 
     ///<summary>Modifies the rotation applied to the Hatch pattern when
@@ -337,7 +335,7 @@ module AutoOpenHatch =
             if rotation <> rc then
                 let rotation = RhinoMath.ToRadians(rotation)
                 hatchObj.HatchGeometry.PatternRotation <- rotation
-                hatchObj.CommitChanges() |> ignore
+                hatchObj.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
 
@@ -360,7 +358,7 @@ module AutoOpenHatch =
         let rc = hatchObj.HatchGeometry.PatternScale
         if scale <> rc then
             hatchObj.HatchGeometry.PatternScale <- scale
-            hatchObj.CommitChanges() |> ignore
+            hatchObj.CommitChanges() |> ignore<bool>
             State.Doc.Views.Redraw()
 
     ///<summary>Modifies the scale applied to the Hatch pattern when it is
@@ -374,7 +372,7 @@ module AutoOpenHatch =
             let rc = hatchObj.HatchGeometry.PatternScale
             if scale <> rc then
                 hatchObj.HatchGeometry.PatternScale <- scale
-                hatchObj.CommitChanges() |> ignore
+                hatchObj.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
 

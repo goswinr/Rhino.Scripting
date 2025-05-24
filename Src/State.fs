@@ -78,9 +78,9 @@ type internal State private () =
             // | :? RhinoSyncException -> warnAboutFailedEventSetup()
             | e ->
                 //raise e
-                sprintf "%A" e
-                |>! RhinoApp.WriteLine
-                |> eprintfn "%s"
+                let txt = sprintf "%A" e
+                RhinoApp.WriteLine txt
+                eprintfn "%s" txt
 
 
     static let initState()=

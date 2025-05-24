@@ -36,14 +36,14 @@ module AutoOpenMesh =
                            [<OPT;DEF(null:Drawing.Color seq)>]vertexColors:Drawing.Color seq) : Guid =
         let mesh = new Mesh()
         for pt in vertices do
-            mesh.Vertices.Add(pt) |> ignore
+            mesh.Vertices.Add(pt) |> ignore<int>
 
         for face in faceVertices do
             let l = Seq.length(face)
             if l = 3 then
-                mesh.Faces.AddFace(face.[0], face.[1], face.[2]) |> ignore
+                mesh.Faces.AddFace(face.[0], face.[1], face.[2]) |> ignore<int>
             elif l = 4 then
-                mesh.Faces.AddFace(face.[0], face.[1], face.[2], face.[3]) |> ignore
+                mesh.Faces.AddFace(face.[0], face.[1], face.[2], face.[3]) |> ignore<int>
             else
                 RhinoScriptingException.Raise "RhinoScriptSyntax.AddMesh: Expected 3 or 4 indices for a face but got %d" l
 
@@ -52,14 +52,14 @@ module AutoOpenMesh =
             let normals = Array.zeroCreate count
             for i, normal in Seq.indexed(vertexNormals) do
                 normals.[i] <- normal
-            mesh.Normals.SetNormals(normals)    |> ignore
+            mesh.Normals.SetNormals(normals)    |> ignore<bool>
 
         if notNull textureCoordinates then
             let count = Seq.length(textureCoordinates)
             let tcs = Array.zeroCreate count
             for i, tc in Seq.indexed(textureCoordinates) do
                 tcs.[i] <-  tc
-            mesh.TextureCoordinates.SetTextureCoordinates(tcs)  |> ignore
+            mesh.TextureCoordinates.SetTextureCoordinates(tcs)  |> ignore<bool>
 
         if notNull vertexColors then
             let count = Seq.length(vertexColors)
@@ -92,28 +92,28 @@ module AutoOpenMesh =
                            [<OPT;DEF(null:Drawing.Color seq)>]vertexColors:Drawing.Color seq) : Guid =
         let mesh = new Mesh()
         for pt in vertices do
-            mesh.Vertices.Add(pt) |> ignore
+            mesh.Vertices.Add(pt) |> ignore<int>
 
         for face in faceVertices do
             let a,b,c,d = face
             if c = d then
-                mesh.Faces.AddFace(a,b,c) |> ignore
+                mesh.Faces.AddFace(a,b,c) |> ignore<int>
             else
-                mesh.Faces.AddFace(a,b,c,d) |> ignore
+                mesh.Faces.AddFace(a,b,c,d) |> ignore<int>
 
         if notNull vertexNormals then
             let count = Seq.length(vertexNormals)
             let normals = Array.zeroCreate count
             for i, normal in Seq.indexed(vertexNormals) do
                 normals.[i] <- normal
-            mesh.Normals.SetNormals(normals)    |> ignore
+            mesh.Normals.SetNormals(normals)    |> ignore<bool>
 
         if notNull textureCoordinates then
             let count = Seq.length(textureCoordinates)
             let tcs = Array.zeroCreate count
             for i, tc in Seq.indexed(textureCoordinates) do
                 tcs.[i] <-  tc
-            mesh.TextureCoordinates.SetTextureCoordinates(tcs)  |> ignore
+            mesh.TextureCoordinates.SetTextureCoordinates(tcs)  |> ignore<bool>
 
         if notNull vertexColors then
             let count = Seq.length(vertexColors)
@@ -137,11 +137,11 @@ module AutoOpenMesh =
     ///<returns>(Guid) The identifier of the new Mesh.</returns>
     static member AddMeshQuad(pointA:Point3d , pointB:Point3d , pointC: Point3d , pointD: Point3d) : Guid =
           let mesh = new Mesh()
-          mesh.Vertices.Add(pointA) |> ignore
-          mesh.Vertices.Add(pointB) |> ignore
-          mesh.Vertices.Add(pointC) |> ignore
-          mesh.Vertices.Add(pointD) |> ignore
-          mesh.Faces.AddFace(0,1,2,3) |> ignore
+          mesh.Vertices.Add(pointA) |> ignore<int>
+          mesh.Vertices.Add(pointB) |> ignore<int>
+          mesh.Vertices.Add(pointC) |> ignore<int>
+          mesh.Vertices.Add(pointD) |> ignore<int>
+          mesh.Faces.AddFace(0,1,2,3) |> ignore<int>
           let rc = State.Doc.Objects.AddMesh(mesh)
           if rc = Guid.Empty then  RhinoScriptingException.Raise "RhinoScriptSyntax.AddMeshQuad failed.  points:'%A, %A, %A and %A" pointA pointB pointC pointD
           State.Doc.Views.Redraw()
@@ -154,10 +154,10 @@ module AutoOpenMesh =
     ///<returns>(Guid) The identifier of the new Mesh.</returns>
     static member AddMeshTriangle(pointA:Point3d , pointB:Point3d , pointC: Point3d ) : Guid =
           let mesh = new Mesh()
-          mesh.Vertices.Add(pointA) |> ignore
-          mesh.Vertices.Add(pointB) |> ignore
-          mesh.Vertices.Add(pointC) |> ignore
-          mesh.Faces.AddFace(0,1,2) |> ignore
+          mesh.Vertices.Add(pointA) |> ignore<int>
+          mesh.Vertices.Add(pointB) |> ignore<int>
+          mesh.Vertices.Add(pointC) |> ignore<int>
+          mesh.Faces.AddFace(0,1,2) |> ignore<int>
           let rc = State.Doc.Objects.AddMesh(mesh)
           if rc = Guid.Empty then  RhinoScriptingException.Raise "RhinoScriptSyntax.AddMeshTriangle failed.  points:'%A, %A and %A" pointA pointB pointC
           State.Doc.Views.Redraw()
@@ -243,7 +243,7 @@ module AutoOpenMesh =
                         let objectId = State.Doc.Objects.AddMesh(submesh)
                         if objectId <> Guid.Empty then rc.Add(objectId)
                 if delete then
-                    State.Doc.Objects.Delete(meshid, true)|> ignore
+                    State.Doc.Objects.Delete(meshid, true)|> ignore<bool>
         if rc.Count>0 then State.Doc.Views.Redraw()
         rc
 
@@ -316,7 +316,7 @@ module AutoOpenMesh =
         if deleteInput then
             for objectId in objectIds do
                 //guid = RhinoScriptSyntax.CoerceGuid(objectId)
-                State.Doc.Objects.Delete(objectId, true) |> ignore
+                State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
         State.Doc.Views.Redraw()
         rc
 
@@ -364,7 +364,7 @@ module AutoOpenMesh =
         if deleteInput then
             for objectId in Seq.append input0 input1 do
                 //id = RhinoScriptSyntax.CoerceGuid(objectId)
-                State.Doc.Objects.Delete(objectId, true) |> ignore
+                State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
         State.Doc.Views.Redraw()
         rc
 
@@ -389,7 +389,7 @@ module AutoOpenMesh =
         if deleteInput then
             for objectId in Seq.append input0 input1 do
                 //id = RhinoScriptSyntax.CoerceGuid(objectId)
-                State.Doc.Objects.Delete(objectId, true) |> ignore
+                State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
         State.Doc.Views.Redraw()
         rc
 
@@ -414,7 +414,7 @@ module AutoOpenMesh =
             if objectId <> Guid.Empty then rc.Add(objectId)
         if deleteInput then
             for objectId in Seq.append input0 input1 do
-                State.Doc.Objects.Delete(objectId, true) |> ignore
+                State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
         State.Doc.Views.Redraw()
         rc
 
@@ -435,7 +435,7 @@ module AutoOpenMesh =
             if objectId <> Guid.Empty then rc.Add(objectId)
         if rc.Count>0 && deleteInput then
             for objectId in meshIds do
-                State.Doc.Objects.Delete(objectId, true) |> ignore
+                State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
         State.Doc.Views.Redraw()
         rc
 
@@ -486,7 +486,7 @@ module AutoOpenMesh =
     static member MeshFaceNormals(meshId:Guid) : Vector3d ResizeArray =
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
         if mesh.FaceNormals.Count <> mesh.Faces.Count then
-            mesh.FaceNormals.ComputeFaceNormals() |> ignore
+            mesh.FaceNormals.ComputeFaceNormals() |> ignore<bool>
         let rc = ResizeArray()
         for i = 0 to mesh.FaceNormals.Count - 1 do
             let normal = mesh.FaceNormals.[i]
@@ -698,7 +698,7 @@ module AutoOpenMesh =
             rc <- mesh.Faces.ConvertQuadsToTriangles()
             if rc  then
                 //id = RhinoScriptSyntax.CoerceGuid(objectId)
-                State.Doc.Objects.Replace(objectId, mesh) |> ignore
+                State.Doc.Objects.Replace(objectId, mesh) |> ignore<bool>
                 State.Doc.Views.Redraw()
         rc
 
@@ -721,7 +721,7 @@ module AutoOpenMesh =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let attr = rhobj.Attributes
         let ids  = breps |> RArr.mapSeq (fun brep -> State.Doc.Objects.AddBrep(brep, attr) )
-        if deleteInput then State.Doc.Objects.Delete(rhobj, quiet=true)|> ignore
+        if deleteInput then State.Doc.Objects.Delete(rhobj, quiet=true)|> ignore<bool>
         State.Doc.Views.Redraw()
         ids
 
@@ -760,8 +760,8 @@ module AutoOpenMesh =
             if colorcount <> mesh.Vertices.Count then
                 RhinoScriptingException.Raise "RhinoScriptSyntax.MeshVertexColors: Length of colors must match vertex count.  meshId:'%s' colors:'%A'" (Pretty.str meshId) colors
             mesh.VertexColors.Clear()
-            for c in colors do mesh.VertexColors.Add(c) |> ignore
-        State.Doc.Objects.Replace(meshId, mesh) |> ignore
+            for c in colors do mesh.VertexColors.Add(c) |> ignore<int>
+        State.Doc.Objects.Replace(meshId, mesh) |> ignore<bool>
         State.Doc.Views.Redraw()
 
 
@@ -889,7 +889,7 @@ module AutoOpenMesh =
         let rc  = pieces |> RArr.mapArr State.Doc.Objects.AddMesh
         if rc.Count <> 0 && deleteInput then
             //id = RhinoScriptSyntax.CoerceGuid(objectId)
-            State.Doc.Objects.Delete(objectId, true) |> ignore
+            State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
         State.Doc.Views.Redraw()
         rc
 
@@ -902,7 +902,7 @@ module AutoOpenMesh =
         let rc = mesh.UnifyNormals()
         if rc>0 then
             //id = RhinoScriptSyntax.CoerceGuid(objectId)
-            State.Doc.Objects.Replace(objectId, mesh)|> ignore
+            State.Doc.Objects.Replace(objectId, mesh)|> ignore<bool>
             State.Doc.Views.Redraw()
         rc
 
