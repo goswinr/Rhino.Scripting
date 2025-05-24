@@ -1,4 +1,4 @@
-﻿
+
 namespace Rhino.Scripting
 
 open Rhino
@@ -185,7 +185,7 @@ module AutoOpenBlock =
     ///<returns>(int) The number of objects that make up a block definition.</returns>
     static member BlockObjectCount(blockName:string) : int =
         let instDef = State.Doc.InstanceDefinitions.Find(blockName)
-        if isNull instDef then  RhinoScriptingException.Raise "RhinoScriptSyntax.BlockObjectCount:'%s' does not exist in InstanceDefinitionsTable" blockName
+        if isNull instDef then  RhinoScriptingException.Raise "RhinoScriptSyntax.BlockObjectCount: '%s' does not exist in InstanceDefinitionsTable" blockName
         instDef.ObjectCount
 
 
@@ -300,7 +300,7 @@ module AutoOpenBlock =
     ///<returns>(bool) True or False.</returns>
     static member IsBlockEmbedded(blockName:string) : bool =
         let instDef = State.Doc.InstanceDefinitions.Find(blockName)
-        if isNull instDef then  RhinoScriptingException.Raise "RhinoScriptSyntax.IsBlockEmbedded '%s' does not exist in InstanceDefinitionsTable" blockName
+        if isNull instDef then  RhinoScriptingException.Raise "RhinoScriptSyntax.IsBlockEmbedded: '%s' does not exist in InstanceDefinitionsTable" blockName
         match int( instDef.UpdateType) with
         | 1  -> true //DocObjects.InstanceDefinitionUpdateType.Embedded
         | 2  -> true //DocObjects.InstanceDefinitionUpdateType.LinkedAndEmbedded
@@ -326,7 +326,7 @@ module AutoOpenBlock =
     ///<returns>(bool) True or False.</returns>
     static member IsBlockInUse(blockName:string, [<OPT;DEF(0)>]whereToLook:int) : bool =
         let instDef = State.Doc.InstanceDefinitions.Find(blockName)
-        if isNull instDef then  RhinoScriptingException.Raise "RhinoScriptSyntax.IsBlockInUse '%s' does not exist in InstanceDefinitionsTable" blockName
+        if isNull instDef then  RhinoScriptingException.Raise "RhinoScriptSyntax.IsBlockInUse: '%s' does not exist in InstanceDefinitionsTable" blockName
         instDef.InUse(whereToLook)
 
 
@@ -335,7 +335,7 @@ module AutoOpenBlock =
     ///<returns>(bool) True or False.</returns>
     static member IsBlockReference(blockName:string) : bool =
         let instDef = State.Doc.InstanceDefinitions.Find(blockName)
-        if isNull instDef then  RhinoScriptingException.Raise "RhinoScriptSyntax.IsBlockReference '%s' does not exist in InstanceDefinitionsTable" blockName
+        if isNull instDef then  RhinoScriptingException.Raise "RhinoScriptSyntax.IsBlockReference: '%s' does not exist in InstanceDefinitionsTable" blockName
         instDef.IsReference
 
 
@@ -345,7 +345,7 @@ module AutoOpenBlock =
     ///<returns>(bool) True or False indicating success or failure.</returns>
     static member RenameBlock(blockName:string, newName:string) : bool =
         let instDef = State.Doc.InstanceDefinitions.Find(blockName)
-        if isNull instDef then  RhinoScriptingException.Raise "RhinoScriptSyntax.RenameBlock '%s' does not exist in InstanceDefinitionsTable" blockName
+        if isNull instDef then  RhinoScriptingException.Raise "RhinoScriptSyntax.RenameBlock: '%s' does not exist in InstanceDefinitionsTable" blockName
         let description = instDef.Description
         State.Doc.InstanceDefinitions.Modify(instDef, newName, description, quiet=false)
 
