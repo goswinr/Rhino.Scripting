@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.11.0-net7] - 2025-03-15
+## [0.11.0] - 2025-03-15
 ### Added
 - build for net7.0 too
 

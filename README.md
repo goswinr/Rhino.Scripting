@@ -156,9 +156,14 @@ These are implemented with 3 overloads and  `Optional` and `DefaultParameterValu
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let layerIndex =
             if createLayerIfMissing then
-                UtilLayer.getOrCreateLayer(layer, UtilLayer.randomLayerColor,
-                    UtilLayer.ByParent, UtilLayer.ByParent,
-                    allowAllUnicode,collapseParents).Index
+                UtilLayer.getOrCreateLayer(
+                    layer,
+                    UtilLayer.randomLayerColor,
+                    UtilLayer.ByParent,
+                    UtilLayer.ByParent,
+                    allowAllUnicode,
+                    collapseParents
+                    ).Index
             else
                 RhinoScriptSyntax.CoerceLayer(layer).Index
         obj.Attributes.LayerIndex <- layerIndex
@@ -184,9 +189,14 @@ These are implemented with 3 overloads and  `Optional` and `DefaultParameterValu
                              , [<OPT;DEF(false:bool)>]collapseParents:bool) : unit = //MULTISET
         let layerIndex =
             if createLayerIfMissing then
-                UtilLayer.getOrCreateLayer(layer,
-                    UtilLayer.randomLayerColor, UtilLayer.ByParent,
-                    UtilLayer.ByParent, allowUnicode, collapseParents).Index
+                UtilLayer.getOrCreateLayer(
+                    layer,
+                    UtilLayer.randomLayerColor,
+                    UtilLayer.ByParent,
+                    UtilLayer.ByParent,
+                    allowUnicode,
+                    collapseParents
+                    ).Index
             else
                 RhinoScriptSyntax.CoerceLayer(layer).Index
         for objectId in objectIds do
@@ -203,17 +213,7 @@ These are implemented with 3 overloads and  `Optional` and `DefaultParameterValu
 
 ## .NET Framework or .NET Core?
 
-This library is currently only targeting .NET Framework 4.8.<br>
-However, it should work in .NET 7.0 or higher as well as per [the offical guidelines](https://developer.rhino3d.com/guides/rhinocommon/moving-to-dotnet-7/#migrating-your-plugin)
-
-But I can not be compiled for net7.0.
-C# allows a project with RhinoCommon to compile targeting net7, but arguably it shouldn't.
-F# is stricter and does not allow this. See [dotnet/fsharp#17295 (comment)](https://github.com/dotnet/fsharp/issues/17295#issuecomment-2158893769)
-
-So this libary is waiting for a [RhinoCommon Nuget](https://www.nuget.org/packages/RhinoCommon/#supportedframeworks-body-tab) nuget properly targeting `net7.0`.
-It is actually planned but seems to be tricky because of some hacks from the past:
-https://mcneel.myjetbrains.com/youtrack/issue/RH-77311/Add-.NET-7-target-to-nuget-packages
-
+On Rhino 8.19 or higher, you can use .NET 7.0 too.<br>
 
 
 ## Build from source
@@ -224,7 +224,7 @@ dotnet build ForPublishing.fsproj
 ```
 
 This will first combine all `Scripting_*.fs` files into one file and compile it.<br>
-This is neede because F# type extension are not visible from C# editor tooling.
+This is needed because F# type extensions are not visible from C# editor tooling.
 
 ## Edit the source
 While having all 900 methods on one class in one file is needed for publishing via `ForPublishing.fsproj` <br>
