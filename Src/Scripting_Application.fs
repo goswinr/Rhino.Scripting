@@ -1,4 +1,4 @@
-﻿namespace Rhino.Scripting
+namespace Rhino.Scripting
 
 open Rhino
 
@@ -66,10 +66,8 @@ module AutoOpenApplication =
         RhinoSync.DoSync (fun () ->
             ApplicationSettings.CommandAliasList.SetMacro(alias, macro)
             |> ignore)
-
-
-    ///<summary>Returns a array of command alias names.</summary>
-    ///<returns>(string array) a array of command alias names.</returns>
+    ///<summary>Returns an array of command alias names.</summary>
+    ///<returns>(string array) an array of command alias names.</returns>
     static member AliasNames() : array<string> =
         RhinoSync.DoSync (fun () ->
             ApplicationSettings.CommandAliasList.GetNames())
@@ -632,9 +630,7 @@ module AutoOpenApplication =
         let objectId = Rhino.PlugIns.PlugIn.IdFromName(plugin)
         if objectId<>Guid.Empty then  objectId
         else RhinoScriptingException.Raise "RhinoScriptSyntax.PlugInId: Plugin %s not found" plugin
-
-
-    ///<summary>Returns a array of registered Rhino plug-ins.</summary>
+    ///<summary>Returns an array of registered Rhino plug-ins.</summary>
     ///<param name="types">(int) Optional, default value: <c>0</c>
     ///    The type of plug-ins to return.
     ///    0 = all
@@ -647,7 +643,7 @@ module AutoOpenApplication =
     ///<param name="status">(int) Optional, default value: <c>0</c>
     /// 0 = both loaded and unloaded,
     /// 1 = loaded,
-    /// 2 = unloaded. If omitted both status is returned</param>
+    /// 2 = unloaded. If omitted both statuses are returned</param>
     ///<returns>(string array) array of registered Rhino plug-ins.</returns>
     static member PlugIns([<OPT;DEF(0)>]types:int, [<OPT;DEF(0)>]status:int) : array<string> =
         let mutable filter = Rhino.PlugIns.PlugInType.Any
@@ -711,11 +707,10 @@ module AutoOpenApplication =
     static member SearchPathList() : array<string> =
         ApplicationSettings.FileSettings.GetSearchPaths()
 
-
     ///<summary>Sends a string of printable characters to Rhino's Commandline.</summary>
     ///<param name="keys">(string) A string of characters to send to the Commandline</param>
     ///<param name="addReturn">(bool) Optional, default value: <c>true</c>
-    ///    Append a return character to the end of the string. If omitted an return character will be added (True)</param>
+    ///    Append a return character to the end of the string. If omitted a return character will be added (True)</param>
     ///<returns>(unit) void, nothing.</returns>
     static member SendKeystrokes(keys:string, [<OPT;DEF(true)>]addReturn:bool) : unit =
         RhinoSync.DoSync (fun () ->
