@@ -122,7 +122,7 @@ module PrettySetup =
             "-Guid.Empty-"
         elif Runtime.HostUtils.RunningInRhino  then // because Rhino.Scripting might be referenced from outside of Rhino too
             let o = State.Doc.Objects.FindId(g)
-            if isNull o then sprintf "Guid %O (not in State.Doc.Objects table of this Rhino file)." g
+            if isNull o then sprintf "Guid %O (not in RhinoDoc.Objects table of this Rhino file)." g
             else
                 let name = o.Attributes.Name // null if unset
                 if String.IsNullOrWhiteSpace name then

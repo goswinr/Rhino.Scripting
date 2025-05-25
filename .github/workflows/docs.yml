@@ -30,7 +30,7 @@ jobs:
         run: dotnet tool restore
 
       - name: Build code to make xml file
-        run: dotnet build ForPublishing.fsproj -c Release # see required xml tags: https://fsprojects.github.io/FSharp.Formatting/zero-to-hero.html#Generating-API-documentation
+        run: dotnet build ForPublishing.fsproj -c Release --framework net48 # see required xml tags: https://fsprojects.github.io/FSharp.Formatting/zero-to-hero.html#Generating-API-documentation
 
       - name: copy README.md to Docs/index.md
         run: cp README.md Docs/index.md

@@ -15,6 +15,7 @@ type internal RunOnUiDelegate = delegate of unit -> unit
 [<AbstractClass>]
 [<Sealed>] //use these attributes to match C# static class and make in visible in C# // https://stackoverflow.com/questions/13101995/defining-static-classes-in-f
 type RhinoSync private () =
+    static let mutable logErrors = true
 
     static let mutable feshRhinoSyncModule:Type = null
 
@@ -22,72 +23,37 @@ type RhinoSync private () =
 
     static let mutable feshRhAssembly : Reflection.Assembly = null //set via reflection below ; from Fesh.Rhino
 
-    static let mutable hideEditor : Action = null //set via reflection below ; from Fesh.Rhino
+    static let mutable hideEditor = Action(fun ()->()) //set via reflection below ; from Fesh.Rhino
 
-    static let mutable showEditor : Action = null //set via reflection below ; from Fesh.Rhino
+    static let mutable showEditor = Action(fun ()->()) //set via reflection below ; from Fesh.Rhino
 
-    static let mutable isEditorVisible : Func<bool> = null //set via reflection below ; from Fesh.Rhino
+    static let mutable isEditorVisible = new Func<bool>(fun () -> false) //set via reflection below ; from Fesh.Rhino
 
-    static let mutable logErrors = true
+    /// Red green blue text
+    static let mutable printFeshLogColor = //changed via reflection below from Fesh.Rhino
+        new Action<int,int,int,string>(fun r g b s -> Console.Write s)
+
+    /// Red green blue text
+    static let mutable printnFeshLogColor  = //changed via reflection below from Fesh.Rhino
+        new Action<int,int,int,string>(fun r g b s -> Console.WriteLine s)
+
+    static let mutable clearFeshLog = Action(fun ()->()) // changed via reflection below from Fesh
 
     static let mutable prettyFormatters: ResizeArray<obj -> option<string>> = null
 
-    /// Red green blue text
-    static let mutable printColor : int * int * int * string -> unit= //changed via reflection below from Fesh.Rhino
-        fun (_,_,_, s) -> Console.Write s
-
-    /// Red green blue text
-    static let mutable printNewLineColor : int * int * int * string -> unit = //changed via reflection below from Fesh.Rhino
-        fun (_,_,_, s) -> Console.WriteLine s
-
-    static let mutable clear : unit -> unit = // changed via reflection below from Fesh
-        fun () -> ()
-
-    static let initFeshPrint() =
-        let allAss = AppDomain.CurrentDomain.GetAssemblies()
-        match allAss |> Array.tryFind (fun a -> a.GetName().Name = "Fesh") with
-        | Some feshAssembly ->
-            try
-                let printModule = feshAssembly.GetType "Fesh.Model.IFeshLogModule"
-                if notNull printModule then
-                    let cl = printModule.GetProperty("clear").GetValue(feshAssembly)
-                    if notNull cl then
-                        let clt = cl :?> unit -> unit
-                        clear   <- clt
-
-                    try
-                        let pc = printModule.GetProperty( "printColorTupled" ).GetValue(feshAssembly)
-                        if notNull pc then
-                            let pct = pc :?>  int * int * int * string -> unit
-                            printColor   <- pct
-
-                        let pnc = printModule.GetProperty("printnColorTupled").GetValue(feshAssembly)
-                        if notNull pnc then
-                            let pct = pnc :?> int * int * int * string -> unit
-                            printNewLineColor   <- pct
-
-                    with ex ->
-                        eprintfn "The Fesh.Model.IFeshLogModule.clear was found but printColorTupled failed. The Error was: %A" ex
-
-            with ex ->
-                eprintfn "The Fesh was found but setting up color printing failed. The Error was: %A" ex
-        |None -> ()
-
-        match allAss |> Array.tryFind (fun a -> a.GetName().Name = "Pretty") with
-        | Some prettyAssembly ->
-            try
-                let prettySettings = prettyAssembly.GetType "Pretty.PrettySettings"
-                if notNull prettySettings then
-                    let formatters = prettySettings.GetProperty("Formatters").GetValue(prettyAssembly) :?> ResizeArray<obj -> option<string>>
-                    if notNull formatters then
-                        prettyFormatters <- formatters
-
-
-            with ex ->
-                eprintfn "An Assembly 'Pretty' was found but setting up color printing failed. The Error was: %A" ex
-        |None -> ()
-
-
+    // static let initFeshPrint() =
+    //     let allAss = AppDomain.CurrentDomain.GetAssemblies()
+    //     match allAss |> Array.tryFind (fun a -> a.GetName().Name = "Pretty") with
+    //     | Some prettyAssembly ->
+    //         try
+    //             let prettySettings = prettyAssembly.GetType "Pretty.PrettySettings"
+    //             if notNull prettySettings then
+    //                 let formatters = prettySettings.GetProperty("Formatters").GetValue(prettyAssembly) :?> ResizeArray<obj -> option<string>>
+    //                 if notNull formatters then
+    //                     prettyFormatters <- formatters
+    //         with ex ->
+    //             eprintfn "An Assembly 'Pretty' was found but setting up color printing failed. The Error was: %A" ex
+    //     |None -> ()
 
 
     static let log msg = Printf.kprintf(fun s -> if logErrors then (RhinoApp.WriteLine s ; eprintfn "%s" s))  msg
@@ -95,7 +61,7 @@ type RhinoSync private () =
     static let mutable initIsPending = true
 
     //only called when actually needed in DoSync methods below.
-    static let init() =
+    static let initSync() =
         initIsPending <- false
         if isNull feshRhAssembly then
             // it s ok to log errors here since we check 'if notNull feshRh then'
@@ -107,47 +73,39 @@ type RhinoSync private () =
                 if notNull feshRh then
                     feshRhAssembly <- feshRh.Assembly
                     feshRhinoSyncModule <- feshRhAssembly.GetType "Fesh.Rhino.Sync"
-                    initFeshPrint()
             with e ->
                 log "Rhino.Scripting.dll could not get feshRhinoSyncModule from Fesh Assembly via Reflection: %A" e
 
         if notNull feshRhinoSyncModule then
             // it s ok to log errors here since feshRhinoSyncModule is not null and we expect to find those all:
-            try
-                hideEditor <- feshRhinoSyncModule.GetProperty("hideEditor").GetValue(feshRhAssembly)  :?> Action
-                //if isNull hideEditor then
-                    //log "Rhino.Scripting.dll: Fesh.Rhino.Sync.hideEditor is null" // null is expected when the Fesh plugin is loaded but the editor is not running.
-            with e ->
-                log "Rhino.Scripting.dll: Fesh.Rhino.Sync.hideEditor failed with: %O" e
+            try hideEditor <- feshRhinoSyncModule.GetProperty("hideEditor").GetValue(feshRhAssembly) :?> Action
+            with e -> log "Rhino.Scripting.dll: loading Fesh.Rhino.Sync.hideEditor via reflection failed with: %O" e
 
-            try
-                showEditor <- feshRhinoSyncModule.GetProperty("showEditor").GetValue(feshRhAssembly) :?> Action
-                // if isNull showEditor then
-                //     log "Rhino.Scripting.dll: Fesh.Rhino.Sync showEditor is null" // null is expected when the Fesh plugin is loaded but the editor is not running.
-            with e ->
-                log "Rhino.Scripting.dll: Fesh.Rhino.Sync.showEditor failed with: %O" e
+            try showEditor <- feshRhinoSyncModule.GetProperty("showEditor").GetValue(feshRhAssembly) :?> Action
+            with e -> log "Rhino.Scripting.dll: loading Fesh.Rhino.Sync.showEditor via reflection failed with: %O" e
 
-            try
-                isEditorVisible <- feshRhinoSyncModule.GetProperty("isEditorVisible").GetValue(feshRhAssembly) :?> Func<bool>
-                //if isNull isEditorVisible then
-                //    log "Rhino.Scripting.dll: Fesh.Rhino.Sync isEditorVisible is null" // null is expected when the Fesh plugin is loaded but the editor is not running.
-            with e ->
-                log "Rhino.Scripting.dll: Fesh.Rhino.Sync.isEditorVisible failed with: %O" e
+            try isEditorVisible <- feshRhinoSyncModule.GetProperty("isEditorVisible").GetValue(feshRhAssembly) :?> Func<bool>
+            with e -> log "Rhino.Scripting.dll: loading Fesh.Rhino.Sync.isEditorVisible via reflection failed with: %O" e
 
-            try
-                syncContext <- feshRhinoSyncModule.GetProperty("syncContext").GetValue(feshRhAssembly) :?> Threading.SynchronizationContext
-                //if isNull syncContext then
-                    //log "Rhino.Scripting.dll: Fesh.Rhino.Sync.syncContext is null"// null is expected when the Fesh plugin is loaded but the editor is not running.
+            try syncContext <- feshRhinoSyncModule.GetProperty("syncContext").GetValue(feshRhAssembly) :?> Threading.SynchronizationContext
+            with e -> log "Rhino.Scripting.dll: loading Fesh.Rhino.Sync.syncContext via reflection failed with: %O" e
 
-            with e ->
-                log "Rhino.Scripting.dll: Fesh.Rhino.Sync.syncContext failed with: %O" e
+            try printFeshLogColor <- feshRhinoSyncModule.GetProperty("printFeshLogColor").GetValue(feshRhAssembly) :?> Action<int,int,int,string>
+            with e -> log "Rhino.Scripting.dll: loading Fesh.Rhino.Sync.printFeshLogColor via reflection failed with: %O" e
+
+            try printnFeshLogColor <- feshRhinoSyncModule.GetProperty("printnFeshLogColor").GetValue(feshRhAssembly) :?> Action<int,int,int,string>
+            with e -> log "Rhino.Scripting.dll: loading Fesh.Rhino.Sync.printnFeshLogColor via reflection failed with: %O" e
+
+            try clearFeshLog <- feshRhinoSyncModule.GetProperty("clearFeshLog").GetValue(feshRhAssembly) :?> Action
+            with e -> log "Rhino.Scripting.dll: loading Fesh.Rhino.Sync.clearFeshLog via reflection failed with: %O" e
 
         else
             // Fesh syncContext not found via reflection,
             // The code is not used from within Fesh.Rhino plugin
             // let just use AsyncInvoke from Eto.Forms.Application
             // https://pages.picoe.ca/docs/api/html/M_Eto_Forms_Application_AsyncInvoke.htm#!
-            syncContext <- null
+            // syncContext <- null
+            syncContext <- Threading.SynchronizationContext.Current
 
             //
             // // try to get just the sync context from Windows form ( that works on Mac.Mono) (WPF is not anymore referenced by this project)
@@ -162,7 +120,7 @@ type RhinoSync private () =
         // should be called via reflection from Fesh.Rhino in case Rhino.Scripting is loaded already by another plugin.
         // Reinitialize Rhino.Scripting just in case it is loaded already in the current AppDomain:
         // to have showEditor and hideEditor actions setup correctly.
-        new Action(init)
+        new Action(initSync)
 
 
     // An alternative to do! Async.SwitchToContext syncContext
@@ -187,59 +145,63 @@ type RhinoSync private () =
     /// Set to false to disable the logging off errors to
     /// RhinoApp.WriteLine and the error stream (eprintfn).
     static member LogErrors
-        with get() = logErrors
-        and  set v = logErrors <- v
+        with get() : bool = logErrors
+        and  set v : unit = logErrors <- v
 
     /// The SynchronizationContext of the currently Running Rhino Instance,
     /// This SynchronizationContext is loaded via reflection from the Fesh.Rhino plugin
     static member SyncContext
-        with get() =
+        with get() : Threading.SynchronizationContext =
             if isNull syncContext then
-                initialize.Invoke()  // init()
+                initialize.Invoke()  // this is the same as  init()
             syncContext
-        and set v =
+        and set v : unit =
             syncContext <- v
 
     /// Hide the WPF Window of currently running Fesh Editor.
     /// Or do nothing if not running in Fesh Editor.
-    static member HideEditor() = if notNull hideEditor then hideEditor.Invoke()
+    static member HideEditor() = hideEditor.Invoke() //Action
 
     /// Show the WPF Window of currently running Fesh Editor.
     /// Or do nothing if not running in Fesh Editor.
-    static member ShowEditor() = if notNull showEditor then showEditor.Invoke()
+    static member ShowEditor() = showEditor.Invoke() //Action
 
     // The Assembly currently running Fesh Editor Window.
     // Or 'null' if not running in Fesh Editor.
     // static member FeshRhinoAssembly :Reflection.Assembly = feshRhAssembly
 
     //static member Initialize() =  init() // not called in ActiveDocument module anymore , only called when actually needed in DoSync methods below.
-    static member PrettyFormatters = prettyFormatters
+
+
+    /// This is a collection of pretty formatters that the libray Pretty is using if present. Needs to be set via reflection !!
+    static member PrettyFormatters : ResizeArray<obj -> option<string>> =
+        prettyFormatters
 
     /// Prints in both RhinoApp.WriteLine and Console.WriteLine, or Fesh Editor with color if running.
     /// Red green blue text , NO new line
     static member PrintColor r g b s =
-        printColor (r, g, b, s)
+        printFeshLogColor.Invoke(r, g, b, s)
         RhinoApp.Write s
         RhinoApp.Wait()
 
     /// Prints in both RhinoApp.WriteLine and Console.WriteLine, or Fesh Editor with color  if running.
     /// Red green blue text , with new line
     static member PrintnColor r g b s =
-        printNewLineColor (r, g, b, s)
+        printnFeshLogColor.Invoke(r, g, b, s)
         RhinoApp.WriteLine s
         RhinoApp.Wait()
 
     /// Clears the Fesh log window
     /// and the Rhino command history window.
     static member ClearLog() =
-        clear()
+        clearFeshLog.Invoke() //Action
         RhinoApp.ClearCommandHistoryWindow()
         RhinoApp.Wait()
 
     /// Evaluates a function on UI Thread.
     static member DoSync (func:unit->'T) : 'T =
         if RhinoApp.InvokeRequired then
-            if initIsPending then init()
+            if initIsPending then initSync()
             if isNull syncContext then
                 Eto.Forms.Application.Instance.Invoke func
 
@@ -262,7 +224,7 @@ type RhinoSync private () =
     static member DoSyncRedraw (func:unit->'T) : 'T =
         let redraw = RhinoDoc.ActiveDoc.Views.RedrawEnabled
         if RhinoApp.InvokeRequired then
-            if initIsPending then init()
+            if initIsPending then initSync()
             if isNull syncContext then
                 Eto.Forms.Application.Instance.Invoke func
 
@@ -291,7 +253,7 @@ type RhinoSync private () =
         let redraw = RhinoDoc.ActiveDoc.Views.RedrawEnabled
 
         if RhinoApp.InvokeRequired then
-            if initIsPending then init() // do first
+            if initIsPending then initSync() // do first
             if isNull syncContext then
                 Eto.Forms.Application.Instance.Invoke func
 
@@ -303,23 +265,31 @@ type RhinoSync private () =
             else
                 async{
                     do! Async.SwitchToContext syncContext
-                    let isWinVis = if isNull isEditorVisible then false else isEditorVisible.Invoke() // do after init
+                    let isWinVis = isEditorVisible.Invoke() // do after init
                     //eprintfn "Hiding Fesh async..isWinVis:%b" isWinVis
-                    if isWinVis && notNull hideEditor then hideEditor.Invoke()
-                    if not redraw then RhinoDoc.ActiveDoc.Views.RedrawEnabled <- true
-                    RhinoApp.SetFocusToMainWindow()
+                    if isWinVis then
+                        hideEditor.Invoke() //Action
+                    if not redraw then
+                        RhinoDoc.ActiveDoc.Views.RedrawEnabled <- true
+                    RhinoApp.SetFocusToMainWindow() //Action
                     let res = func()
-                    if not redraw then RhinoDoc.ActiveDoc.Views.RedrawEnabled <- false
-                    if isWinVis && notNull showEditor then showEditor.Invoke()
+                    if not redraw then
+                        RhinoDoc.ActiveDoc.Views.RedrawEnabled <- false
+                    if isWinVis then
+                        showEditor.Invoke() //Action
                     return res
                     } |> Async.RunSynchronously
         else
-            if initIsPending then init() // because even when we are in sync we still need to see if the Fesh window is showing or not.
-            let isWinVis = if isNull isEditorVisible then false else isEditorVisible.Invoke() // do after init
+            if initIsPending then initSync() // because even when we are in sync we still need to see if the Fesh window is showing or not.
+            let isWinVis = isEditorVisible.Invoke() // do after init
             //eprintfn "Hiding Fesh sync..isWinVis:%b" isWinVis
-            if isWinVis && notNull hideEditor then hideEditor.Invoke()
-            if not redraw then RhinoDoc.ActiveDoc.Views.RedrawEnabled <- true
+            if isWinVis then
+                hideEditor.Invoke() //Action
+            if not redraw then
+                RhinoDoc.ActiveDoc.Views.RedrawEnabled <- true
             let res = func()
-            if not redraw then RhinoDoc.ActiveDoc.Views.RedrawEnabled <- false
-            if isWinVis && notNull showEditor then showEditor.Invoke()
+            if not redraw then
+                RhinoDoc.ActiveDoc.Views.RedrawEnabled <- false
+            if isWinVis then
+                showEditor.Invoke() //Action
             res

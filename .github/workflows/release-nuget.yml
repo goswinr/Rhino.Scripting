@@ -25,7 +25,9 @@ jobs:
         Set-Content -Path README.md -Value $content    
 
     - name: dotnet build
-      run: dotnet build ForPublishing.fsproj --configuration Release
+      # build target frameworks net48 and net7.0 separately to avoid race conditions in combineIntoOneFile.fsx
+      run: |
+          dotnet build ForPublishing.fsproj -c Release 
 
     - name: Check version consistency of git tag and CHANGELOG.md
       # needs in fsproj:

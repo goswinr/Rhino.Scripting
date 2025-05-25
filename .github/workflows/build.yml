@@ -22,8 +22,12 @@ jobs:
           dotnet-version: '9.x'
 
       - name: Run dotnet build ForEditing
-        run: dotnet build ForEditing.fsproj
+        run: |
+          dotnet build ForEditing.fsproj 
 
       - name: Run dotnet build ForPublishing
-        run: dotnet build ForPublishing.fsproj
+        # build target frameworks net48 and net7.0 separately to avoid race conditions in combineIntoOneFile.fsx
+        run: |
+          dotnet build ForPublishing.fsproj --framework net48
+          dotnet build ForPublishing.fsproj --framework net7.0
 
