@@ -83,8 +83,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - First public release
 
-[Unreleased]: https://github.com/goswinr/Rhino.Scripting/compare/0.11.0-net7...HEAD
-[0.11.0]: https://github.com/goswinr/Rhino.Scripting/compare/0.10.1...0.11.0-net7
+[Unreleased]: https://github.com/goswinr/Rhino.Scripting/compare/0.12.0...HEAD
+[0.12.0]: https://github.com/goswinr/Rhino.Scripting/compare/0.11.0...0.12.0
+[0.11.0]: https://github.com/goswinr/Rhino.Scripting/compare/0.10.1...0.11.0
 [0.10.1]: https://github.com/goswinr/Rhino.Scripting/compare/0.10.0...0.10.1
 [0.10.0]: https://github.com/goswinr/Rhino.Scripting/compare/0.9.0...0.10.0
 [0.9.0]: https://github.com/goswinr/Rhino.Scripting/compare/0.8.2...0.9.0

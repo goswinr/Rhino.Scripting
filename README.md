@@ -212,8 +212,11 @@ These are implemented with 3 overloads and  `Optional` and `DefaultParameterValu
 [goswinr.github.io/Rhino.Scripting](https://goswinr.github.io/Rhino.Scripting)
 
 ## .NET Framework or .NET Core?
+On Rhino 8.19 or higher, you can use .NET 7.0 and .NET Framework 4.8.<br>
+For Rhino 7 and lower versions of Rhino 8, only .NET Framework 4.8 is recommended.<br>
 
-On Rhino 8.19 or higher, you can use .NET 7.0 too.<br>
+## Windows or Mac?
+This library should work on Rhino for Mac just as well as on Windows.<br>
 
 
 ## Build from source
