@@ -47,7 +47,7 @@ However, you can use this library just as well in the new Rhino 8 [ScriptEditor]
 
 First reference the assemblies.
 ```fsharp
-#r "nuget: Rhino.Scripting, 0.10.0"
+#r "nuget: Rhino.Scripting"
 ```
 
 The main namespace is  `Rhino.Scripting`.<br>
@@ -74,8 +74,7 @@ You can use it via the new Rhino 8 [ScriptEditor](https://www.rhino3d.com/featur
 First reference the assemblies.
 
 ```csharp
-#r "nuget: FSharp.Core, 9.0.201" // when used in Rhino 8 ScriptEditor all dependencies need to be added explicitly
-#r "nuget: Rhino.Scripting, 0.10.0"
+#r "nuget: Rhino.Scripting"
 ```
 The main namespace is  `Rhino.Scripting`.<br>
 The main class of this library is called `RhinoScriptSyntax` it has all ~900 functions as static methods.<br>
