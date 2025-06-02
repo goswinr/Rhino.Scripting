@@ -13,7 +13,7 @@ module internal VersionInfo =
     let versionInfo =
         let v = typeof<Dummy>.Assembly.GetName().Version
         lazy
-            $"\r\nRhinoApp.Version:{RhinoApp.Version}\r\nRhino.Scripting Version:{v}\r\n"
+            $"{Environment.NewLine}Rhino:{RhinoApp.Version}{Environment.NewLine}Rhino.Scripting:{v}{Environment.NewLine}"
 
 
 open VersionInfo

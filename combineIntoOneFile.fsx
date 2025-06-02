@@ -91,7 +91,7 @@ module CombineIntoOneFile =
             let n = file.Replace("Src/Scripting_", " ")
             lines.AddRange(file|> getLines |> afterMarker file)
             if i%7 =0 then
-                printf "\r\n  -- %s" n
+                printf $"{Environment.NewLine}  -- %s{n}"
             else
                 printf " %s" n
         printfn ""
