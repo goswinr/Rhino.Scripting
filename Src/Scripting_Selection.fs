@@ -252,7 +252,7 @@ module AutoOpenSelection =
     ///    Minimum count of objects allowed to be selected</param>
     /// <param name="maximumCount">(int) Optional, default value: <c>0</c>
     ///    Maximum count of objects allowed to be selected</param>
-    /// <param name="printCount">(bool) Optional, default value: <c>true</c> Print object count to command window.</param>
+    /// <param name="printCount">(bool) Optional, default value: <c>false</c> Print object count to command window.</param>
     /// <param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, Will be ignored if 'objects' are set. Calls a custom function in the script and passes
     ///    the Rhino Object, Geometry, and component index and returns true or false indicating if the object can be selected</param>
     /// <returns>(Guid ResizeArray) List of identifiers of the picked objects.
@@ -265,7 +265,7 @@ module AutoOpenSelection =
                                     [<OPT;DEF(null:Guid seq)>]objectsToSelectFrom:Guid seq,
                                     [<OPT;DEF(1)>]minimumCount:int,
                                     [<OPT;DEF(0)>]maximumCount:int,
-                                    [<OPT;DEF(true)>]printCount:bool,
+                                    [<OPT;DEF(false)>]printCount:bool,
                                     [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter)  : ResizeArray<Guid> =
         let get () =
             if not <| preselect then
@@ -297,7 +297,7 @@ module AutoOpenSelection =
                     rc.Add(objref.ObjectId)
                     let obj = objref.Object()
                     if select && notNull obj then obj.Select(select) |> ignore<int>
-                if printCount then PrettySetup.printfnBlue "RhinoScriptSyntax.GetObjects(...) returned %s" (RhinoScriptSyntax.ObjectDescription(rc))
+                if printCount then PrettySetup.printfnBlue $"RhinoScriptSyntax.GetObjects(\"{message}\") returned {RhinoScriptSyntax.ObjectDescription rc}"
                 rc
         RhinoSync.DoSyncRedrawHideEditor get
 
@@ -320,7 +320,7 @@ module AutoOpenSelection =
     /// <param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select the picked objects. If False, the objects that are
     ///    picked are not selected</param>
-    /// <param name="printCount">(bool) Optional, default value: <c>true</c> Print object count to command window</param>
+    /// <param name="printCount">(bool) Optional, default value: <c>false</c> Print object count to command window</param>
     /// <param name="objectsToSelectFrom">(Guid seq) Optional, List of object identifiers specifying objects that are
     ///    allowed to be selected</param>
     /// <returns>((Guid*bool*int*Point3d*string) ResizeArray) List containing the following information
@@ -335,7 +335,7 @@ module AutoOpenSelection =
                                     [<OPT;DEF(true)>]group:bool,
                                     [<OPT;DEF(true)>]preselect:bool,
                                     [<OPT;DEF(false)>]select:bool,
-                                    [<OPT;DEF(true)>]printCount:bool,
+                                    [<OPT;DEF(false)>]printCount:bool,
                                     [<OPT;DEF(null:Guid seq)>]objectsToSelectFrom:Guid seq) : (Guid*bool*DocObjects.SelectionMethod*Point3d*string) ResizeArray =
         let get () =
             if not <| preselect then
@@ -374,7 +374,7 @@ module AutoOpenSelection =
                     rc
                     |> RArr.map ( fun (id, _, _, _, _) -> id )
                     |> RhinoScriptSyntax.ObjectDescription
-                    |> PrettySetup.printfnBlue "RhinoScriptSyntax.GetObjectsEx(...) returned %s"
+                    |> PrettySetup.printfnBlue "RhinoScriptSyntax.GetObjectsEx(\"%s\") returned %s" message
                 rc
         RhinoSync.DoSyncRedrawHideEditor get
 
