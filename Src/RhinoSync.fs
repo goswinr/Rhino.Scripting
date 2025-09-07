@@ -104,7 +104,6 @@ type RhinoSync private () =
             // The code is not used from within Fesh.Rhino plugin
             // let just use AsyncInvoke from Eto.Forms.Application
             // https://pages.picoe.ca/docs/api/html/M_Eto_Forms_Application_AsyncInvoke.htm#!
-            // syncContext <- null
             syncContext <- Threading.SynchronizationContext.Current
 
             //
@@ -203,7 +202,7 @@ type RhinoSync private () =
         if RhinoApp.InvokeRequired then
             if initIsPending then initSync()
             if isNull syncContext then
-                Eto.Forms.Application.Instance.Invoke func
+                Eto.Forms.Application.Instance.Invoke func // This should never get called, even when not hosted in Fesh Editor.
 
                 // RhinoSyncException.Raise "%s%s%s%s%s" "This code needs to run on the main UI thread." Environment.NewLine
                 //         "Rhino.RhinoSync.syncContext is still null or not set up. An automatic context switch is not possible." Environment.NewLine
