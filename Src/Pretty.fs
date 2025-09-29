@@ -111,7 +111,8 @@ module AutoOpenPrettyExtensions =
 /// An internal module to set up nice printing of Rhino Objects.
 /// (It is public only for access from Rhino.Scripting.Fsharp project)
 [<RequireQualifiedAccess>]
-module PrettySetup =
+module internal PrettySetup =
+    // internal module is still visible to Rhino.Scripting.FSharp project via InternalsVisibleTo attribute in ForPublishing.fsproj
 
     let mutable private initIsPending = true // to delay setup of printing till first print call
 

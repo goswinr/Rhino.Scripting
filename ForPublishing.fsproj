@@ -76,6 +76,12 @@
 
     <!-- This is probably not working to the editing files because the way files a structured on github does not match the way the are compiled from a one big generated file.-->
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
+
+   <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+     <!-- https://stackoverflow.com/a/61008642/969070 -->
+     <_Parameter1>Rhino.Scripting.FSharp</_Parameter1>
+   </AssemblyAttribute>
+
   </ItemGroup>
 
   <ItemGroup>
