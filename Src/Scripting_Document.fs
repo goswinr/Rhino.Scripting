@@ -510,6 +510,7 @@ module AutoOpenDocument =
 
     /// <summary>Set the document's distance display precision.</summary>
     /// <param name="precision">(int) The distance display precision. If the current distance display mode is Decimal, then precision is the number of decimal places.
+    ///    Valid values are >= 0 and <= 20.
     ///    If the current distance display mode is Fractional (including Feet and Inches), then the denominator = (1/2)^precision.
     ///    Use UnitDistanceDisplayMode to get the current distance display mode</param>
     /// <returns>(unit) void, nothing.</returns>
