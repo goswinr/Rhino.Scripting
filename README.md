@@ -1,4 +1,4 @@
-![logo](https://raw.githubusercontent.com/goswinr/Rhino.Scripting/main/Docs/img/logo.png)
+![logo](https://raw.githubusercontent.com/goswinr/Rhino.Scripting/main/Docs/img/logo128.png)
 # Rhino.Scripting
 
 [![Rhino.Scripting on nuget.org](https://img.shields.io/nuget/v/Rhino.Scripting)](https://www.nuget.org/packages/Rhino.Scripting/)
