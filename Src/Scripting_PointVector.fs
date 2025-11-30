@@ -182,7 +182,7 @@ module AutoOpenPointVector =
 
     /// <summary>Checks if a list of 3D points are coplanar.</summary>
     /// <param name="points">(Point3d seq) 3D points to test</param>
-    /// <param name="tolerance">(float) Optional, default value: <c>1.0e-12</c> = RhinoMath.ZeroTolerance
+    /// <param name="tolerance">(float) Optional, default value: <c>1.0e-12</c> (RhinoMath.ZeroTolerance)
     ///    Tolerance to use when verifying</param>
     /// <returns>(bool) True or False.</returns>
     static member PointsAreCoplanar(points:Point3d seq, [<OPT;DEF(0.0)>]tolerance:float) : bool =

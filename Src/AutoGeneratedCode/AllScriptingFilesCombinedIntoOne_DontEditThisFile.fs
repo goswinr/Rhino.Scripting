@@ -6853,7 +6853,7 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Set the document's distance display precision.</summary>
     /// <param name="precision">(int) The distance display precision. If the current distance display mode is Decimal, then precision is the number of decimal places.
-    ///    Valid values are >= 0 and <= 20.
+    ///    Valid values are &gt;= 0 and &lt;= 20.
     ///    If the current distance display mode is Fractional (including Feet and Inches), then the denominator = (1/2)^precision.
     ///    Use UnitDistanceDisplayMode to get the current distance display mode</param>
     /// <returns>(unit) void, nothing.</returns>
@@ -12667,7 +12667,7 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Checks if a list of 3D points are coplanar.</summary>
     /// <param name="points">(Point3d seq) 3D points to test</param>
-    /// <param name="tolerance">(float) Optional, default value: <c>1.0e-12</c> = RhinoMath.ZeroTolerance
+    /// <param name="tolerance">(float) Optional, default value: <c>1.0e-12</c> (RhinoMath.ZeroTolerance)
     ///    Tolerance to use when verifying</param>
     /// <returns>(bool) True or False.</returns>
     static member PointsAreCoplanar(points:Point3d seq, [<OPT;DEF(0.0)>]tolerance:float) : bool =
