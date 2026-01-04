@@ -100,7 +100,9 @@
 
   </ItemGroup>
 
-  <!-- Combine all files of the rhinoscriptingsyntax into one:  https://stackoverflow.com/a/44829863/969070 -->
+  <!-- Combine all files of the rhinoscriptingsyntax into one:  https://stackoverflow.com/a/44829863/969070
+  Locally this is ok but on gh actions this can lead to a race condition writing to AllScriptingFilesCombinedIntoOne_DontEditThisFile.fs
+  so dotnet fsi combineIntoOneFile.fsx is run in the action first and then content compared and writing skipped if not needed -->
   <Target Name="Combine Into One File" BeforeTargets="BeforeBuild">
     <Exec Command="dotnet fsi combineIntoOneFile.fsx" />
     <ItemGroup>

@@ -25,9 +25,15 @@ jobs:
         run: |
           dotnet build ForEditing.fsproj 
 
+      - name: Run combineIntoOneFile.fsx
+        # to avoid race conditions in combineIntoOneFile.fsx
+        run: |
+          dotnet fsi combineIntoOneFile.fsx
+      
       - name: Run dotnet build ForPublishing
         # build target frameworks net48 and net7.0 separately to avoid race conditions in combineIntoOneFile.fsx
+        # dotnet build ForPublishing.fsproj --framework net48
+        # dotnet build ForPublishing.fsproj --framework net7.0
         run: |
-          dotnet build ForPublishing.fsproj --framework net48
-          dotnet build ForPublishing.fsproj --framework net7.0
+          dotnet build ForPublishing.fsproj 
 
