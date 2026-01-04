@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir:*)",
+      "Bash(git -C \"d:\\\\Git\\\\_Rhino_\\\\Rhino.Scripting\" diff README.md)",
+      "Bash(git diff:*)"
+    ]
+  }
+}
