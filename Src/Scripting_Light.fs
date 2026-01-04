@@ -1,4 +1,4 @@
-﻿namespace Rhino.Scripting
+namespace Rhino.Scripting
 
 open Rhino
 open System
@@ -249,7 +249,7 @@ module AutoOpenLight =
             RhinoScriptingException.Raise "RhinoScriptSyntax.LightColor failed.  objectId:'%s' color:'%A'" (Pretty.str objectId) color
         State.Doc.Views.Redraw()
 
-    /// <summary>Changes the color of multiple light.</summary>
+    /// <summary>Changes the color of multiple lights.</summary>
     /// <param name="objectIds">(Guid seq) The light objects's identifiers</param>
     /// <param name="color">(Drawing.Color) The light's new color</param>
     /// <returns>(unit) void, nothing.</returns>
@@ -413,7 +413,7 @@ module AutoOpenLight =
             RhinoScriptingException.Raise "RhinoScriptSyntax.SpotLightHardness failed.  objectId:'%s' hardness:'%A'" (Pretty.str objectId) hardness
         State.Doc.Views.Redraw()
 
-    /// <summary>Changes the hardness of multiple spot light. Spotlight hardness
+    /// <summary>Changes the hardness of multiple spot lights. Spotlight hardness
     /// controls the fully illuminated region.</summary>
     /// <param name="objectIds">(Guid seq) The light objects's identifiers</param>
     /// <param name="hardness">(float) The light's new hardness</param>
@@ -454,7 +454,7 @@ module AutoOpenLight =
             RhinoScriptingException.Raise "RhinoScriptSyntax.SpotLightRadius failed.  objectId:'%s' radius:'%A'" (Pretty.str objectId) radius
         State.Doc.Views.Redraw()
 
-    /// <summary>Changes the radius of multiple spot light.</summary>
+    /// <summary>Changes the radius of multiple spot lights.</summary>
     /// <param name="objectIds">(Guid seq) The light objects's identifiers</param>
     /// <param name="radius">(float) The light's new radius</param>
     /// <returns>(unit) void, nothing.</returns>
@@ -493,7 +493,7 @@ module AutoOpenLight =
             RhinoScriptingException.Raise "RhinoScriptSyntax.SpotLightShadowIntensity failed.  objectId:'%s' intensity:'%A'" (Pretty.str objectId) intensity
         State.Doc.Views.Redraw()
 
-    /// <summary>Changes the shadow intensity of multiple spot light.</summary>
+    /// <summary>Changes the shadow intensity of multiple spot lights.</summary>
     /// <param name="objectIds">(Guid seq) The light objects's identifiers</param>
     /// <param name="intensity">(float) The light's new intensity</param>
     /// <returns>(unit) void, nothing.</returns>

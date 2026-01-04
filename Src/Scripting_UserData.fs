@@ -1,4 +1,4 @@
-﻿namespace Rhino.Scripting
+namespace Rhino.Scripting
 
 open Rhino
 open System
@@ -40,7 +40,7 @@ module AutoOpenUserData =
     /// <returns>(string array) Array of all section names if sectionName is omitted,
     /// else all entry names in this section.</returns>
     static member GetDocumentData([<OPT;DEF(null:string)>]sectionName:string) : array<string> =
-        if notNull sectionName then
+        if isNull sectionName then
             State.Doc.Strings.GetSectionNames()
         else
             State.Doc.Strings.GetEntryNames(sectionName)

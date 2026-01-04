@@ -2,7 +2,7 @@
 
 open Rhino
 
-/// An Integer Enum of Object types to be use in object selection functions of Rhino.Scripting.
+/// An integer Enum of Object types to be used in object selection functions of Rhino.Scripting.
 /// Don't create an instance, use the instance in Rhino.Scripting.RhinoScriptSyntax.Filter
 [<Sealed>]
 type ObjectFilterEnum internal () =  // not a static class, just internal, constructor is used once in static class Scripting
@@ -47,7 +47,7 @@ type ObjectFilterEnum internal () =  // not a static class, just internal, const
     /// returns 1073741824
     member _.Extrusion = 1073741824
 
-    /// A helper function to get a DocObjects.ObjectType Enum form an integer
+    /// A helper function to get a DocObjects.ObjectType Enum from an integer
     static member GetFilterEnum(i:int) : DocObjects.ObjectType = // not internal because also used in Rhino.Scripting.Fsharp
         let mutable e = DocObjects.ObjectType.None
         if 0 <> (i &&& 1 ) then          e  <- e ||| DocObjects.ObjectType.Point

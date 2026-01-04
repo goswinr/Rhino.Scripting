@@ -530,7 +530,7 @@ module AutoOpenCoerce =
 
     /// <summary>Attempt to get Hatch Geometry.</summary>
     /// <param name="objectId">(Guid) objectId of Hatch object</param>
-    /// <returns>A Geometry.CoerceHatch. Raises a RhinoScriptingException if coerce failed.</returns>
+    /// <returns>A Geometry.Hatch. Raises a RhinoScriptingException if coerce failed.</returns>
     static member CoerceHatch (objectId:Guid) : Hatch =
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :?  Hatch as a -> a
@@ -598,9 +598,9 @@ module AutoOpenCoerce =
                 | :? option<Guid> as go      -> ((State.Doc.Objects.FindId(go.Value).Geometry) :?> Point).Location
                 | :? (string*string*string) as xyz  -> let x, y, z = xyz in Point3d(parseFloatEnDe(x), parseFloatEnDe(y), parseFloatEnDe(z))
                 | :? Guid as g ->  ((State.Doc.Objects.FindId(g).Geometry) :?> Point).Location
-                | :? seq<float>  as xyz  ->  point3dOf3(Seq.item 0 xyz, Seq.item 3 xyz, Seq.item 2 xyz)
-                | :? seq<int>  as xyz  ->    point3dOf3(Seq.item 0 xyz, Seq.item 3 xyz, Seq.item 2 xyz)
-                | :? seq<string> as xyz  ->  point3dOf3(Seq.item 0 xyz, Seq.item 3 xyz, Seq.item 2 xyz)
+                | :? seq<float>  as xyz  ->  point3dOf3(Seq.item 0 xyz, Seq.item 1 xyz, Seq.item 2 xyz)
+                | :? seq<int>  as xyz  ->    point3dOf3(Seq.item 0 xyz, Seq.item 1 xyz, Seq.item 2 xyz)
+                | :? seq<string> as xyz  ->  point3dOf3(Seq.item 0 xyz, Seq.item 1 xyz, Seq.item 2 xyz)
                 | :? string as s  ->
                     let xs = s.Split(';')
                     if Seq.length xs > 2 then
@@ -652,9 +652,9 @@ module AutoOpenCoerce =
                 | :? (Vector3d option) as v   -> v.Value // from UI function
                 | :? option<Guid> as go      -> (State.Doc.Objects.FindId(go.Value).Geometry :?> LineCurve).Line.Direction
                 | :? (string*string*string) as xyz  -> let x, y, z = xyz in Vector3d(parseFloatEnDe(x), parseFloatEnDe(y), parseFloatEnDe(z))
-                | :? seq<float>  as xyz  ->  vecOf3(Seq.item 0 xyz, Seq.item 3 xyz, Seq.item 2 xyz)
-                | :? seq<int>  as xyz  ->    vecOf3(Seq.item 0 xyz, Seq.item 3 xyz, Seq.item 2 xyz)
-                | :? seq<string> as xyz  ->  vecOf3(Seq.item 0 xyz, Seq.item 3 xyz, Seq.item 2 xyz)
+                | :? seq<float>  as xyz  ->  vecOf3(Seq.item 0 xyz, Seq.item 1 xyz, Seq.item 2 xyz)
+                | :? seq<int>  as xyz  ->    vecOf3(Seq.item 0 xyz, Seq.item 1 xyz, Seq.item 2 xyz)
+                | :? seq<string> as xyz  ->  vecOf3(Seq.item 0 xyz, Seq.item 1 xyz, Seq.item 2 xyz)
                 | :? string as s  ->
                     let xs = s.Split(';')
                     if Seq.length xs > 2 then

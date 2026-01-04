@@ -141,7 +141,7 @@ type RhinoSync private () =
     // Public members:
     // ---------------------------------
 
-    /// Set to false to disable the logging off errors to
+    /// Set to false to disable the logging of errors to
     /// RhinoApp.WriteLine and the error stream (eprintfn).
     static member LogErrors
         with get() : bool = logErrors
@@ -172,19 +172,19 @@ type RhinoSync private () =
     //static member Initialize() =  init() // not called in ActiveDocument module anymore , only called when actually needed in DoSync methods below.
 
 
-    /// This is a collection of pretty formatters that the libray Pretty is using if present. Needs to be set via reflection !!
+    /// This is a collection of pretty formatters that the library Pretty is using if present. Needs to be set via reflection.
     static member PrettyFormatters : ResizeArray<obj -> option<string>> =
         prettyFormatters
 
     /// Prints in both RhinoApp.WriteLine and Console.WriteLine, or Fesh Editor with color if running.
-    /// Red green blue text , NO new line
+    /// Red green blue text, NO new line
     static member PrintColor r g b s =
         printFeshLogColor.Invoke(r, g, b, s)
         RhinoApp.Write s
         RhinoApp.Wait()
 
-    /// Prints in both RhinoApp.WriteLine and Console.WriteLine, or Fesh Editor with color  if running.
-    /// Red green blue text , with new line
+    /// Prints in both RhinoApp.WriteLine and Console.WriteLine, or Fesh Editor with color if running.
+    /// Red green blue text, with new line
     static member PrintnColor r g b s =
         printnFeshLogColor.Invoke(r, g, b, s)
         RhinoApp.WriteLine s

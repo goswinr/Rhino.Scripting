@@ -10,7 +10,7 @@ module AutoOpenPlane =
   type RhinoScriptSyntax with
     //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete)
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file.
-    //---So that all members are visible in C# and Ironpython too.
+    //---So that all members are visible in C# and IronPython too.
     //---This happens as part of the <Targets> in the *.fsproj file.
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
 

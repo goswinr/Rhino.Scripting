@@ -31,7 +31,7 @@ type internal DEF =  Runtime.InteropServices.DefaultParameterValueAttribute
 type RhinoScriptSyntax private () =
 
     // static class, use these attributes [<AbstractClass; Sealed>] to match C# static class
-    // and make in visible in C# // https://stackoverflow.com/questions/13101995/defining-static-classes-in-f
+    // and make it visible in C# // https://stackoverflow.com/questions/13101995/defining-static-classes-in-f
 
     /// The current active Rhino document (= the file currently open)
     static member Doc = State.Doc
@@ -45,7 +45,7 @@ type RhinoScriptSyntax private () =
     static member val Sticky = new Dict<string, obj>() with get
 
     /// An Integer Enum of Object types.
-    /// To be use in object selection functions such as rs.GetObjects().
+    /// To be used in object selection functions such as rs.GetObjects().
     static member val Filter = new ObjectFilterEnum ()
 
     /// Tests to see if the user has pressed the escape key.

@@ -1,4 +1,4 @@
-﻿namespace Rhino.Scripting
+namespace Rhino.Scripting
 
 open Rhino
 open System
@@ -70,7 +70,7 @@ module AutoOpenLine =
     /// <param name="line">(Geometry.Line) a Geometry.Line</param>
     /// <param name="distance">(float) The distance</param>
     /// <param name="line2">(Geometry.Line) The test line</param>
-    /// <returns>(bool) True if the shortest distance from the line to the other project is
+    /// <returns>(bool) True if the shortest distance from the line to the other object is
     ///    greater than distance, False otherwise.</returns>
     static member LineIsFartherThan(line:Line, distance:float, line2:Line) : bool =
         let minDist = line.MinimumDistanceTo(line2)

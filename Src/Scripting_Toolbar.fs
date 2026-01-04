@@ -98,16 +98,16 @@ module AutoOpenToolbar =
         else RhinoScriptingException.Raise "RhinoScriptSyntax.IsToolbarVisible failed on name '%s'" name
 
 
-    /// <summary>Opens a tool-bar collection file.</summary>
+    /// <summary>Opens a toolbar collection file.</summary>
     /// <param name="file">(string) Full path to the collection file</param>
-    /// <returns>(string) Rhino-assigned name of the tool-bar collection.</returns>
+    /// <returns>(string) Rhino-assigned name of the toolbar collection.</returns>
     static member OpenToolbarCollection(file:string) : string =
         let tbfile = RhinoApp.ToolbarFiles.Open(file)
         if notNull tbfile then  tbfile.Name
         else RhinoScriptingException.Raise "RhinoScriptSyntax.OpenToolbarCollection failed on file '%s'" file
 
 
-    /// <summary>Saves an open tool-bar collection to disk.</summary>
+    /// <summary>Saves an open toolbar collection to disk.</summary>
     /// <param name="name">(string) Name of a currently open toolbar file</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
     static member SaveToolbarCollection(name:string) : bool =
@@ -116,7 +116,7 @@ module AutoOpenToolbar =
         else false
 
 
-    /// <summary>Saves an open tool-bar collection to a different disk file.</summary>
+    /// <summary>Saves an open toolbar collection to a different disk file.</summary>
     /// <param name="name">(string) Name of a currently open toolbar file</param>
     /// <param name="file">(string) Full path to file name to save to</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
@@ -126,7 +126,7 @@ module AutoOpenToolbar =
         else false
 
 
-    /// <summary>Shows a previously hidden tool-bar group in an open tool-bar collection.</summary>
+    /// <summary>Shows a previously hidden toolbar group in an open toolbar collection.</summary>
     /// <param name="name">(string) Name of a currently open toolbar file</param>
     /// <param name="toolbarGroup">(string) Name of a toolbar group to show</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
@@ -143,19 +143,19 @@ module AutoOpenToolbar =
             false
 
 
-    /// <summary>Returns number of currently open tool-bar collections.</summary>
-    /// <returns>(int) The number of currently open tool-bar collections.</returns>
+    /// <summary>Returns number of currently open toolbar collections.</summary>
+    /// <returns>(int) The number of currently open toolbar collections.</returns>
     static member ToolbarCollectionCount() : int =
         RhinoApp.ToolbarFiles.Count
 
 
-    /// <summary>Returns names of all currently open tool-bar collections.</summary>
-    /// <returns>(string ResizeArray) The names of all currently open tool-bar collections.</returns>
+    /// <summary>Returns names of all currently open toolbar collections.</summary>
+    /// <returns>(string ResizeArray) The names of all currently open toolbar collections.</returns>
     static member ToolbarCollectionNames() : string ResizeArray =
         RhinoApp.ToolbarFiles |> RArr.mapSeq _.Name
 
-    /// <summary>Returns full path to a currently open tool-bar collection file.</summary>
-    /// <param name="name">(string) Name of currently open tool-bar collection</param>
+    /// <summary>Returns full path to a currently open toolbar collection file.</summary>
+    /// <param name="name">(string) Name of currently open toolbar collection</param>
     /// <returns>(string) The full path.</returns>
     static member ToolbarCollectionPath(name:string) : string =
         let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
@@ -163,11 +163,11 @@ module AutoOpenToolbar =
         else ""
 
 
-    /// <summary>Returns the number of tool-bars or groups in a currently open tool-bar file.</summary>
-    /// <param name="name">(string) Name of currently open tool-bar collection</param>
+    /// <summary>Returns the number of toolbars or groups in a currently open toolbar file.</summary>
+    /// <param name="name">(string) Name of currently open toolbar collection</param>
     /// <param name="groups">(bool) Optional, default value: <c>false</c>
-    ///    If true, return the number of tool-bar groups in the file</param>
-    /// <returns>(int) number of tool-bars.</returns>
+    ///    If true, return the number of toolbar groups in the file</param>
+    /// <returns>(int) Number of toolbars.</returns>
     static member ToolbarCount(name:string, [<OPT;DEF(false)>]groups:bool) : int =
         let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
         if notNull tbfile then
@@ -177,12 +177,12 @@ module AutoOpenToolbar =
             -1
 
 
-    /// <summary>Returns the names of all tool-bars (or tool-bar groups) found in a
-    ///    currently open tool-bar file.</summary>
-    /// <param name="name">(string) Name of currently open tool-bar collection</param>
+    /// <summary>Returns the names of all toolbars (or toolbar groups) found in a
+    ///    currently open toolbar file.</summary>
+    /// <param name="name">(string) Name of currently open toolbar collection</param>
     /// <param name="groups">(bool) Optional, default value: <c>false</c>
-    ///    If true, return the names of tool-bar groups in the file</param>
-    /// <returns>(string ResizeArray) names of all tool-bars (or tool-bar groups).</returns>
+    ///    If true, return the names of toolbar groups in the file</param>
+    /// <returns>(string ResizeArray) Names of all toolbars (or toolbar groups).</returns>
     static member ToolbarNames(name:string, [<OPT;DEF(false)>]groups:bool) : string ResizeArray =
         let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
         let rc = ResizeArray()

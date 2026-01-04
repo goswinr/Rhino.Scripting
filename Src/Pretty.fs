@@ -77,7 +77,7 @@ module AutoOpenPrettyExtensions =
 
 
     type Plane with
-        /// returns a string showing the Transformation Matrix in an aligned 4x4 grid
+        /// returns a string showing the Plane origin and axes
         member p.Pretty =
             if not p.IsValid then "invalid Rhino.Geometry.Plane"
             else
@@ -90,7 +90,7 @@ module AutoOpenPrettyExtensions =
                 |> String.concat Environment.NewLine
 
     type BoundingBox with
-        /// returns a string showing the Transformation Matrix in an aligned 4x4 grid
+        /// returns a string showing the BoundingBox size and extents
         member b.Pretty =
             [|
             if b.IsDegenerate(Rhino.Scripting.State.Doc.ModelAbsoluteTolerance) > 0 then
@@ -150,7 +150,7 @@ module internal PrettySetup =
         | :? BoundingBox as x -> Some <| x.Pretty
         | _                   -> None
 
-    /// This should only needs to be called by other libraries that build on top of this pretty printing functions
+    /// This should only need to be called by other libraries that build on top of this pretty printing functions
     let init()=
         if initIsPending then
             initIsPending <- false
@@ -168,7 +168,7 @@ module internal PrettySetup =
                     RhinoDoc.EndOpenDocument.Add       (fun a -> PrettySettings.userZeroTolerance <- a.Document.ModelAbsoluteTolerance * 0.1 )
             with e ->
                 // try to log errors to error stream:
-                eprintfn "Initializing Pretty pretty printing in Rhino.InternalToPrettySetup.init() via Rhino.Scripting.dll failed with:%s%A" Environment.NewLine e
+                eprintfn "Initializing Pretty pretty printing in Rhino.PrettySetup.init() via Rhino.Scripting.dll failed with:%s%A" Environment.NewLine e
 
 
     /// Like printfn but in Blue if used from Fesh Editor. Adds a new line at end.
@@ -201,7 +201,7 @@ module internal Pretty  =
     /// Settings are exposed in FsEx.Pretty.PrettySettings:
     /// - thousandSeparator       = '     ; set this to change the printing of floats and integers larger than 10'000
     /// - maxNestingDepth         = 3     ; set this to change how deep the content of nested seq is printed (printFull ignores this)
-    /// - maxNestingDepth         = 6     ; set this to change how how many items per seq are printed (printFull ignores this)
+    /// - maxNestingDepth         = 6     ; set this to change how many items per seq are printed (printFull ignores this)
     /// - maxCharsInString        = 2000  ; set this to change how many characters of a string might be printed at once.
     let str (x:'T) :string =
         PrettySetup.init() // the shadowing is only done to ensure init() is called once

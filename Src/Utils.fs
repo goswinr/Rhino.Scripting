@@ -79,7 +79,7 @@ module PrettyFormat =
         | -1 ->
             match s.IndexOf("e",StringComparison.OrdinalIgnoreCase) with
             | -1 -> doBeforeComma start (s.Length-1)
-            | e -> // if float is in scientific notation don't insert comas into it too:
+            | e -> // if float is in scientific notation don't insert commas into it too:
                 doBeforeComma start (s.Length-1)
                 for ei = e to s.Length-1 do add s.[ei]
         | i ->
@@ -89,7 +89,7 @@ module PrettyFormat =
             if i < s.Length then
                 match s.IndexOf("e",StringComparison.OrdinalIgnoreCase) with
                 | -1 -> doAfterComma (i+1) (s.Length-1)
-                | e -> // if float is in scientific notation don't insert comas into it too:
+                | e -> // if float is in scientific notation don't insert commas into it too:
                     doAfterComma (i+1) (e-1)
                     for ei = e to s.Length-1 do add s.[ei]
 
@@ -130,8 +130,8 @@ module PrettyFormat =
     /// e.g.: 0 digits behind comma if above 1000
     let single (x:float32) =
         if   Single.IsNaN x then Literals.NaN
-        elif x = Single.NegativeInfinity then Literals.PositiveInfinity
-        elif x = Single.PositiveInfinity then Literals.NegativeInfinity
+        elif x = Single.NegativeInfinity then Literals.NegativeInfinity
+        elif x = Single.PositiveInfinity then Literals.PositiveInfinity
         elif x = -1.234321e+38f then Literals.RhinoMathUnsetSingle // for https://developer.rhino3d.com/api/RhinoCommon/html/F_Rhino_RhinoMath_UnsetSingle.htm
         elif x = 0.0f then "0.0" // not "0" as in sprintf "%g"
         else
@@ -244,7 +244,7 @@ module AutoOpenRsUtils =
         f x |> ignore<bool> //https://twitter.com/GoswinR/status/1316988132932407296
         x
 
-        /// Null coalescing:
+    /// Null coalescing:
     /// Returns the value on the left unless it is null, then it returns the value on the right.
     let inline ( |? ) (a:'T) (b:'T)  =
         // a more fancy version: https://gist.github.com/jbtule/8477768#file-nullcoalesce-fs
@@ -258,11 +258,11 @@ module AutoOpenRsUtils =
         Double.IsInfinity (float f) || Double.IsNaN (float f)
 
 
-    /// Converts Angels from Degrees to Radians.
+    /// Converts Angles from Degrees to Radians.
     let inline toRadians (degrees:float<'T>):float =  // no measure on returned float !
         0.0174532925199433 * float degrees // 0.0174532925199433 = Math.PI / 180.
 
-    /// Converts Angels from Radians to Degrees.
+    /// Converts Angles from Radians to Degrees.
     let inline toDegrees (radians:float<'T>) :float = // no measure on returned float !
         57.2957795130823 * float radians // 57.2957795130823 = 180. / Math.PI
 
@@ -273,8 +273,8 @@ module AutoOpenRsUtils =
     /// German culture (used for float parsing).
     let deAt = Globalization.CultureInfo.GetCultureInfo "de-DE"
 
-        /// First tries to parses float with En-Us CultureInfo (period as decimal separator),
-    /// if this fails tries to parse parses float with De-At CultureInfo (comma as decimal separator).
+    /// First tries to parse float with En-Us CultureInfo (period as decimal separator),
+    /// if this fails tries to parse float with De-At CultureInfo (comma as decimal separator).
     let tryParseFloatEnDe (x:string) : option<float> =
         match Double.TryParse(x, Globalization.NumberStyles.Float, enUs) with
         | true, f -> Some f
@@ -283,8 +283,8 @@ module AutoOpenRsUtils =
                 | _ -> None
 
 
-    /// First tries to parses float with En-Us CultureInfo (period as decimal separator).
-    /// If this fails tries to parse parses float with De-At CultureInfo (comma as decimal separator).
+    /// First tries to parse float with En-Us CultureInfo (period as decimal separator).
+    /// If this fails tries to parse float with De-At CultureInfo (comma as decimal separator).
     let parseFloatEnDe (x:string) : float =
         match tryParseFloatEnDe x  with
         | Some f -> f

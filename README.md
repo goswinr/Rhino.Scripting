@@ -30,7 +30,7 @@ also access to all functions of the underlying .NET Framework as well as the [Rh
 
 ## What is this repo?
 
-This repo has [all original  RhinoScript functions](https://developer.rhino3d.com/api/RhinoScriptSyntax/) reimplemented in [F#](https://fsharp.org/).<br>
+This repo has [all original RhinoScript functions](https://developer.rhino3d.com/api/RhinoScriptSyntax/) reimplemented in [F#](https://fsharp.org/).<br>
 It is literally a translation of [the open-source IronPython rhinoscriptsyntax](https://github.com/mcneel/rhinoscriptsyntax) implementation to F#.<br>
 [You can see all 900+ methods in this repo in the docs](https://goswinr.github.io/Rhino.Scripting/reference/rhino-scripting-rhinoscriptsyntax.html).
 
@@ -50,7 +50,7 @@ First reference the assemblies.
 #r "nuget: Rhino.Scripting"
 ```
 
-The main namespace is  `Rhino.Scripting`.<br>
+The main namespace is `Rhino.Scripting`.<br>
 The main class of this library is called `RhinoScriptSyntax` it has all ~900 functions as static methods.<br>
 In F# you can create an alias like this:
 
@@ -76,7 +76,7 @@ First reference the assemblies.
 ```csharp
 #r "nuget: Rhino.Scripting"
 ```
-The main namespace is  `Rhino.Scripting`.<br>
+The main namespace is `Rhino.Scripting`.<br>
 The main class of this library is called `RhinoScriptSyntax` it has all ~900 functions as static methods.<br>
 In C# you can create an alias like this:
 
@@ -86,7 +86,7 @@ using rs = Rhino.Scripting.RhinoScriptSyntax;
 
 then you can use it like the RhinoScriptSyntax in Python:
 ```csharp
-var pt =  rs.GetObject("Select an Object");
+var pt = rs.GetObject("Select an Object");
 rs.ObjectColor(pt, System.Drawing.Color.Blue);
 ```
 
@@ -124,7 +124,7 @@ To set the layer of several objects, and create the layer if it does not exist y
 rs.ObjectLayer(list of guids, string, createLayerIfMissing = true )
 ```
 
-These are implemented with 3 overloads and  `Optional` and `DefaultParameterValue` parameters:
+These are implemented with 3 overloads and `Optional` and `DefaultParameterValue` parameters:
 ```fsharp
     ///<summary>Returns the full layer name of an object.
     /// parent layers are separated by <c>::</c>.</summary>

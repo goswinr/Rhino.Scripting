@@ -5,7 +5,7 @@ open System
 open Rhino.Scripting.RhinoScriptingUtils
 
 /// An internal static class to hold current state like active Rhino document.
-[<AbstractClass; Sealed>] //static class, use these attributes to match C# static class and make in visible in C# // https://stackoverflow.com/questions/13101995/defining-static-classes-in-f
+[<AbstractClass; Sealed>] //static class, use these attributes to match C# static class and make it visible in C# // https://stackoverflow.com/questions/13101995/defining-static-classes-in-f
 type internal State private () =
 
     /// Rhino.Runtime.HostUtils.RunningInRhino
@@ -14,7 +14,7 @@ type internal State private () =
     /// was escape key pressed
     static let mutable escapePressed = false // will be reset in EndOpenDocument Event
 
-    /// To store last created object form executing a rs.Command(...)
+    /// To store last created object from executing a rs.Command(...)
     static let mutable commandSerialNumbers : option<uint32*uint32> = None // will be reset in EndOpenDocument Event
 
     /// The current active Rhino document (= the file currently open)
@@ -28,7 +28,7 @@ type internal State private () =
     //----------------------------------------------------------------
 
 
-    /// keep the reference to the active Document (3d file ) updated.
+    /// keep the reference to the active Document (3d file) updated.
     static let updateDoc (document:RhinoDoc) =
         doc <- document //Rhino.RhinoDoc.ActiveDoc
         ot  <- document.Objects //Rhino.RhinoDoc.ActiveDoc.Objects
@@ -66,9 +66,9 @@ type internal State private () =
                 // RhinoDoc.BeginOpenDocument.Add //Don't use since it is called on temp pasting files too
 
                 // listen to Esc Key press.
-                // doing this "Add" in on UI thread is only required if no handler has been added in sync before.
-                // Adding the first handler to this from async thread cause a Access violation exception that can only be seen with the windows event log.
-                // This his handler does not work on Sync evaluation-mode , TODO: test!
+                // doing this "Add" on UI thread is only required if no handler has been added in sync before.
+                // Adding the first handler to this from async thread causes an Access violation exception that can only be seen with the windows event log.
+                // This handler does not work on Sync evaluation-mode, TODO: test!
                 RhinoApp.EscapeKeyPressed.Add( fun _ ->
                     if not escapePressed  &&  not <| Input.RhinoGet.InGet(doc) then
                         escapePressed <- true
@@ -117,7 +117,7 @@ type internal State private () =
         and set v =
             escapePressed <- v
 
-    /// To store last created object form executing a rs.Command(...)
+    /// To store last created object from executing a rs.Command(...)
     static member CommandSerialNumbers
         with get() =
             if isNull doc then initState()

@@ -6,9 +6,6 @@ open System
 open Rhino.Scripting.RhinoScriptingUtils
 open Rhino.Geometry
 
-
-
-
 [<AutoOpen>]
 module AutoOpenBlock =
   type RhinoScriptSyntax with

@@ -67,10 +67,10 @@ module internal Util =
                                 loop(i+1)
 
                             // sometimes OK :
-                            | UnicodeCategory.OtherSymbol       
-                            | UnicodeCategory.MathSymbol         
-                            | UnicodeCategory.OtherNumber ->    
-                                if (c <= '÷' && c <> '×')  || c = '⌀' || c='∅'  then // anything below char 247 (÷) is OK , but exclude MathSymbol char 215 that looks like letter x, ⌀ 8960 DIAMETER SIGN, and ∅ 8709 EMPTY SET (somtimes used as diameter too)"
+                            | UnicodeCategory.OtherSymbol
+                            | UnicodeCategory.MathSymbol
+                            | UnicodeCategory.OtherNumber ->
+                                if (c <= '÷' && c <> '×')  || c = '⌀' || c='∅'  then // anything below char 247 (÷) is OK , but exclude MathSymbol char 215 that looks like letter x, ⌀ 8960 DIAMETER SIGN, and ∅ 8709 EMPTY SET (sometimes used as diameter too)"
                                     loop(i+1) 
                                 else 
                                     false
@@ -102,8 +102,8 @@ module internal Util =
                 loop 0
 
 
-    /// <summary>Checks if a string is a acceptable string for use in Rhino Object Names or User Dictionary keys and values.
-    /// A acceptable string may not include line returns, tabs, and leading or trailing whitespace.
+    /// <summary>Checks if a string is an acceptable string for use in Rhino Object Names or User Dictionary keys and values.
+    /// An acceptable string may not include line returns, tabs, and leading or trailing whitespace.
     /// Confusing or ambiguous Unicode characters that look like ASCII are allowed. </summary>
     /// <param name="name">(string) The string to check.</param>
     /// <param name="allowEmpty">(bool) set to true to make empty strings pass. </param>    

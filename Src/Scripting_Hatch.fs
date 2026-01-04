@@ -102,7 +102,7 @@ module AutoOpenHatch =
         try
            let rc = RhinoScriptSyntax.AddHatches([curve], hatchPattern, scale, rotation,tolerance)
            if rc.Count = 1 then rc.[0]
-           else RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatch failed to create exactly on hatch from curve. It created %d Hatches"  rc.Count
+           else RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatch failed to create exactly one hatch from curve. It created %d Hatches"  rc.Count
         with e->
             let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance
             RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatch failed on one curve using tolerance %f %sMessage: %s" tolerance  Environment.NewLine e.Message
@@ -121,7 +121,7 @@ module AutoOpenHatch =
                               [<OPT;DEF(0.0)>]rotation:float,
                               [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray =
         let curves  = curveIds |> RArr.mapSeq RhinoScriptSyntax.CoerceCurve
-        try RhinoScriptSyntax.AddHatches(curves, hatchPattern, scale, rotation)
+        try RhinoScriptSyntax.AddHatches(curves, hatchPattern, scale, rotation, tolerance)
         with e->
             let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance
             RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatches failed on curveIds using tolerance %f :'%s' %sMessage: %s" tolerance (Pretty.str curveIds) Environment.NewLine  e.Message
@@ -236,9 +236,9 @@ module AutoOpenHatch =
         hatchObj.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
-    /// <summary>Changes multiple Hatch objects's Hatch pattern.</summary>
+    /// <summary>Changes multiple Hatch objects' Hatch pattern.</summary>
     /// <param name="hatchIds">(Guid seq) Identifiers of multiple Hatch objects</param>
-    /// <param name="hatchPattern">(string) Name of multiple existing Hatch pattern to replace the
+    /// <param name="hatchPattern">(string) Name of existing Hatch pattern to replace the
     ///    current Hatch pattern</param>
     /// <returns>(unit) void, nothing.</returns>
     static member HatchPattern(hatchIds:Guid seq, hatchPattern:string) : unit = //MULTISET
@@ -312,11 +312,11 @@ module AutoOpenHatch =
     /// <returns>(unit) void, nothing.</returns>
     static member HatchRotation(hatchId:Guid, rotation:float) : unit = //SET
         let hatchObj = RhinoScriptSyntax.CoerceHatchObject(hatchId)
-        let mutable rc = hatchObj.HatchGeometry.PatternRotation
-        rc <- RhinoMath.ToDegrees(rc)
-        if rotation <> rc then
-            let rotation = RhinoMath.ToRadians(rotation)
-            hatchObj.HatchGeometry.PatternRotation <- rotation
+        let currentRotationRadians = hatchObj.HatchGeometry.PatternRotation
+        let currentRotationDegrees = RhinoMath.ToDegrees(currentRotationRadians)
+        if rotation <> currentRotationDegrees then
+            let rotationRadians = RhinoMath.ToRadians(rotation)
+            hatchObj.HatchGeometry.PatternRotation <- rotationRadians
             hatchObj.CommitChanges() |> ignore<bool>
             State.Doc.Views.Redraw()
 
