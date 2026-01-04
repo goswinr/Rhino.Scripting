@@ -31,7 +31,7 @@ type internal DEF =  Runtime.InteropServices.DefaultParameterValueAttribute
 type RhinoScriptSyntax private () =
 
     // static class, use these attributes [<AbstractClass; Sealed>] to match C# static class
-    // and make in visible in C# // https://stackoverflow.com/questions/13101995/defining-static-classes-in-f
+    // and make it visible in C# // https://stackoverflow.com/questions/13101995/defining-static-classes-in-f
 
     /// The current active Rhino document (= the file currently open)
     static member Doc = State.Doc
@@ -45,7 +45,7 @@ type RhinoScriptSyntax private () =
     static member val Sticky = new Dict<string, obj>() with get
 
     /// An Integer Enum of Object types.
-    /// To be use in object selection functions such as rs.GetObjects().
+    /// To be used in object selection functions such as rs.GetObjects().
     static member val Filter = new ObjectFilterEnum ()
 
     /// Tests to see if the user has pressed the escape key.
@@ -725,7 +725,7 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Attempt to get Hatch Geometry.</summary>
     /// <param name="objectId">(Guid) objectId of Hatch object</param>
-    /// <returns>A Geometry.CoerceHatch. Raises a RhinoScriptingException if coerce failed.</returns>
+    /// <returns>A Geometry.Hatch. Raises a RhinoScriptingException if coerce failed.</returns>
     static member CoerceHatch (objectId:Guid) : Hatch =
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :?  Hatch as a -> a
@@ -793,9 +793,9 @@ type RhinoScriptSyntax private () =
                 | :? option<Guid> as go      -> ((State.Doc.Objects.FindId(go.Value).Geometry) :?> Point).Location
                 | :? (string*string*string) as xyz  -> let x, y, z = xyz in Point3d(parseFloatEnDe(x), parseFloatEnDe(y), parseFloatEnDe(z))
                 | :? Guid as g ->  ((State.Doc.Objects.FindId(g).Geometry) :?> Point).Location
-                | :? seq<float>  as xyz  ->  point3dOf3(Seq.item 0 xyz, Seq.item 3 xyz, Seq.item 2 xyz)
-                | :? seq<int>  as xyz  ->    point3dOf3(Seq.item 0 xyz, Seq.item 3 xyz, Seq.item 2 xyz)
-                | :? seq<string> as xyz  ->  point3dOf3(Seq.item 0 xyz, Seq.item 3 xyz, Seq.item 2 xyz)
+                | :? seq<float>  as xyz  ->  point3dOf3(Seq.item 0 xyz, Seq.item 1 xyz, Seq.item 2 xyz)
+                | :? seq<int>  as xyz  ->    point3dOf3(Seq.item 0 xyz, Seq.item 1 xyz, Seq.item 2 xyz)
+                | :? seq<string> as xyz  ->  point3dOf3(Seq.item 0 xyz, Seq.item 1 xyz, Seq.item 2 xyz)
                 | :? string as s  ->
                     let xs = s.Split(';')
                     if Seq.length xs > 2 then
@@ -847,9 +847,9 @@ type RhinoScriptSyntax private () =
                 | :? (Vector3d option) as v   -> v.Value // from UI function
                 | :? option<Guid> as go      -> (State.Doc.Objects.FindId(go.Value).Geometry :?> LineCurve).Line.Direction
                 | :? (string*string*string) as xyz  -> let x, y, z = xyz in Vector3d(parseFloatEnDe(x), parseFloatEnDe(y), parseFloatEnDe(z))
-                | :? seq<float>  as xyz  ->  vecOf3(Seq.item 0 xyz, Seq.item 3 xyz, Seq.item 2 xyz)
-                | :? seq<int>  as xyz  ->    vecOf3(Seq.item 0 xyz, Seq.item 3 xyz, Seq.item 2 xyz)
-                | :? seq<string> as xyz  ->  vecOf3(Seq.item 0 xyz, Seq.item 3 xyz, Seq.item 2 xyz)
+                | :? seq<float>  as xyz  ->  vecOf3(Seq.item 0 xyz, Seq.item 1 xyz, Seq.item 2 xyz)
+                | :? seq<int>  as xyz  ->    vecOf3(Seq.item 0 xyz, Seq.item 1 xyz, Seq.item 2 xyz)
+                | :? seq<string> as xyz  ->  vecOf3(Seq.item 0 xyz, Seq.item 1 xyz, Seq.item 2 xyz)
                 | :? string as s  ->
                     let xs = s.Split(';')
                     if Seq.length xs > 2 then
@@ -8567,7 +8567,7 @@ type RhinoScriptSyntax private () =
         try
            let rc = RhinoScriptSyntax.AddHatches([curve], hatchPattern, scale, rotation,tolerance)
            if rc.Count = 1 then rc.[0]
-           else RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatch failed to create exactly on hatch from curve. It created %d Hatches"  rc.Count
+           else RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatch failed to create exactly one hatch from curve. It created %d Hatches"  rc.Count
         with e->
             let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance
             RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatch failed on one curve using tolerance %f %sMessage: %s" tolerance  Environment.NewLine e.Message
@@ -8586,7 +8586,7 @@ type RhinoScriptSyntax private () =
                               [<OPT;DEF(0.0)>]rotation:float,
                               [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray =
         let curves  = curveIds |> RArr.mapSeq RhinoScriptSyntax.CoerceCurve
-        try RhinoScriptSyntax.AddHatches(curves, hatchPattern, scale, rotation)
+        try RhinoScriptSyntax.AddHatches(curves, hatchPattern, scale, rotation, tolerance)
         with e->
             let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance
             RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatches failed on curveIds using tolerance %f :'%s' %sMessage: %s" tolerance (Pretty.str curveIds) Environment.NewLine  e.Message
@@ -8701,9 +8701,9 @@ type RhinoScriptSyntax private () =
         hatchObj.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
-    /// <summary>Changes multiple Hatch objects's Hatch pattern.</summary>
+    /// <summary>Changes multiple Hatch objects' Hatch pattern.</summary>
     /// <param name="hatchIds">(Guid seq) Identifiers of multiple Hatch objects</param>
-    /// <param name="hatchPattern">(string) Name of multiple existing Hatch pattern to replace the
+    /// <param name="hatchPattern">(string) Name of existing Hatch pattern to replace the
     ///    current Hatch pattern</param>
     /// <returns>(unit) void, nothing.</returns>
     static member HatchPattern(hatchIds:Guid seq, hatchPattern:string) : unit = //MULTISET
@@ -8777,11 +8777,11 @@ type RhinoScriptSyntax private () =
     /// <returns>(unit) void, nothing.</returns>
     static member HatchRotation(hatchId:Guid, rotation:float) : unit = //SET
         let hatchObj = RhinoScriptSyntax.CoerceHatchObject(hatchId)
-        let mutable rc = hatchObj.HatchGeometry.PatternRotation
-        rc <- RhinoMath.ToDegrees(rc)
-        if rotation <> rc then
-            let rotation = RhinoMath.ToRadians(rotation)
-            hatchObj.HatchGeometry.PatternRotation <- rotation
+        let currentRotationRadians = hatchObj.HatchGeometry.PatternRotation
+        let currentRotationDegrees = RhinoMath.ToDegrees(currentRotationRadians)
+        if rotation <> currentRotationDegrees then
+            let rotationRadians = RhinoMath.ToRadians(rotation)
+            hatchObj.HatchGeometry.PatternRotation <- rotationRadians
             hatchObj.CommitChanges() |> ignore<bool>
             State.Doc.Views.Redraw()
 
@@ -9114,7 +9114,7 @@ type RhinoScriptSyntax private () =
             RhinoScriptingException.Raise "RhinoScriptSyntax.LightColor failed.  objectId:'%s' color:'%A'" (Pretty.str objectId) color
         State.Doc.Views.Redraw()
 
-    /// <summary>Changes the color of multiple light.</summary>
+    /// <summary>Changes the color of multiple lights.</summary>
     /// <param name="objectIds">(Guid seq) The light objects's identifiers</param>
     /// <param name="color">(Drawing.Color) The light's new color</param>
     /// <returns>(unit) void, nothing.</returns>
@@ -9278,7 +9278,7 @@ type RhinoScriptSyntax private () =
             RhinoScriptingException.Raise "RhinoScriptSyntax.SpotLightHardness failed.  objectId:'%s' hardness:'%A'" (Pretty.str objectId) hardness
         State.Doc.Views.Redraw()
 
-    /// <summary>Changes the hardness of multiple spot light. Spotlight hardness
+    /// <summary>Changes the hardness of multiple spot lights. Spotlight hardness
     /// controls the fully illuminated region.</summary>
     /// <param name="objectIds">(Guid seq) The light objects's identifiers</param>
     /// <param name="hardness">(float) The light's new hardness</param>
@@ -9319,7 +9319,7 @@ type RhinoScriptSyntax private () =
             RhinoScriptingException.Raise "RhinoScriptSyntax.SpotLightRadius failed.  objectId:'%s' radius:'%A'" (Pretty.str objectId) radius
         State.Doc.Views.Redraw()
 
-    /// <summary>Changes the radius of multiple spot light.</summary>
+    /// <summary>Changes the radius of multiple spot lights.</summary>
     /// <param name="objectIds">(Guid seq) The light objects's identifiers</param>
     /// <param name="radius">(float) The light's new radius</param>
     /// <returns>(unit) void, nothing.</returns>
@@ -9358,7 +9358,7 @@ type RhinoScriptSyntax private () =
             RhinoScriptingException.Raise "RhinoScriptSyntax.SpotLightShadowIntensity failed.  objectId:'%s' intensity:'%A'" (Pretty.str objectId) intensity
         State.Doc.Views.Redraw()
 
-    /// <summary>Changes the shadow intensity of multiple spot light.</summary>
+    /// <summary>Changes the shadow intensity of multiple spot lights.</summary>
     /// <param name="objectIds">(Guid seq) The light objects's identifiers</param>
     /// <param name="intensity">(float) The light's new intensity</param>
     /// <returns>(unit) void, nothing.</returns>
@@ -9434,7 +9434,7 @@ type RhinoScriptSyntax private () =
     /// <param name="line">(Geometry.Line) a Geometry.Line</param>
     /// <param name="distance">(float) The distance</param>
     /// <param name="line2">(Geometry.Line) The test line</param>
-    /// <returns>(bool) True if the shortest distance from the line to the other project is
+    /// <returns>(bool) True if the shortest distance from the line to the other object is
     ///    greater than distance, False otherwise.</returns>
     static member LineIsFartherThan(line:Line, distance:float, line2:Line) : bool =
         let minDist = line.MinimumDistanceTo(line2)
@@ -9558,7 +9558,7 @@ type RhinoScriptSyntax private () =
     /// <returns>(bool) True or False.</returns>
     static member IsLinetypeReference(name:string) : bool =
         let lt = State.Doc.Linetypes.FindName(name)
-        if isNull lt then RhinoScriptingException.Raise "RhinoScriptSyntax.IsLinetypeReference unable to find '%s' in a line-types" name
+        if isNull lt then RhinoScriptingException.Raise "RhinoScriptSyntax.IsLinetypeReference unable to find '%s' in linetypes" name
         lt.IsReference
 
 
@@ -16444,16 +16444,16 @@ type RhinoScriptSyntax private () =
         else RhinoScriptingException.Raise "RhinoScriptSyntax.IsToolbarVisible failed on name '%s'" name
 
 
-    /// <summary>Opens a tool-bar collection file.</summary>
+    /// <summary>Opens a toolbar collection file.</summary>
     /// <param name="file">(string) Full path to the collection file</param>
-    /// <returns>(string) Rhino-assigned name of the tool-bar collection.</returns>
+    /// <returns>(string) Rhino-assigned name of the toolbar collection.</returns>
     static member OpenToolbarCollection(file:string) : string =
         let tbfile = RhinoApp.ToolbarFiles.Open(file)
         if notNull tbfile then  tbfile.Name
         else RhinoScriptingException.Raise "RhinoScriptSyntax.OpenToolbarCollection failed on file '%s'" file
 
 
-    /// <summary>Saves an open tool-bar collection to disk.</summary>
+    /// <summary>Saves an open toolbar collection to disk.</summary>
     /// <param name="name">(string) Name of a currently open toolbar file</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
     static member SaveToolbarCollection(name:string) : bool =
@@ -16462,7 +16462,7 @@ type RhinoScriptSyntax private () =
         else false
 
 
-    /// <summary>Saves an open tool-bar collection to a different disk file.</summary>
+    /// <summary>Saves an open toolbar collection to a different disk file.</summary>
     /// <param name="name">(string) Name of a currently open toolbar file</param>
     /// <param name="file">(string) Full path to file name to save to</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
@@ -16472,7 +16472,7 @@ type RhinoScriptSyntax private () =
         else false
 
 
-    /// <summary>Shows a previously hidden tool-bar group in an open tool-bar collection.</summary>
+    /// <summary>Shows a previously hidden toolbar group in an open toolbar collection.</summary>
     /// <param name="name">(string) Name of a currently open toolbar file</param>
     /// <param name="toolbarGroup">(string) Name of a toolbar group to show</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
@@ -16489,19 +16489,19 @@ type RhinoScriptSyntax private () =
             false
 
 
-    /// <summary>Returns number of currently open tool-bar collections.</summary>
-    /// <returns>(int) The number of currently open tool-bar collections.</returns>
+    /// <summary>Returns number of currently open toolbar collections.</summary>
+    /// <returns>(int) The number of currently open toolbar collections.</returns>
     static member ToolbarCollectionCount() : int =
         RhinoApp.ToolbarFiles.Count
 
 
-    /// <summary>Returns names of all currently open tool-bar collections.</summary>
-    /// <returns>(string ResizeArray) The names of all currently open tool-bar collections.</returns>
+    /// <summary>Returns names of all currently open toolbar collections.</summary>
+    /// <returns>(string ResizeArray) The names of all currently open toolbar collections.</returns>
     static member ToolbarCollectionNames() : string ResizeArray =
         RhinoApp.ToolbarFiles |> RArr.mapSeq _.Name
 
-    /// <summary>Returns full path to a currently open tool-bar collection file.</summary>
-    /// <param name="name">(string) Name of currently open tool-bar collection</param>
+    /// <summary>Returns full path to a currently open toolbar collection file.</summary>
+    /// <param name="name">(string) Name of currently open toolbar collection</param>
     /// <returns>(string) The full path.</returns>
     static member ToolbarCollectionPath(name:string) : string =
         let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
@@ -16509,11 +16509,11 @@ type RhinoScriptSyntax private () =
         else ""
 
 
-    /// <summary>Returns the number of tool-bars or groups in a currently open tool-bar file.</summary>
-    /// <param name="name">(string) Name of currently open tool-bar collection</param>
+    /// <summary>Returns the number of toolbars or groups in a currently open toolbar file.</summary>
+    /// <param name="name">(string) Name of currently open toolbar collection</param>
     /// <param name="groups">(bool) Optional, default value: <c>false</c>
-    ///    If true, return the number of tool-bar groups in the file</param>
-    /// <returns>(int) number of tool-bars.</returns>
+    ///    If true, return the number of toolbar groups in the file</param>
+    /// <returns>(int) Number of toolbars.</returns>
     static member ToolbarCount(name:string, [<OPT;DEF(false)>]groups:bool) : int =
         let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
         if notNull tbfile then
@@ -16523,12 +16523,12 @@ type RhinoScriptSyntax private () =
             -1
 
 
-    /// <summary>Returns the names of all tool-bars (or tool-bar groups) found in a
-    ///    currently open tool-bar file.</summary>
-    /// <param name="name">(string) Name of currently open tool-bar collection</param>
+    /// <summary>Returns the names of all toolbars (or toolbar groups) found in a
+    ///    currently open toolbar file.</summary>
+    /// <param name="name">(string) Name of currently open toolbar collection</param>
     /// <param name="groups">(bool) Optional, default value: <c>false</c>
-    ///    If true, return the names of tool-bar groups in the file</param>
-    /// <returns>(string ResizeArray) names of all tool-bars (or tool-bar groups).</returns>
+    ///    If true, return the names of toolbar groups in the file</param>
+    /// <returns>(string ResizeArray) Names of all toolbars (or toolbar groups).</returns>
     static member ToolbarNames(name:string, [<OPT;DEF(false)>]groups:bool) : string ResizeArray =
         let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
         let rc = ResizeArray()
@@ -16865,7 +16865,7 @@ type RhinoScriptSyntax private () =
     /// <returns>(string array) Array of all section names if sectionName is omitted,
     /// else all entry names in this section.</returns>
     static member GetDocumentData([<OPT;DEF(null:string)>]sectionName:string) : array<string> =
-        if notNull sectionName then
+        if isNull sectionName then
             State.Doc.Strings.GetSectionNames()
         else
             State.Doc.Strings.GetEntryNames(sectionName)

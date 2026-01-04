@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.12.1] - 2026-01-04
+### Fixed
+- Fix typos in documentation (README.md spacing issues)
+- Fix typos in XML docstrings (Scripting_Header.fs, Scripting_Light.fs)
+- Fix grammar errors in documentation comments
+
 ## [0.12.0] - 2025-05-25
 ### Fixed
 - fix sync with Fesh.Rhino 0.27.4
@@ -83,7 +89,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - First public release
 
-[Unreleased]: https://github.com/goswinr/Rhino.Scripting/compare/0.12.0...HEAD
+[Unreleased]: https://github.com/goswinr/Rhino.Scripting/compare/0.12.1...HEAD
+[0.12.1]: https://github.com/goswinr/Rhino.Scripting/compare/0.12.0...0.12.1
 [0.12.0]: https://github.com/goswinr/Rhino.Scripting/compare/0.11.0...0.12.0
 [0.11.0]: https://github.com/goswinr/Rhino.Scripting/compare/0.10.1...0.11.0
 [0.10.1]: https://github.com/goswinr/Rhino.Scripting/compare/0.10.0...0.10.1
