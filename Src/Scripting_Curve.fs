@@ -446,7 +446,7 @@ module AutoOpenCurve =
         let arc = ref Arc.Unset
         let rc = curve.TryGetArc( arc, RhinoMath.ZeroTolerance )
         if not <| rc then RhinoScriptingException.Raise "RhinoScriptSyntax.ArcAngle: Curve is not an arc. curveId:'%s' segmentIndex:'%A'" (Pretty.str curveId) segmentIndex
-        (!arc).AngleDegrees
+        (arc.Value).AngleDegrees
 
 
     /// <summary>Returns the center point of an arc Curve object.</summary>
@@ -458,7 +458,7 @@ module AutoOpenCurve =
         let arc = ref Arc.Unset
         let rc = curve.TryGetArc( arc, RhinoMath.ZeroTolerance )
         if not <| rc then RhinoScriptingException.Raise "RhinoScriptSyntax.ArcCenterPoint: Curve is not an arc. curveId:'%s' segmentIndex:'%A'" (Pretty.str curveId) segmentIndex
-        (!arc).Center
+        (arc.Value).Center
 
 
     /// <summary>Returns the mid point of an arc Curve object.</summary>
@@ -470,7 +470,7 @@ module AutoOpenCurve =
         let arc = ref Arc.Unset
         let rc = curve.TryGetArc( arc, RhinoMath.ZeroTolerance )
         if not <| rc then RhinoScriptingException.Raise "RhinoScriptSyntax.ArcMidPoint: Curve is not an arc. curveId:'%s' segmentIndex:'%A'" (Pretty.str curveId) segmentIndex
-        (!arc).MidPoint
+        (arc.Value).MidPoint
 
 
     /// <summary>Returns the radius of an arc Curve object.</summary>
@@ -482,7 +482,7 @@ module AutoOpenCurve =
         let arc = ref Arc.Unset
         let rc = curve.TryGetArc( arc, RhinoMath.ZeroTolerance )
         if not <| rc then RhinoScriptingException.Raise "RhinoScriptSyntax.ArcRadius: Curve is not an arc. curveId:'%s' segmentIndex:'%A'" (Pretty.str curveId) segmentIndex
-        (!arc).Radius
+        (arc.Value).Radius
 
 
 

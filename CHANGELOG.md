@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.13.0] - 2026-01-17
+### Fixed
+- Fix DimStyleTextAlignment
+- Fix Deprecation Warnings
+
+## Changed
+- CoerceView fails on empty string now instead of returning current view
+
 ## [0.12.1] - 2026-01-04
 ### Fixed
 - Fix typos in documentation (README.md spacing issues)

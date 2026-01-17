@@ -122,6 +122,8 @@ module AutoOpenUtility =
         // if isNull cl then RhinoScriptingException.Raise "RhinoScriptSyntax.ClipboardText(text) failed to get clipboard instance"
         // cl.Text <- text //System.InvalidOperationException: Platform instance is null. Have you created your application?
 
+        //https://github.com/mcneel/rhinoscriptsyntax/blob/rhino-8.x/Scripts/rhinoscript/utility.py#L139
+
         // Windows.Forms.Clipboard.SetText(text)
         // use reflection to avoid dependency on Windows.Forms
         let clipboardType = Type.GetType "System.Windows.Forms.Clipboard, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"

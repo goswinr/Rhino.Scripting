@@ -3,8 +3,9 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>net48</TargetFramework>
-    <!-- <TargetFramework>net7.0</TargetFramework> would need RhinoCommon 8.19  -->
-    <!-- net7 failed in the past: https://discourse.mcneel.com/t/rhinocommon-with-net7-0-target/200460/2 -->
+    <!-- <TargetFramework>net7.0</TargetFramework> -->
+
+    <DefineConstants Condition="'$(TargetFramework)' == 'net48'">RH7</DefineConstants>
 
     <LangVersion>preview</LangVersion>
 	  <SatelliteResourceLanguages>en</SatelliteResourceLanguages> <!-- to only have the english resources of F# core-->
@@ -16,9 +17,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- otherwise the minimum FSharp.Core version would be forced by the SDK used for building it. this would be needlessly too high-->
+    <PackageReference Include="RhinoCommon" Version="7.0.20314.3001"  Condition="'$(TargetFramework)' == 'net48'" PrivateAssets="all" ExcludeAssets="runtime" />
+    <PackageReference Include="RhinoCommon" Version="8.19.25132.1001" Condition="'$(TargetFramework)' != 'net48'" PrivateAssets="all" ExcludeAssets="runtime" />
+
+
 	  <PackageReference Include="FSharp.Core" Version="6.0.7" /> <!-- so that dependabot does not fail, even though it is set to be excluded -->
-    <PackageReference Include="RhinoCommon" Version="7.0.20314.3001" PrivateAssets="all" ExcludeAssets="runtime" />
     <PackageReference Include="Eto.Forms"   Version="2.9.0"  PrivateAssets="all" ExcludeAssets="runtime" />
 
     <!-- see https://discourse.mcneel.com/t/system-drawing-object-has-no-attribute-bitmap-rhino-8-wip/150608/6 -->

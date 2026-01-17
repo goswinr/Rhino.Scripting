@@ -215,9 +215,9 @@ type RhinoScriptSyntax private () =
     // TODO none of the coerce function should take generic parameter, just a few overloads
 
 
-    //---------------------------------------------------
-    //-----------------Coerce and TryCoerce pairs -------
-    //---------------------------------------------------
+    //---------------------------------------------
+    //----------- Coerce and TryCoerce pairs -----
+    //---------------------------------------------
 
 
 
@@ -440,14 +440,14 @@ type RhinoScriptSyntax private () =
         | :? Curve as crv ->
             let a = ref (new Arc())
             let ok = crv.TryGetArc(a,State.Doc.ModelAbsoluteTolerance)
-            if ok then Some( !a )
+            if ok then Some( a.Value )
             else None
         | :? Guid as g ->
             match State.Doc.Objects.FindId(g).Geometry with
             | :? Curve as crv ->
                 let a = ref (new Arc())
                 let ok = crv.TryGetArc(a,State.Doc.ModelAbsoluteTolerance)
-                if ok then Some( !a )
+                if ok then Some( a.Value )
                 else None
             | _ -> None
         |_ -> None
@@ -471,14 +471,14 @@ type RhinoScriptSyntax private () =
         | :? Curve as crv ->
             let a = ref (new Circle())
             let ok = crv.TryGetCircle(a,State.Doc.ModelAbsoluteTolerance)
-            if ok then Some( !a )
+            if ok then Some( a.Value )
             else None
         | :? Guid as g ->
             match State.Doc.Objects.FindId(g).Geometry with
             | :? Curve as crv ->
                 let a = ref (new Circle())
                 let ok = crv.TryGetCircle(a,State.Doc.ModelAbsoluteTolerance)
-                if ok then Some( !a )
+                if ok then Some( a.Value )
                 else None
             | _ -> None
         |_ -> None
@@ -500,14 +500,14 @@ type RhinoScriptSyntax private () =
         | :? Curve as crv ->
             let a = ref (new Ellipse())
             let ok = crv.TryGetEllipse(a,State.Doc.ModelAbsoluteTolerance)
-            if ok then Some( !a )
+            if ok then Some( a.Value )
             else None
         | :? Guid as g ->
             match State.Doc.Objects.FindId(g).Geometry with
             | :? Curve as crv ->
                 let a = ref (new  Ellipse())
                 let ok = crv.TryGetEllipse(a,State.Doc.ModelAbsoluteTolerance)
-                if ok then Some( !a )
+                if ok then Some( a.Value )
                 else None
             | _ -> None
         |_ -> None
@@ -530,14 +530,14 @@ type RhinoScriptSyntax private () =
         | :? Curve as crv ->
                 let a : ref<Polyline> = ref null
                 let ok = crv.TryGetPolyline(a)
-                if ok then Some( !a )
+                if ok then Some( a.Value )
                 else None
         | :? Guid as g ->
             match State.Doc.Objects.FindId(g).Geometry with
             | :? Curve as crv ->
                 let a : ref<Polyline> = ref null
                 let ok = crv.TryGetPolyline(a)
-                if ok then Some( !a )
+                if ok then Some( a.Value )
                 else None
             | _ -> None
         |_ -> None
@@ -611,16 +611,16 @@ type RhinoScriptSyntax private () =
         | :? string as view ->
             if isNull view then
                 None
-            elif view = "" then
-                Some State.Doc.Views.ActiveView
+            // elif view = "" then
+            //     Some State.Doc.Views.ActiveView
             else
-                let allViews =
-                    State.Doc.Views.GetViewList(includeStandardViews=true, includePageViews=true)
-                    |> Array.filter (fun v-> v.MainViewport.Name = view)
-                if allViews.Length = 1 then
-                    Some allViews.[0]
-                else
-                    None
+                #if RH7
+                State.Doc.Views.GetViewList(includeStandardViews=true, includePageViews=true)
+                #else
+                State.Doc.Views.GetViewList(Display.ViewTypeFilter.ModelStyleViews ||| Display.ViewTypeFilter.Page)
+                #endif
+                |> Array.tryFind (fun v -> v.MainViewport.Name = view)
+
         | _ -> None
 
 
@@ -635,23 +635,25 @@ type RhinoScriptSyntax private () =
                 RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceView: could not CoerceView from '%O'" g
             else
                 viewObj
+
         | :? string as view ->
             if isNull view then
                 RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceView: failed on null for view name input" // or State.Doc.Views.ActiveView
-            elif view = "" then
-                State.Doc.Views.ActiveView
+            // elif view = "" then
+            //     State.Doc.Views.ActiveView
             else
-                let allViews =
-                    State.Doc.Views.GetViewList(includeStandardViews=true, includePageViews=true)
-                    |> Array.filter (fun v-> v.MainViewport.Name = view)
-                if allViews.Length = 1 then
-                    allViews.[0]
-                else
-                    RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceView: could not CoerceView '%s'" view
+                #if RH7
+                State.Doc.Views.GetViewList(includeStandardViews=true, includePageViews=true)
+                #else
+                State.Doc.Views.GetViewList(Display.ViewTypeFilter.ModelStyleViews ||| Display.ViewTypeFilter.Page) // ModelStyleViews, see: https://github.com/mcneel/rhinoscriptsyntax/blob/86c9ab1e97df384662a8548b4accee45dfd77a8c/Scripts/rhinoscript/view.py#L26
+                #endif
+
+                |> Array.tryFind (fun v -> v.MainViewport.Name = view)
+                |> Option.defaultWith (fun () ->  RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceView: could not find view called '%s'" view)
+
+
         | _ ->
             RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceView: Cannot get view from %A" nameOrId
-
-
 
 
 
@@ -3370,7 +3372,7 @@ type RhinoScriptSyntax private () =
         let arc = ref Arc.Unset
         let rc = curve.TryGetArc( arc, RhinoMath.ZeroTolerance )
         if not <| rc then RhinoScriptingException.Raise "RhinoScriptSyntax.ArcAngle: Curve is not an arc. curveId:'%s' segmentIndex:'%A'" (Pretty.str curveId) segmentIndex
-        (!arc).AngleDegrees
+        (arc.Value).AngleDegrees
 
 
     /// <summary>Returns the center point of an arc Curve object.</summary>
@@ -3382,7 +3384,7 @@ type RhinoScriptSyntax private () =
         let arc = ref Arc.Unset
         let rc = curve.TryGetArc( arc, RhinoMath.ZeroTolerance )
         if not <| rc then RhinoScriptingException.Raise "RhinoScriptSyntax.ArcCenterPoint: Curve is not an arc. curveId:'%s' segmentIndex:'%A'" (Pretty.str curveId) segmentIndex
-        (!arc).Center
+        (arc.Value).Center
 
 
     /// <summary>Returns the mid point of an arc Curve object.</summary>
@@ -3394,7 +3396,7 @@ type RhinoScriptSyntax private () =
         let arc = ref Arc.Unset
         let rc = curve.TryGetArc( arc, RhinoMath.ZeroTolerance )
         if not <| rc then RhinoScriptingException.Raise "RhinoScriptSyntax.ArcMidPoint: Curve is not an arc. curveId:'%s' segmentIndex:'%A'" (Pretty.str curveId) segmentIndex
-        (!arc).MidPoint
+        (arc.Value).MidPoint
 
 
     /// <summary>Returns the radius of an arc Curve object.</summary>
@@ -3406,7 +3408,7 @@ type RhinoScriptSyntax private () =
         let arc = ref Arc.Unset
         let rc = curve.TryGetArc( arc, RhinoMath.ZeroTolerance )
         if not <| rc then RhinoScriptingException.Raise "RhinoScriptSyntax.ArcRadius: Curve is not an arc. curveId:'%s' segmentIndex:'%A'" (Pretty.str curveId) segmentIndex
-        (!arc).Radius
+        (arc.Value).Radius
 
 
 
@@ -6130,45 +6132,56 @@ type RhinoScriptSyntax private () =
     /// <returns>(unit) void, nothing.</returns>
     static member DimStyleSuffix(dimStyle:string, suffix:string) : unit = //SET
         let ds = State.Doc.DimStyles.FindName(dimStyle)
-        if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleSuffix set failed. dimStyle:'%s' suffix:'%A'" dimStyle suffix
+        if isNull ds then
+            RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleSuffix set failed. dimStyle:'%s' suffix:'%A'" dimStyle suffix
         ds.Suffix <- suffix
         if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=false) then
             RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleSuffix set failed. dimStyle:'%s' suffix:'%A'" dimStyle suffix
         State.Doc.Views.Redraw()
 
 
-
     /// <summary>Returns the text alignment mode of a dimension style.</summary>
     /// <param name="dimStyle">(string) The name of an existing dimension style</param>
     /// <returns>(int) The current text alignment
-    ///     Top                   0   Attach to top of an 'I' on the first line. (Independent of glyphs being displayed.)
-    ///     MiddleOfTop           1   Attach to middle of an 'I' on the first line. (Independent of glyphs being displayed.)
-    ///     BottomOfTop           2   Attach to baseline of first line. (Independent of glyphs being displayed.)
-    ///     Middle                3   Attach to middle of text vertical advance. (Independent of glyphs being displayed.)
-    ///     MiddleOfBottom        4   Attach to middle of an 'I' on the last line. (Independent of glyphs being displayed.)
-    ///     Bottom                5   Attach to the baseline of the last line. (Independent of glyphs being displayed.)
-    ///     BottomOfBoundingBox   6   Attach to the bottom of the bounding box of the visible glyphs.</returns>
+    ///    0 = Normal (same as 2)
+    ///    1 = Horizontal to view
+    ///    2 = Above the dimension line
+    ///    3 = In the dimension line
+    /// </returns>
     static member DimStyleTextAlignment(dimStyle:string) : int = //GET
         let ds = State.Doc.DimStyles.FindName(dimStyle)
-        if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleTextAlignment get failed. dimStyle:'%s'" dimStyle
-        int ds.TextVerticalAlignment
+        if isNull ds then
+            RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleTextAlignment get failed. dimStyle:'%s'" dimStyle
+        int ds.DimTextLocation
 
     /// <summary>Changes the text alignment mode of a dimension style.</summary>
     /// <param name="dimStyle">(string) The name of an existing dimension style</param>
     /// <param name="alignment">(int) The new text alignment
-    ///     Top                   0   Attach to top of an 'I' on the first line. (Independent of glyphs being displayed.)
-    ///     MiddleOfTop           1   Attach to middle of an 'I' on the first line. (Independent of glyphs being displayed.)
-    ///     BottomOfTop           2   Attach to baseline of first line. (Independent of glyphs being displayed.)
-    ///     Middle                3   Attach to middle of text vertical advance. (Independent of glyphs being displayed.)
-    ///     MiddleOfBottom        4   Attach to middle of an 'I' on the last line. (Independent of glyphs being displayed.)
-    ///     Bottom                5   Attach to the baseline of the last line. (Independent of glyphs being displayed.)
-    ///     BottomOfBoundingBox   6   Attach to the bottom of the bounding box of the visible glyphs.</param>
+    ///    0 = Normal (same as 2)
+    ///    1 = Horizontal to view
+    ///    2 = Above the dimension line
+    ///    3 = In the dimension line
+    /// </param>
     /// <returns>(unit) void, nothing.</returns>
     static member DimStyleTextAlignment(dimStyle:string, alignment:int) : unit = //SET
         let ds = State.Doc.DimStyles.FindName(dimStyle)
-        if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleTextAlignment not found. dimStyle:'%s' alignment:'%A'" dimStyle alignment
-        elif alignment<0 || alignment>6 then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleTextAlignment set failed. dimStyle:'%s' alignment:'%A'" dimStyle alignment
-        ds.TextVerticalAlignment <- LanguagePrimitives.EnumOfValue (byte alignment)
+        if isNull ds then
+            RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleTextAlignment not found. dimStyle:'%s' alignment:'%d'" dimStyle alignment
+        elif alignment<0 || alignment>3 then
+            RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleTextAlignment invalid alignment. dimStyle:'%s' alignment:'%d' is not between 0 and 3" dimStyle alignment
+
+        // https://github.com/mcneel/rhinoscriptsyntax/commit/9c542c3c0084189d08dd19962e78745523226bd8
+        // for backward compatibility, lets set the "horizontal to view" if
+        // alignment value is '1' - eirannejad 2025-03-17 (RH-86539)
+        if alignment=1 then
+            ds.DimTextOrientation <- Rhino.DocObjects.TextOrientation.InView
+
+        // set dim text location
+        if alignment=3 then
+            ds.DimTextLocation <- Rhino.DocObjects.DimensionStyle.TextLocation.InDimLine
+        if alignment=0 || alignment=2 then
+            ds.DimTextLocation <- Rhino.DocObjects.DimensionStyle.TextLocation.AboveDimLine  // default
+
         if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=false) then
             RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleTextAlignment set failed. dimStyle:'%s' alignment:'%A'" dimStyle alignment
         State.Doc.Views.Redraw()
@@ -7021,7 +7034,13 @@ type RhinoScriptSyntax private () =
         let viewList =
             if isNull views then [State.Doc.Views.ActiveView.ActiveViewportID]
             else
-                let modelViews = State.Doc.Views.GetViewList(includeStandardViews=true, includePageViews=false)
+                let modelViews =
+                    #if RH7
+                    State.Doc.Views.GetViewList(includeStandardViews=true, includePageViews=false)
+                    #else
+                    State.Doc.Views.GetViewList(Display.ViewTypeFilter.Model)
+                    #endif
+
                 [for view in views do
                     for item in modelViews do
                         if item.ActiveViewport.Name = view then
@@ -17713,8 +17732,13 @@ type RhinoScriptSyntax private () =
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetPointOnMesh(meshId:Guid, [<OPT;DEF("Pick Point On Mesh")>]message:string) : Point3d =
         let get () =
-            //let res, point = Input.RhinoGet.GetPointOnMesh(State.Doc, meshId, message, acceptNothing=false) // TODO later versions of RhinoCommon7 require this !?
-            let res, point = Input.RhinoGet.GetPointOnMesh( meshId, message, acceptNothing=false) //still Ok in earlier versions of RhinoCommon 7
+            let res, point =
+                #if RH7
+                Input.RhinoGet.GetPointOnMesh( meshId, message, acceptNothing=false) //still Ok in earlier versions of RhinoCommon 7
+                #else
+                Input.RhinoGet.GetPointOnMesh(State.Doc, meshId, message, acceptNothing=false) // TODO later versions of RhinoCommon7 require this !?
+                #endif
+
             if res = Commands.Result.Success then point
             else RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetPointOnMesh()"
 
@@ -18397,6 +18421,8 @@ type RhinoScriptSyntax private () =
         // if isNull cl then RhinoScriptingException.Raise "RhinoScriptSyntax.ClipboardText(text) failed to get clipboard instance"
         // cl.Text <- text //System.InvalidOperationException: Platform instance is null. Have you created your application?
 
+        //https://github.com/mcneel/rhinoscriptsyntax/blob/rhino-8.x/Scripts/rhinoscript/utility.py#L139
+
         // Windows.Forms.Clipboard.SetText(text)
         // use reflection to avoid dependency on Windows.Forms
         let clipboardType = Type.GetType "System.Windows.Forms.Clipboard, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
@@ -18946,19 +18972,35 @@ type RhinoScriptSyntax private () =
     /// <param name="layout">(string) Title of an existing page layout view</param>
     /// <returns>(bool) True if layout is a page layout view, False is layout is a standard model view.</returns>
     static member IsLayout(layout:string) : bool =
-        if   State.Doc.Views.GetViewList(includeStandardViews=false,includePageViews=true) |> Array.exists (fun v -> v.MainViewport.Name = layout) then
-            true
-        elif State.Doc.Views.GetViewList(includeStandardViews=true ,includePageViews=false) |> Array.exists (fun v -> v.MainViewport.Name = layout) then
-            false
-        else
-            RhinoScriptingException.Raise "RhinoScriptSyntax.IsLayout View does not exist at all.  layout:'%A'" layout // or false
+        #if RH7
+            if   State.Doc.Views.GetViewList(includeStandardViews=false,includePageViews=true) |> Array.exists (fun v -> v.MainViewport.Name = layout) then
+                true
+            elif State.Doc.Views.GetViewList(includeStandardViews=true ,includePageViews=false) |> Array.exists (fun v -> v.MainViewport.Name = layout) then
+                false
+            else
+                RhinoScriptingException.Raise "RhinoScriptSyntax.IsLayout View does not exist at all.  layout:'%A'" layout // or false
+
+        #else
+            if   State.Doc.Views.GetViewList Display.ViewTypeFilter.Page |> Array.exists (fun v -> v.MainViewport.Name = layout) then
+                true
+            elif State.Doc.Views.GetViewList Display.ViewTypeFilter.ModelStyleViews |> Array.exists (fun v -> v.MainViewport.Name = layout) then
+                false
+            else
+                RhinoScriptingException.Raise "RhinoScriptSyntax.IsLayout View does not exist at all.  layout:'%A'" layout // or false
+
+        #endif
 
 
     /// <summary>Checks if the specified view exists.</summary>
     /// <param name="view">(string) Title of the view</param>
     /// <returns>(bool) True of False indicating success or failure.</returns>
     static member IsView(view:string) : bool =
-        State.Doc.Views.GetViewList(includeStandardViews=false, includePageViews=true) |> Array.exists ( fun v -> v.MainViewport.Name = view)
+        #if RH7
+        State.Doc.Views.GetViewList(includeStandardViews=true, includePageViews=true)
+        #else
+        State.Doc.Views.GetViewList(Display.ViewTypeFilter.ModelStyleViews ||| Display.ViewTypeFilter.Page)
+        #endif
+        |> Array.exists ( fun v -> v.MainViewport.Name = view)
 
 
 
@@ -19421,7 +19463,20 @@ type RhinoScriptSyntax private () =
     ///    2 = both standard and page layout views</param>
     /// <returns>(string ResizeArray) List of the view names.</returns>
     static member ViewNames([<OPT;DEF(0)>]viewType:int) : string ResizeArray =
-        let views = State.Doc.Views.GetViewList(viewType <> 1, viewType>0)
+        let views =
+            #if RH7
+            match viewType with
+            | 0 -> State.Doc.Views.GetViewList(includeStandardViews=true , includePageViews=false)
+            | 1 -> State.Doc.Views.GetViewList(includeStandardViews=false, includePageViews=true)
+            | 2 -> State.Doc.Views.GetViewList(includeStandardViews=true , includePageViews=true)
+            | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.ViewNames invalid viewType:'%A'" viewType
+            #else
+            match viewType with
+            | 0 -> State.Doc.Views.GetViewList(Display.ViewTypeFilter.ModelStyleViews)
+            | 1 -> State.Doc.Views.GetViewList(Display.ViewTypeFilter.Page)
+            | 2 -> State.Doc.Views.GetViewList(Display.ViewTypeFilter.ModelStyleViews ||| Display.ViewTypeFilter.Page)
+            | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.ViewNames invalid viewType:'%A'" viewType
+            #endif
         if isNull views then RhinoScriptingException.Raise "RhinoScriptSyntax.ViewNames failed. viewType:'%A'" viewType
         views |> RArr.mapArr _.MainViewport.Name
 
@@ -19643,8 +19698,14 @@ type RhinoScriptSyntax private () =
                                    [<OPT;DEF("")>]view:string,
                                    [<OPT;DEF(false)>]all:bool) : unit =
           if all then
-              let views = State.Doc.Views.GetViewList(true, true)
-              for view in views do view.ActiveViewport.ZoomBoundingBox(boundingBox) |> ignore<bool>
+              let views =
+                #if RH7
+                State.Doc.Views.GetViewList(includeStandardViews=true, includePageViews=true)
+                #else
+                State.Doc.Views.GetViewList(Display.ViewTypeFilter.Model ||| Display.ViewTypeFilter.Page)
+                #endif
+              for view in views do
+                view.ActiveViewport.ZoomBoundingBox(boundingBox) |> ignore<bool>
           else
               let view = RhinoScriptSyntax.CoerceView(view)
               view.ActiveViewport.ZoomBoundingBox(boundingBox) |> ignore<bool>
@@ -19658,8 +19719,14 @@ type RhinoScriptSyntax private () =
     /// <returns>(unit).</returns>
     static member ZoomExtents([<OPT;DEF("")>]view:string, [<OPT;DEF(false)>]all:bool) : unit =
         if  all then
-            let views = State.Doc.Views.GetViewList(true, true)
-            for view in views do view.ActiveViewport.ZoomExtents()|> ignore<bool>
+            let views =
+                #if RH7
+                State.Doc.Views.GetViewList(includeStandardViews=true, includePageViews=true)
+                #else
+                State.Doc.Views.GetViewList(Display.ViewTypeFilter.Model ||| Display.ViewTypeFilter.Page)
+                #endif
+            for view in views do
+                view.ActiveViewport.ZoomExtents()|> ignore<bool>
         else
             let view = RhinoScriptSyntax.CoerceView(view)
             view.ActiveViewport.ZoomExtents()|> ignore<bool>
@@ -19673,8 +19740,14 @@ type RhinoScriptSyntax private () =
     /// <returns>(unit).</returns>
     static member ZoomSelected([<OPT;DEF("")>]view:string, [<OPT;DEF(false)>]all:bool) : unit =
         if all then
-            let views = State.Doc.Views.GetViewList(true, true)
-            for view in views do view.ActiveViewport.ZoomExtentsSelected()|> ignore<bool>
+            let views =
+                #if RH7
+                State.Doc.Views.GetViewList(includeStandardViews=true, includePageViews=true)
+                #else
+                State.Doc.Views.GetViewList(Display.ViewTypeFilter.Model ||| Display.ViewTypeFilter.Page)
+                #endif
+            for view in views do
+                view.ActiveViewport.ZoomExtentsSelected()|> ignore<bool>
         else
             let view = RhinoScriptSyntax.CoerceView(view)
             view.ActiveViewport.ZoomExtentsSelected()|> ignore<bool>
