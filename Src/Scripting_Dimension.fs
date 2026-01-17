@@ -560,45 +560,56 @@ module AutoOpenDimension =
     /// <returns>(unit) void, nothing.</returns>
     static member DimStyleSuffix(dimStyle:string, suffix:string) : unit = //SET
         let ds = State.Doc.DimStyles.FindName(dimStyle)
-        if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleSuffix set failed. dimStyle:'%s' suffix:'%A'" dimStyle suffix
+        if isNull ds then
+            RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleSuffix set failed. dimStyle:'%s' suffix:'%A'" dimStyle suffix
         ds.Suffix <- suffix
         if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=false) then
             RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleSuffix set failed. dimStyle:'%s' suffix:'%A'" dimStyle suffix
         State.Doc.Views.Redraw()
 
 
-
     /// <summary>Returns the text alignment mode of a dimension style.</summary>
     /// <param name="dimStyle">(string) The name of an existing dimension style</param>
     /// <returns>(int) The current text alignment
-    ///     Top                   0   Attach to top of an 'I' on the first line. (Independent of glyphs being displayed.)
-    ///     MiddleOfTop           1   Attach to middle of an 'I' on the first line. (Independent of glyphs being displayed.)
-    ///     BottomOfTop           2   Attach to baseline of first line. (Independent of glyphs being displayed.)
-    ///     Middle                3   Attach to middle of text vertical advance. (Independent of glyphs being displayed.)
-    ///     MiddleOfBottom        4   Attach to middle of an 'I' on the last line. (Independent of glyphs being displayed.)
-    ///     Bottom                5   Attach to the baseline of the last line. (Independent of glyphs being displayed.)
-    ///     BottomOfBoundingBox   6   Attach to the bottom of the bounding box of the visible glyphs.</returns>
+    ///    0 = Normal (same as 2)
+    ///    1 = Horizontal to view
+    ///    2 = Above the dimension line
+    ///    3 = In the dimension line
+    /// </returns>
     static member DimStyleTextAlignment(dimStyle:string) : int = //GET
         let ds = State.Doc.DimStyles.FindName(dimStyle)
-        if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleTextAlignment get failed. dimStyle:'%s'" dimStyle
-        int ds.TextVerticalAlignment
+        if isNull ds then
+            RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleTextAlignment get failed. dimStyle:'%s'" dimStyle
+        int ds.DimTextLocation
 
     /// <summary>Changes the text alignment mode of a dimension style.</summary>
     /// <param name="dimStyle">(string) The name of an existing dimension style</param>
     /// <param name="alignment">(int) The new text alignment
-    ///     Top                   0   Attach to top of an 'I' on the first line. (Independent of glyphs being displayed.)
-    ///     MiddleOfTop           1   Attach to middle of an 'I' on the first line. (Independent of glyphs being displayed.)
-    ///     BottomOfTop           2   Attach to baseline of first line. (Independent of glyphs being displayed.)
-    ///     Middle                3   Attach to middle of text vertical advance. (Independent of glyphs being displayed.)
-    ///     MiddleOfBottom        4   Attach to middle of an 'I' on the last line. (Independent of glyphs being displayed.)
-    ///     Bottom                5   Attach to the baseline of the last line. (Independent of glyphs being displayed.)
-    ///     BottomOfBoundingBox   6   Attach to the bottom of the bounding box of the visible glyphs.</param>
+    ///    0 = Normal (same as 2)
+    ///    1 = Horizontal to view
+    ///    2 = Above the dimension line
+    ///    3 = In the dimension line
+    /// </param>
     /// <returns>(unit) void, nothing.</returns>
     static member DimStyleTextAlignment(dimStyle:string, alignment:int) : unit = //SET
         let ds = State.Doc.DimStyles.FindName(dimStyle)
-        if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleTextAlignment not found. dimStyle:'%s' alignment:'%A'" dimStyle alignment
-        elif alignment<0 || alignment>6 then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleTextAlignment set failed. dimStyle:'%s' alignment:'%A'" dimStyle alignment
-        ds.TextVerticalAlignment <- LanguagePrimitives.EnumOfValue (byte alignment)
+        if isNull ds then
+            RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleTextAlignment not found. dimStyle:'%s' alignment:'%d'" dimStyle alignment
+        elif alignment<0 || alignment>3 then
+            RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleTextAlignment invalid alignment. dimStyle:'%s' alignment:'%d' is not between 0 and 3" dimStyle alignment
+
+        // https://github.com/mcneel/rhinoscriptsyntax/commit/9c542c3c0084189d08dd19962e78745523226bd8
+        // for backward compatibility, lets set the "horizontal to view" if
+        // alignment value is '1' - eirannejad 2025-03-17 (RH-86539)
+        if alignment=1 then
+            ds.DimTextOrientation <- Rhino.DocObjects.TextOrientation.InView
+
+        // set dim text location
+        if alignment=3 then
+            ds.DimTextLocation <- Rhino.DocObjects.DimensionStyle.TextLocation.InDimLine
+        if alignment=0 || alignment=2 then
+            ds.DimTextLocation <- Rhino.DocObjects.DimensionStyle.TextLocation.AboveDimLine  // default
+
         if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=false) then
             RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleTextAlignment set failed. dimStyle:'%s' alignment:'%A'" dimStyle alignment
         State.Doc.Views.Redraw()
