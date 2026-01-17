@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix DimStyleTextAlignment
 - Fix Deprecation Warnings
 
-## Changed
+### Changed
 - CoerceView fails on empty string now instead of returning current view
 
 ## [0.12.1] - 2026-01-04
@@ -97,7 +97,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - First public release
 
-[Unreleased]: https://github.com/goswinr/Rhino.Scripting/compare/0.12.1...HEAD
+[Unreleased]: https://github.com/goswinr/Rhino.Scripting/compare/0.13.0...HEAD
+[0.13.0]: https://github.com/goswinr/Rhino.Scripting/compare/0.12.1...0.13.0
 [0.12.1]: https://github.com/goswinr/Rhino.Scripting/compare/0.12.0...0.12.1
 [0.12.0]: https://github.com/goswinr/Rhino.Scripting/compare/0.11.0...0.12.0
 [0.11.0]: https://github.com/goswinr/Rhino.Scripting/compare/0.10.1...0.11.0
@@ -114,9 +115,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [0.4.0]: https://github.com/goswinr/Rhino.Scripting/compare/0.3.0...0.4.0
 [0.3.0]: https://github.com/goswinr/Rhino.Scripting/compare/0.2.0...0.3.0
 [0.2.0]: https://github.com/goswinr/Rhino.Scripting/releases/tag/0.2.0
-
-<!--
-use to get tag dates:
-git log --tags --simplify-by-decoration --pretty="format:%ci %d"
-
--->
