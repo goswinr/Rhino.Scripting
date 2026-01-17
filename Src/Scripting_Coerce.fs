@@ -20,9 +20,9 @@ module AutoOpenCoerce =
     // TODO none of the coerce function should take generic parameter, just a few overloads
 
 
-    //---------------------------------------------------
-    //-----------------Coerce and TryCoerce pairs -------
-    //---------------------------------------------------
+    //---------------------------------------------
+    //----------- Coerce and TryCoerce pairs -----
+    //---------------------------------------------
 
 
 
@@ -245,14 +245,14 @@ module AutoOpenCoerce =
         | :? Curve as crv ->
             let a = ref (new Arc())
             let ok = crv.TryGetArc(a,State.Doc.ModelAbsoluteTolerance)
-            if ok then Some( !a )
+            if ok then Some( a.Value )
             else None
         | :? Guid as g ->
             match State.Doc.Objects.FindId(g).Geometry with
             | :? Curve as crv ->
                 let a = ref (new Arc())
                 let ok = crv.TryGetArc(a,State.Doc.ModelAbsoluteTolerance)
-                if ok then Some( !a )
+                if ok then Some( a.Value )
                 else None
             | _ -> None
         |_ -> None
@@ -276,14 +276,14 @@ module AutoOpenCoerce =
         | :? Curve as crv ->
             let a = ref (new Circle())
             let ok = crv.TryGetCircle(a,State.Doc.ModelAbsoluteTolerance)
-            if ok then Some( !a )
+            if ok then Some( a.Value )
             else None
         | :? Guid as g ->
             match State.Doc.Objects.FindId(g).Geometry with
             | :? Curve as crv ->
                 let a = ref (new Circle())
                 let ok = crv.TryGetCircle(a,State.Doc.ModelAbsoluteTolerance)
-                if ok then Some( !a )
+                if ok then Some( a.Value )
                 else None
             | _ -> None
         |_ -> None
@@ -305,14 +305,14 @@ module AutoOpenCoerce =
         | :? Curve as crv ->
             let a = ref (new Ellipse())
             let ok = crv.TryGetEllipse(a,State.Doc.ModelAbsoluteTolerance)
-            if ok then Some( !a )
+            if ok then Some( a.Value )
             else None
         | :? Guid as g ->
             match State.Doc.Objects.FindId(g).Geometry with
             | :? Curve as crv ->
                 let a = ref (new  Ellipse())
                 let ok = crv.TryGetEllipse(a,State.Doc.ModelAbsoluteTolerance)
-                if ok then Some( !a )
+                if ok then Some( a.Value )
                 else None
             | _ -> None
         |_ -> None
@@ -335,14 +335,14 @@ module AutoOpenCoerce =
         | :? Curve as crv ->
                 let a : ref<Polyline> = ref null
                 let ok = crv.TryGetPolyline(a)
-                if ok then Some( !a )
+                if ok then Some( a.Value )
                 else None
         | :? Guid as g ->
             match State.Doc.Objects.FindId(g).Geometry with
             | :? Curve as crv ->
                 let a : ref<Polyline> = ref null
                 let ok = crv.TryGetPolyline(a)
-                if ok then Some( !a )
+                if ok then Some( a.Value )
                 else None
             | _ -> None
         |_ -> None
@@ -416,16 +416,16 @@ module AutoOpenCoerce =
         | :? string as view ->
             if isNull view then
                 None
-            elif view = "" then
-                Some State.Doc.Views.ActiveView
+            // elif view = "" then
+            //     Some State.Doc.Views.ActiveView
             else
-                let allViews =
-                    State.Doc.Views.GetViewList(includeStandardViews=true, includePageViews=true)
-                    |> Array.filter (fun v-> v.MainViewport.Name = view)
-                if allViews.Length = 1 then
-                    Some allViews.[0]
-                else
-                    None
+                #if RH7
+                State.Doc.Views.GetViewList(includeStandardViews=true, includePageViews=true)
+                #else
+                State.Doc.Views.GetViewList(Display.ViewTypeFilter.ModelStyleViews ||| Display.ViewTypeFilter.Page)
+                #endif
+                |> Array.tryFind (fun v -> v.MainViewport.Name = view)
+
         | _ -> None
 
 
@@ -440,23 +440,25 @@ module AutoOpenCoerce =
                 RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceView: could not CoerceView from '%O'" g
             else
                 viewObj
+
         | :? string as view ->
             if isNull view then
                 RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceView: failed on null for view name input" // or State.Doc.Views.ActiveView
-            elif view = "" then
-                State.Doc.Views.ActiveView
+            // elif view = "" then
+            //     State.Doc.Views.ActiveView
             else
-                let allViews =
-                    State.Doc.Views.GetViewList(includeStandardViews=true, includePageViews=true)
-                    |> Array.filter (fun v-> v.MainViewport.Name = view)
-                if allViews.Length = 1 then
-                    allViews.[0]
-                else
-                    RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceView: could not CoerceView '%s'" view
+                #if RH7
+                State.Doc.Views.GetViewList(includeStandardViews=true, includePageViews=true)
+                #else
+                State.Doc.Views.GetViewList(Display.ViewTypeFilter.ModelStyleViews ||| Display.ViewTypeFilter.Page) // ModelStyleViews, see: https://github.com/mcneel/rhinoscriptsyntax/blob/86c9ab1e97df384662a8548b4accee45dfd77a8c/Scripts/rhinoscript/view.py#L26
+                #endif
+
+                |> Array.tryFind (fun v -> v.MainViewport.Name = view)
+                |> Option.defaultWith (fun () ->  RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceView: could not find view called '%s'" view)
+
+
         | _ ->
             RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceView: Cannot get view from %A" nameOrId
-
-
 
 
 

@@ -196,19 +196,35 @@ module AutoOpenViews =
     /// <param name="layout">(string) Title of an existing page layout view</param>
     /// <returns>(bool) True if layout is a page layout view, False is layout is a standard model view.</returns>
     static member IsLayout(layout:string) : bool =
-        if   State.Doc.Views.GetViewList(includeStandardViews=false,includePageViews=true) |> Array.exists (fun v -> v.MainViewport.Name = layout) then
-            true
-        elif State.Doc.Views.GetViewList(includeStandardViews=true ,includePageViews=false) |> Array.exists (fun v -> v.MainViewport.Name = layout) then
-            false
-        else
-            RhinoScriptingException.Raise "RhinoScriptSyntax.IsLayout View does not exist at all.  layout:'%A'" layout // or false
+        #if RH7
+            if   State.Doc.Views.GetViewList(includeStandardViews=false,includePageViews=true) |> Array.exists (fun v -> v.MainViewport.Name = layout) then
+                true
+            elif State.Doc.Views.GetViewList(includeStandardViews=true ,includePageViews=false) |> Array.exists (fun v -> v.MainViewport.Name = layout) then
+                false
+            else
+                RhinoScriptingException.Raise "RhinoScriptSyntax.IsLayout View does not exist at all.  layout:'%A'" layout // or false
+
+        #else
+            if   State.Doc.Views.GetViewList Display.ViewTypeFilter.Page |> Array.exists (fun v -> v.MainViewport.Name = layout) then
+                true
+            elif State.Doc.Views.GetViewList Display.ViewTypeFilter.ModelStyleViews |> Array.exists (fun v -> v.MainViewport.Name = layout) then
+                false
+            else
+                RhinoScriptingException.Raise "RhinoScriptSyntax.IsLayout View does not exist at all.  layout:'%A'" layout // or false
+
+        #endif
 
 
     /// <summary>Checks if the specified view exists.</summary>
     /// <param name="view">(string) Title of the view</param>
     /// <returns>(bool) True of False indicating success or failure.</returns>
     static member IsView(view:string) : bool =
-        State.Doc.Views.GetViewList(includeStandardViews=false, includePageViews=true) |> Array.exists ( fun v -> v.MainViewport.Name = view)
+        #if RH7
+        State.Doc.Views.GetViewList(includeStandardViews=true, includePageViews=true)
+        #else
+        State.Doc.Views.GetViewList(Display.ViewTypeFilter.ModelStyleViews ||| Display.ViewTypeFilter.Page)
+        #endif
+        |> Array.exists ( fun v -> v.MainViewport.Name = view)
 
 
 
@@ -671,7 +687,20 @@ module AutoOpenViews =
     ///    2 = both standard and page layout views</param>
     /// <returns>(string ResizeArray) List of the view names.</returns>
     static member ViewNames([<OPT;DEF(0)>]viewType:int) : string ResizeArray =
-        let views = State.Doc.Views.GetViewList(viewType <> 1, viewType>0)
+        let views =
+            #if RH7
+            match viewType with
+            | 0 -> State.Doc.Views.GetViewList(includeStandardViews=true , includePageViews=false)
+            | 1 -> State.Doc.Views.GetViewList(includeStandardViews=false, includePageViews=true)
+            | 2 -> State.Doc.Views.GetViewList(includeStandardViews=true , includePageViews=true)
+            | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.ViewNames invalid viewType:'%A'" viewType
+            #else
+            match viewType with
+            | 0 -> State.Doc.Views.GetViewList(Display.ViewTypeFilter.ModelStyleViews)
+            | 1 -> State.Doc.Views.GetViewList(Display.ViewTypeFilter.Page)
+            | 2 -> State.Doc.Views.GetViewList(Display.ViewTypeFilter.ModelStyleViews ||| Display.ViewTypeFilter.Page)
+            | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.ViewNames invalid viewType:'%A'" viewType
+            #endif
         if isNull views then RhinoScriptingException.Raise "RhinoScriptSyntax.ViewNames failed. viewType:'%A'" viewType
         views |> RArr.mapArr _.MainViewport.Name
 
@@ -893,8 +922,14 @@ module AutoOpenViews =
                                    [<OPT;DEF("")>]view:string,
                                    [<OPT;DEF(false)>]all:bool) : unit =
           if all then
-              let views = State.Doc.Views.GetViewList(true, true)
-              for view in views do view.ActiveViewport.ZoomBoundingBox(boundingBox) |> ignore<bool>
+              let views =
+                #if RH7
+                State.Doc.Views.GetViewList(includeStandardViews=true, includePageViews=true)
+                #else
+                State.Doc.Views.GetViewList(Display.ViewTypeFilter.Model ||| Display.ViewTypeFilter.Page)
+                #endif
+              for view in views do
+                view.ActiveViewport.ZoomBoundingBox(boundingBox) |> ignore<bool>
           else
               let view = RhinoScriptSyntax.CoerceView(view)
               view.ActiveViewport.ZoomBoundingBox(boundingBox) |> ignore<bool>
@@ -908,8 +943,14 @@ module AutoOpenViews =
     /// <returns>(unit).</returns>
     static member ZoomExtents([<OPT;DEF("")>]view:string, [<OPT;DEF(false)>]all:bool) : unit =
         if  all then
-            let views = State.Doc.Views.GetViewList(true, true)
-            for view in views do view.ActiveViewport.ZoomExtents()|> ignore<bool>
+            let views =
+                #if RH7
+                State.Doc.Views.GetViewList(includeStandardViews=true, includePageViews=true)
+                #else
+                State.Doc.Views.GetViewList(Display.ViewTypeFilter.Model ||| Display.ViewTypeFilter.Page)
+                #endif
+            for view in views do
+                view.ActiveViewport.ZoomExtents()|> ignore<bool>
         else
             let view = RhinoScriptSyntax.CoerceView(view)
             view.ActiveViewport.ZoomExtents()|> ignore<bool>
@@ -923,8 +964,14 @@ module AutoOpenViews =
     /// <returns>(unit).</returns>
     static member ZoomSelected([<OPT;DEF("")>]view:string, [<OPT;DEF(false)>]all:bool) : unit =
         if all then
-            let views = State.Doc.Views.GetViewList(true, true)
-            for view in views do view.ActiveViewport.ZoomExtentsSelected()|> ignore<bool>
+            let views =
+                #if RH7
+                State.Doc.Views.GetViewList(includeStandardViews=true, includePageViews=true)
+                #else
+                State.Doc.Views.GetViewList(Display.ViewTypeFilter.Model ||| Display.ViewTypeFilter.Page)
+                #endif
+            for view in views do
+                view.ActiveViewport.ZoomExtentsSelected()|> ignore<bool>
         else
             let view = RhinoScriptSyntax.CoerceView(view)
             view.ActiveViewport.ZoomExtentsSelected()|> ignore<bool>

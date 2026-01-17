@@ -608,8 +608,13 @@ module AutoOpenUserInterface =
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetPointOnMesh(meshId:Guid, [<OPT;DEF("Pick Point On Mesh")>]message:string) : Point3d =
         let get () =
-            //let res, point = Input.RhinoGet.GetPointOnMesh(State.Doc, meshId, message, acceptNothing=false) // TODO later versions of RhinoCommon7 require this !?
-            let res, point = Input.RhinoGet.GetPointOnMesh( meshId, message, acceptNothing=false) //still Ok in earlier versions of RhinoCommon 7
+            let res, point =
+                #if RH7
+                Input.RhinoGet.GetPointOnMesh( meshId, message, acceptNothing=false) //still Ok in earlier versions of RhinoCommon 7
+                #else
+                Input.RhinoGet.GetPointOnMesh(State.Doc, meshId, message, acceptNothing=false) // TODO later versions of RhinoCommon7 require this !?
+                #endif
+
             if res = Commands.Result.Success then point
             else RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetPointOnMesh()"
 

@@ -31,7 +31,13 @@ module AutoOpenGeometry =
         let viewList =
             if isNull views then [State.Doc.Views.ActiveView.ActiveViewportID]
             else
-                let modelViews = State.Doc.Views.GetViewList(includeStandardViews=true, includePageViews=false)
+                let modelViews =
+                    #if RH7
+                    State.Doc.Views.GetViewList(includeStandardViews=true, includePageViews=false)
+                    #else
+                    State.Doc.Views.GetViewList(Display.ViewTypeFilter.Model)
+                    #endif
+
                 [for view in views do
                     for item in modelViews do
                         if item.ActiveViewport.Name = view then
