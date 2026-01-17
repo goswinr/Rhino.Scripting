@@ -66,7 +66,7 @@ module AutoOpenUtility =
     static member Angle2(line1:Line, line2:Line) : float * float =
         let vec0 = line1.To - line1.From
         let vec1 = line2.To - line2.From
-        if not <| vec0.Unitize() || not <| vec1.Unitize() then  RhinoScriptingException.Raise "RhinoScriptSyntax.Angle2 two failed on %A and %A" line1 line2
+        if not <| vec0.Unitize() || not <| vec1.Unitize() then  RhinoScriptingException.Raise "Angle2 two failed on %A and %A" line1 line2
         let mutable dot = vec0 * vec1
         dot <- max -1.0 (min 1.0 dot) // clamp for math errors
         let mutable angle = Math.Acos(dot)
@@ -86,7 +86,7 @@ module AutoOpenUtility =
         //let platform = Eto.Platform.Detect //Could not detect platform. Are you missing a platform assembly? --->  Error creating instance of platform type 'Eto.Wpf.Platform, Eto.Wpf' --->  Unable to cast object of type 'Eto.Wpf.Platform' to type 'Eto.Platform'.
         //use _ctx = platform.Context
         // let cl = Eto.Forms.Clipboard.Instance
-        // if isNull cl then RhinoScriptingException.Raise "RhinoScriptSyntax.ClipboardText() failed to get clipboard instance"
+        // if isNull cl then RhinoScriptingException.Raise "ClipboardText() failed to get clipboard instance"
         // if cl.ContainsText then cl.Text else ""
 
         // if Windows.Forms.Clipboard.ContainsText() then Windows.Forms.Clipboard.GetText() else ""
@@ -119,7 +119,7 @@ module AutoOpenUtility =
     static member ClipboardText(text:string) : unit = //SET
         // does not work with Eto.Forms.Clipboard
         // let cl = Eto.Forms.Clipboard.Instance
-        // if isNull cl then RhinoScriptingException.Raise "RhinoScriptSyntax.ClipboardText(text) failed to get clipboard instance"
+        // if isNull cl then RhinoScriptingException.Raise "ClipboardText(text) failed to get clipboard instance"
         // cl.Text <- text //System.InvalidOperationException: Platform instance is null. Have you created your application?
 
         //https://github.com/mcneel/rhinoscriptsyntax/blob/rhino-8.x/Scripts/rhinoscript/utility.py#L139
@@ -325,7 +325,7 @@ module AutoOpenUtility =
             |3 -> fun (p:Point3d) -> p.Y, p.Z, p.X
             |4 -> fun (p:Point3d) -> p.Z, p.X, p.Y
             |5 -> fun (p:Point3d) -> p.Z, p.Y, p.X
-            |_ -> RhinoScriptingException.Raise "RhinoScriptSyntax.SortPoints is missing implementation for order input %d, only 0 to 5 are valid inputs" order
+            |_ -> RhinoScriptingException.Raise "SortPoints is missing implementation for order input %d, only 0 to 5 are valid inputs" order
         if ascending then points |>  Seq.sortBy           f
         else              points |>  Seq.sortByDescending f
 
@@ -394,9 +394,9 @@ module AutoOpenUtility =
     /// <param name="blue">(int) Blue value between 0 and 255 </param>
     /// <returns>(System.Drawing.Color) a Color.</returns>
     static member CreateColor(red:int, green:int, blue:int) : Drawing.Color =
-        if red   < 0 || red > 255 then RhinoScriptingException.Raise "RhinoScriptSyntax.CreateColor red value out of range 0 to 255: %d" red
-        if green < 0 || green > 255 then RhinoScriptingException.Raise "RhinoScriptSyntax.CreateColor green value out of range 0 to 255: %d" green
-        if blue  < 0 || blue > 255 then RhinoScriptingException.Raise "RhinoScriptSyntax.CreateColor blue value out of range 0 to 255: %d" blue
+        if red   < 0 || red > 255 then RhinoScriptingException.Raise "CreateColor red value out of range 0 to 255: %d" red
+        if green < 0 || green > 255 then RhinoScriptingException.Raise "CreateColor green value out of range 0 to 255: %d" green
+        if blue  < 0 || blue > 255 then RhinoScriptingException.Raise "CreateColor blue value out of range 0 to 255: %d" blue
         Drawing.Color.FromArgb(red, green, blue)
 
     /// <summary>Creates a RGB color from  red, green and  blue  values as Bytes.</summary>
@@ -458,7 +458,7 @@ module AutoOpenUtility =
                 data.Global.[entry]
             else
                 data.[section].[entry]
-        if isNull s then RhinoScriptingException.Raise "RhinoScriptSyntax.GetSettings entry '%s' in section '%s' not found in file %s" entry section filename
+        if isNull s then RhinoScriptingException.Raise "GetSettings entry '%s' in section '%s' not found in file %s" entry section filename
         else s
 
     /// <summary>Saves a specified section and entry in an ini file.</summary>

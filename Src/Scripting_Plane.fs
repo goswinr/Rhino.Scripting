@@ -48,7 +48,7 @@ module AutoOpenPlane =
         //plane3 = RhinoScriptSyntax.CoercePlane(plane3)
         let rc, point = Intersect.Intersection.PlanePlanePlane(plane1, plane2, plane3)
         if rc then point
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.IntersectPlanes failed, are they parallel? %A; %A; %A" plane1 plane2 plane3
+        else RhinoScriptingException.Raise "IntersectPlanes failed, are they parallel? %A; %A; %A" plane1 plane2 plane3
 
 
     /// <summary>Moves the origin of a plane.</summary>
@@ -86,7 +86,7 @@ module AutoOpenPlane =
     static member PlaneClosestParameter( plane:Plane, point:Point3d) : float*float =
         let rc, s, t = plane.ClosestParameter(point)
         if rc then s, t
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.PlaneClosestParameter failed for %A; %A" plane point
+        else RhinoScriptingException.Raise "PlaneClosestParameter failed for %A; %A" plane point
 
 
     /// <summary>Intersect an infinite Plane and a Curve object.</summary>
@@ -142,7 +142,7 @@ module AutoOpenPlane =
                 rc.Add( (a, b, c, d, e, f, g, h, i, j, k))
             rc
         else
-            RhinoScriptingException.Raise "RhinoScriptSyntax.PlaneCurveIntersection failed on %A; %A tolerance %A" plane curve tolerance
+            RhinoScriptingException.Raise "PlaneCurveIntersection failed on %A; %A tolerance %A" plane curve tolerance
 
 
     /// <summary>Returns the equation of a Plane as a tuple of four numbers. The standard
@@ -162,7 +162,7 @@ module AutoOpenPlane =
         //points = RhinoScriptSyntax.Coerce3dPointlist(points)
         let rc, plane = Plane.FitPlaneToPoints(points)
         if rc = PlaneFitResult.Success then plane
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.PlaneFitFromPoints failed for %A" points
+        else RhinoScriptingException.Raise "PlaneFitFromPoints failed for %A" points
 
 
     /// <summary>Construct a Plane from a point, and two vectors in the Plane.</summary>
@@ -215,7 +215,7 @@ module AutoOpenPlane =
         //y = RhinoScriptSyntax.Coerce3dPoint(y)
         let plane = Plane(origin, x, y)
         if plane.IsValid then plane
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.PlaneFromPoints failed for %A; %A; %A" origin x y
+        else RhinoScriptingException.Raise "PlaneFromPoints failed for %A; %A; %A" origin x y
 
 
     /// <summary>Calculates the intersection of two Planes.</summary>
@@ -227,7 +227,7 @@ module AutoOpenPlane =
         //plane2 = RhinoScriptSyntax.CoercePlane(plane2)
         let rc, line = Intersect.Intersection.PlanePlane(plane1, plane2)
         if rc then line
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.PlanePlaneIntersection failed for %A; %A" plane1 plane2
+        else RhinoScriptingException.Raise "PlanePlaneIntersection failed for %A; %A" plane1 plane2
 
 
     /// <summary>Calculates the intersection of a Plane and a sphere.</summary>
@@ -253,7 +253,7 @@ module AutoOpenPlane =
         elif rc = Intersect.PlaneSphereIntersection.Circle then
             1, circle.Plane, circle.Radius
         else
-            RhinoScriptingException.Raise "RhinoScriptSyntax.PlaneSphereIntersection failed for %A; %A, %A" plane spherePlane sphereRadius
+            RhinoScriptingException.Raise "PlaneSphereIntersection failed for %A; %A, %A" plane spherePlane sphereRadius
 
 
     /// <summary>Transforms a Plane.</summary>
@@ -265,7 +265,7 @@ module AutoOpenPlane =
         //xForm = RhinoScriptSyntax.CoercexForm(xForm)
         let rc = Plane(plane)
         if rc.Transform(xForm) then rc
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.PlaneTransform failed for %A; %A" plane xForm
+        else RhinoScriptingException.Raise "PlaneTransform failed for %A; %A" plane xForm
 
 
     /// <summary>Rotates a Plane.</summary>
@@ -281,7 +281,7 @@ module AutoOpenPlane =
         let angleradians = toRadians(angleDegrees)
         let rc = Plane(plane)
         if rc.Rotate(angleradians, axis) then rc
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.RotatePlane failed for %A; %A; %A" plane angleDegrees axis
+        else RhinoScriptingException.Raise "RotatePlane failed for %A; %A; %A" plane angleDegrees axis
 
 
     /// <summary>Returns Rhino's world XY Plane.</summary>

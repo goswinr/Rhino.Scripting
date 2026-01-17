@@ -63,7 +63,7 @@ type RhinoScriptSyntax private () =
     /// <param name="value">(float) The value to clamp.</param>
     /// <returns>(float) The clamped value.</returns>
     static member Clamp (minVal:float, maxVal:float, value:float) : float =
-        if minVal > maxVal then  RhinoScriptingException.Raise "RhinoScriptSyntax.Clamp: minValue %A must be less than maxValue %A" minVal maxVal
+        if minVal > maxVal then  RhinoScriptingException.Raise "Clamp: minValue %A must be less than maxValue %A" minVal maxVal
         max minVal (min maxVal value)
 
     /// <summary>Like the Python 'xrange' function for integers, this creates a range of floating point values.
@@ -74,18 +74,18 @@ type RhinoScriptSyntax private () =
     /// <param name="step">(float) The step size between two values.</param>
     /// <returns>(float seq) A lazy sequence of floats.</returns>
     static member FxrangePython (start:float, stop:float, step:float) : float seq =
-        if isNanOrInf start then RhinoScriptingException.Raise "RhinoScriptSyntax.FxrangePython: NaN or Infinity, start=%f, step=%f, stop=%f" start step stop
-        if isNanOrInf step  then RhinoScriptingException.Raise "RhinoScriptSyntax.FxrangePython: NaN or Infinity, start=%f, step=%f, stop=%f" start step stop
-        if isNanOrInf stop  then RhinoScriptingException.Raise "RhinoScriptSyntax.FxrangePython: NaN or Infinity, start=%f, step=%f, stop=%f" start step stop
+        if isNanOrInf start then RhinoScriptingException.Raise "FxrangePython: NaN or Infinity, start=%f, step=%f, stop=%f" start step stop
+        if isNanOrInf step  then RhinoScriptingException.Raise "FxrangePython: NaN or Infinity, start=%f, step=%f, stop=%f" start step stop
+        if isNanOrInf stop  then RhinoScriptingException.Raise "FxrangePython: NaN or Infinity, start=%f, step=%f, stop=%f" start step stop
         let range = stop - start
                     |> BitConverter.DoubleToInt64Bits
                     |> (+) 15L // to make sure stop value is included in Range, this will then explicitly be removed below to match python semantics
                     |> BitConverter.Int64BitsToDouble
         let steps = range/step - 1.0 // -1 to make sure stop value is not included(python semantics different from F# semantics on range expressions)
-        if isNanOrInf steps then RhinoScriptingException.Raise "RhinoScriptSyntax.FxrangePython range/step in frange: %f / %f is NaN Infinity, start=%f, stop=%f" range step start stop
+        if isNanOrInf steps then RhinoScriptingException.Raise "FxrangePython range/step in frange: %f / %f is NaN Infinity, start=%f, stop=%f" range step start stop
 
         if steps < 0.0 then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.FxrangePython: Stop value cannot be reached: start=%f, step=%f, stop=%f (steps:%f)" start step stop steps //or Seq.empty
+            RhinoScriptingException.Raise "FxrangePython: Stop value cannot be reached: start=%f, step=%f, stop=%f (steps:%f)" start step stop steps //or Seq.empty
         else
             // the actual algorithm:
             let rec floatRange (start, i, steps) =
@@ -128,17 +128,17 @@ type RhinoScriptSyntax private () =
                 a.LayerIndex <- layerIndex
                 if objectName <> "" then
                     if stringSafetyCheck && not <|  Util.isAcceptableStringId( objectName, false) then // TODO or enforce goodStringID ?
-                        RhinoScriptingException.Raise "RhinoScriptSyntax.Add: objectName the string '%s' cannot be used as key. See RhinoScriptSyntax.IsGoodStringId. You can use checkStrings=false parameter to bypass some of these restrictions." objectName
+                        RhinoScriptingException.Raise "Add: objectName the string '%s' cannot be used as key. See RhinoScriptSyntax.IsGoodStringId. You can use checkStrings=false parameter to bypass some of these restrictions." objectName
                     a.Name <- objectName
                 if notNull userTextKeysAndValues then
                     for k,v in userTextKeysAndValues do
                         if stringSafetyCheck then
                             if not <|  Util.isAcceptableStringId( k, false) then // TODO or enforce goodStringID ?
-                                RhinoScriptingException.Raise "RhinoScriptSyntax.Add: SetUserText the string '%s' cannot be used as key. See RhinoScriptSyntax.IsGoodStringId. You can use checkStrings=false parameter to bypass some of these restrictions." k
+                                RhinoScriptingException.Raise "Add: SetUserText the string '%s' cannot be used as key. See RhinoScriptSyntax.IsGoodStringId. You can use checkStrings=false parameter to bypass some of these restrictions." k
                             if not <|  Util.isAcceptableStringId( v, false) then
-                                RhinoScriptingException.Raise "RhinoScriptSyntax.Add: SetUserText the string '%s' cannot be used as value. See RhinoScriptSyntax.IsGoodStringId. You can use checkStrings=false parameter to bypass some of these restrictions." v
+                                RhinoScriptingException.Raise "Add: SetUserText the string '%s' cannot be used as value. See RhinoScriptSyntax.IsGoodStringId. You can use checkStrings=false parameter to bypass some of these restrictions." v
                         if not <| a.SetUserString(k,v) then
-                            RhinoScriptingException.Raise "RhinoScriptSyntax.Add: failed to set key value pair '%s' and '%s' " k v
+                            RhinoScriptingException.Raise "Add: failed to set key value pair '%s' and '%s' " k v
                 if collapseParents then
                     State.Doc.Layers.[layerIndex].IsExpanded <- false
                 a

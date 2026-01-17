@@ -45,7 +45,7 @@ module AutoOpenMesh =
             elif l = 4 then
                 mesh.Faces.AddFace(face.[0], face.[1], face.[2], face.[3]) |> ignore<int>
             else
-                RhinoScriptingException.Raise "RhinoScriptSyntax.AddMesh: Expected 3 or 4 indices for a face but got %d" l
+                RhinoScriptingException.Raise "AddMesh: Expected 3 or 4 indices for a face but got %d" l
 
         if notNull vertexNormals then
             let count = Seq.length(vertexNormals)
@@ -69,7 +69,7 @@ module AutoOpenMesh =
             mesh.VertexColors.SetColors(colors)   |>   ignore
 
         let rc = State.Doc.Objects.AddMesh(mesh)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddMesh: Unable to add mesh to document. vertices:'%A' faceVertices:'%A' vertexNormals:'%A' textureCoordinates:'%A' vertexColors:'%A'" vertices faceVertices vertexNormals textureCoordinates vertexColors
+        if rc = Guid.Empty then RhinoScriptingException.Raise "AddMesh: Unable to add mesh to document. vertices:'%A' faceVertices:'%A' vertexNormals:'%A' textureCoordinates:'%A' vertexColors:'%A'" vertices faceVertices vertexNormals textureCoordinates vertexColors
         State.Doc.Views.Redraw()
         rc
 
@@ -123,7 +123,7 @@ module AutoOpenMesh =
             mesh.VertexColors.SetColors(colors)   |>   ignore
 
         let rc = State.Doc.Objects.AddMesh(mesh)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddMesh: Unable to add mesh to document.  vertices:'%A' faceVertices:'%A' vertexNormals:'%A' textureCoordinates:'%A' vertexColors:'%A'" vertices faceVertices vertexNormals textureCoordinates vertexColors
+        if rc = Guid.Empty then RhinoScriptingException.Raise "AddMesh: Unable to add mesh to document.  vertices:'%A' faceVertices:'%A' vertexNormals:'%A' textureCoordinates:'%A' vertexColors:'%A'" vertices faceVertices vertexNormals textureCoordinates vertexColors
         State.Doc.Views.Redraw()
         rc
 
@@ -143,7 +143,7 @@ module AutoOpenMesh =
           mesh.Vertices.Add(pointD) |> ignore<int>
           mesh.Faces.AddFace(0,1,2,3) |> ignore<int>
           let rc = State.Doc.Objects.AddMesh(mesh)
-          if rc = Guid.Empty then  RhinoScriptingException.Raise "RhinoScriptSyntax.AddMeshQuad failed.  points:'%A, %A, %A and %A" pointA pointB pointC pointD
+          if rc = Guid.Empty then  RhinoScriptingException.Raise "AddMeshQuad failed.  points:'%A, %A, %A and %A" pointA pointB pointC pointD
           State.Doc.Views.Redraw()
           rc
 
@@ -159,7 +159,7 @@ module AutoOpenMesh =
           mesh.Vertices.Add(pointC) |> ignore<int>
           mesh.Faces.AddFace(0,1,2) |> ignore<int>
           let rc = State.Doc.Objects.AddMesh(mesh)
-          if rc = Guid.Empty then  RhinoScriptingException.Raise "RhinoScriptSyntax.AddMeshTriangle failed.  points:'%A, %A and %A" pointA pointB pointC
+          if rc = Guid.Empty then  RhinoScriptingException.Raise "AddMeshTriangle failed.  points:'%A, %A and %A" pointA pointB pointC
           State.Doc.Views.Redraw()
           rc
 
@@ -172,12 +172,12 @@ module AutoOpenMesh =
         let curve = RhinoScriptSyntax.CoerceCurve(objectId)
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let mesh = Mesh.CreateFromPlanarBoundary(curve, MeshingParameters.Default, tolerance)
-        if isNull mesh then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPlanarMesh failed.  objectId:'%s' deleteInput:'%A'" (Pretty.str objectId) deleteInput
+        if isNull mesh then RhinoScriptingException.Raise "AddPlanarMesh failed.  objectId:'%s' deleteInput:'%A'" (Pretty.str objectId) deleteInput
         if deleteInput then
             let ob = RhinoScriptSyntax.CoerceGuid(objectId)
-            if not<| State.Doc.Objects.Delete(ob, true) then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPlanarMesh failed to delete input.  objectId:'%s' deleteInput:'%A'" (Pretty.str objectId) deleteInput
+            if not<| State.Doc.Objects.Delete(ob, true) then RhinoScriptingException.Raise "AddPlanarMesh failed to delete input.  objectId:'%s' deleteInput:'%A'" (Pretty.str objectId) deleteInput
         let rc = State.Doc.Objects.AddMesh(mesh)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPlanarMesh: Unable to add mesh to document.  objectId:'%s' deleteInput:'%A'" (Pretty.str objectId) deleteInput
+        if rc = Guid.Empty then RhinoScriptingException.Raise "AddPlanarMesh: Unable to add mesh to document.  objectId:'%s' deleteInput:'%A'" (Pretty.str objectId) deleteInput
         State.Doc.Views.Redraw()
         rc
 
@@ -195,7 +195,7 @@ module AutoOpenMesh =
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let polylinecurve = curve.ToPolyline(0 , 0 , 0.0 , 0.0 , 0.0, tolerance , 0.0 , 0.0 , true)
         let pts, faceids = Intersect.Intersection.MeshPolyline(mesh, polylinecurve)
-        if isNull pts then RhinoScriptingException.Raise "RhinoScriptSyntax.CurveMeshIntersection failed. curveId:'%s' meshId:'%s'" (Pretty.str curveId) (Pretty.str meshId)
+        if isNull pts then RhinoScriptingException.Raise "CurveMeshIntersection failed. curveId:'%s' meshId:'%s'" (Pretty.str curveId) (Pretty.str meshId)
         pts, faceids
 
 
@@ -312,7 +312,7 @@ module AutoOpenMesh =
         let joinedMesh = new Mesh()
         joinedMesh.Append(meshes)
         let rc = State.Doc.Objects.AddMesh(joinedMesh)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.JoinMeshes: Failed to join Meshes %A" (Pretty.str objectIds)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "JoinMeshes: Failed to join Meshes %A" (Pretty.str objectIds)
         if deleteInput then
             for objectId in objectIds do
                 //guid = RhinoScriptSyntax.CoerceGuid(objectId)
@@ -330,7 +330,7 @@ module AutoOpenMesh =
         if notNull mp then
             mp.Area
         else
-            RhinoScriptingException.Raise "RhinoScriptSyntax.MeshArea failed.  objectId:'%s'" (Pretty.str objectId)
+            RhinoScriptingException.Raise "MeshArea failed.  objectId:'%s'" (Pretty.str objectId)
 
 
 
@@ -340,7 +340,7 @@ module AutoOpenMesh =
     static member MeshAreaCentroid(objectId:Guid) : Point3d =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let mp = AreaMassProperties.Compute(mesh)
-        if mp|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MeshAreaCentroid failed.  objectId:'%s'" (Pretty.str objectId)
+        if mp|> isNull  then RhinoScriptingException.Raise "MeshAreaCentroid failed.  objectId:'%s'" (Pretty.str objectId)
         mp.Centroid
 
 
@@ -355,7 +355,7 @@ module AutoOpenMesh =
                                          [<OPT;DEF(true)>]deleteInput:bool) : Guid ResizeArray =
         let meshes0  = input0 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
         let meshes1  = input1 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
-        if meshes0.Count = 0 || meshes1.Count = 0 then RhinoScriptingException.Raise "RhinoScriptSyntax.MeshBooleanDifference: No meshes to work with.  input0:'%A' input1:'%A' deleteInput:'%A'" input0 input1 deleteInput
+        if meshes0.Count = 0 || meshes1.Count = 0 then RhinoScriptingException.Raise "MeshBooleanDifference: No meshes to work with.  input0:'%A' input1:'%A' deleteInput:'%A'" input0 input1 deleteInput
         let newmeshes = Mesh.CreateBooleanDifference  (meshes0, meshes1)
         let rc = ResizeArray()
         for mesh in newmeshes do
@@ -380,7 +380,7 @@ module AutoOpenMesh =
                                            [<OPT;DEF(true)>]deleteInput:bool) : Guid ResizeArray =
         let meshes0  = input0 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
         let meshes1  = input1 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
-        if meshes0.Count = 0 || meshes1.Count = 0 then RhinoScriptingException.Raise "RhinoScriptSyntax.MeshBooleanIntersection: No meshes to work with.  input0:'%A' input1:'%A' deleteInput:'%A'" input0 input1 deleteInput
+        if meshes0.Count = 0 || meshes1.Count = 0 then RhinoScriptingException.Raise "MeshBooleanIntersection: No meshes to work with.  input0:'%A' input1:'%A' deleteInput:'%A'" input0 input1 deleteInput
         let newmeshes = Mesh.CreateBooleanIntersection  (meshes0, meshes1)
         let rc = ResizeArray()
         for mesh in newmeshes do
@@ -406,7 +406,7 @@ module AutoOpenMesh =
                                     [<OPT;DEF(true)>]deleteInput:bool) : Guid ResizeArray =
         let meshes0  = input0 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
         let meshes1  = input1 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
-        if meshes0.Count = 0 || meshes1.Count = 0 then RhinoScriptingException.Raise "RhinoScriptSyntax.MeshBooleanSplit: CreateBooleanSplit: No meshes to work with.  input0:'%A' input1:'%A' deleteInput:'%A'" input0 input1 deleteInput
+        if meshes0.Count = 0 || meshes1.Count = 0 then RhinoScriptingException.Raise "MeshBooleanSplit: CreateBooleanSplit: No meshes to work with.  input0:'%A' input1:'%A' deleteInput:'%A'" input0 input1 deleteInput
         let newmeshes = Mesh.CreateBooleanSplit  (meshes0, meshes1)
         let rc = ResizeArray()
         for mesh in newmeshes do
@@ -426,7 +426,7 @@ module AutoOpenMesh =
     ///    Delete the input Meshes</param>
     /// <returns>(Guid ResizeArray) identifiers of new Meshes.</returns>
     static member MeshBooleanUnion(meshIds:Guid seq, [<OPT;DEF(true)>]deleteInput:bool) : Guid ResizeArray =
-        if Seq.length(meshIds)<2 then RhinoScriptingException.Raise "RhinoScriptSyntax.MeshBooleanUnion: MeshIds must contain at least 2 meshes.  meshIds:'%A' deleteInput:'%A'" meshIds deleteInput
+        if Seq.length(meshIds)<2 then RhinoScriptingException.Raise "MeshBooleanUnion: MeshIds must contain at least 2 meshes.  meshIds:'%A' deleteInput:'%A'" meshIds deleteInput
         let meshes  = meshIds |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
         let newmeshes = Mesh.CreateBooleanUnion(meshes)
         let rc = ResizeArray()
@@ -456,7 +456,7 @@ module AutoOpenMesh =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let pt = ref Point3d.Origin
         let face = mesh.ClosestPoint(point, pt, maximumDistance)
-        if face<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.MeshClosestPoint failed.  objectId:'%s' point:'%A' maximumDistance:'%A'" (Pretty.str objectId) point maximumDistance
+        if face<0 then RhinoScriptingException.Raise "MeshClosestPoint failed.  objectId:'%s' point:'%A' maximumDistance:'%A'" (Pretty.str objectId) point maximumDistance
         !pt, face
 
 
@@ -644,9 +644,9 @@ module AutoOpenMesh =
     static member MeshOffset(meshId:Guid, distance:float) : Guid =
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
         let offsetmesh = mesh.Offset(distance)
-        if offsetmesh|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MeshOffset failed.  meshId:'%s' distance:'%A'" (Pretty.str meshId) distance
+        if offsetmesh|> isNull  then RhinoScriptingException.Raise "MeshOffset failed.  meshId:'%s' distance:'%A'" (Pretty.str meshId) distance
         let rc = State.Doc.Objects.AddMesh(offsetmesh)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.MeshOffset: Unable to add mesh to document.  meshId:'%s' distance:'%A'" (Pretty.str meshId) distance
+        if rc = Guid.Empty then RhinoScriptingException.Raise "MeshOffset: Unable to add mesh to document.  meshId:'%s' distance:'%A'" (Pretty.str meshId) distance
         State.Doc.Views.Redraw()
         rc
 
@@ -661,7 +661,7 @@ module AutoOpenMesh =
         let rc = ResizeArray()
         if notNull view then
             let viewport = State.Doc.Views.Find(view, compareCase=false).MainViewport
-            if isNull viewport then RhinoScriptingException.Raise "RhinoScriptSyntax.MeshOutline: did not find view named '%A'" view
+            if isNull viewport then RhinoScriptingException.Raise "MeshOutline: did not find view named '%A'" view
             else
                 for mesh in meshes do
                     let polylines = mesh.GetOutlines(viewport)
@@ -758,7 +758,7 @@ module AutoOpenMesh =
         else
             let colorcount = Seq.length(colors)
             if colorcount <> mesh.Vertices.Count then
-                RhinoScriptingException.Raise "RhinoScriptSyntax.MeshVertexColors: Length of colors must match vertex count.  meshId:'%s' colors:'%A'" (Pretty.str meshId) colors
+                RhinoScriptingException.Raise "MeshVertexColors: Length of colors must match vertex count.  meshId:'%s' colors:'%A'" (Pretty.str meshId) colors
             mesh.VertexColors.Clear()
             for c in colors do mesh.VertexColors.Add(c) |> ignore<int>
         State.Doc.Objects.Replace(meshId, mesh) |> ignore<bool>
@@ -823,7 +823,7 @@ module AutoOpenMesh =
             if notNull mp then
                 totalVolume <- totalVolume + mp.Volume
             else
-                RhinoScriptingException.Raise "RhinoScriptSyntax.MeshVolume failed on objectId:'%s'" (Pretty.str objectId)
+                RhinoScriptingException.Raise "MeshVolume failed on objectId:'%s'" (Pretty.str objectId)
         totalVolume
 
 
@@ -838,7 +838,7 @@ module AutoOpenMesh =
             if notNull mp then
                 totalVolume <- totalVolume + mp.Volume
             else
-                RhinoScriptingException.Raise "RhinoScriptSyntax.MeshVolume failed on mesh:'%s' of %d meshes" (Pretty.str mesh) (Seq.length meshes)
+                RhinoScriptingException.Raise "MeshVolume failed on mesh:'%s' of %d meshes" (Pretty.str mesh) (Seq.length meshes)
         totalVolume
 
 
@@ -849,7 +849,7 @@ module AutoOpenMesh =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let mp = VolumeMassProperties.Compute(mesh)
         if notNull mp then mp.Centroid
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.MeshVolumeCentroid failed.  objectId:'%s'" (Pretty.str objectId)
+        else RhinoScriptingException.Raise "MeshVolumeCentroid failed.  objectId:'%s'" (Pretty.str objectId)
 
     /// <summary>Calculates the volume centroid of a Mesh.</summary>
     /// <param name="mesh">(Geometry.Mesh seq) Mesh Geometry</param>
@@ -857,7 +857,7 @@ module AutoOpenMesh =
     static member MeshVolumeCentroid(mesh:Mesh) : Point3d =
         let mp = VolumeMassProperties.Compute(mesh)
         if notNull mp then mp.Centroid
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.MeshVolumeCentroid failed.  mesh:'%s'" (Pretty.str mesh)
+        else RhinoScriptingException.Raise "MeshVolumeCentroid failed.  mesh:'%s'" (Pretty.str mesh)
 
 
     /// <summary>Pulls a Curve to a Mesh. The function makes a Polyline approximation of
@@ -871,9 +871,9 @@ module AutoOpenMesh =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let tol = State.Doc.ModelAbsoluteTolerance
         let polyline = curve.PullToMesh(mesh, tol)
-        if isNull polyline then RhinoScriptingException.Raise "RhinoScriptSyntax.PullCurveToMesh failed.  meshId:'%s' curveId:'%s'" (Pretty.str meshId)  (Pretty.str curveId)
+        if isNull polyline then RhinoScriptingException.Raise "PullCurveToMesh failed.  meshId:'%s' curveId:'%s'" (Pretty.str meshId)  (Pretty.str curveId)
         let rc = State.Doc.Objects.AddCurve(polyline)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.PullCurveToMesh: Unable to add polyline to document.  meshId:'%s' curveId:'%s'" (Pretty.str meshId) (Pretty.str curveId)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "PullCurveToMesh: Unable to add polyline to document.  meshId:'%s' curveId:'%s'" (Pretty.str meshId) (Pretty.str curveId)
         State.Doc.Views.Redraw()
         rc
 

@@ -195,14 +195,14 @@ module AutoOpenUserData =
     /// <returns>(unit) void, nothing.</returns>
     static member SetDocumentUserText(key:string, value:string, [<OPT;DEF(false)>]allowAllUnicode:bool) : unit =
         if not <|  RhinoScriptSyntax.IsGoodStringId( key, allowEmpty=false) then
-                RhinoScriptingException.Raise "RhinoScriptSyntax.SetDocumentUserText the string '%s' cannot be used as key. See RhinoScriptSyntax.IsGoodStringId. You may be able to bypass these restrictions in Rhino.Scripting by using RhinoCommon directly." key
+                RhinoScriptingException.Raise "SetDocumentUserText the string '%s' cannot be used as key. See RhinoScriptSyntax.IsGoodStringId. You may be able to bypass these restrictions in Rhino.Scripting by using RhinoCommon directly." key
 
         if allowAllUnicode then
             if not <| Util.isAcceptableStringId( value, true) then
-                RhinoScriptingException.Raise "RhinoScriptSyntax.SetDocumentUserText the string '%s' cannot be used as value. See RhinoScriptSyntax.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." value
+                RhinoScriptingException.Raise "SetDocumentUserText the string '%s' cannot be used as value. See RhinoScriptSyntax.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." value
         else
             if not <|  RhinoScriptSyntax.IsGoodStringId( value, allowEmpty=true) then
-                RhinoScriptingException.Raise "RhinoScriptSyntax.SetDocumentUserText the string '%s' cannot be used as value. You may be able to bypass these restrictions by using the optional argument: allowAllUnicode=true" value
+                RhinoScriptingException.Raise "SetDocumentUserText the string '%s' cannot be used as value. You may be able to bypass these restrictions by using the optional argument: allowAllUnicode=true" value
         State.Doc.Strings.SetString(key, value) |> ignore<string>
 
 
@@ -210,9 +210,9 @@ module AutoOpenUserData =
     /// <param name="key">(string) Key name to delete</param>
     /// <returns>(unit) void, nothing.</returns>
     static member DeleteDocumentUserText(key:string) : unit =
-        if isNull key  then RhinoScriptingException.Raise "RhinoScriptSyntax.DeleteDocumentUserText failed on for null key"
+        if isNull key  then RhinoScriptingException.Raise "DeleteDocumentUserText failed on for null key"
         let p = State.Doc.Strings.SetString(key, null)
-        if isNull p then RhinoScriptingException.Raise "RhinoScriptSyntax.DeleteDocumentUserText failed,  key '%s' does not exist"  key
+        if isNull p then RhinoScriptingException.Raise "DeleteDocumentUserText failed,  key '%s' does not exist"  key
 
     /// <summary>Sets a user text stored on an object. Key and value must not contain ambiguous Unicode characters.</summary>
     /// <param name="objectId">(Guid) The object's identifier</param>
@@ -224,20 +224,20 @@ module AutoOpenUserData =
     /// <returns>(unit) void, nothing.</returns>
     static member SetUserText(objectId:Guid, key:string, value:string, [<OPT;DEF(false)>]attachToGeometry:bool, [<OPT;DEF(false)>]allowAllUnicode:bool) : unit =
         if not <| RhinoScriptSyntax.IsGoodStringId( key, allowEmpty=false) then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText the string '%s' cannot be used as key. See RhinoScriptSyntax.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." key
+            RhinoScriptingException.Raise "SetUserText the string '%s' cannot be used as key. See RhinoScriptSyntax.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." key
 
         if allowAllUnicode then
             if not <| Util.isAcceptableStringId( value, true) then
-                RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText the string '%s' cannot be used as value. See RhinoScriptSyntax.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." value
+                RhinoScriptingException.Raise "SetUserText the string '%s' cannot be used as value. See RhinoScriptSyntax.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." value
         else
-            if not <|  RhinoScriptSyntax.IsGoodStringId( value, allowEmpty=true) then                RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText the string '%s' cannot be used as value. You may be able to bypass these restrictions by using the optional argument: allowAllUnicode=true" value
+            if not <|  RhinoScriptSyntax.IsGoodStringId( value, allowEmpty=true) then                RhinoScriptingException.Raise "SetUserText the string '%s' cannot be used as value. You may be able to bypass these restrictions by using the optional argument: allowAllUnicode=true" value
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if attachToGeometry then
             if not <| obj.Geometry.SetUserString(key, value) then
-                RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' value '%s'" (Pretty.str objectId) key value
+                RhinoScriptingException.Raise "SetUserText failed on %s for key '%s' value '%s'" (Pretty.str objectId) key value
         else
             if not <| obj.Attributes.SetUserString(key, value) then
-                RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' value '%s'" (Pretty.str objectId) key value
+                RhinoScriptingException.Raise "SetUserText failed on %s for key '%s' value '%s'" (Pretty.str objectId) key value
 
         obj.CommitChanges() |> ignore<bool> // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
 
@@ -251,22 +251,22 @@ module AutoOpenUserData =
     /// <returns>(unit) void, nothing.</returns>
     static member SetUserText(objectIds:Guid seq, key:string, value:string, [<OPT;DEF(false)>]attachToGeometry:bool, [<OPT;DEF(false)>]allowAllUnicode:bool) : unit = //PLURAL
         if not <|  RhinoScriptSyntax.IsGoodStringId( key, allowEmpty=false) then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText the string '%s' cannot be used as key. See RhinoScriptSyntax.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." key
+            RhinoScriptingException.Raise "SetUserText the string '%s' cannot be used as key. See RhinoScriptSyntax.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." key
 
         if allowAllUnicode then
             if not <| Util.isAcceptableStringId( value, true) then
-                RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText the string '%s' cannot be used as value. See RhinoScriptSyntax.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." value
+                RhinoScriptingException.Raise "SetUserText the string '%s' cannot be used as value. See RhinoScriptSyntax.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." value
         else
-            if not <|  RhinoScriptSyntax.IsGoodStringId( value, allowEmpty=true) then                RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText the string '%s' cannot be used as value. You may be able to bypass these restrictions by using the optional argument: allowAllUnicode=true" value
+            if not <|  RhinoScriptSyntax.IsGoodStringId( value, allowEmpty=true) then                RhinoScriptingException.Raise "SetUserText the string '%s' cannot be used as value. You may be able to bypass these restrictions by using the optional argument: allowAllUnicode=true" value
 
         for objectId in objectIds do
             let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             if attachToGeometry then
                 if not <| obj.Geometry.SetUserString(key, value) then
-                    RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' value '%s'" (Pretty.str objectId) key value
+                    RhinoScriptingException.Raise "SetUserText failed on %s for key '%s' value '%s'" (Pretty.str objectId) key value
             else
                 if not <| obj.Attributes.SetUserString(key, value) then
-                    RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' value '%s'" (Pretty.str objectId) key value
+                    RhinoScriptingException.Raise "SetUserText failed on %s for key '%s' value '%s'" (Pretty.str objectId) key value
             obj.CommitChanges() |> ignore<bool>  // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
 
     /// <summary>Removes user text stored on an object. If the key exists.</summary>

@@ -22,10 +22,10 @@ open VersionInfo
 type RhinoScriptingException (s:string) =
     inherit Exception(s)
     static member Raise msg =
-        Printf.kprintf (fun s -> raise (new RhinoScriptingException(s+versionInfo.Value))) msg
+        Printf.kprintf (fun s -> raise (new RhinoScriptingException $"RhinoScriptSyntax.{s}\n{versionInfo.Value}")) msg
 
     static member FailIfFalse s b =
-        if not b then raise (new RhinoScriptingException(s+versionInfo.Value))
+        if not b then raise (new RhinoScriptingException $"RhinoScriptSyntax.{s}\n{versionInfo.Value}")
 
 
 /// Rhino.Scripting Exception for aborted user interactions, such as canceling to pick an object
@@ -33,8 +33,7 @@ type RhinoUserInteractionException (s:string) =
     inherit Exception(s)
 
     static member Raise msg =
-        Printf.kprintf (fun s -> raise (new RhinoUserInteractionException(s+versionInfo.Value
-        ))) msg
+        Printf.kprintf (fun s -> raise (new RhinoUserInteractionException $"{s}\n{versionInfo.Value}")) msg
 
 // if syncContext is null, then Eto.Forms.Application.Instance.Invoke is used.
 // Rhino.Scripting Exception for UI thread synchronization problems

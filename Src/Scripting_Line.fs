@@ -41,9 +41,9 @@ module AutoOpenLine =
     /// <returns>(Point3d array) List of intersection points (0, 1, or 2 points).</returns>
     static member LineCylinderIntersection(line:Line, cylinderPlane:Plane, cylinderHeight:float, cylinderRadius:float) : Point3d array =
         let circle = Geometry.Circle( cylinderPlane, cylinderRadius )
-        if not <| circle.IsValid then  RhinoScriptingException.Raise "RhinoScriptSyntax.LineCylinderIntersection: Unable to create valid circle with given plane && radius.  line:'%A' cylinderPlane:'%A' cylinderHeight:'%A' cylinderRadius:'%A'" line cylinderPlane cylinderHeight cylinderRadius
+        if not <| circle.IsValid then  RhinoScriptingException.Raise "LineCylinderIntersection: Unable to create valid circle with given plane && radius.  line:'%A' cylinderPlane:'%A' cylinderHeight:'%A' cylinderRadius:'%A'" line cylinderPlane cylinderHeight cylinderRadius
         let cyl = Geometry.Cylinder( circle, cylinderHeight )
-        if not <| cyl.IsValid then  RhinoScriptingException.Raise "RhinoScriptSyntax.LineCylinderIntersection: Unable to create valid cylinder with given circle && height.  line:'%A' cylinderPlane:'%A' cylinderHeight:'%A' cylinderRadius:'%A'" line cylinderPlane cylinderHeight cylinderRadius
+        if not <| cyl.IsValid then  RhinoScriptingException.Raise "LineCylinderIntersection: Unable to create valid cylinder with given circle && height.  line:'%A' cylinderPlane:'%A' cylinderHeight:'%A' cylinderRadius:'%A'" line cylinderPlane cylinderHeight cylinderRadius
         let rc, pt1, pt2 = Intersect.Intersection.LineCylinder(line, cyl)
         if rc= Intersect.LineCylinderIntersection.None then
             [| |]
@@ -86,7 +86,7 @@ module AutoOpenLine =
     /// <returns>(Point3d * Point3d) containing a point on the first line and a point on the second line.</returns>
     static member LineLineIntersection(lineA:Line, lineB:Line) : Point3d * Point3d =
         let rc, a, b = Intersect.Intersection.LineLine(lineA, lineB)
-        if not <| rc then  RhinoScriptingException.Raise "RhinoScriptSyntax.LineLineIntersection failed on lineA:%A lineB:%A , are they parallel?" lineA lineB
+        if not <| rc then  RhinoScriptingException.Raise "LineLineIntersection failed on lineA:%A lineB:%A , are they parallel?" lineA lineB
         lineA.PointAt(a), lineB.PointAt(b)
 
     /// <summary>Finds the longest distance between a line as a finite chord, and a point.</summary>
@@ -129,7 +129,7 @@ module AutoOpenLine =
     /// <returns>(Plane) The Plane.</returns>
     static member LinePlane(line:Line) : Plane =
         let rc, plane = line.TryGetPlane()
-        if not <| rc then  RhinoScriptingException.Raise "RhinoScriptSyntax.LinePlane failed.  line:'%A'" line
+        if not <| rc then  RhinoScriptingException.Raise "LinePlane failed.  line:'%A'" line
         plane
 
 
@@ -139,7 +139,7 @@ module AutoOpenLine =
     /// <returns>(Point3d) The 3D point of intersection is successful.</returns>
     static member LinePlaneIntersection(line:Line, plane:Plane) : Point3d =
         let rc, t = Intersect.Intersection.LinePlane(line, plane)
-        if  not <| rc then  RhinoScriptingException.Raise "RhinoScriptSyntax.LinePlaneIntersection failed. Parallel? line:'%A' plane:'%A'" line plane
+        if  not <| rc then  RhinoScriptingException.Raise "LinePlaneIntersection failed. Parallel? line:'%A' plane:'%A'" line plane
         line.PointAt(t)
 
 
@@ -170,12 +170,12 @@ module AutoOpenLine =
         if copy then
             let ln = Line(line.From,line.To)
             let success = ln.Transform(xForm)
-            if not <| success then  RhinoScriptingException.Raise "RhinoScriptSyntax.LineTransform unable to transform line %A with  %A" line xForm
+            if not <| success then  RhinoScriptingException.Raise "LineTransform unable to transform line %A with  %A" line xForm
             State.Ot.AddLine(ln)
         else
-            // if not <| State.Ot.Replace(lineId,ln) then  RhinoScriptingException.Raise "RhinoScriptSyntax.LineTransform unable to replace geometry: line %A with  %A" line xForm
+            // if not <| State.Ot.Replace(lineId,ln) then  RhinoScriptingException.Raise "LineTransform unable to replace geometry: line %A with  %A" line xForm
             let success =line.Transform(xForm)
-            if not <| success then  RhinoScriptingException.Raise "RhinoScriptSyntax.LineTransform unable to transform line %A with  %A" line xForm
+            if not <| success then  RhinoScriptingException.Raise "LineTransform unable to transform line %A with  %A" line xForm
             lineId
 
 

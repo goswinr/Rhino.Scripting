@@ -47,18 +47,18 @@ module AutoOpenLayer =
 
         let col = if color.IsEmpty then UtilLayer.randomLayerColor else (fun () -> color)
         if notNull parent && isNull name then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.AddLayer if parent name is given (%s) the child name must be given too." parent
+            RhinoScriptingException.Raise "AddLayer if parent name is given (%s) the child name must be given too." parent
 
         let vis =   match visible with
                     | 0 ->  UtilLayer.Off
                     | 1 ->  UtilLayer.On
                     | 2 ->  UtilLayer.ByParent
-                    | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.AddLayer Bad value vor Visibility: %d, it may be 0, 1 or 2" visible
+                    | _ -> RhinoScriptingException.Raise "AddLayer Bad value vor Visibility: %d, it may be 0, 1 or 2" visible
         let loc =   match locked with
                     | 0 ->  UtilLayer.Off
                     | 1 ->  UtilLayer.On
                     | 2 ->  UtilLayer.ByParent
-                    | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.AddLayer Bad value vor Locked: %d, it may be 0, 1 or 2" locked
+                    | _ -> RhinoScriptingException.Raise "AddLayer Bad value vor Locked: %d, it may be 0, 1 or 2" locked
 
         if isNull name then
             //State.Doc.Layers.[UtilLayer.createDefaultLayer(col, true, false)].FullPath
@@ -126,8 +126,8 @@ module AutoOpenLayer =
     /// <returns>(unit) void, nothing.</returns>
     static member ObjectLayer(objectId:Guid, layerIndex:int) : unit = //SET
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        if layerIndex < 0 || layerIndex >= State.Doc.Layers.Count then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectLayer: Setting it via index failed. bad index '%d' (max %d) on: %s " layerIndex State.Doc.Layers.Count (Pretty.str objectId)
-        if State.Doc.Layers.[layerIndex].IsDeleted then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectLayer: Setting it via index failed.  index '%d' is deleted.  on: %s " layerIndex  (Pretty.str objectId)
+        if layerIndex < 0 || layerIndex >= State.Doc.Layers.Count then RhinoScriptingException.Raise "ObjectLayer: Setting it via index failed. bad index '%d' (max %d) on: %s " layerIndex State.Doc.Layers.Count (Pretty.str objectId)
+        if State.Doc.Layers.[layerIndex].IsDeleted then RhinoScriptingException.Raise "ObjectLayer: Setting it via index failed.  index '%d' is deleted.  on: %s " layerIndex  (Pretty.str objectId)
         obj.Attributes.LayerIndex <- layerIndex
         obj.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
@@ -137,8 +137,8 @@ module AutoOpenLayer =
     /// <param name="layerIndex">(int) Index of layer in layer table</param>
     /// <returns>(unit) void, nothing.</returns>
     static member ObjectLayer(objectIds:Guid seq, layerIndex:int) : unit = //MULTISET
-        if layerIndex < 0 || layerIndex >= State.Doc.Layers.Count then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectLayer: Setting it via index failed. bad index '%d' (max %d) on %d objects " layerIndex State.Doc.Layers.Count (Seq.length objectIds)
-        if State.Doc.Layers.[layerIndex].IsDeleted then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectLayer: Setting it via index failed.  index '%d' is deleted.  on %d objects" layerIndex  (Seq.length objectIds)
+        if layerIndex < 0 || layerIndex >= State.Doc.Layers.Count then RhinoScriptingException.Raise "ObjectLayer: Setting it via index failed. bad index '%d' (max %d) on %d objects " layerIndex State.Doc.Layers.Count (Seq.length objectIds)
+        if State.Doc.Layers.[layerIndex].IsDeleted then RhinoScriptingException.Raise "ObjectLayer: Setting it via index failed.  index '%d' is deleted.  on %d objects" layerIndex  (Seq.length objectIds)
         for objectId in objectIds do
             let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             obj.Attributes.LayerIndex <- layerIndex
@@ -155,7 +155,7 @@ module AutoOpenLayer =
                                  , [<OPT;DEF(false:bool)>]allowUnicode:bool ) : unit =
         let i = State.Doc.Layers.FindByFullPath(currentLayerName, RhinoMath.UnsetIntIndex)
         if i = RhinoMath.UnsetIntIndex then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.ChangeLayerName: could not FindByFullPath Layer from currentLayerName: '%s'" currentLayerName
+            RhinoScriptingException.Raise "ChangeLayerName: could not FindByFullPath Layer from currentLayerName: '%s'" currentLayerName
         else
             UtilLayer.failOnBadShortLayerName (newLayerName, newLayerName, allowUnicode)
             let lay = State.Doc.Layers.[i]
@@ -164,7 +164,7 @@ module AutoOpenLayer =
             let np = String.concat "::" ps
             let ni = State.Doc.Layers.FindByFullPath(np, RhinoMath.UnsetIntIndex)
             if ni >= 0 then
-                RhinoScriptingException.Raise "RhinoScriptSyntax.ChangeLayerName: could not rename Layer '%s' to '%s', it already exists." currentLayerName np
+                RhinoScriptingException.Raise "ChangeLayerName: could not rename Layer '%s' to '%s', it already exists." currentLayerName np
             else
                 lay.Name <- newLayerName
 
@@ -180,8 +180,8 @@ module AutoOpenLayer =
     /// <returns>(unit) void, nothing.</returns>
     static member CurrentLayer(layer:string) : unit = //SET
         let i = State.Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
-        if i = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "RhinoScriptSyntax.CurrentLayer: could not FindByFullPath Layer from name'%s'" layer
-        if not<|  State.Doc.Layers.SetCurrentLayerIndex(i, quiet=true) then RhinoScriptingException.Raise "RhinoScriptSyntax.CurrentLayer Set CurrentLayer to %s failed" layer
+        if i = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "CurrentLayer: could not FindByFullPath Layer from name'%s'" layer
+        if not<|  State.Doc.Layers.SetCurrentLayerIndex(i, quiet=true) then RhinoScriptingException.Raise "CurrentLayer Set CurrentLayer to %s failed" layer
 
     /// <summary>Removes an existing layer from the document. The layer to be removed
     ///    cannot be the current layer. Unlike the PurgeLayer method, the layer must
@@ -192,7 +192,7 @@ module AutoOpenLayer =
     /// <returns>(bool) True or False indicating success or failure.</returns>
     static member DeleteLayer(layer:string) : bool =
         let i = State.Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
-        if i = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "RhinoScriptSyntax.DeleteLayer: could not FindByFullPath Layer from name'%s'" layer
+        if i = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "DeleteLayer: could not FindByFullPath Layer from name'%s'" layer
         State.Doc.Layers.Delete(i, quiet=true)
 
 
@@ -203,7 +203,7 @@ module AutoOpenLayer =
     /// <returns>(unit) void, nothing.</returns>
     static member ExpandLayer(layer:string, expand:bool) : unit =
         let i = State.Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
-        if i = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "RhinoScriptSyntax.ExpandLayer: could not FindByFullPath Layer from name'%s'" layer
+        if i = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "ExpandLayer: could not FindByFullPath Layer from name'%s'" layer
         let layer = State.Doc.Layers.[i]
         if layer.IsExpanded <> expand then
             layer.IsExpanded <- expand
@@ -408,7 +408,7 @@ module AutoOpenLayer =
             index <- -1
         else
             let lt = State.Doc.Linetypes.FindName(lineType)
-            if lt|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.LayerLinetype not found. layer:'%s' line typ:'%s'" layer.FullPath lineType
+            if lt|> isNull  then RhinoScriptingException.Raise "LayerLinetype not found. layer:'%s' line typ:'%s'" layer.FullPath lineType
             index <- lt.LinetypeIndex
         layer.LinetypeIndex <- index
         State.Doc.Views.Redraw()
@@ -567,7 +567,7 @@ module AutoOpenLayer =
     /// <returns>(Guid) The layer's identifier.</returns>
     static member LayerId(layer:string) : Guid =
         let idx = State.Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
-        if idx = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "RhinoScriptSyntax.LayerId not found for name %s" layer
+        if idx = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "LayerId not found for name %s" layer
         State.Doc.Layers.[idx].Id
 
 
@@ -725,7 +725,7 @@ module AutoOpenLayer =
                     //if i <> Layers.CurrentLayerIndex then
                     //    if not <| Layers.Delete(i, quiet=true) then
                     //        //if Layers |> Seq.filter ( fun l -> not l.IsDeleted) |> Seq.length > 1 then
-                    //        RhinoScriptingException.Raise "RhinoScriptSyntax.PurgeEmptyLayers: failed to delete layer '%s' " l.FullPath // the last layer can't be deleted so don't raise exception
+                    //        RhinoScriptingException.Raise "PurgeEmptyLayers: failed to delete layer '%s' " l.FullPath // the last layer can't be deleted so don't raise exception
         State.Doc.Views.Redraw()
 
 

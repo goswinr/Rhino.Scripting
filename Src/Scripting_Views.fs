@@ -37,12 +37,12 @@ module AutoOpenViews =
                              corner2:Point2d,
                              [<OPT;DEF(null:string)>]title:string,
                              [<OPT;DEF(1)>]projection:int) : Guid =
-        if projection<1 || projection>7 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddDetail: Projection must be a value between 1-7.  layoutId:'%s' corner1:'%A' corner2:'%A' title:'%A' projection:'%A'" layoutName corner1 corner2 title projection
+        if projection<1 || projection>7 then RhinoScriptingException.Raise "AddDetail: Projection must be a value between 1-7.  layoutId:'%s' corner1:'%A' corner2:'%A' title:'%A' projection:'%A'" layoutName corner1 corner2 title projection
         let layout = RhinoScriptSyntax.CoercePageView(layoutName)//TODO test this
-        if isNull layout then RhinoScriptingException.Raise "RhinoScriptSyntax.AddDetail: No layout found for given layoutId.  layoutId:'%s' corner1:'%A' corner2:'%A' title:'%A' projection:'%A'" layoutName corner1 corner2 title projection
+        if isNull layout then RhinoScriptingException.Raise "AddDetail: No layout found for given layoutId.  layoutId:'%s' corner1:'%A' corner2:'%A' title:'%A' projection:'%A'" layoutName corner1 corner2 title projection
         let projection : Display.DefinedViewportProjection = LanguagePrimitives.EnumOfValue  projection
         let detail = layout.AddDetailView(title, corner1, corner2, projection)
-        if isNull detail then RhinoScriptingException.Raise "RhinoScriptSyntax.AddDetail failed.  layoutId:'%s' corner1:'%A' corner2:'%A' title:'%A' projection:'%A'" layoutName corner1 corner2 title projection
+        if isNull detail then RhinoScriptingException.Raise "AddDetail failed.  layoutId:'%s' corner1:'%A' corner2:'%A' title:'%A' projection:'%A'" layoutName corner1 corner2 title projection
         State.Doc.Views.Redraw()
         detail.Id
 
@@ -59,7 +59,7 @@ module AutoOpenViews =
             if width=0.0 || height=0.0  then State.Doc.Views.AddPageView(title)
             else                             State.Doc.Views.AddPageView(title, width, height)
         if notNull page then page.MainViewport.Id, page.PageName
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.AddLayout failed for %A %A" title (width, height)
+        else RhinoScriptingException.Raise "AddLayout failed for %A %A" title (width, height)
 
 
     /// <summary>Adds new named construction plane to the document.</summary>
@@ -67,9 +67,9 @@ module AutoOpenViews =
     /// <param name="plane">(Plane) The construction plane</param>
     /// <returns>(unit) void, nothing.</returns>
     static member AddNamedCPlane(cPlaneName:string, plane:Plane) : unit =
-        if isNull cPlaneName then RhinoScriptingException.Raise "RhinoScriptSyntax.AddNamedCPlane: cPlaneName = null.  plane:'%A'"  plane
+        if isNull cPlaneName then RhinoScriptingException.Raise "AddNamedCPlane: cPlaneName = null.  plane:'%A'"  plane
         let index = State.Doc.NamedConstructionPlanes.Add(cPlaneName, plane)
-        if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddNamedCPlane failed.  cPlaneName:'%A' plane:'%A'" cPlaneName plane
+        if index<0 then RhinoScriptingException.Raise "AddNamedCPlane failed.  cPlaneName:'%A' plane:'%A'" cPlaneName plane
         ()
 
 
@@ -80,10 +80,10 @@ module AutoOpenViews =
     /// <returns>(unit) void, nothing.</returns>
     static member AddNamedView(name:string, [<OPT;DEF("")>]view:string) : unit =
         let view = RhinoScriptSyntax.CoerceView(view)
-        if isNull name then RhinoScriptingException.Raise "RhinoScriptSyntax.AddNamedView: Name = null.  view:'%A'"  view
+        if isNull name then RhinoScriptingException.Raise "AddNamedView: Name = null.  view:'%A'"  view
         let viewportId = view.MainViewport.Id
         let index = State.Doc.NamedViews.Add(name, viewportId)
-        if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddNamedView failed.  name:'%A' view:'%A'" name view
+        if index<0 then RhinoScriptingException.Raise "AddNamedView failed.  name:'%A' view:'%A'" name view
 
 
 
@@ -104,7 +104,7 @@ module AutoOpenViews =
         if layout = detail then page.SetPageAsActive()
         else
             if not <| page.SetActiveDetail(detail, compareCase=false) then
-                RhinoScriptingException.Raise "RhinoScriptSyntax.CurrentDetail set failed for %s to %s" layout detail
+                RhinoScriptingException.Raise "CurrentDetail set failed for %s to %s" layout detail
         State.Doc.Views.Redraw()
 
 
@@ -150,7 +150,7 @@ module AutoOpenViews =
     static member DetailLock(detailId:Guid, lock:bool) : unit = //SET
         let detail =
             try State.Doc.Objects.FindId(detailId) :?> DocObjects.DetailViewObject
-            with _ ->  RhinoScriptingException.Raise "RhinoScriptSyntax.DetailLock: Setting it failed. detailId is a %s  lock:'%A'" (Pretty.str detailId)  lock
+            with _ ->  RhinoScriptingException.Raise "DetailLock: Setting it failed. detailId is a %s  lock:'%A'" (Pretty.str detailId)  lock
         if lock <> detail.DetailGeometry.IsProjectionLocked then
             detail.DetailGeometry.IsProjectionLocked <- lock
             detail.CommitChanges() |> ignore<bool>
@@ -177,7 +177,7 @@ module AutoOpenViews =
             detail.CommitChanges() |> ignore<bool>
             State.Doc.Views.Redraw()
         else
-            RhinoScriptingException.Raise "RhinoScriptSyntax.DetailScale failed.  detailId:'%s' modelLength:'%A' pageLength:'%A'" (Pretty.str detailId) modelLength pageLength
+            RhinoScriptingException.Raise "DetailScale failed.  detailId:'%s' modelLength:'%A' pageLength:'%A'" (Pretty.str detailId) modelLength pageLength
 
 
 
@@ -202,7 +202,7 @@ module AutoOpenViews =
             elif State.Doc.Views.GetViewList(includeStandardViews=true ,includePageViews=false) |> Array.exists (fun v -> v.MainViewport.Name = layout) then
                 false
             else
-                RhinoScriptingException.Raise "RhinoScriptSyntax.IsLayout View does not exist at all.  layout:'%A'" layout // or false
+                RhinoScriptingException.Raise "IsLayout View does not exist at all.  layout:'%A'" layout // or false
 
         #else
             if   State.Doc.Views.GetViewList Display.ViewTypeFilter.Page |> Array.exists (fun v -> v.MainViewport.Name = layout) then
@@ -210,7 +210,7 @@ module AutoOpenViews =
             elif State.Doc.Views.GetViewList Display.ViewTypeFilter.ModelStyleViews |> Array.exists (fun v -> v.MainViewport.Name = layout) then
                 false
             else
-                RhinoScriptingException.Raise "RhinoScriptSyntax.IsLayout View does not exist at all.  layout:'%A'" layout // or false
+                RhinoScriptingException.Raise "IsLayout View does not exist at all.  layout:'%A'" layout // or false
 
         #endif
 
@@ -285,7 +285,7 @@ module AutoOpenViews =
     /// <returns>(Plane) a Plane.</returns>
     static member NamedCPlane(name:string) : Plane =
         let index = State.Doc.NamedConstructionPlanes.Find(name)
-        if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.NamedCPlane failed.  name:'%A'" name
+        if index<0 then RhinoScriptingException.Raise "NamedCPlane failed.  name:'%A'" name
         State.Doc.NamedConstructionPlanes.[index].Plane
 
 
@@ -315,7 +315,7 @@ module AutoOpenViews =
     /// <param name="newTitle">(string) The new title of the view</param>
     /// <returns>(unit) void, nothing.</returns>
     static member RenameView(oldTitle:string, newTitle:string) : unit =
-        if isNull oldTitle || isNull newTitle then RhinoScriptingException.Raise "RhinoScriptSyntax.RenameView failed.  oldTitle:'%A' newTitle:'%A'" oldTitle newTitle
+        if isNull oldTitle || isNull newTitle then RhinoScriptingException.Raise "RenameView failed.  oldTitle:'%A' newTitle:'%A'" oldTitle newTitle
         let foundview = RhinoScriptSyntax.CoerceView(oldTitle)
         foundview.MainViewport.Name <- newTitle
 
@@ -329,7 +329,7 @@ module AutoOpenViews =
     static member RestoreNamedCPlane(cplaneName:string, [<OPT;DEF("")>]view:string) : string =
         let view = RhinoScriptSyntax.CoerceView(view)
         let index = State.Doc.NamedConstructionPlanes.Find(cplaneName)
-        if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.RestoreNamedCPlane failed.  cplaneName:'%A' view:'%A'" cplaneName view
+        if index<0 then RhinoScriptingException.Raise "RestoreNamedCPlane failed.  cplaneName:'%A' view:'%A'" cplaneName view
         let cplane = State.Doc.NamedConstructionPlanes.[index]
         view.MainViewport.PushConstructionPlane(cplane)
         view.Redraw()
@@ -348,13 +348,13 @@ module AutoOpenViews =
                                     [<OPT;DEF(false)>]restoreBitmap:bool) : unit =
         let view = RhinoScriptSyntax.CoerceView(view)
         let index = State.Doc.NamedViews.FindByName(namedView)
-        if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.RestoreNamedView failed.  namedView:'%A' view:'%A' restoreBitmap:'%A'" namedView view restoreBitmap
+        if index<0 then RhinoScriptingException.Raise "RestoreNamedView failed.  namedView:'%A' view:'%A' restoreBitmap:'%A'" namedView view restoreBitmap
         let viewinfo = State.Doc.NamedViews.[index]
         if view.MainViewport.PushViewInfo(viewinfo, restoreBitmap) then
             view.Redraw()
             //view.MainViewport.Name
         else
-            RhinoScriptingException.Raise "RhinoScriptSyntax.RestoreNamedView failed.  namedView:'%A' view:'%A' restoreBitmap:'%A'" namedView view restoreBitmap
+            RhinoScriptingException.Raise "RestoreNamedView failed.  namedView:'%A' view:'%A' restoreBitmap:'%A'" namedView view restoreBitmap
 
 
     /// <summary>Rotates a perspective-projection view's camera. See the RotateCamera
@@ -571,7 +571,7 @@ module AutoOpenViews =
     static member ViewCameraPlane([<OPT;DEF("")>]view:string) : Plane =
         let view = RhinoScriptSyntax.CoerceView(view)
         let rc, frame = view.ActiveViewport.GetCameraFrame()
-        if not rc then RhinoScriptingException.Raise "RhinoScriptSyntax.ViewCameraPlane failed.  view:'%A'" view
+        if not rc then RhinoScriptingException.Raise "ViewCameraPlane failed.  view:'%A'" view
         frame
 
 
@@ -648,7 +648,7 @@ module AutoOpenViews =
             view.ActiveViewport.DisplayMode <- desc
             State.Doc.Views.Redraw()
         else
-            RhinoScriptingException.Raise "RhinoScriptSyntax.ViewDisplayMode set mode %s not found." mode
+            RhinoScriptingException.Raise "ViewDisplayMode set mode %s not found." mode
 
 
 
@@ -659,7 +659,7 @@ module AutoOpenViews =
         let desc = Display.DisplayModeDescription.FindByName(name)
         if notNull desc then desc.Id
         else
-            RhinoScriptingException.Raise "RhinoScriptSyntax.ViewDisplayModeId set mode %s not found." name
+            RhinoScriptingException.Raise "ViewDisplayModeId set mode %s not found." name
 
 
     /// <summary>Return name of a display mode given it's id.</summary>
@@ -669,7 +669,7 @@ module AutoOpenViews =
         let desc = Display.DisplayModeDescription.GetDisplayMode(modeId)
         if notNull desc then desc.EnglishName
         else
-            RhinoScriptingException.Raise "RhinoScriptSyntax.ViewDisplayModeName set Id %A not found." modeId
+            RhinoScriptingException.Raise "ViewDisplayModeName set Id %A not found." modeId
 
 
     /// <summary>Return list of display modes.</summary>
@@ -693,15 +693,15 @@ module AutoOpenViews =
             | 0 -> State.Doc.Views.GetViewList(includeStandardViews=true , includePageViews=false)
             | 1 -> State.Doc.Views.GetViewList(includeStandardViews=false, includePageViews=true)
             | 2 -> State.Doc.Views.GetViewList(includeStandardViews=true , includePageViews=true)
-            | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.ViewNames invalid viewType:'%A'" viewType
+            | _ -> RhinoScriptingException.Raise "ViewNames invalid viewType:'%A'" viewType
             #else
             match viewType with
             | 0 -> State.Doc.Views.GetViewList(Display.ViewTypeFilter.ModelStyleViews)
             | 1 -> State.Doc.Views.GetViewList(Display.ViewTypeFilter.Page)
             | 2 -> State.Doc.Views.GetViewList(Display.ViewTypeFilter.ModelStyleViews ||| Display.ViewTypeFilter.Page)
-            | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.ViewNames invalid viewType:'%A'" viewType
+            | _ -> RhinoScriptingException.Raise "ViewNames invalid viewType:'%A'" viewType
             #endif
-        if isNull views then RhinoScriptingException.Raise "RhinoScriptSyntax.ViewNames failed. viewType:'%A'" viewType
+        if isNull views then RhinoScriptingException.Raise "ViewNames failed. viewType:'%A'" viewType
         views |> RArr.mapArr _.MainViewport.Name
 
 
@@ -753,7 +753,7 @@ module AutoOpenViews =
     static member ViewRadius(view:string) : float = //GET
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
-        if not viewport.IsParallelProjection then RhinoScriptingException.Raise "RhinoScriptSyntax.ViewRadius view is not ParallelProjection.  view:'%A'" view
+        if not viewport.IsParallelProjection then RhinoScriptingException.Raise "ViewRadius view is not ParallelProjection.  view:'%A'" view
         // let ok, a, b, c, d, e, f = viewport.GetFrustum()
         let _, _, b, _, d, _, _ = viewport.GetFrustum()
         let frusright = b
@@ -773,7 +773,7 @@ module AutoOpenViews =
     static member ViewRadius(view:string, radius:float, mode:bool) : unit = //SET
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
-        if not viewport.IsParallelProjection then RhinoScriptingException.Raise "RhinoScriptSyntax.ViewRadius view is not ParallelProjection.  view:'%A'" view
+        if not viewport.IsParallelProjection then RhinoScriptingException.Raise "ViewRadius view is not ParallelProjection.  view:'%A'" view
         // let ok, a, b, c, d, e, f = viewport.GetFrustum()
         let _, _, b, _, d, _, _ = viewport.GetFrustum()
         let frusright = b
@@ -865,7 +865,7 @@ module AutoOpenViews =
     static member Wallpaper(view:string, filename:string) : unit = //SET
         let viewo = RhinoScriptSyntax.CoerceView(view)
         if not <| viewo.ActiveViewport.SetWallpaper(filename, grayscale=false) then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.Wallpaper failed to set wallpaper to %s in view %s" filename view
+            RhinoScriptingException.Raise "Wallpaper failed to set wallpaper to %s in view %s" filename view
         viewo.Redraw()
 
 
@@ -886,7 +886,7 @@ module AutoOpenViews =
         let viewo = RhinoScriptSyntax.CoerceView(view)
         let filename = viewo.ActiveViewport.WallpaperFilename
         if not <| viewo.ActiveViewport.SetWallpaper(filename, grayscale) then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.WallpaperGrayScale failed to set wallpaper to %s in view %s" filename view
+            RhinoScriptingException.Raise "WallpaperGrayScale failed to set wallpaper to %s in view %s" filename view
         viewo.Redraw()
 
 

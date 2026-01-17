@@ -25,7 +25,7 @@ module AutoOpenLinetype =
     /// <returns>(bool) True or False.</returns>
     static member IsLinetypeReference(name:string) : bool =
         let lt = State.Doc.Linetypes.FindName(name)
-        if isNull lt then RhinoScriptingException.Raise "RhinoScriptSyntax.IsLinetypeReference unable to find '%s' in linetypes" name
+        if isNull lt then RhinoScriptingException.Raise "IsLinetypeReference unable to find '%s' in linetypes" name
         lt.IsReference
 
 

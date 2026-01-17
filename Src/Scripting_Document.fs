@@ -123,7 +123,7 @@ module AutoOpenDocument =
         let bmp =
             if notNull modelName  then
                 if notNull State.Doc.Path then RhinoDoc.ExtractPreviewImage(State.Doc.Path) // TODO test this works ok
-                else RhinoScriptingException.Raise "RhinoScriptSyntax.ExtractPreviewImage failed on unsaved file"
+                else RhinoScriptingException.Raise "ExtractPreviewImage failed on unsaved file"
             else
                 RhinoDoc.ExtractPreviewImage(modelName)
         bmp.Save(fileName)
@@ -189,7 +189,7 @@ module AutoOpenDocument =
     ///   1 = background color</param>
     /// <returns>(Drawing.Color) The current item color.</returns>
     static member RenderColor(item:int) : Drawing.Color = //GET
-        if item<>0 && item<>1 then  RhinoScriptingException.Raise "RhinoScriptSyntax.RenderColor Item must be 0 or 1.  item:'%A'" item
+        if item<>0 && item<>1 then  RhinoScriptingException.Raise "RenderColor Item must be 0 or 1.  item:'%A'" item
         if item = 0 then  State.Doc.RenderSettings.AmbientLight
         else State.Doc.RenderSettings.BackgroundColorTop
 
@@ -200,7 +200,7 @@ module AutoOpenDocument =
     /// <param name="color">(Drawing.Color) The new color value</param>
     /// <returns>(unit) void, nothing.</returns>
     static member RenderColor(item:int, color:Drawing.Color) : unit = //SET
-        if item<>0 && item<>1 then  RhinoScriptingException.Raise "RhinoScriptSyntax.RenderColor Item must be 0 || 1.  item:'%A' color:'%A'" item color
+        if item<>0 && item<>1 then  RhinoScriptingException.Raise "RenderColor Item must be 0 || 1.  item:'%A' color:'%A'" item color
         let settings = State.Doc.RenderSettings
         if item = 0 then  settings.AmbientLight <- color
         else            settings.BackgroundColorTop <- color
@@ -480,7 +480,7 @@ module AutoOpenDocument =
         if tolerance > 0.0 then
             State.Doc.ModelAbsoluteTolerance <- tolerance
         else
-            RhinoScriptingException.Raise "RhinoScriptSyntax.UnitAbsoluteTolerance failed.  tolerance:'%A'" tolerance
+            RhinoScriptingException.Raise "UnitAbsoluteTolerance failed.  tolerance:'%A'" tolerance
 
 
 
@@ -500,7 +500,7 @@ module AutoOpenDocument =
             if angleToleranceDegrees > 0. then
                 State.Doc.ModelAngleToleranceDegrees <- angleToleranceDegrees
             else
-                RhinoScriptingException.Raise "RhinoScriptSyntax.UnitAngleTolerance failed.  angleToleranceDegrees:'%A'" angleToleranceDegrees
+                RhinoScriptingException.Raise "UnitAngleTolerance failed.  angleToleranceDegrees:'%A'" angleToleranceDegrees
 
 
     /// <summary>Return the document's distance display precision.</summary>
@@ -534,7 +534,7 @@ module AutoOpenDocument =
             if relativeTolerance > 0.0 then
                 State.Doc.ModelRelativeTolerance <- relativeTolerance
             else
-                RhinoScriptingException.Raise "RhinoScriptSyntax.UnitRelativeTolerance failed.  relativeTolerance:'%A'" relativeTolerance
+                RhinoScriptingException.Raise "UnitRelativeTolerance failed.  relativeTolerance:'%A'" relativeTolerance
 
 
     /// <summary>Return the scale factor for changing between unit systems.</summary>
@@ -640,7 +640,7 @@ module AutoOpenDocument =
     /// <returns>(unit) void, nothing.</returns>
     static member UnitSystem(unitSystem:int, [<OPT;DEF(false)>]scale:bool) : unit = //SET
         if unitSystem < 1 || unitSystem > 25 then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.UnitSystem value of %d is not  valid" unitSystem
+            RhinoScriptingException.Raise "UnitSystem value of %d is not  valid" unitSystem
             let unitSystem : UnitSystem  = LanguagePrimitives.EnumOfValue (byte unitSystem)
             State.Doc.AdjustPageUnitSystem(unitSystem, scale)
 

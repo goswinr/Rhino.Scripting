@@ -77,7 +77,7 @@ module AutoOpenPointVector =
     static member PointArrayClosestPoint(points:Point3d IList, testPoint:Point3d) : int =
         let index = Rhino.Collections.Point3dList.ClosestIndexInList(points, testPoint)
         if index>=0 then index
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.PointArrayClosestPoint failed on %A, %A" points testPoint
+        else RhinoScriptingException.Raise "PointArrayClosestPoint failed on %A, %A" points testPoint
 
 
     /// <summary>Transforms a list of 3D points.</summary>
@@ -149,10 +149,10 @@ module AutoOpenPointVector =
                 if distance < t3 closest then
                     closest  <-  objectId, meshclosest, distance
 
-            | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.PointClosestObject: non supported object type %A %A  Point, PointCloud, Curve, Brep or Mesh" (RhinoScriptSyntax.ObjectDescription(objectId)) objectId
+            | _ -> RhinoScriptingException.Raise "PointClosestObject: non supported object type %A %A  Point, PointCloud, Curve, Brep or Mesh" (RhinoScriptSyntax.ObjectDescription(objectId)) objectId
 
         if t1 closest <> Guid.Empty then closest
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.PointClosestObject failed on %A and %A" point objectIds
+        else RhinoScriptingException.Raise "PointClosestObject failed on %A and %A" point objectIds
 
 
     /// <summary>Compares two 3D points.</summary>
@@ -175,7 +175,7 @@ module AutoOpenPointVector =
     /// <returns>(Point3d) resulting point.</returns>
     static member PointDivide(point:Point3d, divide:float) : Point3d =
         if divide < RhinoMath.ZeroTolerance && divide > -RhinoMath.ZeroTolerance then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.PointDivide: Cannot divide by Zero or almost Zero %f" divide
+            RhinoScriptingException.Raise "PointDivide: Cannot divide by Zero or almost Zero %f" divide
         else
             point/divide
 
@@ -260,8 +260,8 @@ module AutoOpenPointVector =
                 let tolerance = State.Doc.ModelAbsoluteTolerance
                 brep.Faces.[0].PullPointsToFace(points, tolerance)
             else
-                RhinoScriptingException.Raise "RhinoScriptSyntax.PullPoints only works on surface and single sided breps not %d sided ones" brep.Faces.Count
-        | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.PullPoints does not support %A" (RhinoScriptSyntax.ObjectDescription(objectId))
+                RhinoScriptingException.Raise "PullPoints only works on surface and single sided breps not %d sided ones" brep.Faces.Count
+        | _ -> RhinoScriptingException.Raise "PullPoints does not support %A" (RhinoScriptSyntax.ObjectDescription(objectId))
 
 
     /// <summary>Adds two 3D vectors.</summary>
@@ -280,7 +280,7 @@ module AutoOpenPointVector =
         let vector1 = Vector3d(vector1.X, vector1.Y, vector1.Z)
         let vector2 = Vector3d(vector2.X, vector2.Y, vector2.Z)
         if not <| vector1.Unitize() || not <| vector2.Unitize() then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.VectorAngle: Unable to unitize vector.  vector1:'%A' vector2:'%A'" vector1 vector2
+            RhinoScriptingException.Raise "VectorAngle: Unable to unitize vector.  vector1:'%A' vector2:'%A'" vector1 vector2
         let mutable dot = vector1 * vector2
         dot <- RhinoScriptSyntax.Clamp(-1.0 , 1.0 , dot)
         let radians = Math.Acos(dot)
@@ -320,7 +320,7 @@ module AutoOpenPointVector =
     /// <returns>(Vector3d) resulting vector.</returns>
     static member VectorDivide(vector:Vector3d, divide:float) : Vector3d =
         if divide < RhinoMath.ZeroTolerance && divide > -RhinoMath.ZeroTolerance then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.VectorDivide: Cannot divide by Zero or almost Zero %f" divide
+            RhinoScriptingException.Raise "VectorDivide: Cannot divide by Zero or almost Zero %f" divide
         else
             vector/divide
 
@@ -367,7 +367,7 @@ module AutoOpenPointVector =
         let angleradians = RhinoMath.ToRadians(angleDegrees)
         let rc = Vector3d(vector.X, vector.Y, vector.Z)
         if rc.Rotate(angleradians, axis) then rc
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.VectorRotate failed on %A, %A, %A" vector angleDegrees axis
+        else RhinoScriptingException.Raise "VectorRotate failed on %A, %A, %A" vector angleDegrees axis
 
 
     /// <summary>Scales a 3-D vector.</summary>
@@ -401,7 +401,7 @@ module AutoOpenPointVector =
     /// <returns>(Vector3d) unitized vector.</returns>
     static member inline VectorUnitize(vector:Vector3d) : Vector3d =
         let le = sqrt (vector.X * vector.X + vector.Y * vector.Y + vector.Z * vector.Z)
-        if Double.IsInfinity le || le < RhinoMath.ZeroTolerance then RhinoScriptingException.Raise "RhinoScriptSyntax.VectorUnitize failed on zero length or very short Vector %s" vector.Pretty
+        if Double.IsInfinity le || le < RhinoMath.ZeroTolerance then RhinoScriptingException.Raise "VectorUnitize failed on zero length or very short Vector %s" vector.Pretty
         let f = 1. / le
         Vector3d(vector.X*f, vector.Y*f, vector.Z*f)
 

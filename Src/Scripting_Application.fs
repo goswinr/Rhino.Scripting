@@ -114,7 +114,7 @@ module AutoOpenApplication =
         elif item = 11 then AppearanceSettings.CommandPromptTextColor
         elif item = 12 then AppearanceSettings.CommandPromptBackgroundColor
         elif item = 13 then AppearanceSettings.CommandPromptHypertextColor
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.AppearanceColor: get item %d is out of range" item
+        else RhinoScriptingException.Raise "AppearanceColor: get item %d is out of range" item
 
     /// <summary>Modifies an application interface item's color.</summary>
     /// <param name="item">(int) Item number to either query or modify
@@ -150,7 +150,7 @@ module AutoOpenApplication =
             elif item = 11 then AppearanceSettings.CommandPromptTextColor <- color
             elif item = 12 then AppearanceSettings.CommandPromptBackgroundColor <- color
             elif item = 13 then AppearanceSettings.CommandPromptHypertextColor <- color
-            else RhinoScriptingException.Raise "RhinoScriptSyntax.AppearanceColor:: Setting item %d is out of range" item
+            else RhinoScriptingException.Raise "AppearanceColor:: Setting item %d is out of range" item
             State.Doc.Views.Redraw()
             )
 
@@ -342,7 +342,7 @@ module AutoOpenApplication =
             if mode = 1 || mode = 2 then
                 ApplicationSettings.EdgeAnalysisSettings.ShowEdges <- mode
             else
-                RhinoScriptingException.Raise "RhinoScriptSyntax.EdgeAnalysisMode bad edge analysisMode %d" mode
+                RhinoScriptingException.Raise "EdgeAnalysisMode bad edge analysisMode %d" mode
             )
 
     /// <summary>Enables or disables Rhino's automatic file saving mechanism.</summary>
@@ -362,7 +362,7 @@ module AutoOpenApplication =
             let objectId = PlugIns.PlugIn.IdFromName(plugin)
             let rc, loadSilent = PlugIns.PlugIn.GetLoadProtection(objectId)
             if rc then loadSilent
-            else RhinoScriptingException.Raise "RhinoScriptSyntax.EnablePlugIn: %s GetLoadProtection failed" plugin
+            else RhinoScriptingException.Raise "EnablePlugIn: %s GetLoadProtection failed" plugin
             )
 
     /// <summary>Enables or disables a Rhino plug-in.</summary>
@@ -374,7 +374,7 @@ module AutoOpenApplication =
             let objectId = Rhino.PlugIns.PlugIn.IdFromName(plugin)
             let rc, _ = Rhino.PlugIns.PlugIn.GetLoadProtection(objectId)
             if rc then PlugIns.PlugIn.SetLoadProtection(objectId, enable)
-            else RhinoScriptingException.Raise "RhinoScriptSyntax.EnablePlugIn: %s GetLoadProtection failed" plugin
+            else RhinoScriptingException.Raise "EnablePlugIn: %s GetLoadProtection failed" plugin
             )
 
 
@@ -624,7 +624,7 @@ module AutoOpenApplication =
     static member PlugInId(plugin:string) : Guid =
         let objectId = Rhino.PlugIns.PlugIn.IdFromName(plugin)
         if objectId<>Guid.Empty then  objectId
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.PlugInId: Plugin %s not found" plugin
+        else RhinoScriptingException.Raise "PlugInId: Plugin %s not found" plugin
     /// <summary>Returns an array of registered Rhino plug-ins.</summary>
     /// <param name="types">(int) Optional, default value: <c>0</c>
     ///    The type of plug-ins to return.

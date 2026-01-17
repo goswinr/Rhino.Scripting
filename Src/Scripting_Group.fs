@@ -24,7 +24,7 @@ module AutoOpenGroup =
         else
             index <- State.Doc.Groups.Add( groupName )
         let rc = State.Doc.Groups.GroupName(index)
-        if rc|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.AddGroup failed.  groupName:'%A'" groupName
+        if rc|> isNull  then RhinoScriptingException.Raise "AddGroup failed.  groupName:'%A'" groupName
         rc
 
     /// <summary>Adds one or more objects to an existing group.</summary>
@@ -33,9 +33,9 @@ module AutoOpenGroup =
     /// <returns>(unit) void, nothing.</returns>
     static member AddObjectsToGroup(objectIds:Guid seq, groupName:string) : unit = //PLURAL
         let index = State.Doc.Groups.Find(groupName)
-        if index < 0 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddObjectsToGroup Can't add objects to group, group '%s' not found" groupName
-        if Seq.isEmpty objectIds then RhinoScriptingException.Raise "RhinoScriptSyntax.AddObjectsToGroup Can't add empty seq to group %s" groupName
-        if not <|  State.Doc.Groups.AddToGroup(index, objectIds) then RhinoScriptingException.Raise "RhinoScriptSyntax.AddObjectsToGroup failed '%s' and %A" groupName objectIds
+        if index < 0 then RhinoScriptingException.Raise "AddObjectsToGroup Can't add objects to group, group '%s' not found" groupName
+        if Seq.isEmpty objectIds then RhinoScriptingException.Raise "AddObjectsToGroup Can't add empty seq to group %s" groupName
+        if not <|  State.Doc.Groups.AddToGroup(index, objectIds) then RhinoScriptingException.Raise "AddObjectsToGroup failed '%s' and %A" groupName objectIds
 
 
     /// <summary>Adds two or more objects to a new group.</summary>
@@ -43,8 +43,8 @@ module AutoOpenGroup =
     /// <returns>(unit) void, nothing.</returns>
     static member GroupObjects(objectIds:Guid seq) : unit =
         let index = State.Doc.Groups.Add()
-        if objectIds |> Seq.hasMaximumItems 1 then RhinoScriptingException.Raise "RhinoScriptSyntax.GroupObjects needs to have more than one objects but has %d" (Seq.length objectIds)
-        if not <|  State.Doc.Groups.AddToGroup(index, objectIds) then RhinoScriptingException.Raise "RhinoScriptSyntax.GroupObjects failed on %A"  objectIds
+        if objectIds |> Seq.hasMaximumItems 1 then RhinoScriptingException.Raise "GroupObjects needs to have more than one objects but has %d" (Seq.length objectIds)
+        if not <|  State.Doc.Groups.AddToGroup(index, objectIds) then RhinoScriptingException.Raise "GroupObjects failed on %A"  objectIds
         //State.Doc.Groups.GroupName(index)
 
     /// <summary>Adds two or more objects to a new group, sets group name.</summary>
@@ -53,9 +53,9 @@ module AutoOpenGroup =
     /// <returns>(unit) void, nothing.</returns>
     static member GroupObjects(objectIds:Guid seq, groupName:string) : unit =
         let index = State.Doc.Groups.Add( groupName )
-        if index < 0 then RhinoScriptingException.Raise "RhinoScriptSyntax.GroupObjects failed to create group with name '%s' for %d objects" groupName (Seq.length objectIds)
-        if objectIds |> Seq.hasMaximumItems 1 then RhinoScriptingException.Raise "RhinoScriptSyntax.GroupObjects to '%s' needs to have more than one objects but has %d" groupName (Seq.length objectIds)
-        if not <|  State.Doc.Groups.AddToGroup(index, objectIds) then RhinoScriptingException.Raise "RhinoScriptSyntax.GroupObjects failed on %A"  objectIds
+        if index < 0 then RhinoScriptingException.Raise "GroupObjects failed to create group with name '%s' for %d objects" groupName (Seq.length objectIds)
+        if objectIds |> Seq.hasMaximumItems 1 then RhinoScriptingException.Raise "GroupObjects to '%s' needs to have more than one objects but has %d" groupName (Seq.length objectIds)
+        if not <|  State.Doc.Groups.AddToGroup(index, objectIds) then RhinoScriptingException.Raise "GroupObjects failed on %A"  objectIds
         //State.Doc.Groups.GroupName(index)
 
     /// <summary>Adds a single object to an existing group.</summary>
@@ -64,8 +64,8 @@ module AutoOpenGroup =
     /// <returns>(unit) void, nothing.</returns>
     static member AddObjectToGroup(objectId:Guid, groupName:string) : unit =
         let index = State.Doc.Groups.Find(groupName)
-        if index < 0 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddObjectToGroup Can't add object to group, group '%s' not found" groupName
-        if not <|  State.Doc.Groups.AddToGroup(index, objectId) then RhinoScriptingException.Raise "RhinoScriptSyntax.AddObjectToGroup failed '%s' and %A" groupName objectId
+        if index < 0 then RhinoScriptingException.Raise "AddObjectToGroup Can't add object to group, group '%s' not found" groupName
+        if not <|  State.Doc.Groups.AddToGroup(index, objectId) then RhinoScriptingException.Raise "AddObjectToGroup failed '%s' and %A" groupName objectId
 
 
     /// <summary>Removes an existing group from the document. Reference groups cannot be removed. Deleting a group does not delete the member objects.</summary>
@@ -73,8 +73,8 @@ module AutoOpenGroup =
     /// <returns>(unit) void, nothing.</returns>
     static member DeleteGroup(groupName:string) : unit =
         let index = State.Doc.Groups.Find(groupName)
-        if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.DeleteGroup Can't DeleteGroup, group '%s' not found" groupName
-        if not <| State.Doc.Groups.Delete(index) then RhinoScriptingException.Raise "RhinoScriptSyntax.DeleteGroup failed for group '%s' " groupName
+        if index<0 then RhinoScriptingException.Raise "DeleteGroup Can't DeleteGroup, group '%s' not found" groupName
+        if not <| State.Doc.Groups.Delete(index) then RhinoScriptingException.Raise "DeleteGroup failed for group '%s' " groupName
 
 
     /// <summary>Returns the number of groups in the document.</summary>
@@ -98,7 +98,7 @@ module AutoOpenGroup =
     /// <returns>(int) The number of objects that were hidden.</returns>
     static member HideGroup(groupName:string) : int =
         let index = State.Doc.Groups.Find(groupName)
-        if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.HideGroup: Can't HideGroup, group '%s' not found" groupName
+        if index<0 then RhinoScriptingException.Raise "HideGroup: Can't HideGroup, group '%s' not found" groupName
         State.Doc.Groups.Hide(index);
 
 
@@ -114,7 +114,7 @@ module AutoOpenGroup =
     /// <returns>(bool) True or False if groupName is empty.</returns>
     static member IsGroupEmpty(groupName:string) : bool =
         let index = State.Doc.Groups.Find(groupName)
-        if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.IsGroupEmpty: Can't check IsGroupEmpty, group '%s' not found" groupName
+        if index<0 then RhinoScriptingException.Raise "IsGroupEmpty: Can't check IsGroupEmpty, group '%s' not found" groupName
         State.Doc.Groups.GroupObjectCount(index)>0
 
 
@@ -124,7 +124,7 @@ module AutoOpenGroup =
     /// <returns>(int) Number of objects that were locked.</returns>
     static member LockGroup(groupName:string) : int =
         let index = State.Doc.Groups.Find(groupName)
-        if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.LockGroup failed.  groupName:'%A'" groupName
+        if index<0 then RhinoScriptingException.Raise "LockGroup failed.  groupName:'%A'" groupName
         State.Doc.Groups.Lock(index);
 
 
@@ -148,11 +148,11 @@ module AutoOpenGroup =
     static member RemoveObjectFromGroup(objectId:Guid, groupName:string) : unit =
         let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let index = State.Doc.Groups.Find(groupName)
-        if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.RemoveObjectFromGroup failed.  objectId:'%s' groupName:'%A'" (Pretty.str objectId) groupName
+        if index<0 then RhinoScriptingException.Raise "RemoveObjectFromGroup failed.  objectId:'%s' groupName:'%A'" (Pretty.str objectId) groupName
         let attrs = rhinoObject.Attributes
         attrs.RemoveFromGroup(index)
         if not <| State.Doc.Objects.ModifyAttributes(rhinoObject, attrs, true) then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.RemoveObjectFromGroup failed.  objectId:'%s' groupName:'%A'" (Pretty.str objectId) groupName
+            RhinoScriptingException.Raise "RemoveObjectFromGroup failed.  objectId:'%s' groupName:'%A'" (Pretty.str objectId) groupName
 
 
     /// <summary>Removes multiple objects from an existing group.</summary>
@@ -161,13 +161,13 @@ module AutoOpenGroup =
     /// <returns>(unit) void, nothing.</returns>
     static member RemoveObjectsFromGroup(objectIds:Guid seq, groupName:string) : unit = //PLURAL
         let index = State.Doc.Groups.Find(groupName)
-        if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.RemoveObjectsFromGroup failed.  objectIds:'%A' groupName:'%A'" (Pretty.str objectIds) groupName
+        if index<0 then RhinoScriptingException.Raise "RemoveObjectsFromGroup failed.  objectIds:'%A' groupName:'%A'" (Pretty.str objectIds) groupName
         for objectId in objectIds do
             let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             let attrs = rhinoObject.Attributes
             attrs.RemoveFromGroup(index)
             if not <| State.Doc.Objects.ModifyAttributes(rhinoObject, attrs, true) then
-                RhinoScriptingException.Raise "RhinoScriptSyntax.RemoveObjectsFromGroup failed.  objectId:'%s' groupName:'%A'" (Pretty.str objectId) groupName
+                RhinoScriptingException.Raise "RemoveObjectsFromGroup failed.  objectId:'%s' groupName:'%A'" (Pretty.str objectId) groupName
 
 
 
@@ -177,9 +177,9 @@ module AutoOpenGroup =
     /// <returns>(unit) void, nothing.</returns>
     static member RenameGroup(oldName:string, newName:string) : unit =
         let index = State.Doc.Groups.Find(oldName)
-        if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.RenameGroup failed.  oldName:'%A' newName:'%A'" oldName newName
+        if index<0 then RhinoScriptingException.Raise "RenameGroup failed.  oldName:'%A' newName:'%A'" oldName newName
         if not <| State.Doc.Groups.ChangeGroupName(index, newName) then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.RenameGroup failed.  oldName:'%A' newName:'%A'" oldName newName
+            RhinoScriptingException.Raise "RenameGroup failed.  oldName:'%A' newName:'%A'" oldName newName
 
 
     /// <summary>Shows a group of previously hidden objects. Hidden objects are not
@@ -188,7 +188,7 @@ module AutoOpenGroup =
     /// <returns>(int) The number of objects that were shown.</returns>
     static member ShowGroup(groupName:string) : int =
         let index = State.Doc.Groups.Find(groupName)
-        if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.ShowGroup failed.  groupName:'%A'" groupName
+        if index<0 then RhinoScriptingException.Raise "ShowGroup failed.  groupName:'%A'" groupName
         State.Doc.Groups.Show(index)
 
 
@@ -198,7 +198,7 @@ module AutoOpenGroup =
     /// <returns>(int) The number of objects that were unlocked.</returns>
     static member UnlockGroup(groupName:string) : int =
         let index = State.Doc.Groups.Find(groupName)
-        if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.UnlockGroup failed.  groupName:'%A'" groupName
+        if index<0 then RhinoScriptingException.Raise "UnlockGroup failed.  groupName:'%A'" groupName
         State.Doc.Groups.Unlock(index)
 
     /// <summary>Returns the top most group name that an object is assigned.
@@ -208,7 +208,7 @@ module AutoOpenGroup =
     static member ObjectTopGroup(objId:Guid) : string =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objId)
         let groupIndexes = obj.GetGroupList()
-        if isNull groupIndexes then  RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectTopGroup objId not part of a group:'%s'" (Pretty.str objId)
+        if isNull groupIndexes then  RhinoScriptingException.Raise "ObjectTopGroup objId not part of a group:'%s'" (Pretty.str objId)
         else
             let topGroupIndex = Array.max(groupIndexes) // this is a bad assumption. See RH-49189
             State.Doc.Groups.FindIndex(topGroupIndex).Name

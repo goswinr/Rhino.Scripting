@@ -73,7 +73,7 @@ module AutoOpenUserInterface =
         if notNull newCheckStates then
             (Seq.zip itemStrings newCheckStates |>  ResizeArray)
         else
-            //RhinoScriptingException.Raise "RhinoScriptSyntax.CheckListBox failed.  items:'%A' message:'%A' title:'%A'" items message title
+            //RhinoScriptingException.Raise "CheckListBox failed.  items:'%A' message:'%A' title:'%A'" items message title
             RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.CheckListBox()"
 
 
@@ -147,7 +147,7 @@ module AutoOpenUserInterface =
             go.AcceptNothing(true)
             go.SetCommandPrompt( message )
             let count = Seq.length(items)
-            if count < 1 || count <> Seq.length(defaultVals) then RhinoScriptingException.Raise "RhinoScriptSyntax.GetBoolean failed.  message:'%A' items:'%A' defaultVals:'%A'" message items defaultVals
+            if count < 1 || count <> Seq.length(defaultVals) then RhinoScriptingException.Raise "GetBoolean failed.  message:'%A' items:'%A' defaultVals:'%A'" message items defaultVals
             let toggles = ResizeArray()
             for i = 0 to count - 1 do
                 let initial = defaultVals.[i]
@@ -197,7 +197,7 @@ module AutoOpenUserInterface =
                 |2 -> Input.GetBoxMode.ThreePoint
                 |3 -> Input.GetBoxMode.Vertical
                 |4 -> Input.GetBoxMode.Center
-                |_ -> RhinoScriptingException.Raise "RhinoScriptSyntax.GetBox:Bad mode %A" mode
+                |_ -> RhinoScriptingException.Raise "GetBox:Bad mode %A" mode
 
             let box = ref (Box())
             let rc= Input.RhinoGet.GetBox(box, m, basePoint, prompt1, prompt2, prompt3)
@@ -223,7 +223,7 @@ module AutoOpenUserInterface =
                     let ps = m.GetParameters()
                     ps.Length=1 &&  ps[0].ParameterType.FullName = "System.Drawing.Color&"    )
             match methOp with
-            | None -> RhinoScriptingException.Raise "RhinoScriptSyntax.GetColor: ShowColorDialog method not found"
+            | None -> RhinoScriptingException.Raise "GetColor: ShowColorDialog method not found"
             | Some mi ->
                 let rc = unbox<bool> (mi.Invoke(null,[|colRef:>obj|]))
                 if not rc then  RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetColor()"
@@ -319,7 +319,7 @@ module AutoOpenUserInterface =
                                     [<OPT;DEF(0)>]maxCount:int,
                                     [<OPT;DEF(false)>]select:bool) : ResizeArray<Guid*Guid*Point3d> =
         let get () =
-            if maxCount > 0 && minCount > maxCount then RhinoScriptingException.Raise "RhinoScriptSyntax.GetEdgeCurves: minCount %d is bigger than  maxCount %d" minCount  maxCount
+            if maxCount > 0 && minCount > maxCount then RhinoScriptingException.Raise "GetEdgeCurves: minCount %d is bigger than  maxCount %d" minCount  maxCount
             use go = new Input.Custom.GetObject()
             go.SetCommandPrompt(message)
             go.GeometryFilter <- DocObjects.ObjectType.Curve
@@ -640,7 +640,7 @@ module AutoOpenUserInterface =
                 gp.Constrain(brep, -1, -1, allowPickingPointOffObject=false) |> ignore<bool>
 
             | _ ->
-                RhinoScriptingException.Raise "RhinoScriptSyntax.GetPointOnSurface failed input is not surface or Polysurface.  surfaceId:'%s' message:'%A'" (Pretty.str surfaceId) message
+                RhinoScriptingException.Raise "GetPointOnSurface failed input is not surface or Polysurface.  surfaceId:'%s' message:'%A'" (Pretty.str surfaceId) message
 
             gp.Get() |> ignore<Input.GetResult>
             if gp.CommandResult() <> Commands.Result.Success then

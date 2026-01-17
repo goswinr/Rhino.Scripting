@@ -46,7 +46,7 @@ module AutoOpenTransformation =
     /// <returns>(Transform) The 4x4 transformation matrix.</returns>
     static member XformChangeBasis(initialPlane:Plane, finalPlane:Plane) : Transform =
         let xForm = Transform.ChangeBasis(initialPlane, finalPlane)
-        if not xForm.IsValid then RhinoScriptingException.Raise "RhinoScriptSyntax.XformChangeBasis failed.  initialPlane:'%A' finalPlane:'%A'" initialPlane finalPlane
+        if not xForm.IsValid then RhinoScriptingException.Raise "XformChangeBasis failed.  initialPlane:'%A' finalPlane:'%A'" initialPlane finalPlane
         xForm
 
 
@@ -65,7 +65,7 @@ module AutoOpenTransformation =
                                      y1:Vector3d,
                                      z1:Vector3d) : Transform =
         let xForm = Transform.ChangeBasis(x0, y0, z0, x1, y1, z1)
-        if not xForm.IsValid   then RhinoScriptingException.Raise "RhinoScriptSyntax.XformChangeBasis2 failed.  x0:'%A' y0:'%A' z0:'%A' x1:'%A' y1:'%A' z1:'%A'" x0 y0 z0 x1 y1 z1
+        if not xForm.IsValid   then RhinoScriptingException.Raise "XformChangeBasis2 failed.  x0:'%A' y0:'%A' z0:'%A' x1:'%A' y1:'%A' z1:'%A'" x0 y0 z0 x1 y1 z1
         xForm
 
 
@@ -115,7 +115,7 @@ module AutoOpenTransformation =
     /// <returns>(Transform) The inverted 4x4 transformation matrix.</returns>
     static member XformInverse(xForm:Transform) : Transform =
         let rc, inverse = xForm.TryGetInverse()
-        if not rc then RhinoScriptingException.Raise "RhinoScriptSyntax.XformInverse failed.  xForm:'%A'" xForm
+        if not rc then RhinoScriptingException.Raise "XformInverse failed.  xForm:'%A'" xForm
         inverse
 
 
@@ -149,7 +149,7 @@ module AutoOpenTransformation =
     /// <returns>(Transform) The 4x4 transformation matrix.</returns>
     static member XformRotation1(initialPlane:Plane, finalPlane:Plane) : Transform =
         let xForm = Transform.PlaneToPlane(initialPlane, finalPlane)
-        if not xForm.IsValid   then RhinoScriptingException.Raise "RhinoScriptSyntax.XformRotation1 failed.  initialPlane:'%A' finalPlane:'%A'" initialPlane finalPlane
+        if not xForm.IsValid   then RhinoScriptingException.Raise "XformRotation1 failed.  initialPlane:'%A' finalPlane:'%A'" initialPlane finalPlane
         xForm
 
 
@@ -163,7 +163,7 @@ module AutoOpenTransformation =
                                   centerPoint:Point3d) : Transform =
         let anglerad = toRadians(angleDegrees)
         let xForm = Transform.Rotation(anglerad, rotationAxis, centerPoint)
-        if not xForm.IsValid   then RhinoScriptingException.Raise "RhinoScriptSyntax.XformRotation2 failed.  angleDegrees:'%A' rotationAxis:'%A' centerPoint:'%A'" angleDegrees rotationAxis centerPoint
+        if not xForm.IsValid   then RhinoScriptingException.Raise "XformRotation2 failed.  angleDegrees:'%A' rotationAxis:'%A' centerPoint:'%A'" angleDegrees rotationAxis centerPoint
         xForm
 
 
@@ -177,7 +177,7 @@ module AutoOpenTransformation =
                                   endDirection:Vector3d,
                                   centerPoint:Point3d) : Transform =
         let xForm = Transform.Rotation(startDirection, endDirection, centerPoint)
-        if not xForm.IsValid   then RhinoScriptingException.Raise "RhinoScriptSyntax.XformRotation3 failed.  startDirection:'%A' endDirection:'%A' centerPoint:'%A'" startDirection endDirection centerPoint
+        if not xForm.IsValid   then RhinoScriptingException.Raise "XformRotation3 failed.  startDirection:'%A' endDirection:'%A' centerPoint:'%A'" startDirection endDirection centerPoint
         xForm
 
 
@@ -196,7 +196,7 @@ module AutoOpenTransformation =
                                   y1:Vector3d,
                                   z1:Vector3d) : Transform =
         let xForm = Transform.Rotation(x0, y0, z0, x1, y1, z1)
-        if not xForm.IsValid   then RhinoScriptingException.Raise "RhinoScriptSyntax.XformRotation4 failed.  x0:'%A' y0:'%A' z0:'%A' x1:'%A' y1:'%A' z1:'%A'" x0 y0 z0 x1 y1 z1
+        if not xForm.IsValid   then RhinoScriptingException.Raise "XformRotation4 failed.  x0:'%A' y0:'%A' z0:'%A' x1:'%A' y1:'%A' z1:'%A'" x0 y0 z0 x1 y1 z1
         xForm
 
 

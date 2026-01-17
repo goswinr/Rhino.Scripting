@@ -81,8 +81,8 @@ module AutoOpenToolbar =
         if notNull tbfile then
             let group = tbfile.GetGroup(toolbarGroup)
             if notNull group then  group.IsDocked
-            else RhinoScriptingException.Raise "RhinoScriptSyntax.IsToolbarDocked failed on name '%s'" name
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.IsToolbarDocked failed on name '%s'" name
+            else RhinoScriptingException.Raise "IsToolbarDocked failed on name '%s'" name
+        else RhinoScriptingException.Raise "IsToolbarDocked failed on name '%s'" name
 
 
     /// <summary>Checks if a toolbar group in an open toolbar collection is visible.</summary>
@@ -94,8 +94,8 @@ module AutoOpenToolbar =
         if notNull tbfile then
             let group = tbfile.GetGroup(toolbarGroup)
             if notNull group then  group.Visible
-            else RhinoScriptingException.Raise "RhinoScriptSyntax.IsToolbarVisible failed on name '%s'" name
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.IsToolbarVisible failed on name '%s'" name
+            else RhinoScriptingException.Raise "IsToolbarVisible failed on name '%s'" name
+        else RhinoScriptingException.Raise "IsToolbarVisible failed on name '%s'" name
 
 
     /// <summary>Opens a toolbar collection file.</summary>
@@ -104,7 +104,7 @@ module AutoOpenToolbar =
     static member OpenToolbarCollection(file:string) : string =
         let tbfile = RhinoApp.ToolbarFiles.Open(file)
         if notNull tbfile then  tbfile.Name
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.OpenToolbarCollection failed on file '%s'" file
+        else RhinoScriptingException.Raise "OpenToolbarCollection failed on file '%s'" file
 
 
     /// <summary>Saves an open toolbar collection to disk.</summary>

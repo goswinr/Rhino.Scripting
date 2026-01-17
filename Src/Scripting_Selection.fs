@@ -58,9 +58,9 @@ module AutoOpenSelection =
             it.IncludeLights <- includeLights
             it.IncludeGrips <- includeGrips
             let e = State.Doc.Objects.GetObjectList(it).GetEnumerator()
-            if not <| e.MoveNext() then RhinoScriptingException.Raise "RhinoScriptSyntax.FirstObject not found"
+            if not <| e.MoveNext() then RhinoScriptingException.Raise "FirstObject not found"
             let object = e.Current
-            if isNull object then RhinoScriptingException.Raise "RhinoScriptSyntax.FirstObject not found(null)"
+            if isNull object then RhinoScriptingException.Raise "FirstObject not found(null)"
             if select then object.Select(true) |> ignore<int> // TODO needs sync ? apparently not needed!
             object.Id
 
@@ -575,10 +575,10 @@ module AutoOpenSelection =
         settings.DeletedObjects <- false
         let rhobjs = State.Doc.Objects.GetObjectList(settings)
         if isNull rhobjs || Seq.isEmpty rhobjs then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.LastObject failed.  select:'%A' includeLights:'%A' includeGrips:'%A'" select includeLights includeGrips
+            RhinoScriptingException.Raise "LastObject failed.  select:'%A' includeLights:'%A' includeGrips:'%A'" select includeLights includeGrips
         let firstobj = Seq.last rhobjs
         if isNull firstobj then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.LastObject failed.  select:'%A' includeLights:'%A' includeGrips:'%A'" select includeLights includeGrips
+            RhinoScriptingException.Raise "LastObject failed.  select:'%A' includeLights:'%A' includeGrips:'%A'" select includeLights includeGrips
         if select then
             firstobj.Select(true) |> ignore<int> // TODO needs sync ? apparently not needed!
             State.Doc.Views.Redraw()
@@ -606,7 +606,7 @@ module AutoOpenSelection =
         |> Seq.skipWhile (fun obj -> obj.Id <> objectId)
         |> Seq.skip 1
         |> Seq.tryHead
-        |> Option.defaultWith ( fun () -> RhinoScriptingException.Raise "RhinoScriptSyntax.NextObject not found for %A" (Pretty.str objectId))
+        |> Option.defaultWith ( fun () -> RhinoScriptingException.Raise "NextObject not found for %A" (Pretty.str objectId))
         |> fun obj ->
             if select then
                 obj.Select(true) |> ignore<int> // TODO needs sync ? apparently not needed!
@@ -658,7 +658,7 @@ module AutoOpenSelection =
     static member ObjectsByGroup(groupName:string, [<OPT;DEF(false)>]select:bool) : Guid ResizeArray =
         let groupinstance = State.Doc.Groups.FindName(groupName)
         if isNull groupinstance then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectsByGroup: '%s' does not exist in GroupTable" groupName
+            RhinoScriptingException.Raise "ObjectsByGroup: '%s' does not exist in GroupTable" groupName
         let rhinoobjects = State.Doc.Groups.GroupMembers(groupinstance.Index)
         if isNull rhinoobjects then
             ResizeArray()

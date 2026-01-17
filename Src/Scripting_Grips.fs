@@ -53,7 +53,7 @@ module AutoOpenGrips =
             let rc = Input.RhinoGet.GetGrip(grip, message)
             let grip = !grip
             if rc <> Commands.Result.Success || isNull grip then
-                RhinoScriptingException.Raise "RhinoScriptSyntax.GetObjectGrip User failed to select a Grip for : %s " message
+                RhinoScriptingException.Raise "GetObjectGrip User failed to select a Grip for : %s " message
             else
                 if select then
                     grip.Select(true, true)|> ignore<int>
@@ -131,7 +131,7 @@ module AutoOpenGrips =
                                   [<OPT;DEF(true)>]enable:bool) : int =
         match RhinoScriptSyntax.neighborGrip(1, objectId, index, direction, enable) with
         |Ok r -> r.Index
-        |Error s -> RhinoScriptingException.Raise "RhinoScriptSyntax.NextObjectGrip failed with %s for index %d, direction %d on %A" s index direction objectId
+        |Error s -> RhinoScriptingException.Raise "NextObjectGrip failed with %s for index %d, direction %d on %A" s index direction objectId
 
     /// <summary>Returns number of grips owned by an object.</summary>
     /// <param name="objectId">(Guid) Identifier of the object</param>
@@ -139,7 +139,7 @@ module AutoOpenGrips =
     static member ObjectGripCount(objectId:Guid) : int =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let grips = rhobj.GetGrips()
-        if isNull grips then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripCount failed.  objectId:'%s'" (Pretty.str objectId)
+        if isNull grips then RhinoScriptingException.Raise "ObjectGripCount failed.  objectId:'%s'" (Pretty.str objectId)
         grips.Length
 
 
@@ -149,10 +149,10 @@ module AutoOpenGrips =
     /// <returns>(Point3d) The current location of the grip referenced by index.</returns>
     static member ObjectGripLocation(objectId:Guid, index:int) : Point3d = //GET
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        if not rhobj.GripsOn then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripLocation failed.  objectId:'%s' index:'%A'" (Pretty.str objectId) index
+        if not rhobj.GripsOn then RhinoScriptingException.Raise "ObjectGripLocation failed.  objectId:'%s' index:'%A'" (Pretty.str objectId) index
         let grips = rhobj.GetGrips()
         if isNull grips || index<0 || index>=grips.Length then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripLocation failed.  objectId:'%s' index:'%A'" (Pretty.str objectId) index
+            RhinoScriptingException.Raise "ObjectGripLocation failed.  objectId:'%s' index:'%A'" (Pretty.str objectId) index
         let grip = grips.[index]
         let rc = grip.CurrentLocation
         rc
@@ -164,10 +164,10 @@ module AutoOpenGrips =
     /// <returns>(unit) void, nothing.</returns>
     static member ObjectGripLocation(objectId:Guid, index:int, point:Point3d) : unit = //SET
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        if not rhobj.GripsOn then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripLocation failed.  objectId:'%s' index:'%A' point:'%A'" (Pretty.str objectId) index point
+        if not rhobj.GripsOn then RhinoScriptingException.Raise "ObjectGripLocation failed.  objectId:'%s' index:'%A' point:'%A'" (Pretty.str objectId) index point
         let grips = rhobj.GetGrips()
         if isNull grips || index<0 || index>=grips.Length then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripLocation failed.  objectId:'%s' index:'%A' point:'%A'" (Pretty.str objectId) index point
+            RhinoScriptingException.Raise "ObjectGripLocation failed.  objectId:'%s' index:'%A' point:'%A'" (Pretty.str objectId) index point
         let grip = grips.[index]
         grip.CurrentLocation <-  point
         State.Doc.Objects.GripUpdate(rhobj, true)|> ignore<DocObjects.RhinoObject>
@@ -183,9 +183,9 @@ module AutoOpenGrips =
     /// <returns>(Point3d ResizeArray) The current location of all grips.</returns>
     static member ObjectGripLocations(objectId:Guid) : Point3d ResizeArray = //GET
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        if not rhobj.GripsOn then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripLocations failed.  objectId:'%s'" (Pretty.str objectId)
+        if not rhobj.GripsOn then RhinoScriptingException.Raise "ObjectGripLocations failed.  objectId:'%s'" (Pretty.str objectId)
         let grips = rhobj.GetGrips()
-        if isNull grips then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripLocations failed.  objectId:'%s'" (Pretty.str objectId)
+        if isNull grips then RhinoScriptingException.Raise "ObjectGripLocations failed.  objectId:'%s'" (Pretty.str objectId)
         grips |>  RArr.mapArr _.CurrentLocation
 
 
@@ -199,9 +199,9 @@ module AutoOpenGrips =
     /// <returns>(unit) void, nothing.</returns>
     static member ObjectGripLocations(objectId:Guid, points:Point3d seq) : unit = //SET
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        if not rhobj.GripsOn then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripLocations failed.  objectId:'%s' points:'%A'" (Pretty.str objectId) points
+        if not rhobj.GripsOn then RhinoScriptingException.Raise "ObjectGripLocations failed.  objectId:'%s' points:'%A'" (Pretty.str objectId) points
         let grips = rhobj.GetGrips()
-        if grips |> isNull then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripLocations failed.  objectId:'%s' points:'%A'" (Pretty.str objectId) points
+        if grips |> isNull then RhinoScriptingException.Raise "ObjectGripLocations failed.  objectId:'%s' points:'%A'" (Pretty.str objectId) points
         if Seq.length(points) = Seq.length(grips) then
             for pt, grip in Seq.zip points grips do
                 grip.CurrentLocation <- pt
@@ -248,7 +248,7 @@ module AutoOpenGrips =
                                   [<OPT;DEF(true)>]enable:bool) : int =
         match RhinoScriptSyntax.neighborGrip(-1, objectId, index, direction, enable) with
         |Ok r -> r.Index
-        |Error s -> RhinoScriptingException.Raise "RhinoScriptSyntax.PrevObjectGrip failed with %s for index %d, direction %d on %A" s index direction objectId
+        |Error s -> RhinoScriptingException.Raise "PrevObjectGrip failed with %s for index %d, direction %d on %A" s index direction objectId
 
 
     /// <summary>Returns a list of grip indices identifying an object's selected grips.</summary>
@@ -295,9 +295,9 @@ module AutoOpenGrips =
     /// <returns>(int) Number of grips selected.</returns>
     static member SelectObjectGrips(objectId:Guid) : int =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        if not rhobj.GripsOn then RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObjectGrips failed.  objectId:'%s'" (Pretty.str objectId)
+        if not rhobj.GripsOn then RhinoScriptingException.Raise "SelectObjectGrips failed.  objectId:'%s'" (Pretty.str objectId)
         let grips = rhobj.GetGrips()
-        if isNull grips then RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObjectGrips failed.  objectId:'%s'" (Pretty.str objectId)
+        if isNull grips then RhinoScriptingException.Raise "SelectObjectGrips failed.  objectId:'%s'" (Pretty.str objectId)
         let mutable count = 0
         for grip in grips do
             if grip.Select(true, true)>0 then count<- count +  1
@@ -305,7 +305,7 @@ module AutoOpenGrips =
             State.Doc.Views.Redraw()
             count
         else
-            RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObjectGrips failed.  objectId:'%s'" (Pretty.str objectId)
+            RhinoScriptingException.Raise "SelectObjectGrips failed.  objectId:'%s'" (Pretty.str objectId)
 
 
     /// <summary>Unselects a single grip owned by an object. If the object's grips are
@@ -335,9 +335,9 @@ module AutoOpenGrips =
     /// <returns>(int) Number of grips unselected.</returns>
     static member UnselectObjectGrips(objectId:Guid) : int =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        if not rhobj.GripsOn then RhinoScriptingException.Raise "RhinoScriptSyntax.UnselectObjectGrips failed.  objectId:'%s'" (Pretty.str objectId)
+        if not rhobj.GripsOn then RhinoScriptingException.Raise "UnselectObjectGrips failed.  objectId:'%s'" (Pretty.str objectId)
         let grips = rhobj.GetGrips()
-        if isNull grips then RhinoScriptingException.Raise "RhinoScriptSyntax.UnselectObjectGrips failed.  objectId:'%s'" (Pretty.str objectId)
+        if isNull grips then RhinoScriptingException.Raise "UnselectObjectGrips failed.  objectId:'%s'" (Pretty.str objectId)
         let mutable count = 0
         for grip in grips do
             if grip.Select(false) = 0 then count <- count +   1
@@ -345,7 +345,7 @@ module AutoOpenGrips =
             State.Doc.Views.Redraw()
             count
         else
-            RhinoScriptingException.Raise "RhinoScriptSyntax.UnselectObjectGrips failed.  objectId:'%s'" (Pretty.str objectId)
+            RhinoScriptingException.Raise "UnselectObjectGrips failed.  objectId:'%s'" (Pretty.str objectId)
 
 
 
