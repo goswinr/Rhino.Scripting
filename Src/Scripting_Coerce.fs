@@ -113,6 +113,11 @@ module AutoOpenCoerce =
                 | :? Mesh as m -> Some m
                 | _ -> None
 
+    /// <summary>Returns Some Mesh when given a Mesh geometry object.</summary>
+    /// <param name="mesh">A Mesh geometry object</param>
+    /// <returns>Some Mesh.</returns>
+    static member TryCoerceMesh (mesh:Mesh) : Mesh option = Some mesh
+
     /// <summary>Attempt to get Mesh geometry from the document with a given objectId.</summary>
     /// <param name="objectId">object Identifier (Guid or string)</param>
     /// <returns>(Rhino.Geometry.Mesh. Raises a RhinoScriptingException if coerce failed.</returns>
@@ -120,6 +125,11 @@ module AutoOpenCoerce =
         match RhinoScriptSyntax.TryCoerceMesh(objectId) with
         | Some m -> m
         | None -> RhinoScriptingException.Raise "CoerceMesh failed on: %s " (Pretty.str objectId)
+
+    /// <summary>Returns the Mesh directly when given a Mesh geometry object.</summary>
+    /// <param name="mesh">A Mesh geometry object</param>
+    /// <returns>The same Mesh object.</returns>
+    static member CoerceMesh(mesh:Mesh) : Mesh = mesh
 
     /// <summary>Attempt to get Surface class from given Guid. Fails on empty Guid.</summary>
     /// <param name="objectId">Surface Identifier (Guid)</param>
@@ -139,6 +149,11 @@ module AutoOpenCoerce =
             //     else None
             | _ -> None
 
+    /// <summary>Returns Some Surface when given a Surface geometry object.</summary>
+    /// <param name="surface">A Surface geometry object</param>
+    /// <returns>Some Surface.</returns>
+    static member TryCoerceSurface (surface:Surface) : Surface option = Some surface
+
     /// <summary>Attempt to get Surface geometry from the document with a given objectId.</summary>
     /// <param name="objectId">the object's Identifier</param>
     /// <returns>(Rhino.Geometry.Surface. Raises a RhinoScriptingException if coerce failed.</returns>
@@ -149,6 +164,11 @@ module AutoOpenCoerce =
             if b.Faces.Count = 1 then b.Faces.[0] :> Surface
             else RhinoScriptingException.Raise "CoerceSurface failed on %O from Brep with %d Faces" objectId b.Faces.Count
         | _ -> RhinoScriptingException.Raise "CoerceSurface failed on: %O " objectId
+
+    /// <summary>Returns the Surface directly when given a Surface geometry object.</summary>
+    /// <param name="surface">A Surface geometry object</param>
+    /// <returns>The same Surface object.</returns>
+    static member CoerceSurface(surface:Surface) : Surface = surface
 
     /// <summary>Attempt to get a Polysurface or Brep class from given Guid. Works on Extrusions too. Fails on empty Guid.</summary>
     /// <param name="objectId">Polysurface Identifier (Guid)</param>
@@ -162,6 +182,11 @@ module AutoOpenCoerce =
                 | :? Extrusion as b -> Some (b.ToBrep(true))
                 | _ -> None
 
+    /// <summary>Returns Some Brep when given a Brep geometry object.</summary>
+    /// <param name="brep">A Brep geometry object</param>
+    /// <returns>Some Brep.</returns>
+    static member TryCoerceBrep (brep:Brep) : Brep option = Some brep
+
     /// <summary>Attempt to get Polysurface geometry from the document with a given objectId.</summary>
     /// <param name="objectId">objectId (Guid or string) to be RhinoScriptSyntax.Coerced into a brep</param>
     /// <returns>(Rhino.Geometry.Brep. Raises a RhinoScriptingException if coerce failed.</returns>
@@ -169,6 +194,11 @@ module AutoOpenCoerce =
         match RhinoScriptSyntax.TryCoerceBrep(objectId) with
         | Some b -> b
         | None -> RhinoScriptingException.Raise "CoerceBrep failed on: %s " (Pretty.str objectId)
+
+    /// <summary>Returns the Brep directly when given a Brep geometry object.</summary>
+    /// <param name="brep">A Brep geometry object</param>
+    /// <returns>The same Brep object.</returns>
+    static member CoerceBrep(brep:Brep) : Brep = brep
 
     /// <summary>Attempt to get Curve geometry from the document with a given objectId.</summary>
     /// <param name="objectId">objectId (Guid or string) to be RhinoScriptSyntax.Coerced into a Curve</param>
@@ -189,6 +219,22 @@ module AutoOpenCoerce =
             | :? Curve as c -> Some c
             | _ -> None
 
+    /// <summary>Returns Some Curve when given a Curve geometry object.
+    /// Optionally extracts a segment from a PolyCurve.</summary>
+    /// <param name="curve">A Curve geometry object</param>
+    /// <param name="segmentIndex">(int) Optional, index of segment to retrieve from a PolyCurve. To ignore segmentIndex give -1 as argument</param>
+    /// <returns>Some Curve or None if segment extraction fails.</returns>
+    static member TryCoerceCurve(curve:Curve,[<OPT;DEF(-1)>]segmentIndex:int) : Curve option =
+        if segmentIndex < 0 then
+            Some curve
+        else
+            match curve with
+            | :? PolyCurve as c ->
+                let crv = c.SegmentCurve(segmentIndex)
+                if isNull crv then None
+                else Some crv
+            | _ -> Some curve
+
     /// <summary>Attempt to get Curve geometry from the document with a given objectId.</summary>
     /// <param name="objectId">objectId (Guid or string) to be RhinoScriptSyntax.Coerced into a Curve</param>
     /// <param name="segmentIndex">(int) Optional, index of segment to retrieve. To ignore segmentIndex give -1 as argument</param>
@@ -206,6 +252,22 @@ module AutoOpenCoerce =
                 crv
             | :? Curve as c -> c
             | _ -> RhinoScriptingException.Raise "CoerceCurve failed for %s"  (Pretty.str objectId)
+
+    /// <summary>Returns the Curve directly when given a Curve geometry object.
+    /// Optionally extracts a segment from a PolyCurve.</summary>
+    /// <param name="curve">A Curve geometry object</param>
+    /// <param name="segmentIndex">(int) Optional, index of segment to retrieve from a PolyCurve. To ignore segmentIndex give -1 as argument</param>
+    /// <returns>The Curve object or the specified segment.</returns>
+    static member CoerceCurve(curve:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : Curve =
+        if segmentIndex < 0 then
+            curve
+        else
+            match curve with
+            | :? PolyCurve as c ->
+                let crv = c.SegmentCurve(segmentIndex)
+                if isNull crv then RhinoScriptingException.Raise "CoerceCurve failed on segment index %d for Curve" segmentIndex
+                crv
+            | _ -> curve
 
 
     /// <summary>Attempt to get Rhino Line Geometry using the current Documents Absolute Tolerance.</summary>
