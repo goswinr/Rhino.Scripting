@@ -12591,9 +12591,9 @@ type RhinoScriptSyntax private () =
     static member PointArrayTransform(points:Point3d IList, xForm:Transform) : Point3d ResizeArray =
         let r = ResizeArray<Point3d>()
         for point in points do
-            let p = Point3d(point) //copy first !
-            p.Transform(xForm)
-            r.Add p
+            // let p = Point3d(point) //copy first !
+            // p.Transform(xForm)
+            r.Add (xForm*point)
         r
 
     /// <summary>Finds the object that is closest to a test point.</summary>
@@ -12716,9 +12716,10 @@ type RhinoScriptSyntax private () =
     /// <param name="xForm">(Transform) A valid 4x4 transformation matrix</param>
     /// <returns>(Point3d) transformed Point.</returns>
     static member PointTransform(point:Point3d, xForm:Transform) : Point3d =
-        let p = Point3d(point) //copy first !
-        p.Transform(xForm)
-        p
+        // let p = Point3d(point) //copy first !
+        // p.Transform(xForm)
+        // p // this is somehow returning the input point unmodified  in fsharp interactive if not inside a function
+        xForm*point // works ok in fsharp interactive
 
 
 
@@ -12895,9 +12896,10 @@ type RhinoScriptSyntax private () =
     /// <param name="xForm">(Transform) A valid 4x4 transformation matrix</param>
     /// <returns>(Vector3d) transformed vector.</returns>
     static member VectorTransform(vector:Vector3d, xForm:Transform) : Vector3d =
-        let v = Vector3d(vector)
-        v.Transform(xForm)
-        v
+        // let v = Vector3d(vector)
+        // v.Transform(xForm)
+        // v // this is somehow returning the input vector unmodified in fsharp interactive if not inside a function
+        xForm*vector // works ok in fsharp interactive
 
 
     /// <summary>Unitizes, or normalizes a 3D vector. Note, zero vectors cannot be unitized.</summary>

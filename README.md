@@ -208,7 +208,7 @@ These are implemented with 3 overloads and `Optional` and `DefaultParameterValue
 
 ## Full API Documentation
 
-[goswinr.github.io/Rhino.Scripting](https://goswinr.github.io/Rhino.Scripting)
+[goswinr.github.io/Rhino.Scripting](https://goswinr.github.io/Rhino.Scripting/reference/rhino-scripting-rhinoscriptsyntax.html)
 
 ## .NET Framework or .NET Core?
 On Rhino 8.19 or higher, you can use .NET 7.0 and .NET Framework 4.8.<br>

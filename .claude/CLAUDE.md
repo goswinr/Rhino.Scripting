@@ -26,7 +26,8 @@ Note: Build frameworks separately to avoid race conditions in the file combinati
 dotnet tool restore
 
 # Build documentation
-dotnet fsdocs build --properties Configuration=Release --input Docs --output DocsGenerated
+# for this to work in dotnet-tools.json, rollForward must be set to 'false' for fsdocs-tool
+dotnet fsdocs build --clean --strict --properties Configuration=Release --input Docs --output DocsGenerated
 ```
 
 ### NuGet Package

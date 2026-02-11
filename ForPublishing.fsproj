@@ -3,7 +3,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Library</OutputType>
-	  <TargetFrameworks>net48;net7.0</TargetFrameworks>
+	  <TargetFrameworks>net7.0;net48</TargetFrameworks>  <!-- FsDoc will use the first target framework: https://fsprojects.github.io/FSharp.Formatting/apidocs.html#Selected-projects -->
 
     <DefineConstants Condition="'$(TargetFramework)' == 'net48'">RH7</DefineConstants>
 
@@ -79,10 +79,8 @@
     <!-- This is probably not working to the editing files because the way files a structured on github does not match the way the are compiled from a one big generated file.-->
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.102" PrivateAssets="All" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
 
-   <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
      <!-- https://stackoverflow.com/a/61008642/969070 -->
-     <_Parameter1>Rhino.Scripting.FSharp</_Parameter1>
-   </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo"> <_Parameter1>Rhino.Scripting.FSharp</_Parameter1></AssemblyAttribute>
 
   </ItemGroup>
 
