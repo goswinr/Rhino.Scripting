@@ -206,25 +206,29 @@ module AutoOpenApplication =
     ///    Note, this function is designed to run one command and one command only.
     ///    Do not combine multiple Rhino commands into a single call to this method.
     ///      WRONG:
-    ///        rs.Command("_Line _SelLast _Invert")
+    /// <code>rs.Command("_Line _SelLast _Invert")</code>
     ///      CORRECT:
-    ///        rs.Command("_Line")
-    ///        rs.Command("_SelLast")
-    ///        rs.Command("_Invert")
+    /// <code>
+    /// rs.Command("_Line")
+    /// rs.Command("_SelLast")
+    /// rs.Command("_Invert")
+    /// </code>
     ///    Also, the exclamation point and space character ( ! ) combination used by
     ///    button macros and batch-driven scripts to cancel the previous command is
     ///    not valid.
     ///      WRONG:
-    ///        rs.Command("! _Line _Pause _Pause")
+    /// <code>rs.Command("! _Line _Pause _Pause")</code>
     ///      CORRECT:
-    ///        rs.Command("_Line _Pause _Pause")
+    /// <code>rs.Command("_Line _Pause _Pause")</code>
     ///    In a normal command, when the user enters a command beginning with a '!' , the command exits.
     ///    There is no documented way to get this behavior from within a script command.
     ///
     ///    After the command script has run, you can obtain the identifiers of most
-    ///    recently created or changed object by calling RhinoScriptSyntax.LastCreatedObjects().
-    ///
-    ///    Warnings:
+    ///    recently created or changed object by calling
+    /// <code>RhinoScriptSyntax.LastCreatedObjects()</code>.
+    /// </summary>
+    /// <remarks>
+    ///    Warning:
     ///    This kind of command can be very dangerous. Please be sure you understand the following:
     ///    If you are not very familiar with how references work, you should only call Rhino.RhinoApp.RunScript()
     ///     from within a RhinoScriptCommand derived command.
@@ -238,7 +242,8 @@ module AutoOpenApplication =
     ///    This is because Rhino.RhinoApp.RunScript() can change the dynamic arrays in the run-time database.
     ///    The result is that all pointers and references become invalid.
     ///    Be sure to scope your variables between Rhino.RhinoApp.RunScript() calls.
-    ///    Never allow references and pointers from one section to be used in another section.</summary>
+    ///    Never allow references and pointers from one section to be used in another section.
+    /// </remarks>
     /// <param name="commandString">(string) A Rhino command including any arguments</param>
     /// <param name="echo">(bool) Optional, default value: <c>true</c>
     ///    The default command echo mode <c>true</c> will display the commands on the commandline.

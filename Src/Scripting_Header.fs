@@ -67,8 +67,7 @@ type RhinoScriptSyntax private () =
         max minVal (min maxVal value)
 
     /// <summary>Like the Python 'xrange' function for integers, this creates a range of floating point values.
-    /// The last or stop value will NOT be included in the range as per Python semantics; this is different from F# semantics on range expressions.
-    /// Use FsEx.UtilMath.floatRange(...) to include the stop value in the range.</summary>
+    /// The last or stop value will NOT be included in the range as per Python semantics; this is different from F# semantics on range expressions.</summary>
     /// <param name="start">(float) The first value of the range.</param>
     /// <param name="stop">(float) The end of the range. The last value will not be included in the range (Python semantics).</param>
     /// <param name="step">(float) The step size between two values.</param>
@@ -95,8 +94,7 @@ type RhinoScriptSyntax private () =
             floatRange (start, 0.0, steps)
 
     /// <summary>Like the Python 'range' function for integers, this creates a range of floating point values.
-    /// The last or stop value will NOT be included in the range as per Python semantics; this is different from F# semantics on range expressions.
-    /// Use FsEx.UtilMath.floatRange(...) to include the stop value in the range.</summary>
+    /// The last or stop value will NOT be included in the range as per Python semantics; this is different from F# semantics on range expressions.</summary>
     /// <param name="start">(float) The first value of the range.</param>
     /// <param name="stop">(float) The end of the range. The last value will not be included in the range (Python semantics).</param>
     /// <param name="step">(float) The step size between two values.</param>
@@ -166,7 +164,7 @@ type RhinoScriptSyntax private () =
     /// <param name="layer">(string) Optional. The layer name; parent layers separated by '::'.</param>
     /// <param name="objectName">(string) Optional, default value: <c>""</c>. The object name.</param>
     /// <param name="userTextKeysAndValues">(string*string seq) Optional, default value: <c>[]</c>. List of key-value pairs for user text.</param>
-    /// <param name="layerColor">(Drawing.Color) Optional, default value: <c>FsEx.Color.randomForRhino()</c>. The color for the layer. The layer color will NOT be changed if the layer already exists.</param>
+    /// <param name="layerColor">(Drawing.Color) Optional, default value: <c>UtilLayer.randomLayerColor()</c>. The color for the layer. The layer color will NOT be changed if the layer already exists.</param>
     /// <param name="stringSafetyCheck">(bool) Optional, default value: <c>true</c>. Checks that object name and user text do not include line returns, tabs, or leading/trailing whitespace.</param>
     /// <param name="collapseParents">(bool) Optional, default value: <c>false</c>. Collapse parent layers in the Layer UI.</param>
     /// <returns>(Guid) The Guid of the added object.</returns>

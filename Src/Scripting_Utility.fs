@@ -420,7 +420,7 @@ module AutoOpenUtility =
     (*
     manipulating ini files like in original Rhinoscript could be include via
     <PackageReference Include="ini-parser" Version="2.5.2" />
-    however for now it is excluded to keep the dependencies at just FsEx.
+    however for now it is excluded to keep the dependencies a low.
     If ini-file reading and writing is needed I would suggest to use the "ini-parser" package directly and not the below functions.
 
     open IniParser

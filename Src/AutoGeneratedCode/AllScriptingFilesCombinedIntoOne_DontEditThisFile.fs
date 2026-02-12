@@ -67,8 +67,7 @@ type RhinoScriptSyntax private () =
         max minVal (min maxVal value)
 
     /// <summary>Like the Python 'xrange' function for integers, this creates a range of floating point values.
-    /// The last or stop value will NOT be included in the range as per Python semantics; this is different from F# semantics on range expressions.
-    /// Use FsEx.UtilMath.floatRange(...) to include the stop value in the range.</summary>
+    /// The last or stop value will NOT be included in the range as per Python semantics; this is different from F# semantics on range expressions.</summary>
     /// <param name="start">(float) The first value of the range.</param>
     /// <param name="stop">(float) The end of the range. The last value will not be included in the range (Python semantics).</param>
     /// <param name="step">(float) The step size between two values.</param>
@@ -95,8 +94,7 @@ type RhinoScriptSyntax private () =
             floatRange (start, 0.0, steps)
 
     /// <summary>Like the Python 'range' function for integers, this creates a range of floating point values.
-    /// The last or stop value will NOT be included in the range as per Python semantics; this is different from F# semantics on range expressions.
-    /// Use FsEx.UtilMath.floatRange(...) to include the stop value in the range.</summary>
+    /// The last or stop value will NOT be included in the range as per Python semantics; this is different from F# semantics on range expressions.</summary>
     /// <param name="start">(float) The first value of the range.</param>
     /// <param name="stop">(float) The end of the range. The last value will not be included in the range (Python semantics).</param>
     /// <param name="step">(float) The step size between two values.</param>
@@ -166,7 +164,7 @@ type RhinoScriptSyntax private () =
     /// <param name="layer">(string) Optional. The layer name; parent layers separated by '::'.</param>
     /// <param name="objectName">(string) Optional, default value: <c>""</c>. The object name.</param>
     /// <param name="userTextKeysAndValues">(string*string seq) Optional, default value: <c>[]</c>. List of key-value pairs for user text.</param>
-    /// <param name="layerColor">(Drawing.Color) Optional, default value: <c>FsEx.Color.randomForRhino()</c>. The color for the layer. The layer color will NOT be changed if the layer already exists.</param>
+    /// <param name="layerColor">(Drawing.Color) Optional, default value: <c>UtilLayer.randomLayerColor()</c>. The color for the layer. The layer color will NOT be changed if the layer already exists.</param>
     /// <param name="stringSafetyCheck">(bool) Optional, default value: <c>true</c>. Checks that object name and user text do not include line returns, tabs, or leading/trailing whitespace.</param>
     /// <param name="collapseParents">(bool) Optional, default value: <c>false</c>. Collapse parent layers in the Layer UI.</param>
     /// <returns>(Guid) The Guid of the added object.</returns>
@@ -1963,25 +1961,29 @@ type RhinoScriptSyntax private () =
     ///    Note, this function is designed to run one command and one command only.
     ///    Do not combine multiple Rhino commands into a single call to this method.
     ///      WRONG:
-    ///        rs.Command("_Line _SelLast _Invert")
+    /// <code>rs.Command("_Line _SelLast _Invert")</code>
     ///      CORRECT:
-    ///        rs.Command("_Line")
-    ///        rs.Command("_SelLast")
-    ///        rs.Command("_Invert")
+    /// <code>
+    /// rs.Command("_Line")
+    /// rs.Command("_SelLast")
+    /// rs.Command("_Invert")
+    /// </code>
     ///    Also, the exclamation point and space character ( ! ) combination used by
     ///    button macros and batch-driven scripts to cancel the previous command is
     ///    not valid.
     ///      WRONG:
-    ///        rs.Command("! _Line _Pause _Pause")
+    /// <code>rs.Command("! _Line _Pause _Pause")</code>
     ///      CORRECT:
-    ///        rs.Command("_Line _Pause _Pause")
+    /// <code>rs.Command("_Line _Pause _Pause")</code>
     ///    In a normal command, when the user enters a command beginning with a '!' , the command exits.
     ///    There is no documented way to get this behavior from within a script command.
     ///
     ///    After the command script has run, you can obtain the identifiers of most
-    ///    recently created or changed object by calling RhinoScriptSyntax.LastCreatedObjects().
-    ///
-    ///    Warnings:
+    ///    recently created or changed object by calling
+    /// <code>RhinoScriptSyntax.LastCreatedObjects()</code>.
+    /// </summary>
+    /// <remarks>
+    ///    Warning:
     ///    This kind of command can be very dangerous. Please be sure you understand the following:
     ///    If you are not very familiar with how references work, you should only call Rhino.RhinoApp.RunScript()
     ///     from within a RhinoScriptCommand derived command.
@@ -1995,7 +1997,8 @@ type RhinoScriptSyntax private () =
     ///    This is because Rhino.RhinoApp.RunScript() can change the dynamic arrays in the run-time database.
     ///    The result is that all pointers and references become invalid.
     ///    Be sure to scope your variables between Rhino.RhinoApp.RunScript() calls.
-    ///    Never allow references and pointers from one section to be used in another section.</summary>
+    ///    Never allow references and pointers from one section to be used in another section.
+    /// </remarks>
     /// <param name="commandString">(string) A Rhino command including any arguments</param>
     /// <param name="echo">(bool) Optional, default value: <c>true</c>
     ///    The default command echo mode <c>true</c> will display the commands on the commandline.
@@ -18721,7 +18724,7 @@ type RhinoScriptSyntax private () =
     (*
     manipulating ini files like in original Rhinoscript could be include via
     <PackageReference Include="ini-parser" Version="2.5.2" />
-    however for now it is excluded to keep the dependencies at just FsEx.
+    however for now it is excluded to keep the dependencies a low.
     If ini-file reading and writing is needed I would suggest to use the "ini-parser" package directly and not the below functions.
 
     open IniParser

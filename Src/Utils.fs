@@ -204,7 +204,6 @@ module AutoOpenRsUtils =
 
         /// Get (or set) the last item in the Array.
         /// equal to this.[this.Length - 1]
-        /// (this is an Extension Member from FsEx.ExtensionsArray)
         member this.Last
             with get() =
                 if this.Length = 0 then RhinoScriptingException.Raise "Rhino.Scripting.FsExUtils arr.Last: Failed to get last item of empty Array"

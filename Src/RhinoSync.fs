@@ -15,19 +15,27 @@ type internal RunOnUiDelegate = delegate of unit -> unit
 [<AbstractClass>]
 [<Sealed>] //use these attributes to match C# static class and make in visible in C# // https://stackoverflow.com/questions/13101995/defining-static-classes-in-f
 type RhinoSync private () =
-    static let mutable logErrors = true
 
-    static let mutable feshRhinoSyncModule:Type = null
+    static let mutable logErrors =
+        true
 
-    static let mutable syncContext: Threading.SynchronizationContext  = null //set via reflection below ; from Fesh.Rhino
+    static let mutable feshRhinoSyncModule : Type =
+        null
 
-    static let mutable feshRhAssembly : Reflection.Assembly = null //set via reflection below ; from Fesh.Rhino
+    static let mutable syncContext : Threading.SynchronizationContext  =
+        null //set via reflection below ; from Fesh.Rhino
 
-    static let mutable hideEditor = Action(fun ()->()) //set via reflection below ; from Fesh.Rhino
+    static let mutable feshRhAssembly : Reflection.Assembly =
+        null //set via reflection below ; from Fesh.Rhino
 
-    static let mutable showEditor = Action(fun ()->()) //set via reflection below ; from Fesh.Rhino
+    static let mutable hideEditor =
+        new Action(fun ()->()) //set via reflection below ; from Fesh.Rhino
 
-    static let mutable isEditorVisible = new Func<bool>(fun () -> false) //set via reflection below ; from Fesh.Rhino
+    static let mutable showEditor =
+        new Action(fun ()->()) //set via reflection below ; from Fesh.Rhino
+
+    static let mutable isEditorVisible =
+        new Func<bool>(fun () -> false) //set via reflection below ; from Fesh.Rhino
 
     /// Red green blue text
     static let mutable printFeshLogColor = //changed via reflection below from Fesh.Rhino
@@ -37,10 +45,13 @@ type RhinoSync private () =
     static let mutable printnFeshLogColor  = //changed via reflection below from Fesh.Rhino
         new Action<int,int,int,string>(fun r g b s -> Console.WriteLine s)
 
-    static let mutable clearFeshLog = Action(fun ()->()) // changed via reflection below from Fesh
+    static let mutable clearFeshLog =
+        new Action(fun ()->()) // changed via reflection below from Fesh
 
-    static let mutable prettyFormatters: ResizeArray<obj -> option<string>> = null
+    static let mutable prettyFormatters: ResizeArray<obj -> option<string>> =
+        ResizeArray<obj -> option<string>>()
 
+    // Do this one there is a well working Pretty library
     // static let initFeshPrint() =
     //     let allAss = AppDomain.CurrentDomain.GetAssemblies()
     //     match allAss |> Array.tryFind (fun a -> a.GetName().Name = "Pretty") with
@@ -56,7 +67,12 @@ type RhinoSync private () =
     //     |None -> ()
 
 
-    static let log msg = Printf.kprintf(fun s -> if logErrors then (RhinoApp.WriteLine s ; eprintfn "%s" s))  msg
+    static let log msg =
+        Printf.kprintf(fun s ->
+            if logErrors then
+                RhinoApp.WriteLine s
+                eprintfn "%s" s
+            )  msg
 
     static let mutable initIsPending = true
 
@@ -159,11 +175,13 @@ type RhinoSync private () =
 
     /// Hide the WPF Window of currently running Fesh Editor.
     /// Or do nothing if not running in Fesh Editor.
-    static member HideEditor() = hideEditor.Invoke() //Action
+    static member HideEditor() =
+        hideEditor.Invoke() //Action
 
     /// Show the WPF Window of currently running Fesh Editor.
     /// Or do nothing if not running in Fesh Editor.
-    static member ShowEditor() = showEditor.Invoke() //Action
+    static member ShowEditor() =
+        showEditor.Invoke() //Action
 
     // The Assembly currently running Fesh Editor Window.
     // Or 'null' if not running in Fesh Editor.

@@ -121,22 +121,19 @@ module internal PrettySetup =
     let internal guid (g:Guid)=
         if g = Guid.Empty then
             "-Guid.Empty-"
-        elif Runtime.HostUtils.RunningInRhino  then // because Rhino.Scripting might be referenced from outside of Rhino too
+        else
             let o = State.Doc.Objects.FindId(g)
-            if isNull o then sprintf "Guid %O (not in RhinoDoc.Objects table of this Rhino file)." g
+            if isNull o then
+                sprintf "Guid %O (not in RhinoDoc.Objects table of this Rhino file)." g
             else
                 let name = o.Attributes.Name // null if unset
                 if String.IsNullOrWhiteSpace name then
                     sprintf "Guid %O (a %s%s%s on Layer '%s')" g  (if o.IsDeleted then "deleted " else "") (if o.IsHidden then "hidden " else "") (o.ShortDescription(false)) (State.Doc.Layers.[o.Attributes.LayerIndex].FullPath)
                 else
                     sprintf "Guid %O (a %s%s%s named '%s' on Layer '%s')" g (if o.IsDeleted then "deleted " else "") (if o.IsHidden then "hidden " else "") (o.ShortDescription(false)) name (State.Doc.Layers.[o.Attributes.LayerIndex].FullPath)
-        else
-            // the Pretty.str function gets injected into FsEx.Pretty, below
-            // so that using the print function still works on other Guids if Rhino.Scripting is referenced from outside of rhino where there is no active Doc
-            sprintf "Guid %O" g
 
-    /// Rhino specific formatting function that is set to be the
-    /// externalFormatter in FsEx.PrettySettings. It is set in the init() function.
+
+    /// Rhino specific formatting functions
     let internal formatRhinoObject : obj -> option<string> =
         function
         | :? Guid        as x -> Some <| (guid x)
@@ -162,10 +159,10 @@ module internal PrettySetup =
                     // these below fail if not running inside rhino.exe
                     // scripts that reference Rhino.Scripting from outside of rhino is still Ok , but all function that call the C++ API don't work
                     // but accessing the current Doc obviously does not work.
-                    PrettySettings.userZeroTolerance                                              <- State.Doc.ModelAbsoluteTolerance  * 0.1 // so that any float smaller than State.Doc.ModelAbsoluteTolerance wil be shown as 0.0
-                    RhinoApp.AppSettingsChanged.Add    (fun _ -> PrettySettings.userZeroTolerance <- State.Doc.ModelAbsoluteTolerance  * 0.1 )
-                    RhinoDoc.ActiveDocumentChanged.Add (fun a -> PrettySettings.userZeroTolerance <- a.Document.ModelAbsoluteTolerance * 0.1 )
-                    RhinoDoc.EndOpenDocument.Add       (fun a -> PrettySettings.userZeroTolerance <- a.Document.ModelAbsoluteTolerance * 0.1 )
+                    PrettySettings.userZeroTolerance                                              <- State.Doc.ModelAbsoluteTolerance  * 0.01 // so that any float smaller than State.Doc.ModelAbsoluteTolerance wil be shown as 0.0
+                    RhinoApp.AppSettingsChanged.Add    (fun _ -> PrettySettings.userZeroTolerance <- State.Doc.ModelAbsoluteTolerance  * 0.01 )
+                    RhinoDoc.ActiveDocumentChanged.Add (fun a -> PrettySettings.userZeroTolerance <- a.Document.ModelAbsoluteTolerance * 0.01 )
+                    RhinoDoc.EndOpenDocument.Add       (fun a -> PrettySettings.userZeroTolerance <- a.Document.ModelAbsoluteTolerance * 0.01 )
             with e ->
                 // try to log errors to error stream:
                 eprintfn "Initializing Pretty pretty printing in Rhino.PrettySetup.init() via Rhino.Scripting.dll failed with:%s%A" Environment.NewLine e
@@ -197,15 +194,10 @@ module internal PrettySetup =
 [<RequireQualifiedAccess>]
 module internal Pretty  =
 
-    /// Pretty formatting for Rhino and .Net types, e.g. numbers including thousand Separator and (nested) sequences, first five items are printed out.
-    /// Settings are exposed in FsEx.Pretty.PrettySettings:
-    /// - thousandSeparator       = '     ; set this to change the printing of floats and integers larger than 10'000
-    /// - maxNestingDepth         = 3     ; set this to change how deep the content of nested seq is printed (printFull ignores this)
-    /// - maxNestingDepth         = 6     ; set this to change how many items per seq are printed (printFull ignores this)
-    /// - maxCharsInString        = 2000  ; set this to change how many characters of a string might be printed at once.
+    /// Just call $"{x}" (for now)
     let str (x:'T) :string =
         PrettySetup.init() // the shadowing is only done to ensure init() is called once
-        // Pretty.toPretty x
-        x.ToString()
+        // Pretty.toPretty x // TODO re add pretty printing like in FsEx https://github.com/goswinr/FsEx/blob/main/Src/NiceString.fs
+        $"%A{x}"
 
 
