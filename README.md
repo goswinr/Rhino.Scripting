@@ -4,7 +4,7 @@
 [![Rhino.Scripting on nuget.org](https://img.shields.io/nuget/v/Rhino.Scripting)](https://www.nuget.org/packages/Rhino.Scripting/)
 [![Build Status](https://github.com/goswinr/Rhino.Scripting/actions/workflows/build.yml/badge.svg)](https://github.com/goswinr/Rhino.Scripting/actions/workflows/build.yml)
 [![Docs Build Status](https://github.com/goswinr/Rhino.Scripting/actions/workflows/docs.yml/badge.svg)](https://github.com/goswinr/Rhino.Scripting/actions/workflows/docs.yml)
-[![Check dotnet tools](https://github.com/goswinr/Rhino.Scripting/actions/workflows/outdatedDotnetTool.yml/badge.svg)](https://github.com/goswinr/Rhino.Scripting/actions/workflows/outdatedDotnetTool.yml)
+<!-- [![Check dotnet tools](https://github.com/goswinr/Rhino.Scripting/actions/workflows/outdatedDotnetTool.yml/badge.svg)](https://github.com/goswinr/Rhino.Scripting/actions/workflows/outdatedDotnetTool.yml) -->
 [![license](https://img.shields.io/github/license/goswinr/Rhino.Scripting)](LICENSE.md)
 ![code size](https://img.shields.io/github/languages/code-size/goswinr/Rhino.Scripting.svg)
 
