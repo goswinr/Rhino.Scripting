@@ -17,17 +17,15 @@ module AutoOpenUtility =
 
 
 
-    /// <summary>Return true if the script is being executed in the context of Rhino (currently always true).</summary>
-    /// <returns>(bool) True if the script is being executed in the context of Rhino (currently always true).</returns>
+    /// <summary>Return true if the script is being executed in the context of Rhino (Rhino.Runtime.HostUtils.RunningInRhino).</summary>
     static member ContextIsRhino() : bool =
-        true //TODO implement correctly
+        Rhino.Runtime.HostUtils.RunningInRhino
 
 
-    /// <summary>Return true if the script is being executed in a Grasshopper component (currently always false).</summary>
-    /// <returns>(bool) True if the script is being executed in a Grasshopper component (currently always false).</returns>
-    static member ContextIsGrasshopper() : bool =
-        false //TODO implement correctly
-
+    // /// <summary>Return true if the script is being executed in a Grasshopper component (currently always false).</summary>
+    // static member ContextIsGrasshopper() : bool =
+    //     false //TODO implement correctly
+    //     // https://github.com/mcneel/rhinoscriptsyntax/blob/86c9ab1e97df384662a8548b4accee45dfd77a8c/Scripts/scriptcontext.py#L12
 
     /// <summary>Measures the angle between two points.</summary>
     /// <param name="point1">(Point3d) Point1 of input points</param>
@@ -39,7 +37,8 @@ module AutoOpenUtility =
     ///    element 1 = the elevation
     ///    element 2 = delta in the X direction
     ///    element 3 = delta in the Y direction
-    ///    element 4 = delta in the Z direction.</returns>
+    ///    element 4 = delta in the Z direction.
+    /// </returns>
     static member Angle(point1:Point3d, point2:Point3d, [<OPT;DEF(Plane())>]plane:Plane) : float * float * float * float * float  =
         let plane = if plane.IsValid then plane else Plane.WorldXY
         let vector = point2 - point1
@@ -62,7 +61,8 @@ module AutoOpenUtility =
     /// <param name="line2">(Line) List of 6 numbers or 2 Point3d</param>
     /// <returns>(float * float) containing the following elements:
     ///    0 = The angle in degrees.
-    ///    1 = The reflex angle in degrees.</returns>
+    ///    1 = The reflex angle in degrees.
+    /// </returns>
     static member Angle2(line1:Line, line2:Line) : float * float =
         let vec0 = line1.To - line1.From
         let vec1 = line2.To - line2.From

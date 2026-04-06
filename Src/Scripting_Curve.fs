@@ -342,42 +342,47 @@ module AutoOpenCurve =
 
 
     /// <summary>Adds a Polyline Curve.</summary>
-    /// <param name="points">(Point3d seq) List of 3D points. The list must contain at least two points. If the
-    ///    list contains less than four points, then the first point and
-    ///    last point must be different.</param>
-    /// <returns>(Guid) ObjectId of the new curve object.</returns>
-    static member AddPolyline(points:Point3d seq) : Guid =
+    /// <param name="points">(Point3d seq) List of 3D points. The list must contain at least two points. If the list contains less than four points, then the first point and last point must be different.</param>
+    /// <param name="deleteShortSegments">(bool) Optional, default value: <c>true</c>. If true, segments shorter than the document's absolute tolerance will be deleted.</param>
+    /// <param name="drawDotsAndRaiseIfFailed">(bool) Optional, default value: <c>false</c>. If true, text dots will be drawn on layer `ERROR-AddPolyline` at each point and an exception will be raised if the operation fails.</param>
+    /// <returns>(Guid) ObjectId of the new curve object. Empty Guid if the operation fails.</returns>
+    static member AddPolyline(points:Point3d seq,  [<OPT;DEF(true)>]deleteShortSegments: bool, [<OPT;DEF(false)>]drawDotsAndRaiseIfFailed: bool) : Guid =
         let pl = Polyline(points)
-        //pl.DeleteShortSegments(State.Doc.ModelAbsoluteTolerance) |> ignore<bool>
+        if deleteShortSegments then
+            pl.DeleteShortSegments(State.Doc.ModelAbsoluteTolerance) |> ignore<int>
         let rc = State.Doc.Objects.AddPolyline(pl)
-        if rc = Guid.Empty then
+        if drawDotsAndRaiseIfFailed && rc = Guid.Empty then
             for i,pt in Seq.indexed(points) do
-                let d = State.Doc.Objects.AddTextDot(string i, pt) // TODO really draw debug objects ?
+                let d = State.Doc.Objects.AddTextDot(string i, pt)
                 RhinoScriptSyntax.ObjectLayer(d,"ERROR-AddPolyline", createLayerIfMissing=true)
-            eprintfn "See %d TextDots on layer 'ERROR-AddPolyline'"  (Seq.length points)
+            // eprintfn "See %d TextDots on layer 'ERROR-AddPolyline'"  (Seq.length points)
             RhinoScriptingException.Raise "AddPolyline: Unable to add polyline to document form points:%s'%A'" Environment.NewLine (Pretty.str points)
         State.Doc.Views.Redraw()
         rc
 
-    /// <summary>Adds a closed Polyline Curve ,
-    ///    if the endpoint is already closer than State.Doc.ModelAbsoluteTolerance to the start it wil be set to start point
-    ///    else an additional point will be added with the same position as start.</summary>
+    /// <summary>Adds a closed Polyline Curve.
+    ///    If the endpoint is already closer than State.Doc.ModelAbsoluteTolerance to the start it wil be set to start point
+    ///    else an additional point will be added with the same position as start.
+    /// </summary>
     /// <param name="points">(Point3d seq) List of 3D points. The list must contain at least three points.</param>
-    /// <returns>(Guid) ObjectId of the new curve object.</returns>
-    static member AddPolylineClosed(points:Point3d seq) : Guid =
+    /// <param name="deleteShortSegments">(bool) Optional, default value: <c>true</c>. If true, segments shorter than the document's absolute tolerance will be deleted.</param>
+    /// <param name="drawDotsAndRaiseIfFailed">(bool) Optional, default value: <c>false</c>. If true, text dots will be drawn on layer `ERROR-AddPolylineClosed` at each point and an exception will be raised if the operation fails.</param>
+    /// <returns>(Guid) ObjectId of the new curve object. Empty Guid if the operation fails.</returns>
+    static member AddPolylineClosed(points:Point3d seq,  [<OPT;DEF(true)>]deleteShortSegments: bool, [<OPT;DEF(false)>]drawDotsAndRaiseIfFailed: bool) : Guid =
         let pl = Polyline(points)
         if pl.Count < 3 then RhinoScriptingException.Raise "AddPolylineClosed: Unable to add closed polyline to document from points:%s'%A'" Environment.NewLine (Pretty.str points)
         if (pl.First-pl.Last).Length <= State.Doc.ModelAbsoluteTolerance then
             pl.[pl.Count-1] <- pl.First
         else
             pl.Add pl.First
-        //pl.DeleteShortSegments(State.Doc.ModelAbsoluteTolerance) |> ignore<bool>
+        if deleteShortSegments then
+            pl.DeleteShortSegments(State.Doc.ModelAbsoluteTolerance) |> ignore<int>
         let rc = State.Doc.Objects.AddPolyline(pl)
-        if rc = Guid.Empty then
+        if drawDotsAndRaiseIfFailed && rc = Guid.Empty then
             for i,pt in Seq.indexed(points) do
-                let d = State.Doc.Objects.AddTextDot(string i, pt)  // TODO really draw debug objects ?
+                let d = State.Doc.Objects.AddTextDot(string i, pt)
                 RhinoScriptSyntax.ObjectLayer(d,"ERROR-AddPolylineClosed", createLayerIfMissing=true)
-            eprintfn "See %d TextDots on layer 'ERROR-AddPolylineClosed'"  (Seq.length points)
+            // eprintfn "See %d TextDots on layer 'ERROR-AddPolylineClosed'"  (Seq.length points)
             RhinoScriptingException.Raise "AddPolylineClosed: Unable to add closed polyline to document. points:'%A'" points
         State.Doc.Views.Redraw()
         rc
