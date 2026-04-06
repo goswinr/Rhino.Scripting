@@ -3,7 +3,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Library</OutputType>
-	  <TargetFrameworks>net7.0;net48</TargetFrameworks>  <!-- FsDoc will use the first target framework: https://fsprojects.github.io/FSharp.Formatting/apidocs.html#Selected-projects -->
+	  <TargetFrameworks>net8.0;net48</TargetFrameworks>  <!-- FsDoc will use the first target framework: https://fsprojects.github.io/FSharp.Formatting/apidocs.html#Selected-projects -->
 
     <DefineConstants Condition="'$(TargetFramework)' == 'net48'">RH7</DefineConstants>
 
