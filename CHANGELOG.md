@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-04-06
+### Fixed
+- no more auto fail on bad input for AddPolyline
+### Changed
+- net8 instead of net7
+
+
 ## [0.13.0] - 2026-01-17
 ### Fixed
 - Fix DimStyleTextAlignment
