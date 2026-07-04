@@ -68,5 +68,5 @@ jobs:
 
       - name: Deploy to GitHub Pages (attempt 3)
         id: deployment3
-        if: steps.deployment1.outcome == 'failure' && steps.deployment2.outcome == 'failure'
+        if: steps.deployment1.outcome == 'failure' && (steps.deployment2.outcome == 'failure' || steps.deployment2.outcome == 'skipped')
         uses: actions/deploy-pages@v5
