@@ -99,13 +99,9 @@ module AutoOpenHatch =
                               [<OPT;DEF(1.0)>]scale:float,
                               [<OPT;DEF(0.0)>]rotation:float,
                               [<OPT;DEF(0.0)>]tolerance:float) : Guid  =
-        try
-           let rc = RhinoScriptSyntax.AddHatches([curve], hatchPattern, scale, rotation,tolerance)
-           if rc.Count = 1 then rc.[0]
-           else RhinoScriptingException.Raise "AddHatch failed to create exactly one hatch from curve. It created %d Hatches"  rc.Count
-        with e->
-            let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance
-            RhinoScriptingException.Raise "AddHatch failed on one curve using tolerance %f %sMessage: %s" tolerance  Environment.NewLine e.Message
+        let rc = RhinoScriptSyntax.AddHatches([curve], hatchPattern, scale, rotation,tolerance) // gives a good error message already
+        if rc.Count = 1 then rc.[0]
+        else RhinoScriptingException.Raise "AddHatch failed to create exactly one hatch from curve. It created %d Hatches"  rc.Count
 
 
     /// <summary>Creates one or more new Hatch objects from a list of closed planar Curves.</summary>
@@ -123,8 +119,7 @@ module AutoOpenHatch =
         let curves  = curveIds |> RArr.mapSeq RhinoScriptSyntax.CoerceCurve
         try RhinoScriptSyntax.AddHatches(curves, hatchPattern, scale, rotation, tolerance)
         with e->
-            let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance
-            RhinoScriptingException.Raise "AddHatches failed on curveIds using tolerance %f :'%s' %sMessage: %s" tolerance (Pretty.str curveIds) Environment.NewLine  e.Message
+            RhinoScriptingException.RaiseWith e "AddHatches failed on curveIds %s%s%s" (Pretty.str curveIds) Environment.NewLine e.Message
 
     /// <summary>Creates a new Hatch object from a closed planar Curve object.</summary>
     /// <param name="curveId">(Guid) Identifier of the closed planar Curve that defines the boundary of the Hatch object</param>
@@ -138,10 +133,10 @@ module AutoOpenHatch =
                             [<OPT;DEF(1.0)>]scale:float,
                             [<OPT;DEF(0.0)>]rotation:float,
                             [<OPT;DEF(0.0)>]tolerance:float) : Guid =
-        try RhinoScriptSyntax.AddHatch(RhinoScriptSyntax.CoerceCurve(curveId), hatchPattern, scale, rotation, tolerance)
+        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
+        try RhinoScriptSyntax.AddHatch(curve, hatchPattern, scale, rotation, tolerance)
         with e->
-            let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance
-            RhinoScriptingException.Raise "AddHatch failed on one curve using tolerance %f : %s%sMessage: %s" tolerance (Pretty.str curveId) Environment.NewLine  e.Message
+            RhinoScriptingException.RaiseWith e "AddHatch failed on curveId %s%s%s" (Pretty.str curveId) Environment.NewLine e.Message
 
 
 
