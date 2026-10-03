@@ -34,7 +34,7 @@ module AutoOpenCoerce =
         | :? Guid  as g -> if Guid.Empty = g then None else Some g
         | :? DocObjects.RhinoObject as o -> Some o.Id
         | :? DocObjects.ObjRef      as o -> Some o.ObjectId
-        | :? string  as s -> let ok, g = Guid.TryParse s in  if ok then Some g else None
+        | :? string  as s -> let ok, g = Guid.TryParse s in  if ok && g <> Guid.Empty then Some g else None
         | _ -> None
 
     /// <summary>Attempt to get a Guid from input.</summary>
@@ -68,7 +68,7 @@ module AutoOpenCoerce =
             if Guid.Empty = objectId then    RhinoScriptingException.Raise "CoerceRhinoObject failed on empty Guid"
             else                             RhinoScriptingException.Raise "CoerceRhinoObject: The Guid %O was not found in the Current Object table." objectId
 
-    /// <summary>Attempt to get GeometryBase from a given Guid. Fails on empty Guid.</summary>
+    /// <summary>Attempt to get GeometryBase from a given Guid. Returns None on empty or unknown Guid.</summary>
     /// <param name="objectId">Geometry identifier (Guid).</param>
     /// <returns>A Rhino.Geometry.GeometryBase option.</returns>
     static member TryCoerceGeometry (objectId:Guid) :GeometryBase option =
@@ -89,8 +89,8 @@ module AutoOpenCoerce =
     /// <param name="objectId">(Guid) light Identifier</param>
     /// <returns>A Rhino.Geometry.Light. Option.</returns>
     static member TryCoerceLight (objectId:Guid) : Light option =
-        match RhinoScriptSyntax.CoerceGeometry objectId with
-        | :? Geometry.Light as l -> Some l
+        match RhinoScriptSyntax.TryCoerceGeometry objectId with
+        | Some (:? Geometry.Light as l) -> Some l
         | _ -> None
 
     /// <summary>Attempt to get Rhino LightObject from the document with a given objectId.</summary>
@@ -102,7 +102,7 @@ module AutoOpenCoerce =
         | _ -> RhinoScriptingException.Raise "CoerceLight failed on: %s " (Pretty.str objectId)
 
 
-    /// <summary>Attempt to get Mesh class from given Guid. Fails on empty Guid.</summary>
+    /// <summary>Attempt to get Mesh class from given Guid. Returns None on empty or unknown Guid.</summary>
     /// <param name="objectId">Mesh Identifier (Guid)</param>
     /// <returns>A Rhino.Geometry.Surface Option.</returns>
     static member TryCoerceMesh (objectId:Guid) : Mesh option =
@@ -121,7 +121,7 @@ module AutoOpenCoerce =
         | Some m -> m
         | None -> RhinoScriptingException.Raise "CoerceMesh failed on: %s " (Pretty.str objectId)
 
-    /// <summary>Attempt to get Surface class from given Guid. Fails on empty Guid.</summary>
+    /// <summary>Attempt to get Surface class from given Guid. Returns None on empty or unknown Guid.</summary>
     /// <param name="objectId">Surface Identifier (Guid)</param>
     /// <returns>A Rhino.Geometry.Surface Option.</returns>
     static member TryCoerceSurface (objectId:Guid) : Surface option =
@@ -150,7 +150,7 @@ module AutoOpenCoerce =
             else RhinoScriptingException.Raise "CoerceSurface failed on %O from Brep with %d Faces" objectId b.Faces.Count
         | _ -> RhinoScriptingException.Raise "CoerceSurface failed on: %O " objectId
 
-    /// <summary>Attempt to get a Polysurface or Brep class from given Guid. Works on Extrusions too. Fails on empty Guid.</summary>
+    /// <summary>Attempt to get a Polysurface or Brep class from given Guid. Works on Extrusions too. Returns None on empty or unknown Guid.</summary>
     /// <param name="objectId">Polysurface Identifier (Guid)</param>
     /// <returns>A Rhino.Geometry.Mesh Option.</returns>
     static member TryCoerceBrep (objectId:Guid) : Brep option =
@@ -175,19 +175,21 @@ module AutoOpenCoerce =
     /// <param name="segmentIndex">(int) Optional, index of segment to retrieve. To ignore segmentIndex give -1 as argument</param>
     /// <returns>A Rhino.Geometry.Curve Option.</returns>
     static member TryCoerceCurve(objectId:Guid,[<OPT;DEF(-1)>]segmentIndex:int) : Curve option =
-        let geo = RhinoScriptSyntax.CoerceGeometry objectId
-        if segmentIndex < 0 then
-            match geo with
-            | :? Curve as c -> Some c
-            | _ -> None
-        else
-            match geo with
-            | :? PolyCurve as c ->
-                let crv = c.SegmentCurve(segmentIndex)
-                if isNull crv then None
-                else Some crv
-            | :? Curve as c -> Some c
-            | _ -> None
+        match RhinoScriptSyntax.TryCoerceGeometry objectId with
+        | None -> None
+        | Some geo ->
+            if segmentIndex < 0 then
+                match geo with
+                | :? Curve as c -> Some c
+                | _ -> None
+            else
+                match geo with
+                | :? PolyCurve as c ->
+                    let crv = c.SegmentCurve(segmentIndex)
+                    if isNull crv then None
+                    else Some crv
+                | :? Curve as c -> Some c
+                | _ -> None
 
     /// <summary>Attempt to get Curve geometry from the document with a given objectId.</summary>
     /// <param name="objectId">objectId (Guid or string) to be RhinoScriptSyntax.Coerced into a Curve</param>
@@ -218,9 +220,9 @@ module AutoOpenCoerce =
             if crv.IsLinear(State.Doc.ModelAbsoluteTolerance) then Some <|  Line(crv.PointAtStart, crv.PointAtEnd)
                 else None
         | :? Guid as g ->
-            match State.Doc.Objects.FindId(g).Geometry with
-            | :? LineCurve as l -> Some l.Line
-            | :? Curve as crv ->
+            match RhinoScriptSyntax.TryCoerceGeometry g with
+            | Some (:? LineCurve as l) -> Some l.Line
+            | Some (:? Curve as crv) ->
                 if crv.IsLinear(State.Doc.ModelAbsoluteTolerance) then Some <| Line(crv.PointAtStart, crv.PointAtEnd)
                 else None
             | _ -> None
@@ -248,8 +250,8 @@ module AutoOpenCoerce =
             if ok then Some( a.Value )
             else None
         | :? Guid as g ->
-            match State.Doc.Objects.FindId(g).Geometry with
-            | :? Curve as crv ->
+            match RhinoScriptSyntax.TryCoerceGeometry g with
+            | Some (:? Curve as crv) ->
                 let a = ref (new Arc())
                 let ok = crv.TryGetArc(a,State.Doc.ModelAbsoluteTolerance)
                 if ok then Some( a.Value )
@@ -279,8 +281,8 @@ module AutoOpenCoerce =
             if ok then Some( a.Value )
             else None
         | :? Guid as g ->
-            match State.Doc.Objects.FindId(g).Geometry with
-            | :? Curve as crv ->
+            match RhinoScriptSyntax.TryCoerceGeometry g with
+            | Some (:? Curve as crv) ->
                 let a = ref (new Circle())
                 let ok = crv.TryGetCircle(a,State.Doc.ModelAbsoluteTolerance)
                 if ok then Some( a.Value )
@@ -308,8 +310,8 @@ module AutoOpenCoerce =
             if ok then Some( a.Value )
             else None
         | :? Guid as g ->
-            match State.Doc.Objects.FindId(g).Geometry with
-            | :? Curve as crv ->
+            match RhinoScriptSyntax.TryCoerceGeometry g with
+            | Some (:? Curve as crv) ->
                 let a = ref (new  Ellipse())
                 let ok = crv.TryGetEllipse(a,State.Doc.ModelAbsoluteTolerance)
                 if ok then Some( a.Value )
@@ -338,8 +340,8 @@ module AutoOpenCoerce =
                 if ok then Some( a.Value )
                 else None
         | :? Guid as g ->
-            match State.Doc.Objects.FindId(g).Geometry with
-            | :? Curve as crv ->
+            match RhinoScriptSyntax.TryCoerceGeometry g with
+            | Some (:? Curve as crv) ->
                 let a : ref<Polyline> = ref null
                 let ok = crv.TryGetPolyline(a)
                 if ok then Some( a.Value )
