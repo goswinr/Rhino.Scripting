@@ -238,75 +238,38 @@ type RhinoSync private () =
 
     /// Evaluates a function on UI Thread.
     /// Also ensures that redraw is enabled and disabled afterwards again if it was disabled initially.
+    /// Redraw is restored even if the function throws an exception.
     static member DoSyncRedraw (func:unit->'T) : 'T =
-        let redraw = RhinoDoc.ActiveDoc.Views.RedrawEnabled
-        if RhinoApp.InvokeRequired then
-            if initIsPending then initSync()
-            if isNull syncContext then
-                Eto.Forms.Application.Instance.Invoke func
-
-                // RhinoSyncException.Raise "This code needs to run on the main UI thread. Rhino.RhinoSync.syncContext is still null or not set up. An automatic context switch is not possible. You are calling a function of Rhino.Scripting that need the UI thread."
-                // TODO: better would be to call https://developer.rhino3d.com/api/RhinoCommon/html/M_Rhino_RhinoApp_InvokeOnUiThread.htm and then pass in a continuation function?
-                // or somehow get the syncContext from RhinoCode or RhinoCommon or the Rhino .NET host via reflection.
-                // https://discourse.mcneel.com/t/use-rhino-ui-dialogs-from-worker-threads/90130
-            else
-                async{
-                    do! Async.SwitchToContext syncContext
-                    if  not redraw then RhinoDoc.ActiveDoc.Views.RedrawEnabled <- true
-                    let res = func()
-                    if  not redraw then RhinoDoc.ActiveDoc.Views.RedrawEnabled <- false
-                    return res
-                    } |> Async.RunSynchronously
-        else
-            if not redraw then RhinoDoc.ActiveDoc.Views.RedrawEnabled <- true
-            let res = func()
-            if not redraw then RhinoDoc.ActiveDoc.Views.RedrawEnabled <- false
-            res
+        RhinoSync.DoSync (fun () ->
+            let views = RhinoDoc.ActiveDoc.Views
+            let redraw = views.RedrawEnabled
+            if not redraw then views.RedrawEnabled <- true
+            try
+                func()
+            finally
+                if not redraw then views.RedrawEnabled <- false
+            )
 
     /// Evaluates a function on UI Thread.
     /// Also ensures that redraw is enabled and disabled afterwards again if it was disabled initially.
-    /// Hides Fesh editor window if it exists. Shows it afterwards again
+    /// Hides Fesh editor window if it exists. Shows it afterwards again.
+    /// Redraw and editor visibility are restored even if the function throws an exception.
     static member DoSyncRedrawHideEditor (func:unit->'T) : 'T =
-        let redraw = RhinoDoc.ActiveDoc.Views.RedrawEnabled
-
-        if RhinoApp.InvokeRequired then
-            if initIsPending then initSync() // do first
-            if isNull syncContext then
-                Eto.Forms.Application.Instance.Invoke func
-
-                // RhinoSyncException.Raise "This code needs to run on the main UI thread. Rhino.RhinoSync.syncContext is still null or not set up. An automatic context switch is not possible. You are calling a function of Rhino.Scripting that need the UI thread."
-                // TODO: better would be to call https://developer.rhino3d.com/api/RhinoCommon/html/M_Rhino_RhinoApp_InvokeOnUiThread.htm and then pass in a continuation function?
-                // or somehow get the syncContext from RhinoCode or RhinoCommon or the Rhino .NET host via reflection.
-                // https://discourse.mcneel.com/t/use-rhino-ui-dialogs-from-worker-threads/90130
-
-            else
-                async{
-                    do! Async.SwitchToContext syncContext
-                    let isWinVis = isEditorVisible.Invoke() // do after init
-                    //eprintfn "Hiding Fesh async..isWinVis:%b" isWinVis
-                    if isWinVis then
-                        hideEditor.Invoke() //Action
-                    if not redraw then
-                        RhinoDoc.ActiveDoc.Views.RedrawEnabled <- true
-                    RhinoApp.SetFocusToMainWindow() //Action
-                    let res = func()
-                    if not redraw then
-                        RhinoDoc.ActiveDoc.Views.RedrawEnabled <- false
-                    if isWinVis then
-                        showEditor.Invoke() //Action
-                    return res
-                    } |> Async.RunSynchronously
-        else
-            if initIsPending then initSync() // because even when we are in sync we still need to see if the Fesh window is showing or not.
+        if initIsPending then initSync() // because even when we are on the UI thread we still need to see if the Fesh window is showing or not.
+        RhinoSync.DoSync (fun () ->
             let isWinVis = isEditorVisible.Invoke() // do after init
-            //eprintfn "Hiding Fesh sync..isWinVis:%b" isWinVis
             if isWinVis then
                 hideEditor.Invoke() //Action
+            let views = RhinoDoc.ActiveDoc.Views
+            let redraw = views.RedrawEnabled
             if not redraw then
-                RhinoDoc.ActiveDoc.Views.RedrawEnabled <- true
-            let res = func()
-            if not redraw then
-                RhinoDoc.ActiveDoc.Views.RedrawEnabled <- false
-            if isWinVis then
-                showEditor.Invoke() //Action
-            res
+                views.RedrawEnabled <- true
+            RhinoApp.SetFocusToMainWindow()
+            try
+                func()
+            finally
+                if not redraw then
+                    views.RedrawEnabled <- false
+                if isWinVis then
+                    showEditor.Invoke() //Action
+            )
