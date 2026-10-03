@@ -42,3 +42,12 @@ type RhinoUserInteractionException (s:string) =
 //     static member inline Raise msg =
 //         Printf.kprintf (fun s -> raise (new RhinoSyncException(s))) msg
 //
+
+[<AutoOpen>]
+module internal AutoOpenExceptionUtil =
+
+    /// Raises a RhinoScriptingException if the Guid is Guid.Empty, otherwise returns it.
+    /// Used on the result of Doc.Objects.Add... functions, they return Guid.Empty if adding failed.
+    let failIfEmptyGuid (methodName:string) (id:Guid) : Guid =
+        if id = Guid.Empty then RhinoScriptingException.Raise "%s: Unable to add object to document. Is the geometry valid?" methodName
+        id

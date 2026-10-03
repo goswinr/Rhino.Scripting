@@ -121,7 +121,7 @@ module AutoOpenGeometry =
     /// <param name="points">(Point3d seq) List of points</param>
     /// <returns>(Guid ResizeArray) List of identifiers of the new objects.</returns>
     static member AddPoints(points:Point3d seq) : Guid ResizeArray =
-        let rc = points |> RArr.mapSeq State.Doc.Objects.AddPoint
+        let rc = points |> RArr.mapSeq (fun p -> State.Doc.Objects.AddPoint(p) |> failIfEmptyGuid "AddPoints")
         State.Doc.Views.Redraw()
         rc
 
@@ -432,7 +432,7 @@ module AutoOpenGeometry =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(textId)
         let curves = (rhobj.Geometry:?>TextEntity).Explode()
         let attr = rhobj.Attributes
-        let rc = curves  |> RArr.mapArr ( fun curve -> State.Doc.Objects.AddCurve(curve, attr) )
+        let rc = curves  |> RArr.mapArr ( fun curve -> State.Doc.Objects.AddCurve(curve, attr) |> failIfEmptyGuid "ExplodeText" )
         if delete then State.Doc.Objects.Delete(rhobj, quiet=true) |> ignore<bool>
         State.Doc.Views.Redraw()
         rc

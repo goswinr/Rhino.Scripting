@@ -44,7 +44,7 @@ module AutoOpenSurface =
                            [<OPT;DEF(true)>]cap:bool) : Guid =
         let cone = Cone(basis, height, radius)
         let brep = Brep.CreateFromCone(cone, cap)// cone is upside down
-        let rc = State.Doc.Objects.AddBrep(brep)
+        let rc = State.Doc.Objects.AddBrep(brep) |> failIfEmptyGuid "AddCone"
         State.Doc.Views.Redraw()
         rc
 
@@ -63,7 +63,7 @@ module AutoOpenSurface =
         let pl = RhinoScriptSyntax.PlaneFromNormal(tip,n)
         let cone = Cone(pl, n.Length, radius)
         let brep = Brep.CreateFromCone(cone, cap)// cone is upside down
-        let rc = State.Doc.Objects.AddBrep(brep)
+        let rc = State.Doc.Objects.AddBrep(brep) |> failIfEmptyGuid "AddCone"
         State.Doc.Views.Redraw()
         rc
 
@@ -177,7 +177,7 @@ module AutoOpenSurface =
         let curves  = curves |> RArr.mapSeq RhinoScriptSyntax.CoerceCurve
         let surf, _ = NurbsSurface.CreateNetworkSurface(curves, continuity, edgeTolerance, interiorTolerance, angleTolerance)// 0.0 Tolerance OK ? TODO
         if notNull surf then
-            let rc = State.Doc.Objects.AddSurface(surf)
+            let rc = State.Doc.Objects.AddSurface(surf) |> failIfEmptyGuid "AddNetworkSrf"
             State.Doc.Views.Redraw()
             rc
         else
@@ -294,7 +294,7 @@ module AutoOpenSurface =
                     let b =  Array.create 4 fixEdges
                     let brep = Brep.CreatePatch(geometry, surface, uspan, vspan, trim, false, pointSpacing, flexibility, surfacePull, b, tolerance)
                     if notNull brep then
-                        let rc =  State.Doc.Objects.AddBrep(brep)
+                        let rc =  State.Doc.Objects.AddBrep(brep) |> failIfEmptyGuid "AddPatch"
                         State.Doc.Views.Redraw()
                         rc
                     else
@@ -341,7 +341,7 @@ module AutoOpenSurface =
         let b =  Array.create 4 fixEdges
         let brep = Brep.CreatePatch(geometry, null, uspan, vspan, trim, false, pointSpacing, flexibility, surfacePull, b, tolerance) //TODO test with null as srf
         if notNull brep then
-            let rc =  State.Doc.Objects.AddBrep(brep)
+            let rc =  State.Doc.Objects.AddBrep(brep) |> failIfEmptyGuid "AddPatch"
             State.Doc.Views.Redraw()
             rc
         else
@@ -370,7 +370,7 @@ module AutoOpenSurface =
         let angtol = State.Doc.ModelAngleToleranceRadians
         let cap :PipeCapMode  = LanguagePrimitives.EnumOfValue  cap
         let breps = Brep.CreatePipe(rail, parameters, radii, (blendType = 0), cap, fit, abstol, angtol)
-        let rc  = breps |> RArr.mapArr State.Doc.Objects.AddBrep
+        let rc  = breps |> RArr.mapArr (fun b -> State.Doc.Objects.AddBrep(b) |> failIfEmptyGuid "AddPipe")
         State.Doc.Views.Redraw()
         rc
 
@@ -384,7 +384,7 @@ module AutoOpenSurface =
         let breps = Brep.CreatePlanarBreps(new PolylineCurve(polyline), tolerance)
         if notNull breps then
             if breps.Length <> 1 then RhinoScriptingException.Raise "AddPlanarSrf created more then one surface on one input curve, use the seq overload instead on the same function on %s" (Pretty.str polyline)
-            let rc =  State.Doc.Objects.AddBrep(breps.[0])
+            let rc =  State.Doc.Objects.AddBrep(breps.[0]) |> failIfEmptyGuid "AddPlanarSrf"
             State.Doc.Views.Redraw()
             rc
         else
@@ -398,7 +398,7 @@ module AutoOpenSurface =
         let breps = Brep.CreatePlanarBreps(curve, tolerance)
         if notNull breps then
             if breps.Length <> 1 then RhinoScriptingException.Raise "AddPlanarSrf created more then one surface on one input curve, use the seq overload instead on the same function on %s" (Pretty.str curve)
-            let rc =  State.Doc.Objects.AddBrep(breps.[0])
+            let rc =  State.Doc.Objects.AddBrep(breps.[0]) |> failIfEmptyGuid "AddPlanarSrf"
             State.Doc.Views.Redraw()
             rc
         else
@@ -411,7 +411,7 @@ module AutoOpenSurface =
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let breps = Brep.CreatePlanarBreps(curves, tolerance)
         if notNull breps then
-            let rc  = breps |> RArr.mapArr State.Doc.Objects.AddBrep
+            let rc  = breps |> RArr.mapArr (fun b -> State.Doc.Objects.AddBrep(b) |> failIfEmptyGuid "AddPlanarSrf")
             State.Doc.Views.Redraw()
             rc
         else
@@ -425,7 +425,7 @@ module AutoOpenSurface =
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let breps = Brep.CreatePlanarBreps(curves, tolerance)
         if notNull breps then
-            let rc  = breps |> RArr.mapArr State.Doc.Objects.AddBrep
+            let rc  = breps |> RArr.mapArr (fun b -> State.Doc.Objects.AddBrep(b) |> failIfEmptyGuid "AddPlanarSrf")
             State.Doc.Views.Redraw()
             rc
         else
@@ -531,7 +531,7 @@ module AutoOpenSurface =
         if isNull srf then RhinoScriptingException.Raise "AddRevSrf failed. curveId:'%s' axis:'%A' startAngle:'%A' endAngle:'%A'" (Pretty.str curveId) axis startAngle endAngle
         let ns = srf.ToNurbsSurface()
         if isNull ns then RhinoScriptingException.Raise "AddRevSrf failed. curveId:'%s' axis:'%A' startAngle:'%A' endAngle:'%A'" (Pretty.str curveId) axis startAngle endAngle
-        let rc = State.Doc.Objects.AddSurface(ns)
+        let rc = State.Doc.Objects.AddSurface(ns) |> failIfEmptyGuid "AddRevSrf"
         State.Doc.Views.Redraw()
         rc
 
@@ -677,7 +677,7 @@ module AutoOpenSurface =
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let breps = Brep.CreateFromSweep(rail, shapes, closed, tolerance)
         if isNull breps then RhinoScriptingException.Raise "AddSweep1 failed.  rail:'%A' shapes:'%A' closed:'%A'" rail shapes closed
-        let rc  = breps |> RArr.mapArr State.Doc.Objects.AddBrep
+        let rc  = breps |> RArr.mapArr (fun b -> State.Doc.Objects.AddBrep(b) |> failIfEmptyGuid "AddSweep1")
         State.Doc.Views.Redraw()
         rc
 
@@ -698,7 +698,7 @@ module AutoOpenSurface =
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let breps = Brep.CreateFromSweep(rail1, rail2, shapes, closed, tolerance)
         if isNull breps then RhinoScriptingException.Raise "AddSweep2 failed.  rails:'%A' shapes:'%A' closed:'%A'" rails shapes closed
-        let rc  = breps |> RArr.mapArr State.Doc.Objects.AddBrep
+        let rc  = breps |> RArr.mapArr (fun b -> State.Doc.Objects.AddBrep(b) |> failIfEmptyGuid "AddSweep2")
         State.Doc.Views.Redraw()
         rc
 
@@ -719,7 +719,7 @@ module AutoOpenSurface =
         let railinst = RhinoScriptSyntax.CoerceCurve(rail)
         let surface = NurbsSurface.CreateRailRevolvedSurface(profileinst, railinst, axis, scaleHeight)
         if isNull surface then RhinoScriptingException.Raise "AddRailRevSrf failed.  profile:'%A' rail:'%A' axis:'%A' scaleHeight:'%A'" profile rail axis scaleHeight
-        let rc = State.Doc.Objects.AddSurface(surface)
+        let rc = State.Doc.Objects.AddSurface(surface) |> failIfEmptyGuid "AddRailRevSrf"
         State.Doc.Views.Redraw()
         rc
 
@@ -734,7 +734,7 @@ module AutoOpenSurface =
                             minorRadius:float) : Guid =
         let torus = Torus(basis, majorRadius, minorRadius)
         let revsurf = torus.ToRevSurface()
-        let rc = State.Doc.Objects.AddSurface(revsurf)
+        let rc = State.Doc.Objects.AddSurface(revsurf) |> failIfEmptyGuid "AddTorus"
         State.Doc.Views.Redraw()
         rc
 
@@ -756,7 +756,7 @@ module AutoOpenSurface =
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let newbreps = Brep.CreateBooleanDifference(breps0, breps1, tolerance)
         if newbreps|> isNull  then RhinoScriptingException.Raise "BooleanDifference failed.  input0:'%A' input1:'%A' deleteInput:'%A'" input0 input1 deleteInput
-        let rc  = newbreps |> RArr.mapArr State.Doc.Objects.AddBrep
+        let rc  = newbreps |> RArr.mapArr (fun b -> State.Doc.Objects.AddBrep(b) |> failIfEmptyGuid "BooleanDifference")
         if deleteInput then
             for objectId in input0 do State.Doc.Objects.Delete(objectId, true)|> ignore<bool>
             for objectId in input1 do State.Doc.Objects.Delete(objectId, true)|> ignore<bool>
@@ -780,7 +780,7 @@ module AutoOpenSurface =
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let newbreps = Brep.CreateBooleanIntersection(breps0, breps1, tolerance)
         if newbreps|> isNull  then RhinoScriptingException.Raise "BooleanIntersection failed.  input0:'%A' input1:'%A' deleteInput:'%A'" input0 input1 deleteInput
-        let rc  = newbreps |> RArr.mapArr State.Doc.Objects.AddBrep
+        let rc  = newbreps |> RArr.mapArr (fun b -> State.Doc.Objects.AddBrep(b) |> failIfEmptyGuid "BooleanIntersection")
         if deleteInput then
             for objectId in input0 do State.Doc.Objects.Delete(objectId, true)|> ignore<bool>
             for objectId in input1 do State.Doc.Objects.Delete(objectId, true)|> ignore<bool>
@@ -801,7 +801,7 @@ module AutoOpenSurface =
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let newbreps = Brep.CreateBooleanUnion(breps, tolerance)
         if newbreps|> isNull  then RhinoScriptingException.Raise "BooleanUnion failed.  input:'%A' deleteInput:'%A'" input deleteInput
-        let rc  = newbreps |> RArr.mapArr State.Doc.Objects.AddBrep
+        let rc  = newbreps |> RArr.mapArr (fun b -> State.Doc.Objects.AddBrep(b) |> failIfEmptyGuid "BooleanUnion")
         if  deleteInput then
             for objectId in input do State.Doc.Objects.Delete(objectId, true)|> ignore<bool>
         State.Doc.Views.Redraw()
@@ -905,7 +905,7 @@ module AutoOpenSurface =
         let tolerance = State.Doc.ModelAbsoluteTolerance * 2.1
         curves <- Curve.JoinCurves(curves, tolerance)
         if curves|> isNull  then RhinoScriptingException.Raise "DuplicateSurfaceBorder failed.  surfaceId:'%s' type:'%d'" (Pretty.str surfaceId) typ
-        let rc  = curves |> RArr.mapArr State.Doc.Objects.AddCurve
+        let rc  = curves |> RArr.mapArr (fun c -> State.Doc.Objects.AddCurve(c) |> failIfEmptyGuid "DuplicateSurfaceBorder")
         State.Doc.Views.Redraw()
         rc
 
@@ -1024,7 +1024,7 @@ module AutoOpenSurface =
         for index in faceIndices do
             let face = brep.Faces.[index]
             let newbrep = face.DuplicateFace(true)
-            let objectId = State.Doc.Objects.AddBrep(newbrep)
+            let objectId = State.Doc.Objects.AddBrep(newbrep) |> failIfEmptyGuid "ExtractSurface"
             rc.Add(objectId)
         if copy then
             for index in faceIndices do brep.Faces.RemoveAt(index)
@@ -1093,7 +1093,7 @@ module AutoOpenSurface =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let newbrep = brep.Faces.[0].CreateExtrusion(curve, cap)
         if notNull newbrep then
-            let rc = State.Doc.Objects.AddBrep(newbrep)
+            let rc = State.Doc.Objects.AddBrep(newbrep) |> failIfEmptyGuid "ExtrudeSurface"
             State.Doc.Views.Redraw()
             rc
         else
@@ -1125,7 +1125,7 @@ module AutoOpenSurface =
         if isNull surfaces then RhinoScriptingException.Raise "FilletSurfaces failed.  surface0:'%A' surface1:'%A' radius:'%A' uvparam0:'%A' uvparam1:'%A'" surface0 surface1 radius uvparam0 uvparam1
         let rc = ResizeArray()
         for surf in surfaces do
-            rc.Add( State.Doc.Objects.AddSurface(surf))
+            rc.Add( State.Doc.Objects.AddSurface(surf) |> failIfEmptyGuid "FilletSurfaces")
         State.Doc.Views.Redraw()
         rc
 
@@ -1538,7 +1538,7 @@ module AutoOpenSurface =
             State.Doc.Views.Redraw()
             surfaceId
         else
-            let objectIdn = State.Doc.Objects.AddSurface(newsurf)
+            let objectIdn = State.Doc.Objects.AddSurface(newsurf) |> failIfEmptyGuid "MakeSurfacePeriodic"
             State.Doc.Views.Redraw()
             objectIdn
 
@@ -1587,7 +1587,7 @@ module AutoOpenSurface =
         let curve = RhinoScriptSyntax.CoerceCurve(curve)
         let tol = State.Doc.ModelAbsoluteTolerance
         let curves = Curve.PullToBrepFace(curve, brep.Faces.[0], tol)
-        let rc  = curves |> RArr.mapArr State.Doc.Objects.AddCurve
+        let rc  = curves |> RArr.mapArr (fun c -> State.Doc.Objects.AddCurve(c) |> failIfEmptyGuid "PullCurve")
         if deleteInput  then
             State.Doc.Objects.Delete(crvobj, true) |> ignore<bool>
         State.Doc.Views.Redraw()
@@ -1725,7 +1725,7 @@ module AutoOpenSurface =
         if  createCopy then
             let oldobj = State.Doc.Objects.FindId(objectId)
             let attr = oldobj.Attributes
-            let rc = State.Doc.Objects.AddBrep(brep, attr)
+            let rc = State.Doc.Objects.AddBrep(brep, attr) |> failIfEmptyGuid "ShrinkTrimmedSurface"
             State.Doc.Views.Redraw()
             rc
         else
@@ -1752,7 +1752,7 @@ module AutoOpenSurface =
         if deleteInput then
             //brepId = RhinoScriptSyntax.CoerceGuid(brepId)
             State.Doc.Objects.Delete(brepId, true) |> ignore<bool>
-        let rc  = pieces |> RArr.mapArr State.Doc.Objects.AddBrep
+        let rc  = pieces |> RArr.mapArr (fun b -> State.Doc.Objects.AddBrep(b) |> failIfEmptyGuid "SplitBrep")
         State.Doc.Views.Redraw()
         rc
 
@@ -2376,11 +2376,11 @@ module AutoOpenSurface =
                     State.Doc.Objects.Replace(objectId, breps.[i]) |> ignore<bool>
                     rc.Add(objectId)
                 else
-                    rc.Add(State.Doc.Objects.AddBrep(breps.[i], attrs))
+                    rc.Add(State.Doc.Objects.AddBrep(breps.[i], attrs) |> failIfEmptyGuid "TrimBrep")
             State.Doc.Views.Redraw()
             rc
         else
-            let rc  = breps |> RArr.mapArr State.Doc.Objects.AddBrep
+            let rc  = breps |> RArr.mapArr (fun b -> State.Doc.Objects.AddBrep(b) |> failIfEmptyGuid "TrimBrep")
             State.Doc.Views.Redraw()
             rc
 
@@ -2404,11 +2404,11 @@ module AutoOpenSurface =
                     State.Doc.Objects.Replace(objectId, breps.[i]) |> ignore<bool>
                     rc.Add(objectId)
                 else
-                    rc.Add(State.Doc.Objects.AddBrep(breps.[i], attrs))
+                    rc.Add(State.Doc.Objects.AddBrep(breps.[i], attrs) |> failIfEmptyGuid "TrimBrep")
             State.Doc.Views.Redraw()
             rc
         else
-            let rc  = breps |> RArr.mapArr State.Doc.Objects.AddBrep
+            let rc  = breps |> RArr.mapArr (fun b -> State.Doc.Objects.AddBrep(b) |> failIfEmptyGuid "TrimBrep")
             State.Doc.Views.Redraw()
             rc
 
@@ -2428,7 +2428,7 @@ module AutoOpenSurface =
         u.[1] <-  interval|> snd
         let newsurface = surface.Trim(u, v)
         if notNull newsurface then
-            let rc = State.Doc.Objects.AddSurface(newsurface)
+            let rc = State.Doc.Objects.AddSurface(newsurface) |> failIfEmptyGuid "TrimSurfaceU"
             if deleteInput then  State.Doc.Objects.Delete(surfaceId, true) |> ignore<bool>
             State.Doc.Views.Redraw()
             rc
@@ -2451,7 +2451,7 @@ module AutoOpenSurface =
         v.[1] <-  interval|> snd
         let newsurface = surface.Trim(u, v)
         if notNull newsurface then
-            let rc = State.Doc.Objects.AddSurface(newsurface)
+            let rc = State.Doc.Objects.AddSurface(newsurface) |> failIfEmptyGuid "TrimSurfaceV"
             if deleteInput then  State.Doc.Objects.Delete(surfaceId, true) |> ignore<bool>
             State.Doc.Views.Redraw()
             rc
@@ -2479,7 +2479,7 @@ module AutoOpenSurface =
         v.[1]  <- intervalV|> snd
         let newsurface = surface.Trim(u, v)
         if notNull newsurface then
-            let rc = State.Doc.Objects.AddSurface(newsurface)
+            let rc = State.Doc.Objects.AddSurface(newsurface) |> failIfEmptyGuid "TrimSurfaceUV"
             if deleteInput then  State.Doc.Objects.Delete(surfaceId, true) |> ignore<bool>
             State.Doc.Views.Redraw()
             rc
@@ -2522,16 +2522,16 @@ module AutoOpenSurface =
 
         let breps, curves, points, dots = unroll.PerformUnroll()
         if isNull breps then RhinoScriptingException.Raise "UnrollSurface: failed on  %A" surfaceId
-        let rc  = breps |> RArr.mapArr State.Doc.Objects.AddBrep
+        let rc  = breps |> RArr.mapArr (fun b -> State.Doc.Objects.AddBrep(b) |> failIfEmptyGuid "UnrollSurface")
         let newfollowing = ResizeArray()
         for curve in curves do
-            let objectId = State.Doc.Objects.AddCurve(curve) //TODO verify order is correct ???
+            let objectId = State.Doc.Objects.AddCurve(curve) |> failIfEmptyGuid "UnrollSurface" //TODO verify order is correct ???
             newfollowing.Add(objectId)
         for point in points do
-            let objectId = State.Doc.Objects.AddPoint(point)
+            let objectId = State.Doc.Objects.AddPoint(point) |> failIfEmptyGuid "UnrollSurface"
             newfollowing.Add(objectId)
         for dot in dots do
-            let objectId = State.Doc.Objects.AddTextDot(dot)
+            let objectId = State.Doc.Objects.AddTextDot(dot) |> failIfEmptyGuid "UnrollSurface"
             newfollowing.Add(objectId)
         State.Doc.Views.Redraw()
         rc, newfollowing

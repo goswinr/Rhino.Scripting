@@ -97,7 +97,7 @@ module AutoOpenDimension =
             let cprc, s, t = plane0.ClosestParameter( point )
             if not cprc then  RhinoScriptingException.Raise "AddLeader failed.  points %A, text:%s, plane %A" points text plane
             points2d.Add( Rhino.Geometry.Point2d(s, t))
-        State.Doc.Objects.AddLeader(text, plane0, points2d)
+        State.Doc.Objects.AddLeader(text, plane0, points2d) |> failIfEmptyGuid "AddLeader"
 
 
     /// <summary>Adds a linear dimension to the document.</summary>

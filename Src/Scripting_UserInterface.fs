@@ -333,7 +333,7 @@ module AutoOpenUserInterface =
                     let edge = go.Object(i).Edge()
                     if notNull edge then
                         let crv = edge.Duplicate() :?> NurbsCurve
-                        let curveid = State.Doc.Objects.AddCurve(crv)
+                        let curveid = State.Doc.Objects.AddCurve(crv) |> failIfEmptyGuid "GetEdgeCurves"
                         let parentid = go.Object(i).ObjectId
                         let pt = go.Object(i).SelectionPoint()
                         r.Add( (curveid, parentid, pt))

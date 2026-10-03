@@ -1753,7 +1753,7 @@ module AutoOpenCurve =
         let pieces = curve.DuplicateSegments()
         if notNull pieces then
             for piece in pieces do
-                rc.Add(State.Doc.Objects.AddCurve(piece))
+                rc.Add(State.Doc.Objects.AddCurve(piece) |> failIfEmptyGuid "ExplodeCurve")
             if deleteInput then
                 State.Doc.Objects.Delete(curveId, quiet=true) |> ignore<bool>
         if rc.Count>0 then  State.Doc.Views.Redraw()
@@ -1773,7 +1773,7 @@ module AutoOpenCurve =
             let pieces = curve.DuplicateSegments()
             if notNull pieces then
                 for piece in pieces do
-                    rc.Add(State.Doc.Objects.AddCurve(piece))
+                    rc.Add(State.Doc.Objects.AddCurve(piece) |> failIfEmptyGuid "ExplodeCurves")
                 if deleteInput then
                     State.Doc.Objects.Delete(curveId, quiet=true) |> ignore<bool>
         if rc.Count>0 then  State.Doc.Views.Redraw()
@@ -1827,7 +1827,7 @@ module AutoOpenCurve =
                 else
                     RhinoScriptingException.Raise "ExtendCurve failed. curveId:'%s' extensionType:'%A' side:'%A' boundaryCurveIds:'%s'" (Pretty.str curveId) extensionType side  (Pretty.str boundaryCurveIds)
             else
-                let g= State.Doc.Objects.AddCurve(newCurve)
+                let g= State.Doc.Objects.AddCurve(newCurve) |> failIfEmptyGuid "ExtendCurve"
                 State.Doc.Views.Redraw()
                 g
         else
@@ -2224,7 +2224,7 @@ module AutoOpenCurve =
         if isNull newCurves then
             RhinoScriptingException.Raise "JoinCurves failed on curveIds:'%s' deleteInput:'%A' tolerance:'%A'" (Pretty.str curveIds) deleteInput tolerance
 
-        let rc = newCurves  |> RArr.mapSeq  State.Doc.Objects.AddCurve
+        let rc = newCurves  |> RArr.mapSeq  (fun c -> State.Doc.Objects.AddCurve(c) |> failIfEmptyGuid "JoinCurves")
         if deleteInput then
             for objectId in curveIds do
                 State.Doc.Objects.Delete(objectId, quiet=false) |> ignore<bool>
@@ -2279,7 +2279,7 @@ module AutoOpenCurve =
         let  tolerance = if tolerance = 0.0 then RhinoMath.UnsetValue else abs (tolerance)
         let crv = Curve.CreateMeanCurve(curve0, curve1, tolerance)
         if notNull crv then
-            let rc = State.Doc.Objects.AddCurve(crv)
+            let rc = State.Doc.Objects.AddCurve(crv) |> failIfEmptyGuid "MeanCurve"
             State.Doc.Views.Redraw()
             rc
         else
@@ -2296,7 +2296,7 @@ module AutoOpenCurve =
         if not <| ispolyline then  RhinoScriptingException.Raise "MeshPolyline failed.  polylineId:'%s'" (Pretty.str polylineId)
         let mesh = Mesh.CreateFromClosedPolyline(polyline)
         if isNull mesh then  RhinoScriptingException.Raise "MeshPolyline failed.  polylineId:'%s'" (Pretty.str polylineId)
-        let rc = State.Doc.Objects.AddMesh(mesh)
+        let rc = State.Doc.Objects.AddMesh(mesh) |> failIfEmptyGuid "MeshPolyline"
         State.Doc.Views.Redraw()
         rc
 
@@ -2323,7 +2323,7 @@ module AutoOpenCurve =
         let stylee:CurveOffsetCornerStyle = EnumOfValue style
         let curves = curve.Offset(direction, normal0, distance, tolerance, stylee)
         if isNull curves then  RhinoScriptingException.Raise "OffsetCurve failed. curveId:'%s' direction:'%A' distance:'%A' normal:'%A' style:%d" (Pretty.str curveId) direction distance normal style
-        let rc =  curves |> RArr.mapSeq State.Doc.Objects.AddCurve
+        let rc =  curves |> RArr.mapSeq (fun c -> State.Doc.Objects.AddCurve(c) |> failIfEmptyGuid "OffsetCurve")
         rc
 
 
@@ -2339,7 +2339,7 @@ module AutoOpenCurve =
         let tol = State.Doc.ModelAbsoluteTolerance
         let curves = curve.OffsetOnSurface(surface, parameter, tol)
         if isNull curves then  RhinoScriptingException.Raise "OffsetCurveOnSurfaceUV failed. curveId:'%s' surfaceId:'%s' parameter:'%A'" (Pretty.str curveId) (Pretty.str surfaceId) parameter
-        let rc = curves  |> RArr.mapSeq  State.Doc.Objects.AddCurve
+        let rc = curves  |> RArr.mapSeq  (fun c -> State.Doc.Objects.AddCurve(c) |> failIfEmptyGuid "OffsetCurveOnSurfaceUV")
         rc
 
     /// <summary>Offset a Curve on a Surface. The source Curve must lie on the Surface.
@@ -2356,7 +2356,7 @@ module AutoOpenCurve =
         let curves = curve.OffsetOnSurface(surface, distance, tol)
         if isNull curves then  RhinoScriptingException.Raise "OffsetCurveOnSurface failed. curveId:'%s' surfaceId:'%s' distance:'%A'" (Pretty.str curveId) (Pretty.str surfaceId) distance
         let curves = curves  |> RArr.mapSeq (fun curve -> curve.ExtendOnSurface(Rhino.Geometry.CurveEnd.Both, surface) )//https://github.com/mcneel/rhinoscriptsyntax/pull/186
-        let rc = curves  |> RArr.mapSeq  State.Doc.Objects.AddCurve
+        let rc = curves  |> RArr.mapSeq  (fun c -> State.Doc.Objects.AddCurve(c) |> failIfEmptyGuid "OffsetCurveOnSurface")
         State.Doc.Views.Redraw()
         rc
 
@@ -2457,7 +2457,7 @@ module AutoOpenCurve =
         let meshes =  meshIds |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let newCurves = Curve.ProjectToMesh(curves, meshes, direction, tolerance)
-        let ids =  newCurves  |> RArr.mapSeq  State.Doc.Objects.AddCurve
+        let ids =  newCurves  |> RArr.mapSeq  (fun c -> State.Doc.Objects.AddCurve(c) |> failIfEmptyGuid "ProjectCurveToMesh")
         if ids.Count >0 then  State.Doc.Views.Redraw()
         ids
 
@@ -2472,7 +2472,7 @@ module AutoOpenCurve =
         let breps = surfaceIds  |> RArr.mapSeq  RhinoScriptSyntax.CoerceBrep
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let newCurves = Curve.ProjectToBrep(curves, breps, direction, tolerance)
-        let ids = newCurves  |> RArr.mapSeq  State.Doc.Objects.AddCurve
+        let ids = newCurves  |> RArr.mapSeq  (fun c -> State.Doc.Objects.AddCurve(c) |> failIfEmptyGuid "ProjectCurveToSurface")
         if ids.Count > 0 then  State.Doc.Views.Redraw()
         ids
 
@@ -2583,7 +2583,7 @@ module AutoOpenCurve =
         let newcurves = curve.Split(parameter)
         if isNull newcurves then  RhinoScriptingException.Raise "SplitCurve failed. curveId:'%s' parameter:'%A' deleteInput:'%A'" (Pretty.str curveId) parameter deleteInput
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(curveId)
-        let rc =  newcurves |> RArr.mapArr (fun crv ->  State.Doc.Objects.AddCurve(crv, rhobj.Attributes) )
+        let rc =  newcurves |> RArr.mapArr (fun crv ->  State.Doc.Objects.AddCurve(crv, rhobj.Attributes) |> failIfEmptyGuid "SplitCurve" )
         if deleteInput then
             State.Doc.Objects.Delete(curveId, quiet=true)|> ignore<bool>
         State.Doc.Views.Redraw()
@@ -2605,7 +2605,7 @@ module AutoOpenCurve =
         let newCurve = curve.Trim(fst interval, snd interval)
         if isNull newCurve then  RhinoScriptingException.Raise "TrimCurve failed. curveId:'%s' interval:'%A' deleteInput:'%A'" (Pretty.str curveId) interval deleteInput
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(curveId)
-        let rc = State.Doc.Objects.AddCurve(newCurve, rhobj.Attributes)
+        let rc = State.Doc.Objects.AddCurve(newCurve, rhobj.Attributes) |> failIfEmptyGuid "TrimCurve"
         if deleteInput then
             State.Doc.Objects.Delete(curveId, quiet=true)|> ignore<bool>
         State.Doc.Views.Redraw()

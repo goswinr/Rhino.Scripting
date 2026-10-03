@@ -141,22 +141,24 @@ type RhinoScriptSyntax private () =
                     State.Doc.Layers.[layerIndex].IsExpanded <- false
                 a
 
-        match box geo with
-        | :? GeometryBase as g ->  State.Doc.Objects.Add(g,attr)
-        // now the structs:
-        | :? Point3d     as pt->   State.Doc.Objects.AddPoint(pt,attr)
-        | :? Point3f     as pt->   State.Doc.Objects.AddPoint(pt,attr)
-        | :? Line        as ln->   State.Doc.Objects.AddLine(ln,attr)
-        | :? Arc         as a->    State.Doc.Objects.AddArc(a,attr)
-        | :? Circle      as c->   State.Doc.Objects.AddCircle(c,attr)
-        | :? Ellipse     as e->    State.Doc.Objects.AddEllipse(e,attr)
-        | :? Polyline    as pl ->  State.Doc.Objects.AddPolyline(pl,attr)
-        | :? Box         as b ->   State.Doc.Objects.AddBox(b,attr)
-        | :? BoundingBox as b ->   State.Doc.Objects.AddBox(Box(b),attr)
-        | :? Sphere      as b ->   State.Doc.Objects.AddSphere(b,attr)
-        | :? Cylinder    as cl ->  State.Doc.Objects.AddSurface (cl.ToNurbsSurface(),attr)
-        | :? Cone        as c ->   State.Doc.Objects.AddSurface (c.ToNurbsSurface(),attr)
-        | _ -> RhinoScriptingException.Raise $"RhinoScriptSyntax.Add: object of type {geo.GetType().FullName} not implemented yet"
+        let id =
+            match box geo with
+            | :? GeometryBase as g ->  State.Doc.Objects.Add(g,attr)
+            // now the structs:
+            | :? Point3d     as pt->   State.Doc.Objects.AddPoint(pt,attr)
+            | :? Point3f     as pt->   State.Doc.Objects.AddPoint(pt,attr)
+            | :? Line        as ln->   State.Doc.Objects.AddLine(ln,attr)
+            | :? Arc         as a->    State.Doc.Objects.AddArc(a,attr)
+            | :? Circle      as c->   State.Doc.Objects.AddCircle(c,attr)
+            | :? Ellipse     as e->    State.Doc.Objects.AddEllipse(e,attr)
+            | :? Polyline    as pl ->  State.Doc.Objects.AddPolyline(pl,attr)
+            | :? Box         as b ->   State.Doc.Objects.AddBox(b,attr)
+            | :? BoundingBox as b ->   State.Doc.Objects.AddBox(Box(b),attr)
+            | :? Sphere      as b ->   State.Doc.Objects.AddSphere(b,attr)
+            | :? Cylinder    as cl ->  State.Doc.Objects.AddSurface (cl.ToNurbsSurface(),attr)
+            | :? Cone        as c ->   State.Doc.Objects.AddSurface (c.ToNurbsSurface(),attr)
+            | _ -> RhinoScriptingException.Raise $"RhinoScriptSyntax.Add: object of type {geo.GetType().FullName} not implemented yet"
+        failIfEmptyGuid "Add" id
 
     /// <summary>Adds any geometry object (struct or class) to the Rhino document.
     /// Works not only on any subclass of GeometryBase but also on Point3d, Line, Arc, and similar structs.</summary>
@@ -4684,7 +4686,7 @@ type RhinoScriptSyntax private () =
         let pieces = curve.DuplicateSegments()
         if notNull pieces then
             for piece in pieces do
-                rc.Add(State.Doc.Objects.AddCurve(piece))
+                rc.Add(State.Doc.Objects.AddCurve(piece) |> failIfEmptyGuid "ExplodeCurve")
             if deleteInput then
                 State.Doc.Objects.Delete(curveId, quiet=true) |> ignore<bool>
         if rc.Count>0 then  State.Doc.Views.Redraw()
@@ -4704,7 +4706,7 @@ type RhinoScriptSyntax private () =
             let pieces = curve.DuplicateSegments()
             if notNull pieces then
                 for piece in pieces do
-                    rc.Add(State.Doc.Objects.AddCurve(piece))
+                    rc.Add(State.Doc.Objects.AddCurve(piece) |> failIfEmptyGuid "ExplodeCurves")
                 if deleteInput then
                     State.Doc.Objects.Delete(curveId, quiet=true) |> ignore<bool>
         if rc.Count>0 then  State.Doc.Views.Redraw()
@@ -4758,7 +4760,7 @@ type RhinoScriptSyntax private () =
                 else
                     RhinoScriptingException.Raise "ExtendCurve failed. curveId:'%s' extensionType:'%A' side:'%A' boundaryCurveIds:'%s'" (Pretty.str curveId) extensionType side  (Pretty.str boundaryCurveIds)
             else
-                let g= State.Doc.Objects.AddCurve(newCurve)
+                let g= State.Doc.Objects.AddCurve(newCurve) |> failIfEmptyGuid "ExtendCurve"
                 State.Doc.Views.Redraw()
                 g
         else
@@ -5155,7 +5157,7 @@ type RhinoScriptSyntax private () =
         if isNull newCurves then
             RhinoScriptingException.Raise "JoinCurves failed on curveIds:'%s' deleteInput:'%A' tolerance:'%A'" (Pretty.str curveIds) deleteInput tolerance
 
-        let rc = newCurves  |> RArr.mapSeq  State.Doc.Objects.AddCurve
+        let rc = newCurves  |> RArr.mapSeq  (fun c -> State.Doc.Objects.AddCurve(c) |> failIfEmptyGuid "JoinCurves")
         if deleteInput then
             for objectId in curveIds do
                 State.Doc.Objects.Delete(objectId, quiet=false) |> ignore<bool>
@@ -5210,7 +5212,7 @@ type RhinoScriptSyntax private () =
         let  tolerance = if tolerance = 0.0 then RhinoMath.UnsetValue else abs (tolerance)
         let crv = Curve.CreateMeanCurve(curve0, curve1, tolerance)
         if notNull crv then
-            let rc = State.Doc.Objects.AddCurve(crv)
+            let rc = State.Doc.Objects.AddCurve(crv) |> failIfEmptyGuid "MeanCurve"
             State.Doc.Views.Redraw()
             rc
         else
@@ -5227,7 +5229,7 @@ type RhinoScriptSyntax private () =
         if not <| ispolyline then  RhinoScriptingException.Raise "MeshPolyline failed.  polylineId:'%s'" (Pretty.str polylineId)
         let mesh = Mesh.CreateFromClosedPolyline(polyline)
         if isNull mesh then  RhinoScriptingException.Raise "MeshPolyline failed.  polylineId:'%s'" (Pretty.str polylineId)
-        let rc = State.Doc.Objects.AddMesh(mesh)
+        let rc = State.Doc.Objects.AddMesh(mesh) |> failIfEmptyGuid "MeshPolyline"
         State.Doc.Views.Redraw()
         rc
 
@@ -5254,7 +5256,7 @@ type RhinoScriptSyntax private () =
         let stylee:CurveOffsetCornerStyle = EnumOfValue style
         let curves = curve.Offset(direction, normal0, distance, tolerance, stylee)
         if isNull curves then  RhinoScriptingException.Raise "OffsetCurve failed. curveId:'%s' direction:'%A' distance:'%A' normal:'%A' style:%d" (Pretty.str curveId) direction distance normal style
-        let rc =  curves |> RArr.mapSeq State.Doc.Objects.AddCurve
+        let rc =  curves |> RArr.mapSeq (fun c -> State.Doc.Objects.AddCurve(c) |> failIfEmptyGuid "OffsetCurve")
         rc
 
 
@@ -5270,7 +5272,7 @@ type RhinoScriptSyntax private () =
         let tol = State.Doc.ModelAbsoluteTolerance
         let curves = curve.OffsetOnSurface(surface, parameter, tol)
         if isNull curves then  RhinoScriptingException.Raise "OffsetCurveOnSurfaceUV failed. curveId:'%s' surfaceId:'%s' parameter:'%A'" (Pretty.str curveId) (Pretty.str surfaceId) parameter
-        let rc = curves  |> RArr.mapSeq  State.Doc.Objects.AddCurve
+        let rc = curves  |> RArr.mapSeq  (fun c -> State.Doc.Objects.AddCurve(c) |> failIfEmptyGuid "OffsetCurveOnSurfaceUV")
         rc
 
     /// <summary>Offset a Curve on a Surface. The source Curve must lie on the Surface.
@@ -5287,7 +5289,7 @@ type RhinoScriptSyntax private () =
         let curves = curve.OffsetOnSurface(surface, distance, tol)
         if isNull curves then  RhinoScriptingException.Raise "OffsetCurveOnSurface failed. curveId:'%s' surfaceId:'%s' distance:'%A'" (Pretty.str curveId) (Pretty.str surfaceId) distance
         let curves = curves  |> RArr.mapSeq (fun curve -> curve.ExtendOnSurface(Rhino.Geometry.CurveEnd.Both, surface) )//https://github.com/mcneel/rhinoscriptsyntax/pull/186
-        let rc = curves  |> RArr.mapSeq  State.Doc.Objects.AddCurve
+        let rc = curves  |> RArr.mapSeq  (fun c -> State.Doc.Objects.AddCurve(c) |> failIfEmptyGuid "OffsetCurveOnSurface")
         State.Doc.Views.Redraw()
         rc
 
@@ -5388,7 +5390,7 @@ type RhinoScriptSyntax private () =
         let meshes =  meshIds |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let newCurves = Curve.ProjectToMesh(curves, meshes, direction, tolerance)
-        let ids =  newCurves  |> RArr.mapSeq  State.Doc.Objects.AddCurve
+        let ids =  newCurves  |> RArr.mapSeq  (fun c -> State.Doc.Objects.AddCurve(c) |> failIfEmptyGuid "ProjectCurveToMesh")
         if ids.Count >0 then  State.Doc.Views.Redraw()
         ids
 
@@ -5403,7 +5405,7 @@ type RhinoScriptSyntax private () =
         let breps = surfaceIds  |> RArr.mapSeq  RhinoScriptSyntax.CoerceBrep
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let newCurves = Curve.ProjectToBrep(curves, breps, direction, tolerance)
-        let ids = newCurves  |> RArr.mapSeq  State.Doc.Objects.AddCurve
+        let ids = newCurves  |> RArr.mapSeq  (fun c -> State.Doc.Objects.AddCurve(c) |> failIfEmptyGuid "ProjectCurveToSurface")
         if ids.Count > 0 then  State.Doc.Views.Redraw()
         ids
 
@@ -5514,7 +5516,7 @@ type RhinoScriptSyntax private () =
         let newcurves = curve.Split(parameter)
         if isNull newcurves then  RhinoScriptingException.Raise "SplitCurve failed. curveId:'%s' parameter:'%A' deleteInput:'%A'" (Pretty.str curveId) parameter deleteInput
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(curveId)
-        let rc =  newcurves |> RArr.mapArr (fun crv ->  State.Doc.Objects.AddCurve(crv, rhobj.Attributes) )
+        let rc =  newcurves |> RArr.mapArr (fun crv ->  State.Doc.Objects.AddCurve(crv, rhobj.Attributes) |> failIfEmptyGuid "SplitCurve" )
         if deleteInput then
             State.Doc.Objects.Delete(curveId, quiet=true)|> ignore<bool>
         State.Doc.Views.Redraw()
@@ -5536,7 +5538,7 @@ type RhinoScriptSyntax private () =
         let newCurve = curve.Trim(fst interval, snd interval)
         if isNull newCurve then  RhinoScriptingException.Raise "TrimCurve failed. curveId:'%s' interval:'%A' deleteInput:'%A'" (Pretty.str curveId) interval deleteInput
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(curveId)
-        let rc = State.Doc.Objects.AddCurve(newCurve, rhobj.Attributes)
+        let rc = State.Doc.Objects.AddCurve(newCurve, rhobj.Attributes) |> failIfEmptyGuid "TrimCurve"
         if deleteInput then
             State.Doc.Objects.Delete(curveId, quiet=true)|> ignore<bool>
         State.Doc.Views.Redraw()
@@ -5679,7 +5681,7 @@ type RhinoScriptSyntax private () =
             let cprc, s, t = plane0.ClosestParameter( point )
             if not cprc then  RhinoScriptingException.Raise "AddLeader failed.  points %A, text:%s, plane %A" points text plane
             points2d.Add( Rhino.Geometry.Point2d(s, t))
-        State.Doc.Objects.AddLeader(text, plane0, points2d)
+        State.Doc.Objects.AddLeader(text, plane0, points2d) |> failIfEmptyGuid "AddLeader"
 
 
     /// <summary>Adds a linear dimension to the document.</summary>
@@ -7134,7 +7136,7 @@ type RhinoScriptSyntax private () =
     /// <param name="points">(Point3d seq) List of points</param>
     /// <returns>(Guid ResizeArray) List of identifiers of the new objects.</returns>
     static member AddPoints(points:Point3d seq) : Guid ResizeArray =
-        let rc = points |> RArr.mapSeq State.Doc.Objects.AddPoint
+        let rc = points |> RArr.mapSeq (fun p -> State.Doc.Objects.AddPoint(p) |> failIfEmptyGuid "AddPoints")
         State.Doc.Views.Redraw()
         rc
 
@@ -7445,7 +7447,7 @@ type RhinoScriptSyntax private () =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(textId)
         let curves = (rhobj.Geometry:?>TextEntity).Explode()
         let attr = rhobj.Attributes
-        let rc = curves  |> RArr.mapArr ( fun curve -> State.Doc.Objects.AddCurve(curve, attr) )
+        let rc = curves  |> RArr.mapArr ( fun curve -> State.Doc.Objects.AddCurve(curve, attr) |> failIfEmptyGuid "ExplodeText" )
         if delete then State.Doc.Objects.Delete(rhobj, quiet=true) |> ignore<bool>
         State.Doc.Views.Redraw()
         rc
@@ -10591,14 +10593,14 @@ type RhinoScriptSyntax private () =
                     let polylines = mesh.GetOutlines(viewport)
                     if notNull polylines then
                         for polyline in polylines do
-                            let objectId = State.Doc.Objects.AddPolyline(polyline)
+                            let objectId = State.Doc.Objects.AddPolyline(polyline) |> failIfEmptyGuid "MeshOutline"
                             rc.Add(objectId)
         else
             for mesh in meshes do
                 let polylines = mesh.GetOutlines(Plane.WorldXY)
                 if notNull polylines then
                     for polyline in polylines do
-                        let objectId = State.Doc.Objects.AddPolyline(polyline)
+                        let objectId = State.Doc.Objects.AddPolyline(polyline) |> failIfEmptyGuid "MeshOutline"
                         rc.Add(objectId)
         State.Doc.Views.Redraw()
         rc
@@ -10644,7 +10646,7 @@ type RhinoScriptSyntax private () =
         let breps  = pieces |> RArr.mapArr (fun piece -> Brep.CreateFromMesh(piece, trimmedTriangles) )
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let attr = rhobj.Attributes
-        let ids  = breps |> RArr.mapSeq (fun brep -> State.Doc.Objects.AddBrep(brep, attr) )
+        let ids  = breps |> RArr.mapSeq (fun brep -> State.Doc.Objects.AddBrep(brep, attr) |> failIfEmptyGuid "MeshToNurb" )
         if deleteInput then State.Doc.Objects.Delete(rhobj, quiet=true)|> ignore<bool>
         State.Doc.Views.Redraw()
         ids
@@ -10810,7 +10812,7 @@ type RhinoScriptSyntax private () =
     static member SplitDisjointMesh(objectId:Guid, [<OPT;DEF(false)>]deleteInput:bool) : Guid ResizeArray =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let pieces = mesh.SplitDisjointPieces()
-        let rc  = pieces |> RArr.mapArr State.Doc.Objects.AddMesh
+        let rc  = pieces |> RArr.mapArr (fun m -> State.Doc.Objects.AddMesh(m) |> failIfEmptyGuid "SplitDisjointMesh")
         if rc.Count <> 0 && deleteInput then
             //id = RhinoScriptSyntax.CoerceGuid(objectId)
             State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
@@ -13878,7 +13880,7 @@ type RhinoScriptSyntax private () =
                            [<OPT;DEF(true)>]cap:bool) : Guid =
         let cone = Cone(basis, height, radius)
         let brep = Brep.CreateFromCone(cone, cap)// cone is upside down
-        let rc = State.Doc.Objects.AddBrep(brep)
+        let rc = State.Doc.Objects.AddBrep(brep) |> failIfEmptyGuid "AddCone"
         State.Doc.Views.Redraw()
         rc
 
@@ -13897,7 +13899,7 @@ type RhinoScriptSyntax private () =
         let pl = RhinoScriptSyntax.PlaneFromNormal(tip,n)
         let cone = Cone(pl, n.Length, radius)
         let brep = Brep.CreateFromCone(cone, cap)// cone is upside down
-        let rc = State.Doc.Objects.AddBrep(brep)
+        let rc = State.Doc.Objects.AddBrep(brep) |> failIfEmptyGuid "AddCone"
         State.Doc.Views.Redraw()
         rc
 
@@ -14011,7 +14013,7 @@ type RhinoScriptSyntax private () =
         let curves  = curves |> RArr.mapSeq RhinoScriptSyntax.CoerceCurve
         let surf, _ = NurbsSurface.CreateNetworkSurface(curves, continuity, edgeTolerance, interiorTolerance, angleTolerance)// 0.0 Tolerance OK ? TODO
         if notNull surf then
-            let rc = State.Doc.Objects.AddSurface(surf)
+            let rc = State.Doc.Objects.AddSurface(surf) |> failIfEmptyGuid "AddNetworkSrf"
             State.Doc.Views.Redraw()
             rc
         else
@@ -14128,7 +14130,7 @@ type RhinoScriptSyntax private () =
                     let b =  Array.create 4 fixEdges
                     let brep = Brep.CreatePatch(geometry, surface, uspan, vspan, trim, false, pointSpacing, flexibility, surfacePull, b, tolerance)
                     if notNull brep then
-                        let rc =  State.Doc.Objects.AddBrep(brep)
+                        let rc =  State.Doc.Objects.AddBrep(brep) |> failIfEmptyGuid "AddPatch"
                         State.Doc.Views.Redraw()
                         rc
                     else
@@ -14175,7 +14177,7 @@ type RhinoScriptSyntax private () =
         let b =  Array.create 4 fixEdges
         let brep = Brep.CreatePatch(geometry, null, uspan, vspan, trim, false, pointSpacing, flexibility, surfacePull, b, tolerance) //TODO test with null as srf
         if notNull brep then
-            let rc =  State.Doc.Objects.AddBrep(brep)
+            let rc =  State.Doc.Objects.AddBrep(brep) |> failIfEmptyGuid "AddPatch"
             State.Doc.Views.Redraw()
             rc
         else
@@ -14204,7 +14206,7 @@ type RhinoScriptSyntax private () =
         let angtol = State.Doc.ModelAngleToleranceRadians
         let cap :PipeCapMode  = LanguagePrimitives.EnumOfValue  cap
         let breps = Brep.CreatePipe(rail, parameters, radii, (blendType = 0), cap, fit, abstol, angtol)
-        let rc  = breps |> RArr.mapArr State.Doc.Objects.AddBrep
+        let rc  = breps |> RArr.mapArr (fun b -> State.Doc.Objects.AddBrep(b) |> failIfEmptyGuid "AddPipe")
         State.Doc.Views.Redraw()
         rc
 
@@ -14218,7 +14220,7 @@ type RhinoScriptSyntax private () =
         let breps = Brep.CreatePlanarBreps(new PolylineCurve(polyline), tolerance)
         if notNull breps then
             if breps.Length <> 1 then RhinoScriptingException.Raise "AddPlanarSrf created more then one surface on one input curve, use the seq overload instead on the same function on %s" (Pretty.str polyline)
-            let rc =  State.Doc.Objects.AddBrep(breps.[0])
+            let rc =  State.Doc.Objects.AddBrep(breps.[0]) |> failIfEmptyGuid "AddPlanarSrf"
             State.Doc.Views.Redraw()
             rc
         else
@@ -14232,7 +14234,7 @@ type RhinoScriptSyntax private () =
         let breps = Brep.CreatePlanarBreps(curve, tolerance)
         if notNull breps then
             if breps.Length <> 1 then RhinoScriptingException.Raise "AddPlanarSrf created more then one surface on one input curve, use the seq overload instead on the same function on %s" (Pretty.str curve)
-            let rc =  State.Doc.Objects.AddBrep(breps.[0])
+            let rc =  State.Doc.Objects.AddBrep(breps.[0]) |> failIfEmptyGuid "AddPlanarSrf"
             State.Doc.Views.Redraw()
             rc
         else
@@ -14245,7 +14247,7 @@ type RhinoScriptSyntax private () =
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let breps = Brep.CreatePlanarBreps(curves, tolerance)
         if notNull breps then
-            let rc  = breps |> RArr.mapArr State.Doc.Objects.AddBrep
+            let rc  = breps |> RArr.mapArr (fun b -> State.Doc.Objects.AddBrep(b) |> failIfEmptyGuid "AddPlanarSrf")
             State.Doc.Views.Redraw()
             rc
         else
@@ -14259,7 +14261,7 @@ type RhinoScriptSyntax private () =
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let breps = Brep.CreatePlanarBreps(curves, tolerance)
         if notNull breps then
-            let rc  = breps |> RArr.mapArr State.Doc.Objects.AddBrep
+            let rc  = breps |> RArr.mapArr (fun b -> State.Doc.Objects.AddBrep(b) |> failIfEmptyGuid "AddPlanarSrf")
             State.Doc.Views.Redraw()
             rc
         else
@@ -14365,7 +14367,7 @@ type RhinoScriptSyntax private () =
         if isNull srf then RhinoScriptingException.Raise "AddRevSrf failed. curveId:'%s' axis:'%A' startAngle:'%A' endAngle:'%A'" (Pretty.str curveId) axis startAngle endAngle
         let ns = srf.ToNurbsSurface()
         if isNull ns then RhinoScriptingException.Raise "AddRevSrf failed. curveId:'%s' axis:'%A' startAngle:'%A' endAngle:'%A'" (Pretty.str curveId) axis startAngle endAngle
-        let rc = State.Doc.Objects.AddSurface(ns)
+        let rc = State.Doc.Objects.AddSurface(ns) |> failIfEmptyGuid "AddRevSrf"
         State.Doc.Views.Redraw()
         rc
 
@@ -14511,7 +14513,7 @@ type RhinoScriptSyntax private () =
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let breps = Brep.CreateFromSweep(rail, shapes, closed, tolerance)
         if isNull breps then RhinoScriptingException.Raise "AddSweep1 failed.  rail:'%A' shapes:'%A' closed:'%A'" rail shapes closed
-        let rc  = breps |> RArr.mapArr State.Doc.Objects.AddBrep
+        let rc  = breps |> RArr.mapArr (fun b -> State.Doc.Objects.AddBrep(b) |> failIfEmptyGuid "AddSweep1")
         State.Doc.Views.Redraw()
         rc
 
@@ -14532,7 +14534,7 @@ type RhinoScriptSyntax private () =
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let breps = Brep.CreateFromSweep(rail1, rail2, shapes, closed, tolerance)
         if isNull breps then RhinoScriptingException.Raise "AddSweep2 failed.  rails:'%A' shapes:'%A' closed:'%A'" rails shapes closed
-        let rc  = breps |> RArr.mapArr State.Doc.Objects.AddBrep
+        let rc  = breps |> RArr.mapArr (fun b -> State.Doc.Objects.AddBrep(b) |> failIfEmptyGuid "AddSweep2")
         State.Doc.Views.Redraw()
         rc
 
@@ -14553,7 +14555,7 @@ type RhinoScriptSyntax private () =
         let railinst = RhinoScriptSyntax.CoerceCurve(rail)
         let surface = NurbsSurface.CreateRailRevolvedSurface(profileinst, railinst, axis, scaleHeight)
         if isNull surface then RhinoScriptingException.Raise "AddRailRevSrf failed.  profile:'%A' rail:'%A' axis:'%A' scaleHeight:'%A'" profile rail axis scaleHeight
-        let rc = State.Doc.Objects.AddSurface(surface)
+        let rc = State.Doc.Objects.AddSurface(surface) |> failIfEmptyGuid "AddRailRevSrf"
         State.Doc.Views.Redraw()
         rc
 
@@ -14568,7 +14570,7 @@ type RhinoScriptSyntax private () =
                             minorRadius:float) : Guid =
         let torus = Torus(basis, majorRadius, minorRadius)
         let revsurf = torus.ToRevSurface()
-        let rc = State.Doc.Objects.AddSurface(revsurf)
+        let rc = State.Doc.Objects.AddSurface(revsurf) |> failIfEmptyGuid "AddTorus"
         State.Doc.Views.Redraw()
         rc
 
@@ -14590,7 +14592,7 @@ type RhinoScriptSyntax private () =
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let newbreps = Brep.CreateBooleanDifference(breps0, breps1, tolerance)
         if newbreps|> isNull  then RhinoScriptingException.Raise "BooleanDifference failed.  input0:'%A' input1:'%A' deleteInput:'%A'" input0 input1 deleteInput
-        let rc  = newbreps |> RArr.mapArr State.Doc.Objects.AddBrep
+        let rc  = newbreps |> RArr.mapArr (fun b -> State.Doc.Objects.AddBrep(b) |> failIfEmptyGuid "BooleanDifference")
         if deleteInput then
             for objectId in input0 do State.Doc.Objects.Delete(objectId, true)|> ignore<bool>
             for objectId in input1 do State.Doc.Objects.Delete(objectId, true)|> ignore<bool>
@@ -14614,7 +14616,7 @@ type RhinoScriptSyntax private () =
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let newbreps = Brep.CreateBooleanIntersection(breps0, breps1, tolerance)
         if newbreps|> isNull  then RhinoScriptingException.Raise "BooleanIntersection failed.  input0:'%A' input1:'%A' deleteInput:'%A'" input0 input1 deleteInput
-        let rc  = newbreps |> RArr.mapArr State.Doc.Objects.AddBrep
+        let rc  = newbreps |> RArr.mapArr (fun b -> State.Doc.Objects.AddBrep(b) |> failIfEmptyGuid "BooleanIntersection")
         if deleteInput then
             for objectId in input0 do State.Doc.Objects.Delete(objectId, true)|> ignore<bool>
             for objectId in input1 do State.Doc.Objects.Delete(objectId, true)|> ignore<bool>
@@ -14635,7 +14637,7 @@ type RhinoScriptSyntax private () =
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let newbreps = Brep.CreateBooleanUnion(breps, tolerance)
         if newbreps|> isNull  then RhinoScriptingException.Raise "BooleanUnion failed.  input:'%A' deleteInput:'%A'" input deleteInput
-        let rc  = newbreps |> RArr.mapArr State.Doc.Objects.AddBrep
+        let rc  = newbreps |> RArr.mapArr (fun b -> State.Doc.Objects.AddBrep(b) |> failIfEmptyGuid "BooleanUnion")
         if  deleteInput then
             for objectId in input do State.Doc.Objects.Delete(objectId, true)|> ignore<bool>
         State.Doc.Views.Redraw()
@@ -14739,7 +14741,7 @@ type RhinoScriptSyntax private () =
         let tolerance = State.Doc.ModelAbsoluteTolerance * 2.1
         curves <- Curve.JoinCurves(curves, tolerance)
         if curves|> isNull  then RhinoScriptingException.Raise "DuplicateSurfaceBorder failed.  surfaceId:'%s' type:'%d'" (Pretty.str surfaceId) typ
-        let rc  = curves |> RArr.mapArr State.Doc.Objects.AddCurve
+        let rc  = curves |> RArr.mapArr (fun c -> State.Doc.Objects.AddCurve(c) |> failIfEmptyGuid "DuplicateSurfaceBorder")
         State.Doc.Views.Redraw()
         rc
 
@@ -14858,7 +14860,7 @@ type RhinoScriptSyntax private () =
         for index in faceIndices do
             let face = brep.Faces.[index]
             let newbrep = face.DuplicateFace(true)
-            let objectId = State.Doc.Objects.AddBrep(newbrep)
+            let objectId = State.Doc.Objects.AddBrep(newbrep) |> failIfEmptyGuid "ExtractSurface"
             rc.Add(objectId)
         if copy then
             for index in faceIndices do brep.Faces.RemoveAt(index)
@@ -14927,7 +14929,7 @@ type RhinoScriptSyntax private () =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let newbrep = brep.Faces.[0].CreateExtrusion(curve, cap)
         if notNull newbrep then
-            let rc = State.Doc.Objects.AddBrep(newbrep)
+            let rc = State.Doc.Objects.AddBrep(newbrep) |> failIfEmptyGuid "ExtrudeSurface"
             State.Doc.Views.Redraw()
             rc
         else
@@ -14959,7 +14961,7 @@ type RhinoScriptSyntax private () =
         if isNull surfaces then RhinoScriptingException.Raise "FilletSurfaces failed.  surface0:'%A' surface1:'%A' radius:'%A' uvparam0:'%A' uvparam1:'%A'" surface0 surface1 radius uvparam0 uvparam1
         let rc = ResizeArray()
         for surf in surfaces do
-            rc.Add( State.Doc.Objects.AddSurface(surf))
+            rc.Add( State.Doc.Objects.AddSurface(surf) |> failIfEmptyGuid "FilletSurfaces")
         State.Doc.Views.Redraw()
         rc
 
@@ -15372,7 +15374,7 @@ type RhinoScriptSyntax private () =
             State.Doc.Views.Redraw()
             surfaceId
         else
-            let objectIdn = State.Doc.Objects.AddSurface(newsurf)
+            let objectIdn = State.Doc.Objects.AddSurface(newsurf) |> failIfEmptyGuid "MakeSurfacePeriodic"
             State.Doc.Views.Redraw()
             objectIdn
 
@@ -15421,7 +15423,7 @@ type RhinoScriptSyntax private () =
         let curve = RhinoScriptSyntax.CoerceCurve(curve)
         let tol = State.Doc.ModelAbsoluteTolerance
         let curves = Curve.PullToBrepFace(curve, brep.Faces.[0], tol)
-        let rc  = curves |> RArr.mapArr State.Doc.Objects.AddCurve
+        let rc  = curves |> RArr.mapArr (fun c -> State.Doc.Objects.AddCurve(c) |> failIfEmptyGuid "PullCurve")
         if deleteInput  then
             State.Doc.Objects.Delete(crvobj, true) |> ignore<bool>
         State.Doc.Views.Redraw()
@@ -15559,7 +15561,7 @@ type RhinoScriptSyntax private () =
         if  createCopy then
             let oldobj = State.Doc.Objects.FindId(objectId)
             let attr = oldobj.Attributes
-            let rc = State.Doc.Objects.AddBrep(brep, attr)
+            let rc = State.Doc.Objects.AddBrep(brep, attr) |> failIfEmptyGuid "ShrinkTrimmedSurface"
             State.Doc.Views.Redraw()
             rc
         else
@@ -15586,7 +15588,7 @@ type RhinoScriptSyntax private () =
         if deleteInput then
             //brepId = RhinoScriptSyntax.CoerceGuid(brepId)
             State.Doc.Objects.Delete(brepId, true) |> ignore<bool>
-        let rc  = pieces |> RArr.mapArr State.Doc.Objects.AddBrep
+        let rc  = pieces |> RArr.mapArr (fun b -> State.Doc.Objects.AddBrep(b) |> failIfEmptyGuid "SplitBrep")
         State.Doc.Views.Redraw()
         rc
 
@@ -16210,11 +16212,11 @@ type RhinoScriptSyntax private () =
                     State.Doc.Objects.Replace(objectId, breps.[i]) |> ignore<bool>
                     rc.Add(objectId)
                 else
-                    rc.Add(State.Doc.Objects.AddBrep(breps.[i], attrs))
+                    rc.Add(State.Doc.Objects.AddBrep(breps.[i], attrs) |> failIfEmptyGuid "TrimBrep")
             State.Doc.Views.Redraw()
             rc
         else
-            let rc  = breps |> RArr.mapArr State.Doc.Objects.AddBrep
+            let rc  = breps |> RArr.mapArr (fun b -> State.Doc.Objects.AddBrep(b) |> failIfEmptyGuid "TrimBrep")
             State.Doc.Views.Redraw()
             rc
 
@@ -16238,11 +16240,11 @@ type RhinoScriptSyntax private () =
                     State.Doc.Objects.Replace(objectId, breps.[i]) |> ignore<bool>
                     rc.Add(objectId)
                 else
-                    rc.Add(State.Doc.Objects.AddBrep(breps.[i], attrs))
+                    rc.Add(State.Doc.Objects.AddBrep(breps.[i], attrs) |> failIfEmptyGuid "TrimBrep")
             State.Doc.Views.Redraw()
             rc
         else
-            let rc  = breps |> RArr.mapArr State.Doc.Objects.AddBrep
+            let rc  = breps |> RArr.mapArr (fun b -> State.Doc.Objects.AddBrep(b) |> failIfEmptyGuid "TrimBrep")
             State.Doc.Views.Redraw()
             rc
 
@@ -16262,7 +16264,7 @@ type RhinoScriptSyntax private () =
         u.[1] <-  interval|> snd
         let newsurface = surface.Trim(u, v)
         if notNull newsurface then
-            let rc = State.Doc.Objects.AddSurface(newsurface)
+            let rc = State.Doc.Objects.AddSurface(newsurface) |> failIfEmptyGuid "TrimSurfaceU"
             if deleteInput then  State.Doc.Objects.Delete(surfaceId, true) |> ignore<bool>
             State.Doc.Views.Redraw()
             rc
@@ -16285,7 +16287,7 @@ type RhinoScriptSyntax private () =
         v.[1] <-  interval|> snd
         let newsurface = surface.Trim(u, v)
         if notNull newsurface then
-            let rc = State.Doc.Objects.AddSurface(newsurface)
+            let rc = State.Doc.Objects.AddSurface(newsurface) |> failIfEmptyGuid "TrimSurfaceV"
             if deleteInput then  State.Doc.Objects.Delete(surfaceId, true) |> ignore<bool>
             State.Doc.Views.Redraw()
             rc
@@ -16313,7 +16315,7 @@ type RhinoScriptSyntax private () =
         v.[1]  <- intervalV|> snd
         let newsurface = surface.Trim(u, v)
         if notNull newsurface then
-            let rc = State.Doc.Objects.AddSurface(newsurface)
+            let rc = State.Doc.Objects.AddSurface(newsurface) |> failIfEmptyGuid "TrimSurfaceUV"
             if deleteInput then  State.Doc.Objects.Delete(surfaceId, true) |> ignore<bool>
             State.Doc.Views.Redraw()
             rc
@@ -16356,16 +16358,16 @@ type RhinoScriptSyntax private () =
 
         let breps, curves, points, dots = unroll.PerformUnroll()
         if isNull breps then RhinoScriptingException.Raise "UnrollSurface: failed on  %A" surfaceId
-        let rc  = breps |> RArr.mapArr State.Doc.Objects.AddBrep
+        let rc  = breps |> RArr.mapArr (fun b -> State.Doc.Objects.AddBrep(b) |> failIfEmptyGuid "UnrollSurface")
         let newfollowing = ResizeArray()
         for curve in curves do
-            let objectId = State.Doc.Objects.AddCurve(curve) //TODO verify order is correct ???
+            let objectId = State.Doc.Objects.AddCurve(curve) |> failIfEmptyGuid "UnrollSurface" //TODO verify order is correct ???
             newfollowing.Add(objectId)
         for point in points do
-            let objectId = State.Doc.Objects.AddPoint(point)
+            let objectId = State.Doc.Objects.AddPoint(point) |> failIfEmptyGuid "UnrollSurface"
             newfollowing.Add(objectId)
         for dot in dots do
-            let objectId = State.Doc.Objects.AddTextDot(dot)
+            let objectId = State.Doc.Objects.AddTextDot(dot) |> failIfEmptyGuid "UnrollSurface"
             newfollowing.Add(objectId)
         State.Doc.Views.Redraw()
         rc, newfollowing
@@ -17469,7 +17471,7 @@ type RhinoScriptSyntax private () =
                     let edge = go.Object(i).Edge()
                     if notNull edge then
                         let crv = edge.Duplicate() :?> NurbsCurve
-                        let curveid = State.Doc.Objects.AddCurve(crv)
+                        let curveid = State.Doc.Objects.AddCurve(crv) |> failIfEmptyGuid "GetEdgeCurves"
                         let parentid = go.Object(i).ObjectId
                         let pt = go.Object(i).SelectionPoint()
                         r.Add( (curveid, parentid, pt))

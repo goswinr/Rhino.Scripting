@@ -667,14 +667,14 @@ module AutoOpenMesh =
                     let polylines = mesh.GetOutlines(viewport)
                     if notNull polylines then
                         for polyline in polylines do
-                            let objectId = State.Doc.Objects.AddPolyline(polyline)
+                            let objectId = State.Doc.Objects.AddPolyline(polyline) |> failIfEmptyGuid "MeshOutline"
                             rc.Add(objectId)
         else
             for mesh in meshes do
                 let polylines = mesh.GetOutlines(Plane.WorldXY)
                 if notNull polylines then
                     for polyline in polylines do
-                        let objectId = State.Doc.Objects.AddPolyline(polyline)
+                        let objectId = State.Doc.Objects.AddPolyline(polyline) |> failIfEmptyGuid "MeshOutline"
                         rc.Add(objectId)
         State.Doc.Views.Redraw()
         rc
@@ -720,7 +720,7 @@ module AutoOpenMesh =
         let breps  = pieces |> RArr.mapArr (fun piece -> Brep.CreateFromMesh(piece, trimmedTriangles) )
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let attr = rhobj.Attributes
-        let ids  = breps |> RArr.mapSeq (fun brep -> State.Doc.Objects.AddBrep(brep, attr) )
+        let ids  = breps |> RArr.mapSeq (fun brep -> State.Doc.Objects.AddBrep(brep, attr) |> failIfEmptyGuid "MeshToNurb" )
         if deleteInput then State.Doc.Objects.Delete(rhobj, quiet=true)|> ignore<bool>
         State.Doc.Views.Redraw()
         ids
@@ -886,7 +886,7 @@ module AutoOpenMesh =
     static member SplitDisjointMesh(objectId:Guid, [<OPT;DEF(false)>]deleteInput:bool) : Guid ResizeArray =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let pieces = mesh.SplitDisjointPieces()
-        let rc  = pieces |> RArr.mapArr State.Doc.Objects.AddMesh
+        let rc  = pieces |> RArr.mapArr (fun m -> State.Doc.Objects.AddMesh(m) |> failIfEmptyGuid "SplitDisjointMesh")
         if rc.Count <> 0 && deleteInput then
             //id = RhinoScriptSyntax.CoerceGuid(objectId)
             State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
