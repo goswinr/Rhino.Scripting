@@ -29,9 +29,10 @@ type internal State private () =
 
 
     /// keep the reference to the active Document (3d file) updated.
+    /// The document may be null, e.g. on Mac when the last document is closed.
     static let updateDoc (document:RhinoDoc) =
         doc <- document //Rhino.RhinoDoc.ActiveDoc
-        ot  <- document.Objects //Rhino.RhinoDoc.ActiveDoc.Objects
+        ot  <- if isNull document then null else document.Objects //Rhino.RhinoDoc.ActiveDoc.Objects
         commandSerialNumbers <- None
         escapePressed <- false
 
@@ -70,7 +71,7 @@ type internal State private () =
                 // Adding the first handler to this from async thread causes an Access violation exception that can only be seen with the windows event log.
                 // This handler does not work on Sync evaluation-mode, TODO: test!
                 RhinoApp.EscapeKeyPressed.Add( fun _ ->
-                    if not escapePressed  &&  not <| Input.RhinoGet.InGet(doc) then
+                    if not escapePressed && notNull doc && not <| Input.RhinoGet.InGet(doc) then
                         escapePressed <- true
                     )
                 )
@@ -83,14 +84,25 @@ type internal State private () =
                 eprintfn "%s" txt
 
 
+    /// Runs only once, sets up the event handlers.
     static let initState()=
-        if not Rhino.Runtime.HostUtils.RunningInRhino then
-            RhinoScriptingException.Raise "State.initState Failed to find the active Rhino document, is this dll running hosted inside the Rhino process? "
-        else
-            //RhinoSync.Initialize() // don't do yet, only try to get sync context when actually needed, if on UI thread this might be never.
-            updateDoc(RhinoDoc.ActiveDoc )  // do first
-            setupEventsInSync()             // do after Doc is set up
-            isRunningInRhino <- true        // do last
+        if not isRunningInRhino then
+            if not Rhino.Runtime.HostUtils.RunningInRhino then
+                RhinoScriptingException.Raise "State.initState Failed to find the active Rhino document, is this dll running hosted inside the Rhino process? "
+            else
+                //RhinoSync.Initialize() // don't do yet, only try to get sync context when actually needed, if on UI thread this might be never.
+                updateDoc(RhinoDoc.ActiveDoc )  // do first
+                setupEventsInSync()             // do after Doc is set up
+                isRunningInRhino <- true        // do last
+
+    /// Returns the current document, fails with a clear error if there is none, e.g. on Mac when all documents are closed.
+    static let getDoc() =
+        initState()
+        if isNull doc then
+            updateDoc RhinoDoc.ActiveDoc // in case the ActiveDocumentChanged event was missed
+            if isNull doc then
+                RhinoScriptingException.Raise "State.Doc: There is no active Rhino document. Open or create a document first."
+        doc
 
 
     //----------------------------------------------------------------
@@ -100,19 +112,17 @@ type internal State private () =
     /// The current active Rhino document (= the file currently open)
     static member Doc
         with get()=
-            if isNull doc then initState()
-            doc
+            getDoc()
 
     /// Object Table of the current active Rhino document
     static member Ot
         with get()=
-            if isNull doc then initState()
-            doc.Objects
+            getDoc().Objects
 
     /// Was escape key pressed
     static member EscapePressed
         with get() =
-            if isNull doc then initState()
+            initState()
             escapePressed
         and set v =
             escapePressed <- v
@@ -120,7 +130,7 @@ type internal State private () =
     /// To store last created object from executing a rs.Command(...)
     static member CommandSerialNumbers
         with get() =
-            if isNull doc then initState()
+            initState()
             commandSerialNumbers
         and set v =
             commandSerialNumbers <- v
