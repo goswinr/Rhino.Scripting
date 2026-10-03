@@ -883,26 +883,28 @@ type RhinoScriptSyntax private () =
                 RhinoScriptingException.Raise "CoercePlane failed on: %s " (Pretty.str plane)
 
     /// <summary>Convert input into a Rhino.Geometry.Transform Transformation Matrix if possible.</summary>
-    /// <param name="xForm">object to convert</param>
+    /// <param name="xForm">A Transform, or a 4x4 matrix of floats given row by row as a seq of seq or as a 2D array.
+    ///    Smaller or larger matrices are not accepted.</param>
     /// <returns>(Rhino.Geometry.Transform. Raises a RhinoScriptingException if coerce failed.</returns>
     static member CoerceXform(xForm:'T) : Transform =
         match box xForm with
         | :? Transform  as xForm -> xForm
-        | :? seq<seq<float>>  as xss -> // TODO verify row, column order !!
-                let mutable t= Transform()
-                try
-                    for c, xs in Seq.indexed xss do
-                        for r, x in Seq.indexed xs do
-                            t.[c, r] <- x
-                with
-                    | _ -> RhinoScriptingException.Raise "CoerceXform: seq<seq<float>> %s can not be converted to a Transformation Matrix" (Pretty.str xForm)
+        | :? seq<seq<float>>  as xss ->
+                let rows = xss |> Seq.map Array.ofSeq |> Array.ofSeq
+                if rows.Length <> 4 || rows |> Array.exists (fun r -> r.Length <> 4) then
+                    RhinoScriptingException.Raise "CoerceXform: seq<seq<float>> %s is not a 4x4 matrix, it can not be converted to a Transformation Matrix" (Pretty.str xForm)
+                let mutable t = Transform()
+                for row = 0 to 3 do
+                    for col = 0 to 3 do
+                        t.[row, col] <- rows.[row].[col]
                 t
-        | :? ``[,]``<float>  as xss -> // TODO verify row, column order !!
-                let mutable t= Transform()
-                try
-                    xss|> Array2D.iteri (fun i j x -> t.[i, j]<-x)
-                with
-                    | _ -> RhinoScriptingException.Raise "CoerceXform: Array2D %s can not be converted to a Transformation Matrix" (Pretty.str xForm)
+        | :? ``[,]``<float>  as xss ->
+                if Array2D.length1 xss <> 4 || Array2D.length2 xss <> 4 then
+                    RhinoScriptingException.Raise "CoerceXform: Array2D %s is not a 4x4 matrix, it can not be converted to a Transformation Matrix" (Pretty.str xForm)
+                let mutable t = Transform()
+                for row = 0 to 3 do
+                    for col = 0 to 3 do
+                        t.[row, col] <- xss.[Array2D.base1 xss + row, Array2D.base2 xss + col]
                 t
         | _ -> RhinoScriptingException.Raise "CoerceXform: could not CoerceXform %s can not be converted to a Transformation Matrix" (Pretty.str xForm)
 
