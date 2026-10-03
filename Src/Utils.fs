@@ -110,8 +110,8 @@ module PrettyFormat =
         else
             let  a = abs x
             if   a <  PrettySettings.userZeroTolerance then Literals.BelowUserZeroTolerance // do this check up here, value might be very high
-            elif a >= 10000.          then x.ToString("#")|> addThousandSeparators
-            elif a >= 1000.           then x.ToString("#")
+            elif a >= 10000.          then x.ToString("#", invC)|> addThousandSeparators
+            elif a >= 1000.           then x.ToString("#", invC)
             elif a >= 100.            then x.ToString("#.#" , invC)
             elif a >= 10.             then x.ToString("0.0#" , invC)
             elif a >= 1.              then x.ToString("0.0##" , invC)
@@ -137,8 +137,8 @@ module PrettyFormat =
         else
             let  a = abs x
             if   a <  float32 PrettySettings.userZeroTolerance then Literals.BelowUserZeroTolerance // do this check up here, value might be very high
-            elif a >= 10000.f      then x.ToString("#")|> addThousandSeparators
-            elif a >= 1000.f       then x.ToString("#")
+            elif a >= 10000.f      then x.ToString("#", invC)|> addThousandSeparators
+            elif a >= 1000.f       then x.ToString("#", invC)
             elif a >= 100.f        then x.ToString("#.#" , invC)
             elif a >= 10.f         then x.ToString("0.0#" , invC)
             elif a >= 1.f          then x.ToString("0.0##" , invC)
