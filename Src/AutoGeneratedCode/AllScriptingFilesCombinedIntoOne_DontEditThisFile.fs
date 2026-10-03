@@ -67,7 +67,9 @@ type RhinoScriptSyntax private () =
         max minVal (min maxVal value)
 
     /// <summary>Like the Python 'xrange' function for integers, this creates a range of floating point values.
-    /// The last or stop value will NOT be included in the range as per Python semantics; this is different from F# semantics on range expressions.</summary>
+    /// The last or stop value will NOT be included in the range as per Python semantics; this is different from F# semantics on range expressions.
+    /// Like in Python the range is empty if the stop value cannot be reached, e.g. if start equals stop or if the step has the wrong sign.
+    /// A step of zero raises an exception.</summary>
     /// <param name="start">(float) The first value of the range.</param>
     /// <param name="stop">(float) The end of the range. The last value will not be included in the range (Python semantics).</param>
     /// <param name="step">(float) The step size between two values.</param>
@@ -84,7 +86,7 @@ type RhinoScriptSyntax private () =
         if isNanOrInf steps then RhinoScriptingException.Raise "FxrangePython range/step in frange: %f / %f is NaN Infinity, start=%f, stop=%f" range step start stop
 
         if steps < 0.0 then
-            RhinoScriptingException.Raise "FxrangePython: Stop value cannot be reached: start=%f, step=%f, stop=%f (steps:%f)" start step stop steps //or Seq.empty
+            Seq.empty // Stop value cannot be reached, as in Python
         else
             // the actual algorithm:
             let rec floatRange (start, i, steps) =
@@ -94,7 +96,9 @@ type RhinoScriptSyntax private () =
             floatRange (start, 0.0, steps)
 
     /// <summary>Like the Python 'range' function for integers, this creates a range of floating point values.
-    /// The last or stop value will NOT be included in the range as per Python semantics; this is different from F# semantics on range expressions.</summary>
+    /// The last or stop value will NOT be included in the range as per Python semantics; this is different from F# semantics on range expressions.
+    /// Like in Python the range is empty if the stop value cannot be reached, e.g. if start equals stop or if the step has the wrong sign.
+    /// A step of zero raises an exception.</summary>
     /// <param name="start">(float) The first value of the range.</param>
     /// <param name="stop">(float) The end of the range. The last value will not be included in the range (Python semantics).</param>
     /// <param name="step">(float) The step size between two values.</param>
