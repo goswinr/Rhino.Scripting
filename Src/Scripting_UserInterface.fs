@@ -461,23 +461,31 @@ module AutoOpenUserInterface =
 
     /// <summary>Displays a dialog box prompting the user to select one line-type.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</summary>
-    /// <param name="defaultValLinetype">(string) Optional, Optional. The name of the line-type to select. If omitted, the current line-type will be selected</param>
+    /// <param name="defaultValLinetype">(string) Optional. The name of the line-type to pre-select. If omitted or not found, the current line-type will be pre-selected.
+    ///    Pre-selecting is only supported in Rhino 8 and higher, it is ignored in Rhino 7.</param>
     /// <returns>(string) The names of selected line-type.</returns>
     static member GetLinetype(  [<OPT;DEF(null:string)>]defaultValLinetype:string) : string =
         // the original python script has an unused parameter showByLayer
         //<param name="showByLayer">(bool) Optional, default value: <c>false</c> If True, the "by Layer" line-type will show. Defaults to False</param>
         let getKeepEditor () =
-            let mutable ltinstance = State.Doc.Linetypes.CurrentLinetype
-            if notNull defaultValLinetype then
-                let ltnew = State.Doc.Linetypes.FindName(defaultValLinetype)
-                if notNull ltnew  then ltinstance <- ltnew
-            try
-                let objectId = UI.Dialogs.ShowLineTypes("Select Linetype", "Select Linetype", State.Doc) :?> Guid  // this fails if clicking in void
-                // https://github.com/mcneel/rhinoscriptsyntax/pull/211/files
-                let linetype = State.Doc.Linetypes.FindId(objectId)
-                linetype.Name
-            with _ ->
+            #if RH7
+            ignore defaultValLinetype // Rhino 7 has no overload to pre-select a line-type
+            let objectId =
+                match UI.Dialogs.ShowLineTypes("Select Linetype", "Select Linetype", State.Doc) with
+                | :? Guid as g -> g
+                | _ -> Guid.Empty // null when cancelled or when clicking in void
+            #else
+            let preselect =
+                if isNull defaultValLinetype then State.Doc.Linetypes.CurrentLinetype
+                else State.Doc.Linetypes.FindName(defaultValLinetype) |? State.Doc.Linetypes.CurrentLinetype
+            let objectId = UI.Dialogs.ShowLineTypes("Select Linetype", "Select Linetype", State.Doc, preselect.Id)
+            #endif
+            // https://github.com/mcneel/rhinoscriptsyntax/pull/211/files
+            if objectId = Guid.Empty then
                 RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetLinetype()"
+            let linetype = State.Doc.Linetypes.FindId(objectId)
+            if isNull linetype then RhinoScriptingException.Raise "GetLinetype: Line-type with Id %O not found." objectId
+            linetype.Name
         RhinoSync.DoSync getKeepEditor
 
 
