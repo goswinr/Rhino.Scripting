@@ -159,10 +159,13 @@ module internal PrettySetup =
                     // these below fail if not running inside rhino.exe
                     // scripts that reference Rhino.Scripting from outside of rhino is still Ok , but all function that call the C++ API don't work
                     // but accessing the current Doc obviously does not work.
-                    PrettySettings.userZeroTolerance                                              <- State.Doc.ModelAbsoluteTolerance  * 0.01 // so that any float smaller than State.Doc.ModelAbsoluteTolerance wil be shown as 0.0
-                    RhinoApp.AppSettingsChanged.Add    (fun _ -> PrettySettings.userZeroTolerance <- State.Doc.ModelAbsoluteTolerance  * 0.01 )
-                    RhinoDoc.ActiveDocumentChanged.Add (fun a -> PrettySettings.userZeroTolerance <- a.Document.ModelAbsoluteTolerance * 0.01 )
-                    RhinoDoc.EndOpenDocument.Add       (fun a -> PrettySettings.userZeroTolerance <- a.Document.ModelAbsoluteTolerance * 0.01 )
+                    // so that any float smaller than the documents ModelAbsoluteTolerance wil be shown as 0.0
+                    // the document may be null, e.g. on Mac when all documents are closed:
+                    let setTolerance (d:RhinoDoc) = if notNull d then PrettySettings.userZeroTolerance <- d.ModelAbsoluteTolerance * 0.01
+                    setTolerance RhinoDoc.ActiveDoc
+                    RhinoApp.AppSettingsChanged.Add    (fun _ -> setTolerance RhinoDoc.ActiveDoc )
+                    RhinoDoc.ActiveDocumentChanged.Add (fun a -> setTolerance a.Document )
+                    RhinoDoc.EndOpenDocument.Add       (fun a -> setTolerance a.Document )
             with e ->
                 // try to log errors to error stream:
                 eprintfn "Initializing Pretty pretty printing in Rhino.PrettySetup.init() via Rhino.Scripting.dll failed with:%s%A" Environment.NewLine e
