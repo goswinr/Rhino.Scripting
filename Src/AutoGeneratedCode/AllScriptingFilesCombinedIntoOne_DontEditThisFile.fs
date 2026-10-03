@@ -933,7 +933,8 @@ type RhinoScriptSyntax private () =
 
 
     /// <summary>Attempt to get a System.Drawing.Color also works on natural language color strings see Drawing.ColorTranslator.FromHtml.</summary>
-    /// <param name="color">string, tuple with  or 3 or 4 items</param>
+    /// <param name="color">string, Drawing.Color, (red, green, blue) tuple or (red, green, blue, alpha) tuple of integers from 0 to 255.
+    ///    Like in RhinoPython, alpha is the last item of the 4-tuple, not the first one as in Drawing.Color.FromArgb.</param>
     /// <returns>System.Drawing.Color in ARGB form (not as named color) this will provide better comparison to other colors.
     /// For example the named color Red is not equal to fromRGB(255, 0, 0). Raises a RhinoScriptingException if coerce failed.</returns>
     static member CoerceColor(color:'T) : Drawing.Color =
@@ -941,17 +942,17 @@ type RhinoScriptSyntax private () =
         | :? Drawing.Color  as c -> Drawing.Color.FromArgb(int c.A, int c.R, int c.G, int c.B) //https://stackoverflow.com/questions/20994753/compare-two-color-objects
         | :? (int*int*int) as rgb       ->
             let red , green, blue   = rgb
-            if red  <0 || red  >255 then RhinoScriptingException.Raise "CoerceColor: cannot create color form red %d, blue %d and green %d" red green blue
-            if green<0 || green>255 then RhinoScriptingException.Raise "CoerceColor: cannot create color form red %d, blue %d and green %d" red green blue
-            if blue <0 || blue >255 then RhinoScriptingException.Raise "CoerceColor: cannot create color form red %d, blue %d and green %d" red green blue
+            if red  <0 || red  >255 then RhinoScriptingException.Raise "CoerceColor: cannot create color from red %d, green %d and blue %d" red green blue
+            if green<0 || green>255 then RhinoScriptingException.Raise "CoerceColor: cannot create color from red %d, green %d and blue %d" red green blue
+            if blue <0 || blue >255 then RhinoScriptingException.Raise "CoerceColor: cannot create color from red %d, green %d and blue %d" red green blue
             Drawing.Color.FromArgb( red, green, blue)
 
-        | :? (int*int*int*int) as argb  ->
-            let alpha, red , green, blue   = argb
-            if red  <0 || red  >255 then RhinoScriptingException.Raise "CoerceColor: cannot create color form red %d, blue %d and green  %d alpha %d" red green blue alpha
-            if green<0 || green>255 then RhinoScriptingException.Raise "CoerceColor: cannot create color form red %d, blue %d and green  %d alpha %d" red green blue alpha
-            if blue <0 || blue >255 then RhinoScriptingException.Raise "CoerceColor: cannot create color form red %d, blue %d and green  %d alpha %d" red green blue alpha
-            if alpha<0 || alpha >255 then RhinoScriptingException.Raise "CoerceColor: cannot create color form red %d, blue %d and green %d alpha %d" red green blue alpha
+        | :? (int*int*int*int) as rgba  -> // alpha last, like in RhinoPython
+            let red , green, blue, alpha   = rgba
+            if red  <0 || red  >255 then RhinoScriptingException.Raise "CoerceColor: cannot create color from red %d, green %d, blue %d and alpha %d" red green blue alpha
+            if green<0 || green>255 then RhinoScriptingException.Raise "CoerceColor: cannot create color from red %d, green %d, blue %d and alpha %d" red green blue alpha
+            if blue <0 || blue >255 then RhinoScriptingException.Raise "CoerceColor: cannot create color from red %d, green %d, blue %d and alpha %d" red green blue alpha
+            if alpha<0 || alpha>255 then RhinoScriptingException.Raise "CoerceColor: cannot create color from red %d, green %d, blue %d and alpha %d" red green blue alpha
             Drawing.Color.FromArgb(alpha, red, green, blue)
         | :? string  as s ->
             try
