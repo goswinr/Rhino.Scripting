@@ -19,10 +19,20 @@ module internal VersionInfo =
 open VersionInfo
 
 /// Rhino.Scripting Exception for Errors in script execution
-type RhinoScriptingException (s:string) =
-    inherit Exception(s)
+type RhinoScriptingException =
+    inherit Exception
+
+    new (s:string) = { inherit Exception(s) }
+
+    /// Keeps the original exception as InnerException, including its stack trace.
+    new (s:string, inner:exn) = { inherit Exception(s, inner) }
+
     static member Raise msg =
         Printf.kprintf (fun s -> raise (new RhinoScriptingException $"RhinoScriptSyntax.{s}\n{versionInfo.Value}")) msg
+
+    /// Like Raise, but keeps the given exception as InnerException.
+    static member RaiseWith (inner:exn) msg =
+        Printf.kprintf (fun s -> raise (new RhinoScriptingException($"RhinoScriptSyntax.{s}\n{versionInfo.Value}", inner))) msg
 
     static member FailIfFalse s b =
         if not b then raise (new RhinoScriptingException $"RhinoScriptSyntax.{s}\n{versionInfo.Value}")

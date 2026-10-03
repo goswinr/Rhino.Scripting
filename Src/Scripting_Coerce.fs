@@ -613,8 +613,8 @@ module AutoOpenCoerce =
                         let ys = s.Split(',')
                         Point3d(parseFloatEnDe(Seq.item 0 ys), parseFloatEnDe(Seq.item 1 ys), parseFloatEnDe(Seq.item 2 ys))
                 |_ -> RhinoScriptingException.Raise "Coerce3dPoint failed on: %s " (Pretty.str pt)
-            with _ ->
-                RhinoScriptingException.Raise "Coerce3dPoint failed on: %s " (Pretty.str pt)
+            with e ->
+                RhinoScriptingException.RaiseWith e "Coerce3dPoint failed on: %s " (Pretty.str pt)
 
     /// <summary>Attempt to get Rhino Point Object.</summary>
     /// <param name="objectId">(Guid) objectId of Point object</param>
@@ -667,8 +667,8 @@ module AutoOpenCoerce =
                         let ys = s.Split(',')
                         Vector3d(parseFloatEnDe(Seq.item 0 ys), parseFloatEnDe(Seq.item 1 ys), parseFloatEnDe(Seq.item 2 ys))
                 |_ -> RhinoScriptingException.Raise "Coerce3dVector failed on: %s " (Pretty.str vec)
-            with _ ->
-                RhinoScriptingException.Raise "Coerce3dVector failed on: %s " (Pretty.str vec)
+            with e ->
+                RhinoScriptingException.RaiseWith e "Coerce3dVector failed on: %s " (Pretty.str vec)
 
 
 
