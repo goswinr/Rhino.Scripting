@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- RhinoScriptingException constructor with inner exception, and RhinoScriptingException.RaiseWith
+### Changed
+- Breaking: CoerceColor reads a tuple of 4 integers as (red, green, blue, alpha), like in RhinoPython. It was (alpha, red, green, blue) before
+- Add, AddPoints and AddLeader raise an exception if adding to the document fails, instead of returning Guid.Empty
+- CoerceXform only accepts a 4x4 matrix
+- FxrangePython and FrangePython return an empty range if the stop value cannot be reached, like in Python
+- Without the Fesh editor, RhinoSync always uses Eto.Forms.Application.Instance.Invoke to get to the UI thread
+### Fixed
+- TryCoerce functions never throw an exception, they return None on empty or unknown Guids
+- GetLinetype pre-selects the defaultValLinetype (Rhino 8 only)
+- RhinoSync.DoSyncRedraw and DoSyncRedrawHideEditor restore redraw and the Fesh editor even if an exception is raised
+- Clear error message if there is no active Rhino document (e.g. on Mac), event handlers are not added repeatedly anymore
+- Thread safe initialization of RhinoSync
+- Pretty printing of numbers above 1000 uses the invariant culture
+- Build fails if combineIntoOneFile.fsx does not include all Scripting_*.fs files
 
 ## [0.14.0] - 2026-04-06
 ### Fixed
