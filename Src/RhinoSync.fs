@@ -74,61 +74,61 @@ type RhinoSync private () =
                 eprintfn "%s" s
             )  msg
 
+    [<VolatileField>]
     static let mutable initIsPending = true
 
+    static let initLock = obj()
+
     //only called when actually needed in DoSync methods below.
+    // Thread safe, initIsPending is only set to false once all fields are set up.
     static let initSync() =
-        initIsPending <- false
-        if isNull feshRhAssembly then
-            // it s ok to log errors here since we check 'if notNull feshRh then'
-            try
-                // some reflection hacks because Rhinocommon does not expose a UI sync context
-                // https://discourse.mcneel.com/t/use-rhino-ui-dialogs-from-worker-threads/90130/7
-                let feshId = Guid "01dab273-99ae-4760-8695-3f29f4887831" // the GUID of Fesh.Rhino Plugin set in it's AssemblyInfo.fs see https://github.com/goswinr/Fesh.Rhino/blob/main/Src/AssemblyInfo.fs#L15
-                let feshRh = Rhino.PlugIns.PlugIn.Find feshId
-                if notNull feshRh then
-                    feshRhAssembly <- feshRh.Assembly
-                    feshRhinoSyncModule <- feshRhAssembly.GetType "Fesh.Rhino.Sync"
-            with e ->
-                log "Rhino.Scripting.dll could not get feshRhinoSyncModule from Fesh Assembly via Reflection: %A" e
+        lock initLock (fun () ->
+            if isNull feshRhAssembly then
+                // it s ok to log errors here since we check 'if notNull feshRh then'
+                try
+                    // some reflection hacks because Rhinocommon does not expose a UI sync context
+                    // https://discourse.mcneel.com/t/use-rhino-ui-dialogs-from-worker-threads/90130/7
+                    let feshId = Guid "01dab273-99ae-4760-8695-3f29f4887831" // the GUID of Fesh.Rhino Plugin set in it's AssemblyInfo.fs see https://github.com/goswinr/Fesh.Rhino/blob/main/Src/AssemblyInfo.fs#L15
+                    let feshRh = Rhino.PlugIns.PlugIn.Find feshId
+                    if notNull feshRh then
+                        feshRhAssembly <- feshRh.Assembly
+                        feshRhinoSyncModule <- feshRhAssembly.GetType "Fesh.Rhino.Sync"
+                with e ->
+                    log "Rhino.Scripting.dll could not get feshRhinoSyncModule from Fesh Assembly via Reflection: %A" e
 
-        if notNull feshRhinoSyncModule then
-            // it s ok to log errors here since feshRhinoSyncModule is not null and we expect to find those all:
-            try hideEditor <- feshRhinoSyncModule.GetProperty("hideEditor").GetValue(feshRhAssembly) :?> Action
-            with e -> log "Rhino.Scripting.dll: loading Fesh.Rhino.Sync.hideEditor via reflection failed with: %O" e
+            if notNull feshRhinoSyncModule then
+                // it s ok to log errors here since feshRhinoSyncModule is not null and we expect to find those all:
+                try hideEditor <- feshRhinoSyncModule.GetProperty("hideEditor").GetValue(feshRhAssembly) :?> Action
+                with e -> log "Rhino.Scripting.dll: loading Fesh.Rhino.Sync.hideEditor via reflection failed with: %O" e
 
-            try showEditor <- feshRhinoSyncModule.GetProperty("showEditor").GetValue(feshRhAssembly) :?> Action
-            with e -> log "Rhino.Scripting.dll: loading Fesh.Rhino.Sync.showEditor via reflection failed with: %O" e
+                try showEditor <- feshRhinoSyncModule.GetProperty("showEditor").GetValue(feshRhAssembly) :?> Action
+                with e -> log "Rhino.Scripting.dll: loading Fesh.Rhino.Sync.showEditor via reflection failed with: %O" e
 
-            try isEditorVisible <- feshRhinoSyncModule.GetProperty("isEditorVisible").GetValue(feshRhAssembly) :?> Func<bool>
-            with e -> log "Rhino.Scripting.dll: loading Fesh.Rhino.Sync.isEditorVisible via reflection failed with: %O" e
+                try isEditorVisible <- feshRhinoSyncModule.GetProperty("isEditorVisible").GetValue(feshRhAssembly) :?> Func<bool>
+                with e -> log "Rhino.Scripting.dll: loading Fesh.Rhino.Sync.isEditorVisible via reflection failed with: %O" e
 
-            try syncContext <- feshRhinoSyncModule.GetProperty("syncContext").GetValue(feshRhAssembly) :?> Threading.SynchronizationContext
-            with e -> log "Rhino.Scripting.dll: loading Fesh.Rhino.Sync.syncContext via reflection failed with: %O" e
+                try syncContext <- feshRhinoSyncModule.GetProperty("syncContext").GetValue(feshRhAssembly) :?> Threading.SynchronizationContext
+                with e -> log "Rhino.Scripting.dll: loading Fesh.Rhino.Sync.syncContext via reflection failed with: %O" e
 
-            try printFeshLogColor <- feshRhinoSyncModule.GetProperty("printFeshLogColor").GetValue(feshRhAssembly) :?> Action<int,int,int,string>
-            with e -> log "Rhino.Scripting.dll: loading Fesh.Rhino.Sync.printFeshLogColor via reflection failed with: %O" e
+                try printFeshLogColor <- feshRhinoSyncModule.GetProperty("printFeshLogColor").GetValue(feshRhAssembly) :?> Action<int,int,int,string>
+                with e -> log "Rhino.Scripting.dll: loading Fesh.Rhino.Sync.printFeshLogColor via reflection failed with: %O" e
 
-            try printnFeshLogColor <- feshRhinoSyncModule.GetProperty("printnFeshLogColor").GetValue(feshRhAssembly) :?> Action<int,int,int,string>
-            with e -> log "Rhino.Scripting.dll: loading Fesh.Rhino.Sync.printnFeshLogColor via reflection failed with: %O" e
+                try printnFeshLogColor <- feshRhinoSyncModule.GetProperty("printnFeshLogColor").GetValue(feshRhAssembly) :?> Action<int,int,int,string>
+                with e -> log "Rhino.Scripting.dll: loading Fesh.Rhino.Sync.printnFeshLogColor via reflection failed with: %O" e
 
-            try clearFeshLog <- feshRhinoSyncModule.GetProperty("clearFeshLog").GetValue(feshRhAssembly) :?> Action
-            with e -> log "Rhino.Scripting.dll: loading Fesh.Rhino.Sync.clearFeshLog via reflection failed with: %O" e
+                try clearFeshLog <- feshRhinoSyncModule.GetProperty("clearFeshLog").GetValue(feshRhAssembly) :?> Action
+                with e -> log "Rhino.Scripting.dll: loading Fesh.Rhino.Sync.clearFeshLog via reflection failed with: %O" e
 
-        else
-            // Fesh syncContext not found via reflection,
-            // The code is not used from within Fesh.Rhino plugin
-            // let just use AsyncInvoke from Eto.Forms.Application
-            // https://pages.picoe.ca/docs/api/html/M_Eto_Forms_Application_AsyncInvoke.htm#!
-            syncContext <- Threading.SynchronizationContext.Current
-
-            //
-            // // try to get just the sync context from Windows form ( that works on Mac.Mono) (WPF is not anymore referenced by this project)
-            // try
-            //     RhinoApp.InvokeOnUiThread(new RunOnUiDelegate(fun () -> syncContext <- Windows.Forms.WindowsFormsSynchronizationContext.Current ))
-            // with e ->
-            //     // TODO better not log anything here ??
-            //     log "Rhino.Scripting.dll: Fesh.Rhino.Sync.syncContext failed to init via Windows.Forms.WindowsFormsSynchronizationContext: %O" e
+            else
+                // Fesh syncContext not found via reflection,
+                // The code is not used from within Fesh.Rhino plugin.
+                // Don't use Threading.SynchronizationContext.Current here, this function is usually called from a worker thread,
+                // so that would be the worker thread's context (or null), not the one of the UI thread.
+                // Leave syncContext as it is (null, or set via the public RhinoSync.SyncContext property),
+                // so that Eto.Forms.Application.Instance.Invoke is used in DoSync.
+                ()
+            initIsPending <- false
+            )
 
 
     static let initialize = // Don't rename !!!invoked via reflection from Fesh.Rhino.
