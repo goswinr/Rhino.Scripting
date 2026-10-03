@@ -25,7 +25,7 @@ jobs:
         Set-Content -Path README.md -Value $content    
 
     - name: Run combineIntoOneFile.fsx
-      # to avoid race condition in dotnet build where both net48 and net7 invoke combineIntoOneFile.fsx and try writing to AllScriptingFilesCombinedIntoOne_DontEditThisFile.fs
+      # to avoid race condition in dotnet build where both net48 and net8 invoke combineIntoOneFile.fsx and try writing to AllScriptingFilesCombinedIntoOne_DontEditThisFile.fs
       # invoke it here first to ensure the file is there.
       # Then during the build combineIntoOneFile.fsx is still invoked via the fsproj  but will not write the file anymore since the content has not changed.
       run: |
