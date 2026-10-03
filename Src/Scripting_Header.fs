@@ -141,22 +141,25 @@ type RhinoScriptSyntax private () =
                     State.Doc.Layers.[layerIndex].IsExpanded <- false
                 a
 
-        match box geo with
-        | :? GeometryBase as g ->  State.Doc.Objects.Add(g,attr)
-        // now the structs:
-        | :? Point3d     as pt->   State.Doc.Objects.AddPoint(pt,attr)
-        | :? Point3f     as pt->   State.Doc.Objects.AddPoint(pt,attr)
-        | :? Line        as ln->   State.Doc.Objects.AddLine(ln,attr)
-        | :? Arc         as a->    State.Doc.Objects.AddArc(a,attr)
-        | :? Circle      as c->   State.Doc.Objects.AddCircle(c,attr)
-        | :? Ellipse     as e->    State.Doc.Objects.AddEllipse(e,attr)
-        | :? Polyline    as pl ->  State.Doc.Objects.AddPolyline(pl,attr)
-        | :? Box         as b ->   State.Doc.Objects.AddBox(b,attr)
-        | :? BoundingBox as b ->   State.Doc.Objects.AddBox(Box(b),attr)
-        | :? Sphere      as b ->   State.Doc.Objects.AddSphere(b,attr)
-        | :? Cylinder    as cl ->  State.Doc.Objects.AddSurface (cl.ToNurbsSurface(),attr)
-        | :? Cone        as c ->   State.Doc.Objects.AddSurface (c.ToNurbsSurface(),attr)
-        | _ -> RhinoScriptingException.Raise $"RhinoScriptSyntax.Add: object of type {geo.GetType().FullName} not implemented yet"
+        let id =
+            match box geo with
+            | :? GeometryBase as g ->  State.Doc.Objects.Add(g,attr)
+            // now the structs:
+            | :? Point3d     as pt->   State.Doc.Objects.AddPoint(pt,attr)
+            | :? Point3f     as pt->   State.Doc.Objects.AddPoint(pt,attr)
+            | :? Line        as ln->   State.Doc.Objects.AddLine(ln,attr)
+            | :? Arc         as a->    State.Doc.Objects.AddArc(a,attr)
+            | :? Circle      as c->   State.Doc.Objects.AddCircle(c,attr)
+            | :? Ellipse     as e->    State.Doc.Objects.AddEllipse(e,attr)
+            | :? Polyline    as pl ->  State.Doc.Objects.AddPolyline(pl,attr)
+            | :? Box         as b ->   State.Doc.Objects.AddBox(b,attr)
+            | :? BoundingBox as b ->   State.Doc.Objects.AddBox(Box(b),attr)
+            | :? Sphere      as b ->   State.Doc.Objects.AddSphere(b,attr)
+            | :? Cylinder    as cl ->  State.Doc.Objects.AddSurface (cl.ToNurbsSurface(),attr)
+            | :? Cone        as c ->   State.Doc.Objects.AddSurface (c.ToNurbsSurface(),attr)
+            | _ -> RhinoScriptingException.Raise $"RhinoScriptSyntax.Add: object of type {geo.GetType().FullName} not implemented yet"
+        if id = Guid.Empty then RhinoScriptingException.Raise "Add: Unable to add object to document. geo:'%A' layerIndex:'%A'" geo layerIndex
+        id
 
     /// <summary>Adds any geometry object (struct or class) to the Rhino document.
     /// Works not only on any subclass of GeometryBase but also on Point3d, Line, Arc, and similar structs.</summary>

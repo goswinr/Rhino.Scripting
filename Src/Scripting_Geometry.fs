@@ -121,7 +121,11 @@ module AutoOpenGeometry =
     /// <param name="points">(Point3d seq) List of points</param>
     /// <returns>(Guid ResizeArray) List of identifiers of the new objects.</returns>
     static member AddPoints(points:Point3d seq) : Guid ResizeArray =
-        let rc = points |> RArr.mapSeq State.Doc.Objects.AddPoint
+        let rc =
+            points |> RArr.mapSeq (fun p ->
+                let g = State.Doc.Objects.AddPoint(p)
+                if g = Guid.Empty then RhinoScriptingException.Raise "AddPoints: Unable to add point to document. point:'%A'" p
+                g)
         State.Doc.Views.Redraw()
         rc
 

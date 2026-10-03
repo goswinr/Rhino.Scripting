@@ -141,22 +141,25 @@ type RhinoScriptSyntax private () =
                     State.Doc.Layers.[layerIndex].IsExpanded <- false
                 a
 
-        match box geo with
-        | :? GeometryBase as g ->  State.Doc.Objects.Add(g,attr)
-        // now the structs:
-        | :? Point3d     as pt->   State.Doc.Objects.AddPoint(pt,attr)
-        | :? Point3f     as pt->   State.Doc.Objects.AddPoint(pt,attr)
-        | :? Line        as ln->   State.Doc.Objects.AddLine(ln,attr)
-        | :? Arc         as a->    State.Doc.Objects.AddArc(a,attr)
-        | :? Circle      as c->   State.Doc.Objects.AddCircle(c,attr)
-        | :? Ellipse     as e->    State.Doc.Objects.AddEllipse(e,attr)
-        | :? Polyline    as pl ->  State.Doc.Objects.AddPolyline(pl,attr)
-        | :? Box         as b ->   State.Doc.Objects.AddBox(b,attr)
-        | :? BoundingBox as b ->   State.Doc.Objects.AddBox(Box(b),attr)
-        | :? Sphere      as b ->   State.Doc.Objects.AddSphere(b,attr)
-        | :? Cylinder    as cl ->  State.Doc.Objects.AddSurface (cl.ToNurbsSurface(),attr)
-        | :? Cone        as c ->   State.Doc.Objects.AddSurface (c.ToNurbsSurface(),attr)
-        | _ -> RhinoScriptingException.Raise $"RhinoScriptSyntax.Add: object of type {geo.GetType().FullName} not implemented yet"
+        let id =
+            match box geo with
+            | :? GeometryBase as g ->  State.Doc.Objects.Add(g,attr)
+            // now the structs:
+            | :? Point3d     as pt->   State.Doc.Objects.AddPoint(pt,attr)
+            | :? Point3f     as pt->   State.Doc.Objects.AddPoint(pt,attr)
+            | :? Line        as ln->   State.Doc.Objects.AddLine(ln,attr)
+            | :? Arc         as a->    State.Doc.Objects.AddArc(a,attr)
+            | :? Circle      as c->   State.Doc.Objects.AddCircle(c,attr)
+            | :? Ellipse     as e->    State.Doc.Objects.AddEllipse(e,attr)
+            | :? Polyline    as pl ->  State.Doc.Objects.AddPolyline(pl,attr)
+            | :? Box         as b ->   State.Doc.Objects.AddBox(b,attr)
+            | :? BoundingBox as b ->   State.Doc.Objects.AddBox(Box(b),attr)
+            | :? Sphere      as b ->   State.Doc.Objects.AddSphere(b,attr)
+            | :? Cylinder    as cl ->  State.Doc.Objects.AddSurface (cl.ToNurbsSurface(),attr)
+            | :? Cone        as c ->   State.Doc.Objects.AddSurface (c.ToNurbsSurface(),attr)
+            | _ -> RhinoScriptingException.Raise $"RhinoScriptSyntax.Add: object of type {geo.GetType().FullName} not implemented yet"
+        if id = Guid.Empty then RhinoScriptingException.Raise "Add: Unable to add object to document. geo:'%A' layerIndex:'%A'" geo layerIndex
+        id
 
     /// <summary>Adds any geometry object (struct or class) to the Rhino document.
     /// Works not only on any subclass of GeometryBase but also on Point3d, Line, Arc, and similar structs.</summary>
@@ -5679,7 +5682,9 @@ type RhinoScriptSyntax private () =
             let cprc, s, t = plane0.ClosestParameter( point )
             if not cprc then  RhinoScriptingException.Raise "AddLeader failed.  points %A, text:%s, plane %A" points text plane
             points2d.Add( Rhino.Geometry.Point2d(s, t))
-        State.Doc.Objects.AddLeader(text, plane0, points2d)
+        let rc = State.Doc.Objects.AddLeader(text, plane0, points2d)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "AddLeader: Unable to add leader to document. points:'%A' text:'%A' plane:'%A'" points text plane0
+        rc
 
 
     /// <summary>Adds a linear dimension to the document.</summary>
@@ -7134,7 +7139,11 @@ type RhinoScriptSyntax private () =
     /// <param name="points">(Point3d seq) List of points</param>
     /// <returns>(Guid ResizeArray) List of identifiers of the new objects.</returns>
     static member AddPoints(points:Point3d seq) : Guid ResizeArray =
-        let rc = points |> RArr.mapSeq State.Doc.Objects.AddPoint
+        let rc =
+            points |> RArr.mapSeq (fun p ->
+                let g = State.Doc.Objects.AddPoint(p)
+                if g = Guid.Empty then RhinoScriptingException.Raise "AddPoints: Unable to add point to document. point:'%A'" p
+                g)
         State.Doc.Views.Redraw()
         rc
 
