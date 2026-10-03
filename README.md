@@ -211,15 +211,16 @@ These are implemented with 3 overloads and `Optional` and `DefaultParameterValue
 [goswinr.github.io/Rhino.Scripting](https://goswinr.github.io/Rhino.Scripting/reference/rhino-scripting-rhinoscriptsyntax.html)
 
 ## .NET Framework or .NET Core?
-On Rhino 8.19 or higher, you can use .NET 7.0 and .NET Framework 4.8.<br>
-For Rhino 7 and lower versions of Rhino 8, only .NET Framework 4.8 is recommended.<br>
+The NuGet package contains a build for .NET 8.0 and one for .NET Framework 4.8.<br>
+The .NET 8.0 build can only be loaded when Rhino 8 runs on the .NET 8 runtime (see the Rhino command `SetDotNetRuntime`).<br>
+For Rhino 7, and for Rhino 8 running on .NET 7 or .NET Framework, use the .NET Framework 4.8 build.<br>
 
 ## Windows or Mac?
 This library should work on Rhino for Mac just as well as on Windows.<br>
 
 
 ## Build from source
-To build this library from source you need the .NET SDK 7 or higher installed<br>
+To build this library from source you need the .NET SDK 8 or higher installed<br>
 Then just run in the root folder:
 ```bash
 dotnet build ForPublishing.fsproj
