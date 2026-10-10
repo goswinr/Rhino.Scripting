@@ -125,6 +125,7 @@ type internal State private () =
             initState()
             escapePressed
         and set v =
+            initState() // otherwise a later first initState would reset the value
             escapePressed <- v
 
     /// To store last created object from executing a rs.Command(...)
@@ -133,6 +134,7 @@ type internal State private () =
             initState()
             commandSerialNumbers
         and set v =
+            initState() // otherwise a later first initState would reset the value
             commandSerialNumbers <- v
 
 

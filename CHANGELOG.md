@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Thread safe initialization of RhinoSync
 - Pretty printing of numbers above 1000 uses the invariant culture
 - Build fails if combineIntoOneFile.fsx does not include all Scripting_*.fs files
+- LastCreatedObjects returns the created objects even if Command was the first call to Rhino.Scripting
 
 ## [0.14.0] - 2026-04-06
 ### Fixed
