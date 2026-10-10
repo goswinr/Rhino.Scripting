@@ -44,7 +44,7 @@ F# extension members are not visible from C#, so every public method must be an 
 
 Consequences:
 
-- Never edit the generated file. It is checked into git: rebuild `ForPublishing.fsproj` (or run the script) after changing a `Scripting_*.fs` file, then commit the regenerated file with the change.
+- Never edit the generated file. It is checked into git: rebuild `ForPublishing.fsproj` (or run the script) after changing a `Scripting_*.fs` file, then commit the regenerated file with the change. `build.yml` fails if it is out of date.
 - Everything above the marker is discarded. Any `open` a member needs belongs in `Scripting_Header.fs`. Members stay indented 4 spaces so they line up with the class body once combined.
 - In `ForEditing.fsproj`, a member can only call members from files earlier in compile order. Coerce and Layer come first for that reason. Call other members as `RhinoScriptSyntax.Xxx(...)`.
 - A new `Scripting_*.fs` file must be added to `ForEditing.fsproj` and to the `files` list in `combineIntoOneFile.fsx`. The script fails the build if those lists, or the `Src/` folder, disagree, or if a marker is missing.
