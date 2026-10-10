@@ -4,6 +4,7 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
 	  <TargetFrameworks>net8.0;net48;net10.0</TargetFrameworks>  <!-- FsDoc will use the first target framework: https://fsprojects.github.io/FSharp.Formatting/apidocs.html#Selected-projects -->
+    <!-- <CheckEolTargetFramework>false</CheckEolTargetFramework> --> <!-- uncomment once net8.0 is out of support (November 2026) to silence warning NETSDK1138, Rhino 8 runs on .NET 8 -->
 
     <DefineConstants Condition="'$(TargetFramework)' == 'net48'">RH7</DefineConstants>
 
