@@ -21,9 +21,6 @@ type internal State private () =
     /// The current active Rhino document (= the file currently open)
     static let mutable doc : RhinoDoc = null
 
-    /// Object Table of the current active Rhino document
-    static let mutable ot : DocObjects.Tables.ObjectTable = null
-
     /// Is set once the ActiveDocumentChanged event handler is added.
     /// Until then getDoc checks for a changed active document itself.
     [<VolatileField>]
@@ -38,7 +35,6 @@ type internal State private () =
     /// The document may be null, e.g. on Mac when the last document is closed.
     static let updateDoc (document:RhinoDoc) =
         doc <- document //Rhino.RhinoDoc.ActiveDoc
-        ot  <- if isNull document then null else document.Objects //Rhino.RhinoDoc.ActiveDoc.Objects
         commandSerialNumbers <- None
         escapePressed <- false
 
@@ -115,7 +111,7 @@ type internal State private () =
             lock initLock (fun () ->
                 if not isRunningInRhino then
                     if not Rhino.Runtime.HostUtils.RunningInRhino then
-                        RhinoScriptingException.Raise "State.initState Failed to find the active Rhino document, is this dll running hosted inside the Rhino process? "
+                        RhinoScriptingException.Raise "Doc: Rhino.Scripting only works inside a running Rhino process, Rhino.Runtime.HostUtils.RunningInRhino is false."
                     else
                         //RhinoSync.Initialize() // don't do yet, only try to get sync context when actually needed, if on UI thread this might be never.
                         updateDoc(RhinoDoc.ActiveDoc )  // do first
@@ -129,7 +125,7 @@ type internal State private () =
         if isNull doc || not docEventIsSetUp then
             updateDocIfChanged() // in case the ActiveDocumentChanged event was missed, or its handler is not added (yet)
             if isNull doc then
-                RhinoScriptingException.Raise "State.Doc: There is no active Rhino document. Open or create a document first."
+                RhinoScriptingException.Raise "Doc: There is no active Rhino document. Open or create a document first."
         doc
 
 
