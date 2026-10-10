@@ -1,6 +1,7 @@
 bin/
 obj/
 .vs/
+.vscode/
 
 # FSharp.Formatting
 .fsdocs/
