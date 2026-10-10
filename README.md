@@ -46,6 +46,7 @@ However, you can use this library just as well in the new Rhino 8 [ScriptEditor]
 
 First reference the assemblies.
 ```fsharp
+#r "RhinoCommon"
 #r "nuget: Rhino.Scripting"
 ```
 

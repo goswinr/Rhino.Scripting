@@ -59,7 +59,7 @@ The infrastructure files (`Exceptions.fs`, `Utils.fs`, `RhinoSync.fs`, `State.fs
 ## Threading
 
 Methods can be called from any thread. Code that touches UI (dialogs, layer creation, interactive picking) is wrapped in `RhinoSync.DoSync (fun () -> ...)`. Methods that prompt the user in the viewport use the `let get () = ...` / `RhinoSync.DoSyncRedrawHideEditor get` pattern, which also hides the Fesh editor window during the pick.
-`RhinoSync` finds the [Fesh.Rhino](https://github.com/goswinr/Fesh.Rhino) plugin by reflection: its plugin GUID, the type `Fesh.Rhino.Sync` and that type's property names. Fesh also calls the `initialize` field by reflection, so do not rename it. Without Fesh, `RhinoSync` falls back to `Eto.Forms.Application.Instance.Invoke`.
+`RhinoSync` finds the [Fesh.Rhino](https://github.com/goswinr/Fesh.Rhino) plugin by reflection: its plugin GUID, the type `Fesh.Rhino.Sync` and that type's property names. Fesh also calls the `initialize` field by reflection, and before each script it sets the internal `State.EscapePressed` to false by reflection, so do not rename them. Without Fesh, `RhinoSync` falls back to `Eto.Forms.Application.Instance.Invoke`.
 
 ## Conventions
 

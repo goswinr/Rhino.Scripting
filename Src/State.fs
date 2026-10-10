@@ -144,6 +144,7 @@ type internal State private () =
             getDoc().Objects
 
     /// Was escape key pressed
+    // Don't rename, Fesh.Rhino sets it to false via reflection before each script.
     static member EscapePressed
         with get() =
             initState()
