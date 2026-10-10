@@ -211,9 +211,9 @@ These are implemented with 3 overloads and `Optional` and `DefaultParameterValue
 [goswinr.github.io/Rhino.Scripting](https://goswinr.github.io/Rhino.Scripting/reference/rhino-scripting-rhinoscriptsyntax.html)
 
 ## .NET Framework or .NET Core?
-The NuGet package contains a build for .NET 8.0 and one for .NET Framework 4.8.<br>
-The .NET 8.0 build can only be loaded when Rhino 8 runs on the .NET 8 runtime (see the Rhino command `SetDotNetRuntime`).<br>
-For Rhino 7, and for Rhino 8 running on .NET 7 or .NET Framework, use the .NET Framework 4.8 build.<br>
+The NuGet package contains builds for .NET Framework 4.8, .NET 7.0, .NET 8.0 and .NET 10.0.<br>
+Each .NET build can only be loaded when Rhino runs on that .NET runtime or a newer one (see the Rhino command `SetDotNetRuntime`).<br>
+For Rhino 7, and for Rhino 8 running on .NET Framework, use the .NET Framework 4.8 build.<br>
 
 ## Windows or Mac?
 This library should work on Rhino for Mac just as well as on Windows.<br>

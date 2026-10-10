@@ -14,7 +14,7 @@ Behavior should follow the Python original unless a change is intended; such cha
 dotnet build ForEditing.fsproj          # net48 only, fast, use while editing
 
 dotnet fsi combineIntoOneFile.fsx       # run once first, see below
-dotnet build ForPublishing.fsproj -c Release   # net8.0 + net48, also packs the NuGet package
+dotnet build ForPublishing.fsproj -c Release   # net48, net7.0, net8.0, net10.0; also packs the NuGet package
 # or one framework at a time:
 dotnet build ForPublishing.fsproj -c Release --framework net8.0
 ```
@@ -53,8 +53,8 @@ The infrastructure files (`Exceptions.fs`, `Utils.fs`, `RhinoSync.fs`, `State.fs
 
 ## Rhino 7 vs Rhino 8
 
-- net48 compiles against RhinoCommon 7.0 with the `RH7` define. net8.0 compiles against RhinoCommon 8.19 (it ships only net7.0 and net48 assemblies). RhinoCommon and Eto.Forms are compile-time references only; the user's Rhino provides them at runtime.
-- `ForEditing.fsproj` only builds net48. Rhino 8-only APIs must sit in the `#else` branch of `#if RH7 ... #else ... #endif`, and only `ForPublishing.fsproj` (net8.0) compiles that branch.
+- net48 compiles against RhinoCommon 7.0 with the `RH7` define. net7.0, net8.0 and net10.0 compile against RhinoCommon 8.19 (it ships only net7.0 and net48 assemblies). net8.0 is listed first in `TargetFrameworks` because fsdocs builds the API docs from the first framework. RhinoCommon and Eto.Forms are compile-time references only; the user's Rhino provides them at runtime.
+- `ForEditing.fsproj` only builds net48. Rhino 8-only APIs must sit in the `#else` branch of `#if RH7 ... #else ... #endif`, and only `ForPublishing.fsproj` compiles that branch.
 
 ## Threading
 

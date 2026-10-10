@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - RhinoScriptingException constructor with inner exception, and RhinoScriptingException.RaiseWith
+- Builds for net7.0 and net10.0, in addition to net48 and net8.0
 ### Changed
 - Breaking: CoerceColor reads a tuple of 4 integers as (red, green, blue, alpha), like in RhinoPython. It was (alpha, red, green, blue) before
 - Add, AddPoints and AddLeader raise an exception if adding to the document fails, instead of returning Guid.Empty
