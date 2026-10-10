@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CoerceXform only accepts a 4x4 matrix
 - FxrangePython and FrangePython return an empty range if the stop value cannot be reached, like in Python
 - Without the Fesh editor, RhinoSync always uses Eto.Forms.Application.Instance.Invoke to get to the UI thread
+- The assembly is built for AnyCPU instead of x64, so that it can load in Rhino running natively on ARM64
 ### Fixed
 - TryCoerce functions never throw an exception, they return None on empty or unknown Guids
 - GetLinetype pre-selects the defaultValLinetype (Rhino 8 only)
