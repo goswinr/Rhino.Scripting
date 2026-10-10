@@ -9,6 +9,7 @@ open Rhino.Scripting.RhinoScriptingUtils
 type internal State private () =
 
     /// Rhino.Runtime.HostUtils.RunningInRhino
+    [<VolatileField>]
     static let mutable isRunningInRhino = false
 
     /// was escape key pressed
@@ -58,9 +59,12 @@ type internal State private () =
     //     |> eprintfn "%s"
 
 
-    static let setupEventsInSync() =
-        try
-            RhinoSync.DoSync (fun () ->
+    /// Adds the event handlers on the UI thread.
+    /// From any other thread they are added asynchronously, without waiting for the UI thread,
+    /// because the UI thread might be waiting for this thread, e.g. in Array.Parallel.map. That would deadlock.
+    static let setupEvents() =
+        let setup () =
+            try
                 // keep the reference to the active Document (3d file ) updated:
                 RhinoDoc.ActiveDocumentChanged.Add (fun args ->  updateDoc args.Document)
                 // RhinoDoc.EndOpenDocument.Add  // used here in the past. why ?
@@ -74,26 +78,34 @@ type internal State private () =
                     if not escapePressed && notNull doc && not <| Input.RhinoGet.InGet(doc) then
                         escapePressed <- true
                     )
-                )
-        with
-            // | :? RhinoSyncException -> warnAboutFailedEventSetup()
-            | e ->
-                //raise e
-                let txt = sprintf "%A" e
-                RhinoApp.WriteLine txt
-                eprintfn "%s" txt
+            with
+                // | :? RhinoSyncException -> warnAboutFailedEventSetup()
+                | e ->
+                    //raise e
+                    let txt = sprintf "%A" e
+                    RhinoApp.WriteLine txt
+                    eprintfn "%s" txt
+        if RhinoApp.InvokeRequired then
+            RhinoApp.InvokeOnUiThread(Action setup) // does not wait, unlike RhinoSync.DoSync
+        else
+            setup()
 
+    static let initLock = obj()
 
     /// Runs only once, sets up the event handlers.
+    /// Thread safe, isRunningInRhino is only set to true once the setup is done.
     static let initState()=
         if not isRunningInRhino then
-            if not Rhino.Runtime.HostUtils.RunningInRhino then
-                RhinoScriptingException.Raise "State.initState Failed to find the active Rhino document, is this dll running hosted inside the Rhino process? "
-            else
-                //RhinoSync.Initialize() // don't do yet, only try to get sync context when actually needed, if on UI thread this might be never.
-                updateDoc(RhinoDoc.ActiveDoc )  // do first
-                setupEventsInSync()             // do after Doc is set up
-                isRunningInRhino <- true        // do last
+            lock initLock (fun () ->
+                if not isRunningInRhino then
+                    if not Rhino.Runtime.HostUtils.RunningInRhino then
+                        RhinoScriptingException.Raise "State.initState Failed to find the active Rhino document, is this dll running hosted inside the Rhino process? "
+                    else
+                        //RhinoSync.Initialize() // don't do yet, only try to get sync context when actually needed, if on UI thread this might be never.
+                        updateDoc(RhinoDoc.ActiveDoc )  // do first
+                        setupEvents()                   // do after Doc is set up
+                        isRunningInRhino <- true        // do last
+                )
 
     /// Returns the current document, fails with a clear error if there is none, e.g. on Mac when all documents are closed.
     static let getDoc() =
