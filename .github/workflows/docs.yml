@@ -2,17 +2,18 @@ name: Docs
 
 # copied and adapted from https://fsprojects.github.io/FSharp.Formatting/zero-to-hero.html#Ship-it
 
-# Trigger this Action when new code is pushed to the main branch
+# Build the docs on pull requests too, so that errors from 'fsdocs build --strict' show up before merging.
+# Only pushes to the main branch deploy them.
 on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
 
-# We need some permissions to publish to Github Pages
 permissions:
-  contents: write
-  pages: write
-  id-token: write
+  contents: read
 
 # Make sure only one documentation build/deploy runs at a time.
 # New pushes to main cancel any in-progress run to avoid concurrent deployments.
@@ -35,6 +36,10 @@ jobs:
       - name: Restore dotnet tools
         run: dotnet tool restore
 
+      - name: Run combineIntoOneFile.fsx
+        # Run it once before building all target frameworks in parallel below, see build.yml
+        run: dotnet fsi combineIntoOneFile.fsx
+
       - name: Build code to make xml file
         run: dotnet build ForPublishing.fsproj -c Release  # see required xml tags: https://fsprojects.github.io/FSharp.Formatting/zero-to-hero.html#Generating-API-documentation
 
@@ -46,14 +51,20 @@ jobs:
         run: dotnet fsdocs build --clean --strict --properties Configuration=Release --input Docs --output DocsGenerated
 
       - name: Upload documentation html files
+        if: github.event_name == 'push'
         uses: actions/upload-pages-artifact@v5
         with:
           path: ./DocsGenerated
 
   # GitHub Actions recommends deploying in a separate job.
   deploy:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     needs: build
+    # We need these permissions to publish to Github Pages
+    permissions:
+      pages: write
+      id-token: write
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
