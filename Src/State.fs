@@ -24,6 +24,11 @@ type internal State private () =
     /// Object Table of the current active Rhino document
     static let mutable ot : DocObjects.Tables.ObjectTable = null
 
+    /// Is set once the ActiveDocumentChanged event handler is added.
+    /// Until then getDoc checks for a changed active document itself.
+    [<VolatileField>]
+    static let mutable docEventIsSetUp = false
+
     //----------------------------------------------------------------
     //-----------------Update state:----------------------------------
     //----------------------------------------------------------------
@@ -36,6 +41,16 @@ type internal State private () =
         ot  <- if isNull document then null else document.Objects //Rhino.RhinoDoc.ActiveDoc.Objects
         commandSerialNumbers <- None
         escapePressed <- false
+
+    /// Calls updateDoc only if the active document is a different one,
+    /// so that the Esc and Command state is not reset needlessly.
+    static let updateDocIfChanged() =
+        let active = RhinoDoc.ActiveDoc
+        let isSame =
+            if isNull active then isNull doc
+            else notNull doc && doc.RuntimeSerialNumber = active.RuntimeSerialNumber
+        if not isSame then
+            updateDoc active
 
     // -------Events: --------------------
 
@@ -67,6 +82,7 @@ type internal State private () =
             try
                 // keep the reference to the active Document (3d file ) updated:
                 RhinoDoc.ActiveDocumentChanged.Add (fun args ->  updateDoc args.Document)
+                docEventIsSetUp <- true
                 // RhinoDoc.EndOpenDocument.Add  // used here in the past. why ?
                 // RhinoDoc.BeginOpenDocument.Add //Don't use since it is called on temp pasting files too
 
@@ -110,8 +126,8 @@ type internal State private () =
     /// Returns the current document, fails with a clear error if there is none, e.g. on Mac when all documents are closed.
     static let getDoc() =
         initState()
-        if isNull doc then
-            updateDoc RhinoDoc.ActiveDoc // in case the ActiveDocumentChanged event was missed
+        if isNull doc || not docEventIsSetUp then
+            updateDocIfChanged() // in case the ActiveDocumentChanged event was missed, or its handler is not added (yet)
             if isNull doc then
                 RhinoScriptingException.Raise "State.Doc: There is no active Rhino document. Open or create a document first."
         doc
