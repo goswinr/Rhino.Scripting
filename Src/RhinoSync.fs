@@ -11,7 +11,7 @@ type internal RunOnUiDelegate = delegate of unit -> unit
 /// However concurrent writing to Rhino Object Tables might corrupt its state.
 /// This class provides a way to run all UI methods on the UI thread.
 /// It tries to use the Fesh Editor UI thread if it is running.
-/// If you are not running from the Fesh Editor, it will use RhinoApp.MainWindow.Invoke.
+/// If you are not running from the Fesh Editor, it will use Eto.Forms.Application.Instance.Invoke.
 [<AbstractClass>]
 [<Sealed>] //use these attributes to match C# static class and make in visible in C# // https://stackoverflow.com/questions/13101995/defining-static-classes-in-f
 type RhinoSync private () =
@@ -79,7 +79,7 @@ type RhinoSync private () =
 
     static let initLock = obj()
 
-    //only called when actually needed in DoSync methods below.
+    // Only called when actually needed, via ensureInit below.
     // Thread safe, initIsPending is only set to false once all fields are set up.
     static let initSync() =
         lock initLock (fun () ->
@@ -137,6 +137,13 @@ type RhinoSync private () =
         // to have showEditor and hideEditor actions setup correctly.
         new Action(initSync)
 
+    // Every member that uses one of the fields set up by initSync must call this first.
+    // Until then they hold the defaults: no-op editor actions and uncolored Console printing.
+    // Fesh.Rhino calls 'initialize' only once, when its window loads.
+    // At that time Rhino.Scripting is usually not loaded yet, scripts load it later with #r.
+    static let ensureInit() =
+        if initIsPending then initSync()
+
 
     // An alternative to do! Async.SwitchToContext syncContext
     //static let runOnUiThread(func:unit->'T)=
@@ -164,7 +171,9 @@ type RhinoSync private () =
         and  set v : unit = logErrors <- v
 
     /// The SynchronizationContext of the currently Running Rhino Instance,
-    /// This SynchronizationContext is loaded via reflection from the Fesh.Rhino plugin
+    /// This SynchronizationContext is loaded via reflection from the Fesh.Rhino plugin.
+    /// It is null if not running in the Fesh Editor and not set here.
+    /// Then DoSync uses Eto.Forms.Application.Instance.Invoke instead.
     static member SyncContext
         with get() : Threading.SynchronizationContext =
             if isNull syncContext then
@@ -176,12 +185,18 @@ type RhinoSync private () =
     /// Hide the WPF Window of currently running Fesh Editor.
     /// Or do nothing if not running in Fesh Editor.
     static member HideEditor() =
-        hideEditor.Invoke() //Action
+        ensureInit()
+        // A WPF window throws an InvalidOperationException if accessed from another thread than its own,
+        // e.g. from a script that Fesh runs asynchronously.
+        RhinoSync.DoSync (fun () -> hideEditor.Invoke()) //Action
 
     /// Show the WPF Window of currently running Fesh Editor.
     /// Or do nothing if not running in Fesh Editor.
     static member ShowEditor() =
-        showEditor.Invoke() //Action
+        ensureInit()
+        // A WPF window throws an InvalidOperationException if accessed from another thread than its own,
+        // e.g. from a script that Fesh runs asynchronously.
+        RhinoSync.DoSync (fun () -> showEditor.Invoke()) //Action
 
     // The Assembly currently running Fesh Editor Window.
     // Or 'null' if not running in Fesh Editor.
@@ -197,6 +212,7 @@ type RhinoSync private () =
     /// Prints in both RhinoApp.WriteLine and Console.WriteLine, or Fesh Editor with color if running.
     /// Red green blue text, NO new line
     static member PrintColor r g b s =
+        ensureInit() // otherwise the first prints of a script are not colored and do not go to the Fesh log
         printFeshLogColor.Invoke(r, g, b, s)
         RhinoApp.Write s
         RhinoApp.Wait()
@@ -204,6 +220,7 @@ type RhinoSync private () =
     /// Prints in both RhinoApp.WriteLine and Console.WriteLine, or Fesh Editor with color if running.
     /// Red green blue text, with new line
     static member PrintnColor r g b s =
+        ensureInit() // otherwise the first prints of a script are not colored and do not go to the Fesh log
         printnFeshLogColor.Invoke(r, g, b, s)
         RhinoApp.WriteLine s
         RhinoApp.Wait()
@@ -211,16 +228,20 @@ type RhinoSync private () =
     /// Clears the Fesh log window
     /// and the Rhino command history window.
     static member ClearLog() =
-        clearFeshLog.Invoke() //Action
+        ensureInit() // otherwise the Fesh log is not cleared if this is the first call to RhinoSync
+        clearFeshLog.Invoke() //Action, safe from any thread, the Fesh log switches to the UI thread itself
         RhinoApp.ClearCommandHistoryWindow()
         RhinoApp.Wait()
 
     /// Evaluates a function on UI Thread.
-    static member DoSync (func:unit->'T) : 'T =
+    // The explicit <'T> keeps DoSync generic for HideEditor and ShowEditor, which are defined above it.
+    static member DoSync<'T> (func:unit->'T) : 'T =
         if RhinoApp.InvokeRequired then
-            if initIsPending then initSync()
+            ensureInit()
             if isNull syncContext then
-                Eto.Forms.Application.Instance.Invoke func // This should never get called, even when not hosted in Fesh Editor.
+                // Not hosted in the Fesh Editor, e.g. a script run on a worker thread by Rhino 8 ScriptEditor or by another plugin.
+                // Eto's Invoke blocks until func has run on the UI thread.
+                Eto.Forms.Application.Instance.Invoke func
 
                 // RhinoSyncException.Raise "%s%s%s%s%s" "This code needs to run on the main UI thread." Environment.NewLine
                 //         "Rhino.RhinoSync.syncContext is still null or not set up. An automatic context switch is not possible." Environment.NewLine
@@ -241,8 +262,11 @@ type RhinoSync private () =
     /// Redraw is restored even if the function throws an exception.
     static member DoSyncRedraw (func:unit->'T) : 'T =
         RhinoSync.DoSync (fun () ->
-            let views = RhinoDoc.ActiveDoc.Views
-            let redraw = views.RedrawEnabled
+            // ActiveDoc is null e.g. on Mac when all documents are closed, then there is no redraw state to restore.
+            // State.Doc would raise a clearer error, but State.fs is compiled after this file.
+            let doc = RhinoDoc.ActiveDoc
+            let views = if isNull doc then null else doc.Views
+            let redraw = isNull views || views.RedrawEnabled
             if not redraw then views.RedrawEnabled <- true
             try
                 func()
@@ -255,21 +279,30 @@ type RhinoSync private () =
     /// Hides Fesh editor window if it exists. Shows it afterwards again.
     /// Redraw and editor visibility are restored even if the function throws an exception.
     static member DoSyncRedrawHideEditor (func:unit->'T) : 'T =
-        if initIsPending then initSync() // because even when we are on the UI thread we still need to see if the Fesh window is showing or not.
+        ensureInit() // because even when we are on the UI thread we still need to see if the Fesh window is showing or not.
         RhinoSync.DoSync (fun () ->
             let isWinVis = isEditorVisible.Invoke() // do after init
-            if isWinVis then
-                hideEditor.Invoke() //Action
-            let views = RhinoDoc.ActiveDoc.Views
-            let redraw = views.RedrawEnabled
-            if not redraw then
-                views.RedrawEnabled <- true
-            RhinoApp.SetFocusToMainWindow()
+            // ActiveDoc is null e.g. on Mac when all documents are closed, then there is no redraw state to restore.
+            // State.Doc would raise a clearer error, but State.fs is compiled after this file.
+            let doc = RhinoDoc.ActiveDoc
+            let views = if isNull doc then null else doc.Views
+            let redraw = isNull views || views.RedrawEnabled
+            // Hiding the editor is the first thing inside the try,
+            // so that the editor is shown again even if any later step before func throws.
             try
+                if isWinVis then
+                    hideEditor.Invoke() //Action
+                if not redraw then
+                    views.RedrawEnabled <- true
+                RhinoApp.SetFocusToMainWindow()
                 func()
             finally
-                if not redraw then
-                    views.RedrawEnabled <- false
-                if isWinVis then
-                    showEditor.Invoke() //Action
+                // Nested, so that the editor is shown again even if restoring redraw throws,
+                // e.g. because func closed the document.
+                try
+                    if not redraw then
+                        views.RedrawEnabled <- false
+                finally
+                    if isWinVis then
+                        showEditor.Invoke() //Action
             )

@@ -19,7 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - TryCoerce functions never throw an exception, they return None on empty or unknown Guids
 - GetLinetype pre-selects the defaultValLinetype (Rhino 8 only)
-- RhinoSync.DoSyncRedraw and DoSyncRedrawHideEditor restore redraw and the Fesh editor even if an exception is raised
+- RhinoSync.DoSyncRedraw and DoSyncRedrawHideEditor restore redraw and the Fesh editor even if an exception is raised, and work without an active Rhino document
+- RhinoSync.HideEditor and ShowEditor can be called from any thread
+- RhinoSync.PrintColor, PrintnColor, ClearLog, HideEditor and ShowEditor use the Fesh editor even if they are the first call to RhinoSync
 - Clear error message if there is no active Rhino document (e.g. on Mac), event handlers are not added repeatedly anymore
 - Thread safe initialization of RhinoSync
 - Pretty printing of numbers above 1000 uses the invariant culture
