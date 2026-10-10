@@ -30,7 +30,7 @@
 
   <ItemGroup>
     <None Include="combineIntoOneFile.fsx" />
-    <None Include="Readme.md" />
+    <None Include="README.md" />
 
     <Compile Include="Src/Exceptions.fs" />
     <Compile Include="Src/Utils.fs" />
