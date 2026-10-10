@@ -7,7 +7,7 @@
 
     <DefineConstants Condition="'$(TargetFramework)' == 'net48'">RH7</DefineConstants>
 
-    <LangVersion>preview</LangVersion>
+    <LangVersion>latest</LangVersion>
 	  <SatelliteResourceLanguages>en</SatelliteResourceLanguages> <!-- to only have the english resources of F# core-->
 	  <DisableImplicitFSharpCoreReference>true</DisableImplicitFSharpCoreReference><!-- so that dependabot does not fail https://github.com/dependabot/dependabot-core/issues/10883#issuecomment-2495962805 -->
 

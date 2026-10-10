@@ -7,7 +7,7 @@
 
     <DefineConstants Condition="'$(TargetFramework)' == 'net48'">RH7</DefineConstants>
 
-    <LangVersion>preview</LangVersion>
+    <LangVersion>latest</LangVersion>
     <NeutralLanguage>en</NeutralLanguage>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>   <!-- to only have the english resources-->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
