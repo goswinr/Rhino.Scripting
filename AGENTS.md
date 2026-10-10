@@ -19,6 +19,7 @@ dotnet build ForPublishing.fsproj -c Release   # net8.0 + net48, also packs the 
 dotnet build ForPublishing.fsproj -c Release --framework net8.0
 ```
 
+- `global.json` pins the .NET 10 SDK, and all workflows install the SDK from it. `fsdocs-tool` needs the .NET 10 runtime too.
 - Pass `-c Release` explicitly. The project file deliberately doesn't set the configuration, because a value set there comes too late to switch on optimization.
 
 - There are no tests and no linter. The library only works inside a running Rhino process (`State.Doc` raises otherwise), so verification means compiling both projects without new warnings. `--warnon:3390` (XML doc completeness) and `--warnon:1182` (unused variables) are on.

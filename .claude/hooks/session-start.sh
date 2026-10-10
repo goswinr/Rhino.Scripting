@@ -1,6 +1,6 @@
 #!/bin/bash
 # SessionStart hook for Claude Code cloud sessions:
-# installs the .NET SDK (same major version as the CI in .github/workflows/build.yml),
+# installs the .NET SDK (same major version as pinned in global.json),
 # restores the local dotnet tools and the NuGet packages of both projects.
 set -euo pipefail
 

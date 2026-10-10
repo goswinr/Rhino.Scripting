@@ -30,7 +30,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v6.0.0
         with:
-          dotnet-version: '9.0.x' # Adjust the version as needed
+          global-json-file: global.json
 
       - name: Restore dotnet tools
         run: dotnet tool restore

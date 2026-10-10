@@ -220,7 +220,7 @@ This library should work on Rhino for Mac just as well as on Windows.<br>
 
 
 ## Build from source
-To build this library from source you need the .NET SDK 8 or higher installed<br>
+To build this library from source you need the .NET SDK 10 installed (see `global.json`)<br>
 Then just run in the root folder:
 ```bash
 dotnet build ForPublishing.fsproj -c Release
