@@ -35,5 +35,5 @@ jobs:
         # dotnet build ForPublishing.fsproj --framework net48
         # dotnet build ForPublishing.fsproj --framework net8.0
         run: |
-          dotnet build ForPublishing.fsproj 
+          dotnet build ForPublishing.fsproj -c Release
 

@@ -223,7 +223,7 @@ This library should work on Rhino for Mac just as well as on Windows.<br>
 To build this library from source you need the .NET SDK 8 or higher installed<br>
 Then just run in the root folder:
 ```bash
-dotnet build ForPublishing.fsproj
+dotnet build ForPublishing.fsproj -c Release
 ```
 
 This will first combine all `Scripting_*.fs` files into one file and compile it.<br>

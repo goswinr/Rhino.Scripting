@@ -14,10 +14,12 @@ Behavior should follow the Python original unless a change is intended; such cha
 dotnet build ForEditing.fsproj          # net48 only, fast, use while editing
 
 dotnet fsi combineIntoOneFile.fsx       # run once first, see below
-dotnet build ForPublishing.fsproj       # net8.0 + net48, also packs the NuGet package
+dotnet build ForPublishing.fsproj -c Release   # net8.0 + net48, also packs the NuGet package
 # or one framework at a time:
-dotnet build ForPublishing.fsproj --framework net8.0
+dotnet build ForPublishing.fsproj -c Release --framework net8.0
 ```
+
+- Pass `-c Release` explicitly. The project file deliberately doesn't set the configuration, because a value set there comes too late to switch on optimization.
 
 - There are no tests and no linter. The library only works inside a running Rhino process (`State.Doc` raises otherwise), so verification means compiling both projects without new warnings. `--warnon:3390` (XML doc completeness) and `--warnon:1182` (unused variables) are on.
 - Both `ForPublishing.fsproj` frameworks run `combineIntoOneFile.fsx` before compiling. Built together, they can race writing the generated file. Running the script first (as CI does) avoids that, because it skips writing when the content is unchanged.
