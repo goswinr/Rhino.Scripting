@@ -26,7 +26,7 @@
     <!-- <Version>0.1</Version> done by Ionide.KeepAChangelog.Tasks -->
 
     <Authors>GoswinR</Authors>
-    <Copyright>Goswin Rothenthal 2022</Copyright>
+    <Copyright>Goswin Rothenthal 2019-2026</Copyright>
 
     <Description>A complete re-implementation of the RhinoPython scripting syntax in F#. For Rhino 7.0 or higher.</Description>
 
@@ -48,7 +48,6 @@
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/goswinr/Rhino.Scripting</PackageProjectUrl>
     <RepositoryUrl>https://github.com/goswinr/Rhino.Scripting</RepositoryUrl>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <PackageIcon>logo128.png</PackageIcon>
