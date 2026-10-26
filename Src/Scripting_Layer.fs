@@ -1,11 +1,12 @@
 ﻿namespace Rhino.Scripting
 
 open Rhino
+open System.ComponentModel
 open Rhino.Scripting.RhinoScriptingUtils
 open System
 
 
-[<AutoOpen>]
+[<AutoOpen; EditorBrowsable(EditorBrowsableState.Never)>]
 module AutoOpenLayer =
 
   type RhinoScriptSyntax with

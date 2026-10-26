@@ -1,6 +1,7 @@
 namespace Rhino.Scripting.RhinoScriptingUtils
 
 open Rhino
+open System.ComponentModel
 open Rhino.Scripting
 open System
 
@@ -194,7 +195,7 @@ module internal RArr =
 
 
 
-[<AutoOpenAttribute>]
+[<AutoOpen; EditorBrowsable(EditorBrowsableState.Never)>]
 module AutoOpenRsUtils =
 
     type Dict<'K,'V> = Collections.Generic.Dictionary<'K,'V>

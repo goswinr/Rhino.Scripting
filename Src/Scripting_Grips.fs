@@ -1,12 +1,13 @@
 namespace Rhino.Scripting
 
 open Rhino
+open System.ComponentModel
 open System
 open Rhino.Geometry
 open Rhino.Scripting.RhinoScriptingUtils
 
 
-[<AutoOpen>]
+[<AutoOpen; EditorBrowsable(EditorBrowsableState.Never)>]
 module AutoOpenGrips =
 
   type RhinoScriptSyntax with

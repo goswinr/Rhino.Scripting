@@ -1,6 +1,7 @@
 ﻿namespace Rhino.Scripting
 
 open Rhino
+open System.ComponentModel
 open System
 open Rhino.Geometry
 open Rhino.Scripting.RhinoScriptingUtils
@@ -12,7 +13,7 @@ open Rhino.Scripting.RhinoScriptingUtils
 /// These type extensions are only visible in F# (not in C#)
 /// This auto-open module is under the 'Rhino.Scripting' namespace so that making these extensions available works
 /// with 'open Rhino.Scripting'.
-[<AutoOpen>]
+[<AutoOpen; EditorBrowsable(EditorBrowsableState.Never)>]
 module AutoOpenPrettyExtensions =
 
     type Point3d with

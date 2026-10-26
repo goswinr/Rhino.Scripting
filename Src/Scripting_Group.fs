@@ -1,9 +1,10 @@
 ﻿namespace Rhino.Scripting
 
 open System
+open System.ComponentModel
 open Rhino.Scripting.RhinoScriptingUtils
 
-[<AutoOpen>]
+[<AutoOpen; EditorBrowsable(EditorBrowsableState.Never)>]
 module AutoOpenGroup =
   type RhinoScriptSyntax with
     //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete)

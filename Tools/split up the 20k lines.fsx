@@ -13,6 +13,7 @@ namespace Rhino.Scripting
 open Rhino 
 
 open System
+open System.ComponentModel
 open System.Collections.Generic
 open System.Globalization
 open Microsoft.FSharp.Core.LanguagePrimitives
@@ -25,7 +26,7 @@ open Rhino.ApplicationSettings
 // open FsEx.SaveIgnore
 // open FsEx.CompareOperators
 
-[<AutoOpen>]
+[<AutoOpen; EditorBrowsable(EditorBrowsableState.Never)>]
 module AutoOpen*&%&* =
   type RhinoScriptSyntax with  
     //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete) 

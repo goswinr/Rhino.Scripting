@@ -2,13 +2,14 @@
 namespace Rhino.Scripting
 
 open Rhino
+open System.ComponentModel
 open System
 open System.Collections.Generic
 open Rhino.Geometry
 open Rhino.Scripting.RhinoScriptingUtils
 
 
-[<AutoOpen>]
+[<AutoOpen; EditorBrowsable(EditorBrowsableState.Never)>]
 module AutoOpenSurface =
   type RhinoScriptSyntax with
     //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete)

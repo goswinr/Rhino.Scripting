@@ -1,10 +1,11 @@
 namespace Rhino.Scripting
 
 open Rhino
+open System.ComponentModel
 open System
 open Rhino.Geometry
 
-[<AutoOpen>]
+[<AutoOpen; EditorBrowsable(EditorBrowsableState.Never)>]
 module AutoOpenLine =
   type RhinoScriptSyntax with
     //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete)
