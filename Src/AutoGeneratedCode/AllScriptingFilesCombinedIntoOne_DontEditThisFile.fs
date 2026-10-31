@@ -6274,39 +6274,39 @@ type RhinoScriptSyntax private () =
             RhinoScriptingException.Raise "DimStyleTextHeight set failed. dimStyle:'%s' height:'%A'" dimStyle height
 
 
-    /// <summary>Checks if  an object is an aligned dimension object. Returns false for any other Rhino object.</summary>
+    /// <summary>Checks if  an object is an aligned dimension object. Returns false for any other Rhino object or if the object does not exist.</summary>
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsAlignedDimension(objectId:Guid) : bool =
-        match RhinoScriptSyntax.CoerceGeometry objectId with
-        | :? LinearDimension as g -> g.Aligned
+        match RhinoScriptSyntax.TryCoerceGeometry objectId with
+        | Some (:? LinearDimension as g) -> g.Aligned
         | _ -> false
 
 
-    /// <summary>Checks if  an object is an angular dimension object. Returns false for any other Rhino object.</summary>
+    /// <summary>Checks if  an object is an angular dimension object. Returns false for any other Rhino object or if the object does not exist.</summary>
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsAngularDimension(objectId:Guid) : bool =
-        match RhinoScriptSyntax.CoerceGeometry objectId with
-        | :? AngularDimension -> true
+        match RhinoScriptSyntax.TryCoerceGeometry objectId with
+        | Some (:? AngularDimension) -> true
         | _ -> false
 
 
-    /// <summary>Checks if  an object is a diameter dimension object. Returns false for any other Rhino object.</summary>
+    /// <summary>Checks if  an object is a diameter dimension object. Returns false for any other Rhino object or if the object does not exist.</summary>
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsDiameterDimension(objectId:Guid) : bool =
-        match RhinoScriptSyntax.CoerceGeometry objectId with
-        | :? RadialDimension as g -> g.IsDiameterDimension
+        match RhinoScriptSyntax.TryCoerceGeometry objectId with
+        | Some (:? RadialDimension as g) -> g.IsDiameterDimension
         | _ -> false
 
 
-    /// <summary>Checks if  an object is a dimension object. Returns false for any other Rhino object.</summary>
+    /// <summary>Checks if  an object is a dimension object. Returns false for any other Rhino object or if the object does not exist.</summary>
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsDimension(objectId:Guid) : bool =
-        match RhinoScriptSyntax.CoerceGeometry objectId with
-        | :? AnnotationBase  -> true
+        match RhinoScriptSyntax.TryCoerceGeometry objectId with
+        | Some (:? AnnotationBase) -> true
         | _ -> false
 
 
@@ -6327,39 +6327,39 @@ type RhinoScriptSyntax private () =
         else ds.IsReference
 
 
-    /// <summary>Checks if  an object is a dimension leader object. Returns false for any other Rhino object.</summary>
+    /// <summary>Checks if  an object is a dimension leader object. Returns false for any other Rhino object or if the object does not exist.</summary>
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsLeader(objectId:Guid) : bool =
-            match RhinoScriptSyntax.CoerceGeometry objectId with
-            | :? Leader  -> true
+            match RhinoScriptSyntax.TryCoerceGeometry objectId with
+            | Some (:? Leader) -> true
             | _ -> false
 
 
-    /// <summary>Checks if  an object is a linear dimension object. Returns false for any other Rhino object.</summary>
+    /// <summary>Checks if  an object is a linear dimension object. Returns false for any other Rhino object or if the object does not exist.</summary>
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsLinearDimension(objectId:Guid) : bool =
-            match RhinoScriptSyntax.CoerceGeometry objectId with
-            | :? LinearDimension  -> true
+            match RhinoScriptSyntax.TryCoerceGeometry objectId with
+            | Some (:? LinearDimension) -> true
             | _ -> false
 
 
-    /// <summary>Checks if  an object is an ordinate dimension object. Returns false for any other Rhino object.</summary>
+    /// <summary>Checks if  an object is an ordinate dimension object. Returns false for any other Rhino object or if the object does not exist.</summary>
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsOrdinateDimension(objectId:Guid) : bool =
-            match RhinoScriptSyntax.CoerceGeometry objectId with
-            | :? OrdinateDimension  -> true
+            match RhinoScriptSyntax.TryCoerceGeometry objectId with
+            | Some (:? OrdinateDimension) -> true
             | _ -> false
 
 
-    /// <summary>Checks if  an object is a radial dimension object. Returns false for any other Rhino object.</summary>
+    /// <summary>Checks if  an object is a radial dimension object. Returns false for any other Rhino object or if the object does not exist.</summary>
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsRadialDimension(objectId:Guid) : bool =
-            match RhinoScriptSyntax.CoerceGeometry objectId with
-            | :? RadialDimension  -> true
+            match RhinoScriptSyntax.TryCoerceGeometry objectId with
+            | Some (:? RadialDimension) -> true
             | _ -> false
 
 
@@ -9086,12 +9086,13 @@ type RhinoScriptSyntax private () =
         State.Doc.Views.Redraw()
 
 
-    /// <summary>Verifies a light object is a directional light.</summary>
+    /// <summary>Verifies a light object is a directional light. Returns false for any other Rhino object or if the object does not exist.</summary>
     /// <param name="objectId">(Guid) The light object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsDirectionalLight(objectId:Guid) : bool =
-        let light = RhinoScriptSyntax.CoerceLight(objectId)
-        light.IsDirectionalLight
+        match RhinoScriptSyntax.TryCoerceLight(objectId) with
+        | Some light -> light.IsDirectionalLight
+        | None -> false
 
 
     /// <summary>Verifies an object is a light object.</summary>
@@ -9119,36 +9120,40 @@ type RhinoScriptSyntax private () =
         light.IsReference
 
 
-    /// <summary>Verifies a light object is a linear light.</summary>
+    /// <summary>Verifies a light object is a linear light. Returns false for any other Rhino object or if the object does not exist.</summary>
     /// <param name="objectId">(Guid) The light object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsLinearLight(objectId:Guid) : bool =
-        let light = RhinoScriptSyntax.CoerceLight(objectId)
-        light.IsLinearLight
+        match RhinoScriptSyntax.TryCoerceLight(objectId) with
+        | Some light -> light.IsLinearLight
+        | None -> false
 
 
-    /// <summary>Verifies a light object is a point light.</summary>
+    /// <summary>Verifies a light object is a point light. Returns false for any other Rhino object or if the object does not exist.</summary>
     /// <param name="objectId">(Guid) The light object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsPointLight(objectId:Guid) : bool =
-        let light = RhinoScriptSyntax.CoerceLight(objectId)
-        light.IsPointLight
+        match RhinoScriptSyntax.TryCoerceLight(objectId) with
+        | Some light -> light.IsPointLight
+        | None -> false
 
 
-    /// <summary>Verifies a light object is a rectangular light.</summary>
+    /// <summary>Verifies a light object is a rectangular light. Returns false for any other Rhino object or if the object does not exist.</summary>
     /// <param name="objectId">(Guid) The light object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsRectangularLight(objectId:Guid) : bool =
-        let light = RhinoScriptSyntax.CoerceLight(objectId)
-        light.IsRectangularLight
+        match RhinoScriptSyntax.TryCoerceLight(objectId) with
+        | Some light -> light.IsRectangularLight
+        | None -> false
 
 
-    /// <summary>Verifies a light object is a spot light.</summary>
+    /// <summary>Verifies a light object is a spot light. Returns false for any other Rhino object or if the object does not exist.</summary>
     /// <param name="objectId">(Guid) The light object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsSpotLight(objectId:Guid) : bool =
-        let light = RhinoScriptSyntax.CoerceLight(objectId)
-        light.IsSpotLight
+        match RhinoScriptSyntax.TryCoerceLight(objectId) with
+        | Some light -> light.IsSpotLight
+        | None -> false
 
 
     /// <summary>Returns the color of a light.</summary>
@@ -15155,30 +15160,34 @@ type RhinoScriptSyntax private () =
 
 
 
-    /// <summary>Determines if a Surface is a portion of a cone.</summary>
+    /// <summary>Determines if a Surface is a portion of a cone.
+    /// Returns false for any other Rhino object or if the object does not exist.</summary>
     /// <param name="objectId">(Guid) The Surface object's identifier</param>
     /// <returns>(bool) True , otherwise False.</returns>
     static member IsCone(objectId:Guid) : bool =
-        let surface = RhinoScriptSyntax.CoerceSurface(objectId)
-        surface.IsCone()
+        match RhinoScriptSyntax.TryCoerceSurface(objectId) with
+        | Some surface -> surface.IsCone()
+        | None -> false
 
 
-    /// <summary>Determines if a Surface is a portion of a cone.</summary>
+    /// <summary>Determines if a Surface is a portion of a cone.
+    /// Returns false for any other Rhino object or if the object does not exist.</summary>
     /// <param name="objectId">(Guid) The cylinder object's identifier</param>
     /// <returns>(bool) True , otherwise False.</returns>
     static member IsCylinder(objectId:Guid) : bool =
-        let surface = RhinoScriptSyntax.CoerceSurface(objectId)
-        surface.IsCylinder()
+        match RhinoScriptSyntax.TryCoerceSurface(objectId) with
+        | Some surface -> surface.IsCylinder()
+        | None -> false
 
 
     /// <summary>Verifies an object is a Plane Surface. Plane Surfaces can be created by
-    ///    the Plane command. Note, a Plane Surface is not a planar NURBS Surface.</summary>
+    ///    the Plane command. Note, a Plane Surface is not a planar NURBS Surface.
+    ///    Returns false for any other Rhino object or if the object does not exist.</summary>
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True , otherwise False.</returns>
     static member IsPlaneSurface(objectId:Guid) : bool =
-        let face = RhinoScriptSyntax.CoerceSurface(objectId)
-        match face with
-        | :? BrepFace  as bface ->
+        match RhinoScriptSyntax.TryCoerceSurface(objectId) with
+        | Some (:? BrepFace  as bface) ->
             if bface.IsSurface then
                 match bface.UnderlyingSurface() with
                 | :?  PlaneSurface -> true

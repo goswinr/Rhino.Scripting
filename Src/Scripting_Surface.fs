@@ -1245,30 +1245,34 @@ module AutoOpenSurface =
 
 
 
-    /// <summary>Determines if a Surface is a portion of a cone.</summary>
+    /// <summary>Determines if a Surface is a portion of a cone.
+    /// Returns false for any other Rhino object or if the object does not exist.</summary>
     /// <param name="objectId">(Guid) The Surface object's identifier</param>
     /// <returns>(bool) True , otherwise False.</returns>
     static member IsCone(objectId:Guid) : bool =
-        let surface = RhinoScriptSyntax.CoerceSurface(objectId)
-        surface.IsCone()
+        match RhinoScriptSyntax.TryCoerceSurface(objectId) with
+        | Some surface -> surface.IsCone()
+        | None -> false
 
 
-    /// <summary>Determines if a Surface is a portion of a cone.</summary>
+    /// <summary>Determines if a Surface is a portion of a cone.
+    /// Returns false for any other Rhino object or if the object does not exist.</summary>
     /// <param name="objectId">(Guid) The cylinder object's identifier</param>
     /// <returns>(bool) True , otherwise False.</returns>
     static member IsCylinder(objectId:Guid) : bool =
-        let surface = RhinoScriptSyntax.CoerceSurface(objectId)
-        surface.IsCylinder()
+        match RhinoScriptSyntax.TryCoerceSurface(objectId) with
+        | Some surface -> surface.IsCylinder()
+        | None -> false
 
 
     /// <summary>Verifies an object is a Plane Surface. Plane Surfaces can be created by
-    ///    the Plane command. Note, a Plane Surface is not a planar NURBS Surface.</summary>
+    ///    the Plane command. Note, a Plane Surface is not a planar NURBS Surface.
+    ///    Returns false for any other Rhino object or if the object does not exist.</summary>
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True , otherwise False.</returns>
     static member IsPlaneSurface(objectId:Guid) : bool =
-        let face = RhinoScriptSyntax.CoerceSurface(objectId)
-        match face with
-        | :? BrepFace  as bface ->
+        match RhinoScriptSyntax.TryCoerceSurface(objectId) with
+        | Some (:? BrepFace  as bface) ->
             if bface.IsSurface then
                 match bface.UnderlyingSurface() with
                 | :?  PlaneSurface -> true

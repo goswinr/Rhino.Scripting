@@ -683,39 +683,39 @@ module AutoOpenDimension =
             RhinoScriptingException.Raise "DimStyleTextHeight set failed. dimStyle:'%s' height:'%A'" dimStyle height
 
 
-    /// <summary>Checks if  an object is an aligned dimension object. Returns false for any other Rhino object.</summary>
+    /// <summary>Checks if  an object is an aligned dimension object. Returns false for any other Rhino object or if the object does not exist.</summary>
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsAlignedDimension(objectId:Guid) : bool =
-        match RhinoScriptSyntax.CoerceGeometry objectId with
-        | :? LinearDimension as g -> g.Aligned
+        match RhinoScriptSyntax.TryCoerceGeometry objectId with
+        | Some (:? LinearDimension as g) -> g.Aligned
         | _ -> false
 
 
-    /// <summary>Checks if  an object is an angular dimension object. Returns false for any other Rhino object.</summary>
+    /// <summary>Checks if  an object is an angular dimension object. Returns false for any other Rhino object or if the object does not exist.</summary>
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsAngularDimension(objectId:Guid) : bool =
-        match RhinoScriptSyntax.CoerceGeometry objectId with
-        | :? AngularDimension -> true
+        match RhinoScriptSyntax.TryCoerceGeometry objectId with
+        | Some (:? AngularDimension) -> true
         | _ -> false
 
 
-    /// <summary>Checks if  an object is a diameter dimension object. Returns false for any other Rhino object.</summary>
+    /// <summary>Checks if  an object is a diameter dimension object. Returns false for any other Rhino object or if the object does not exist.</summary>
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsDiameterDimension(objectId:Guid) : bool =
-        match RhinoScriptSyntax.CoerceGeometry objectId with
-        | :? RadialDimension as g -> g.IsDiameterDimension
+        match RhinoScriptSyntax.TryCoerceGeometry objectId with
+        | Some (:? RadialDimension as g) -> g.IsDiameterDimension
         | _ -> false
 
 
-    /// <summary>Checks if  an object is a dimension object. Returns false for any other Rhino object.</summary>
+    /// <summary>Checks if  an object is a dimension object. Returns false for any other Rhino object or if the object does not exist.</summary>
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsDimension(objectId:Guid) : bool =
-        match RhinoScriptSyntax.CoerceGeometry objectId with
-        | :? AnnotationBase  -> true
+        match RhinoScriptSyntax.TryCoerceGeometry objectId with
+        | Some (:? AnnotationBase) -> true
         | _ -> false
 
 
@@ -736,39 +736,39 @@ module AutoOpenDimension =
         else ds.IsReference
 
 
-    /// <summary>Checks if  an object is a dimension leader object. Returns false for any other Rhino object.</summary>
+    /// <summary>Checks if  an object is a dimension leader object. Returns false for any other Rhino object or if the object does not exist.</summary>
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsLeader(objectId:Guid) : bool =
-            match RhinoScriptSyntax.CoerceGeometry objectId with
-            | :? Leader  -> true
+            match RhinoScriptSyntax.TryCoerceGeometry objectId with
+            | Some (:? Leader) -> true
             | _ -> false
 
 
-    /// <summary>Checks if  an object is a linear dimension object. Returns false for any other Rhino object.</summary>
+    /// <summary>Checks if  an object is a linear dimension object. Returns false for any other Rhino object or if the object does not exist.</summary>
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsLinearDimension(objectId:Guid) : bool =
-            match RhinoScriptSyntax.CoerceGeometry objectId with
-            | :? LinearDimension  -> true
+            match RhinoScriptSyntax.TryCoerceGeometry objectId with
+            | Some (:? LinearDimension) -> true
             | _ -> false
 
 
-    /// <summary>Checks if  an object is an ordinate dimension object. Returns false for any other Rhino object.</summary>
+    /// <summary>Checks if  an object is an ordinate dimension object. Returns false for any other Rhino object or if the object does not exist.</summary>
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsOrdinateDimension(objectId:Guid) : bool =
-            match RhinoScriptSyntax.CoerceGeometry objectId with
-            | :? OrdinateDimension  -> true
+            match RhinoScriptSyntax.TryCoerceGeometry objectId with
+            | Some (:? OrdinateDimension) -> true
             | _ -> false
 
 
-    /// <summary>Checks if  an object is a radial dimension object. Returns false for any other Rhino object.</summary>
+    /// <summary>Checks if  an object is a radial dimension object. Returns false for any other Rhino object or if the object does not exist.</summary>
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsRadialDimension(objectId:Guid) : bool =
-            match RhinoScriptSyntax.CoerceGeometry objectId with
-            | :? RadialDimension  -> true
+            match RhinoScriptSyntax.TryCoerceGeometry objectId with
+            | Some (:? RadialDimension) -> true
             | _ -> false
 
 

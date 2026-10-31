@@ -166,12 +166,13 @@ module AutoOpenLight =
         State.Doc.Views.Redraw()
 
 
-    /// <summary>Verifies a light object is a directional light.</summary>
+    /// <summary>Verifies a light object is a directional light. Returns false for any other Rhino object or if the object does not exist.</summary>
     /// <param name="objectId">(Guid) The light object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsDirectionalLight(objectId:Guid) : bool =
-        let light = RhinoScriptSyntax.CoerceLight(objectId)
-        light.IsDirectionalLight
+        match RhinoScriptSyntax.TryCoerceLight(objectId) with
+        | Some light -> light.IsDirectionalLight
+        | None -> false
 
 
     /// <summary>Verifies an object is a light object.</summary>
@@ -199,36 +200,40 @@ module AutoOpenLight =
         light.IsReference
 
 
-    /// <summary>Verifies a light object is a linear light.</summary>
+    /// <summary>Verifies a light object is a linear light. Returns false for any other Rhino object or if the object does not exist.</summary>
     /// <param name="objectId">(Guid) The light object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsLinearLight(objectId:Guid) : bool =
-        let light = RhinoScriptSyntax.CoerceLight(objectId)
-        light.IsLinearLight
+        match RhinoScriptSyntax.TryCoerceLight(objectId) with
+        | Some light -> light.IsLinearLight
+        | None -> false
 
 
-    /// <summary>Verifies a light object is a point light.</summary>
+    /// <summary>Verifies a light object is a point light. Returns false for any other Rhino object or if the object does not exist.</summary>
     /// <param name="objectId">(Guid) The light object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsPointLight(objectId:Guid) : bool =
-        let light = RhinoScriptSyntax.CoerceLight(objectId)
-        light.IsPointLight
+        match RhinoScriptSyntax.TryCoerceLight(objectId) with
+        | Some light -> light.IsPointLight
+        | None -> false
 
 
-    /// <summary>Verifies a light object is a rectangular light.</summary>
+    /// <summary>Verifies a light object is a rectangular light. Returns false for any other Rhino object or if the object does not exist.</summary>
     /// <param name="objectId">(Guid) The light object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsRectangularLight(objectId:Guid) : bool =
-        let light = RhinoScriptSyntax.CoerceLight(objectId)
-        light.IsRectangularLight
+        match RhinoScriptSyntax.TryCoerceLight(objectId) with
+        | Some light -> light.IsRectangularLight
+        | None -> false
 
 
-    /// <summary>Verifies a light object is a spot light.</summary>
+    /// <summary>Verifies a light object is a spot light. Returns false for any other Rhino object or if the object does not exist.</summary>
     /// <param name="objectId">(Guid) The light object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsSpotLight(objectId:Guid) : bool =
-        let light = RhinoScriptSyntax.CoerceLight(objectId)
-        light.IsSpotLight
+        match RhinoScriptSyntax.TryCoerceLight(objectId) with
+        | Some light -> light.IsSpotLight
+        | None -> false
 
 
     /// <summary>Returns the color of a light.</summary>
