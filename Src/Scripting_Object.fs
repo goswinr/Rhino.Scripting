@@ -18,12 +18,46 @@ module AutoOpenObject =
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
 
+    /// Internal helper: Puts copies of grouped objects into new groups, like the native Copy command does,
+    /// instead of leaving them in the groups of the original objects.
+    /// Copies of objects from the same group end up together in the same new group.
+    /// https://github.com/mcneel/rhinoscriptsyntax/commit/49af037ee7
+    static member private putCopiesInNewGroups(copyIds:Guid seq) : unit =
+        let copies = ResizeArray<DocObjects.RhinoObject>()
+        for id in copyIds do
+            match State.Doc.Objects.FindId(id) with
+            | null -> ()
+            | o -> if o.Attributes.GroupCount > 0 then copies.Add o
+        if copies.Count > 0 then
+            #if RH7
+            // GroupTable.RemapObjects is only available in Rhino 8 and later
+            let newGroups = Dictionary<int,int>()
+            for obj in copies do
+                let attr = obj.Attributes.Duplicate()
+                let oldGroups = attr.GetGroupList()
+                attr.RemoveFromAllGroups()
+                for oldGroup in oldGroups do
+                    let newGroup =
+                        match newGroups.TryGetValue oldGroup with
+                        | true, g -> g
+                        | _ ->
+                            let g = State.Doc.Groups.Add()
+                            if g < 0 then RhinoScriptingException.Raise "putCopiesInNewGroups: Failed to add a new group for the copy %s" (Pretty.str obj.Id)
+                            newGroups.[oldGroup] <- g
+                            g
+                    attr.AddToGroup newGroup
+                State.Doc.Objects.ModifyAttributes(obj, attr, quiet=true) |> ignore<bool>
+            #else
+            State.Doc.Groups.RemapObjects(copies) |> ignore<int>
+            #endif
+
+
     /// <summary>Moves, scales, or rotates a list of objects given a 4x4 transformation
     ///    matrix. The matrix acts on the left. To transform geometry objects instead of DocObjects or Guids use their .Transform(xForm) member.</summary>
     /// <param name="objectIds">(Guid seq) List of object identifiers</param>
     /// <param name="matrix">(Transform) The transformation matrix (4x4 array of numbers)</param>
     /// <param name="copy">(bool) Optional, default value: <c>false</c>
-    ///    Copy the objects</param>
+    ///    Copy the objects. Copies of grouped objects are put into new groups</param>
     /// <returns>(Guid ResizeArray) IDs identifying the newly transformed objects.</returns>
     static member TransformObjects( objectIds:Guid seq,
                                     matrix:Transform,
@@ -34,6 +68,7 @@ module AutoOpenObject =
             let objectId = State.Doc.Objects.Transform(objId, matrix, not copy)
             if objectId = Guid.Empty then RhinoScriptingException.Raise "TransformObjects: Cannot apply transform to object '%s' from objectId:'%s' matrix:'%A' copy:'%A'" (Pretty.str objId) (Pretty.str objectId) matrix copy
             rc.Add objectId
+        if copy then RhinoScriptSyntax.putCopiesInNewGroups rc
         State.Doc.Views.Redraw()
         rc
 
@@ -42,17 +77,19 @@ module AutoOpenObject =
     /// <param name="objectId">(Guid) The identifier of the object</param>
     /// <param name="matrix">(Transform) The transformation matrix (4x4 array of numbers)</param>
     /// <param name="copy">(bool) Optional, default value: <c>false</c>
-    ///    Copy the object</param>
+    ///    Copy the object. Copies of grouped objects are put into new groups</param>
     /// <returns>(Guid) The identifier of the transformed object.</returns>
     static member TransformObject(  objectId:Guid,
                                     matrix:Transform,
                                     [<OPT;DEF(false)>]copy:bool) : Guid =
         let res = State.Doc.Objects.Transform(objectId, matrix, not copy)
         if res = Guid.Empty then RhinoScriptingException.Raise "TransformObject: Cannot apply transform to objectId:'%s' matrix:'%A' copy:'%A'"  (Pretty.str objectId) matrix copy
+        if copy then RhinoScriptSyntax.putCopiesInNewGroups [res]
         res
 
 
-    /// <summary>Copies an object from one location to another, or in-place.</summary>
+    /// <summary>Copies an object from one location to another, or in-place.
+    /// The copy of a grouped object is put into a new group.</summary>
     /// <param name="objectId">(Guid) Object to copy</param>
     /// <param name="translation">(Vector3d) Optional, additional translation vector to apply</param>
     /// <returns>(Guid) objectId for the copy.</returns>
@@ -64,11 +101,13 @@ module AutoOpenObject =
                 Transform.Identity
         let res = State.Doc.Objects.Transform(objectId, translation, deleteOriginal=false)
         if res = Guid.Empty then RhinoScriptingException.Raise "CopyObject failed.  objectId:'%s' translation:'%A'" (Pretty.str objectId) translation
+        RhinoScriptSyntax.putCopiesInNewGroups [res]
         res
 
 
 
-    /// <summary>Copies one or more objects from one location to another, or in-place.</summary>
+    /// <summary>Copies one or more objects from one location to another, or in-place.
+    /// Copies of grouped objects are put into new groups.</summary>
     /// <param name="objectIds">(Guid seq) List of objects to copy</param>
     /// <param name="translation">(Vector3d) Optional, translation vector to apply to copied set</param>
     /// <returns>(Guid ResizeArray) Identifiers for the copies.</returns>
@@ -83,6 +122,7 @@ module AutoOpenObject =
             let res = State.Doc.Objects.Transform(objectId, translation, deleteOriginal=false)
             if res = Guid.Empty then RhinoScriptingException.Raise "CopyObjects failed.  objectId:'%s' translation:'%A'" (Pretty.str objectId) translation
             rc.Add res
+        RhinoScriptSyntax.putCopiesInNewGroups rc
         rc
 
 
@@ -334,7 +374,7 @@ module AutoOpenObject =
     /// <param name="startPoint">(Point3d) Start of the mirror Plane</param>
     /// <param name="endPoint">(Point3d) End of the mirror Plane</param>
     /// <param name="copy">(bool) Optional, default value: <c>false</c>
-    ///    Copy the object</param>
+    ///    Copy the object. Copies of grouped objects are put into new groups</param>
     /// <returns>(Guid) Identifier of the mirrored object.</returns>
     static member MirrorObject( objectId:Guid,
                                 startPoint:Point3d,
@@ -348,6 +388,7 @@ module AutoOpenObject =
         let xf = Transform.Mirror(startPoint, vec)
         let res = State.Doc.Objects.Transform(objectId, xf, not copy)
         if res = Guid.Empty then RhinoScriptingException.Raise "MirrorObject Cannot apply MirrorObject transform to objectId:'%s' startPoint:'%A' endPoint:'%A' copy:'%A'" (Pretty.str objectId) startPoint endPoint copy
+        if copy then RhinoScriptSyntax.putCopiesInNewGroups [res]
         res
 
 
@@ -356,7 +397,7 @@ module AutoOpenObject =
     /// <param name="startPoint">(Point3d) Start of the mirror Plane</param>
     /// <param name="endPoint">(Point3d) End of the mirror Plane</param>
     /// <param name="copy">(bool) Optional, default value: <c>false</c>
-    ///    Copy the objects</param>
+    ///    Copy the objects. Copies of grouped objects are put into new groups</param>
     /// <returns>(Guid ResizeArray) List of identifiers of the mirrored objects.</returns>
     static member MirrorObjects(  objectIds:Guid seq,
                                  startPoint:Point3d,
@@ -373,6 +414,7 @@ module AutoOpenObject =
             let objectId = State.Doc.Objects.Transform(objectId, xf, not copy)
             if objectId = Guid.Empty then RhinoScriptingException.Raise "MirrorObjects Cannot apply MirrorObjects to objectId:'%s' startPoint:'%A' endPoint:'%A' copy:'%A'" (Pretty.str objectId) startPoint endPoint copy
             rc.Add objectId
+        if copy then RhinoScriptSyntax.putCopiesInNewGroups rc
         rc
 
 
@@ -1095,7 +1137,7 @@ module AutoOpenObject =
     /// <param name="rotationAngle">(float) In degrees</param>
     /// <param name="axis">(Vector3d) Optional, default value: <c>Vector3d.ZAxis</c>
     ///    Axis of rotation, If omitted, the Vector3d.ZAxis is used as the rotation axis</param>
-    /// <param name="copy">(bool) Optional, default value: <c>false</c>. Copy the object</param>
+    /// <param name="copy">(bool) Optional, default value: <c>false</c>. Copy the object. Copies of grouped objects are put into new groups</param>
     /// <returns>(Guid) Identifier of the rotated object.</returns>
     static member RotateObject( objectId:Guid,
                                 centerPoint:Point3d,
@@ -1107,6 +1149,7 @@ module AutoOpenObject =
         let xf = Transform.Rotation(rotationAngle, axis, centerPoint)
         let res = State.Doc.Objects.Transform(objectId, xf, not copy)
         if res = Guid.Empty then RhinoScriptingException.Raise "RotateObject failed.  objectId:'%s' centerPoint:'%A' rotationAngle:'%A' axis:'%A' copy:'%A'" (Pretty.str objectId) centerPoint rotationAngle axis copy
+        if copy then RhinoScriptSyntax.putCopiesInNewGroups [res]
         res
 
 
@@ -1116,7 +1159,7 @@ module AutoOpenObject =
     /// <param name="rotationAngle">(float) In degrees</param>
     /// <param name="axis">(Vector3d) Optional, default value: <c>Vector3d.ZAxis</c>
     ///    Axis of rotation, If omitted, the Vector3d.ZAxis is used as the rotation axis</param>
-    /// <param name="copy">(bool) Optional, default value: <c>false</c>. Copy the object</param>
+    /// <param name="copy">(bool) Optional, default value: <c>false</c>. Copy the object. Copies of grouped objects are put into new groups</param>
     /// <returns>(Guid ResizeArray) identifiers of the rotated objects.</returns>
     static member RotateObjects( objectIds:Guid seq,
                                  centerPoint:Point3d,
@@ -1131,6 +1174,7 @@ module AutoOpenObject =
             let res = State.Doc.Objects.Transform(objectId, xf, not copy)
             if res = Guid.Empty then RhinoScriptingException.Raise "RotateObjects failed.  objectId:'%s' centerPoint:'%A' rotationAngle:'%A' axis:'%A' copy:'%A'" (Pretty.str objectId) centerPoint rotationAngle axis copy
             rc.Add res
+        if copy then RhinoScriptSyntax.putCopiesInNewGroups rc
         rc
 
 
@@ -1139,7 +1183,7 @@ module AutoOpenObject =
     /// <param name="objectId">(Guid) The identifier of an object</param>
     /// <param name="origin">(Point3d) The origin of the scale transformation</param>
     /// <param name="scale">(float*float*float) Three numbers that identify the X, Y, and Z axis scale factors to apply</param>
-    /// <param name="copy">(bool) Optional, default value: <c>false</c>.Copy the object</param>
+    /// <param name="copy">(bool) Optional, default value: <c>false</c>. Copy the object. Copies of grouped objects are put into new groups</param>
     /// <returns>(Guid) Identifier of the scaled object.</returns>
     static member ScaleObject( objectId:Guid,
                                origin:Point3d,
@@ -1151,13 +1195,14 @@ module AutoOpenObject =
         let xf = Transform.Scale(plane, x, y, z)
         let res = State.Doc.Objects.Transform(objectId, xf, not copy)
         if res = Guid.Empty then RhinoScriptingException.Raise "ScaleObject failed.  objectId:'%s' origin:'%A' scale:'%A' copy:'%A'" (Pretty.str objectId) origin scale  copy
+        if copy then RhinoScriptSyntax.putCopiesInNewGroups [res]
         res
 
     /// <summary>Scales a single object. Uniform scale transformation. Scaling is based on the WorldXY Plane.</summary>
     /// <param name="objectId">(Guid) The identifier of an object</param>
     /// <param name="origin">(Point3d) The origin of the scale transformation</param>
     /// <param name="scale">(float) One numbers that identify the X, Y, and Z axis scale factors to apply</param>
-    /// <param name="copy">(bool) Optional, default value: <c>false</c>. Copy the object</param>
+    /// <param name="copy">(bool) Optional, default value: <c>false</c>. Copy the object. Copies of grouped objects are put into new groups</param>
     /// <returns>(Guid) Identifier of the scaled object.</returns>
     static member ScaleObject( objectId:Guid,
                                origin:Point3d,
@@ -1168,6 +1213,7 @@ module AutoOpenObject =
         let xf = Transform.Scale(plane, scale, scale, scale)
         let res = State.Doc.Objects.Transform(objectId, xf, not copy)
         if res = Guid.Empty then RhinoScriptingException.Raise "ScaleObject failed.  objectId:'%s' origin:'%A' scale:'%A' copy:'%A'" (Pretty.str objectId) origin scale  copy
+        if copy then RhinoScriptSyntax.putCopiesInNewGroups [res]
         res
 
     /// <summary>Scales one or more objects. Can be used to perform a uniform or non-
@@ -1175,7 +1221,7 @@ module AutoOpenObject =
     /// <param name="objectIds">(Guid seq) Identifiers of objects to scale</param>
     /// <param name="origin">(Point3d) The origin of the scale transformation</param>
     /// <param name="scale">(float*float*float) Three numbers that identify the X, Y, and Z axis scale factors to apply</param>
-    /// <param name="copy">(bool) Optional, default value: <c>false</c>. Copy the objects</param>
+    /// <param name="copy">(bool) Optional, default value: <c>false</c>. Copy the objects. Copies of grouped objects are put into new groups</param>
     /// <returns>(Guid ResizeArray) identifiers of the scaled objects.</returns>
     static member ScaleObjects( objectIds:Guid seq,
                                 origin:Point3d,
@@ -1190,6 +1236,7 @@ module AutoOpenObject =
             let res = State.Doc.Objects.Transform(objectId, xf, not copy)
             if res = Guid.Empty then RhinoScriptingException.Raise "ScaleObjects failed.  objectId:'%s' origin:'%s' scale:'%A' copy:'%b'" (Pretty.str objectId) origin.Pretty scale  copy
             rc.Add res
+        if copy then RhinoScriptSyntax.putCopiesInNewGroups rc
         rc
 
     /// <summary>Scales one or more objects. Uniform scale transformation. Scaling is based on the WorldXY Plane.</summary>
@@ -1197,7 +1244,7 @@ module AutoOpenObject =
     /// <param name="origin">(Point3d) The origin of the scale transformation</param>
     /// <param name="scale">(float) One numbers that identify the X, Y, and Z axis scale factors to apply</param>
     /// <param name="copy">(bool) Optional, default value: <c>false</c>
-    ///    Copy the objects</param>
+    ///    Copy the objects. Copies of grouped objects are put into new groups</param>
     /// <returns>(Guid ResizeArray) identifiers of the scaled objects.</returns>
     static member ScaleObjects( objectIds:Guid seq,
                                 origin:Point3d,
@@ -1211,6 +1258,7 @@ module AutoOpenObject =
             let res = State.Doc.Objects.Transform(objectId, xf, not copy)
             if res = Guid.Empty then RhinoScriptingException.Raise "ScaleObjects failed.  objectId:'%s' origin:'%A' scale:'%A' copy:'%A'" (Pretty.str objectId) origin scale  copy
             rc.Add res
+        if copy then RhinoScriptSyntax.putCopiesInNewGroups rc
         rc
 
 
@@ -1295,7 +1343,7 @@ module AutoOpenObject =
     /// <param name="referencePoint">(Point3d) Reference point of the shear transformation</param>
     /// <param name="angleDegrees">(float) The shear angle in degrees</param>
     /// <param name="copy">(bool) Optional, default value: <c>false</c>
-    ///    Copy the objects</param>
+    ///    Copy the objects. Copies of grouped objects are put into new groups</param>
     /// <returns>(Guid) Identifier of the sheared object.</returns>
     static member ShearObject( objectId:Guid,
                                origin:Point3d,
@@ -1321,6 +1369,7 @@ module AutoOpenObject =
        let xf = cobinv * shear2d * cob
        let res = State.Doc.Objects.Transform(objectId, xf, not copy)
        if res = Guid.Empty then RhinoScriptingException.Raise "ShearObject failed for %s, origin %s, ref point  %s and angle in Deg  %f" (Pretty.str objectId) origin.Pretty referencePoint.Pretty angleDegrees
+       if copy then RhinoScriptSyntax.putCopiesInNewGroups [res]
        res
 
 
@@ -1330,7 +1379,7 @@ module AutoOpenObject =
     /// <param name="referencePoint">(Point3d) Reference point of the shear transformation</param>
     /// <param name="angleDegrees">(float) The shear angle in degrees</param>
     /// <param name="copy">(bool) Optional, default value: <c>false</c>
-    ///    Copy the objects</param>
+    ///    Copy the objects. Copies of grouped objects are put into new groups</param>
     /// <returns>(Guid ResizeArray) identifiers of the sheared objects.</returns>
     static member ShearObjects( objectIds:Guid seq,
                                 origin:Point3d,
@@ -1361,6 +1410,7 @@ module AutoOpenObject =
                 RhinoScriptingException.Raise "ShearObjects failed for %s, origin %s, ref point  %s and angle in Deg  %f" (Pretty.str ob) origin.Pretty referencePoint.Pretty angleDegrees
             else
                 r.Add res
+        if copy then RhinoScriptSyntax.putCopiesInNewGroups r
         r
 
 
