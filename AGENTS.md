@@ -77,4 +77,5 @@ Methods can be called from any thread. Code that touches UI (dialogs, layer crea
 ## Other folders
 
 - `Tools/*.fsx` are one-off scripts from past bulk edits of the source (docstring fixes, file splitting). They are not part of the build.
+- `API-Table/ApiTable.fsx` writes `API-Table/ApiTable.md`, a table of the whole public API with signatures, default values and summaries, one table per `Scripting_*.fs` file. Run `dotnet fsi API-Table/ApiTable.fsx` after changing the public API. It type checks the sources itself with FSharp.Compiler.Service, so it needs no build, only the packages of `ForPublishing.fsproj` in the local NuGet cache.
 - `.claude/skills/rhino-scripting.md` is an end-user guide to writing scripts with this library, not to developing it.
