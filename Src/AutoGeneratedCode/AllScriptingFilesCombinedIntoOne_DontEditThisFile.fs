@@ -6162,27 +6162,40 @@ type RhinoScriptSyntax private () =
         State.Doc.Views.Redraw()
 
 
-    /// <summary>Returns the text alignment mode of a dimension style.</summary>
+    /// <summary>Returns the text alignment mode of a dimension style.
+    /// Rhino 6 replaced the single Rhino 5 text alignment setting with a text location
+    /// (above, in, or below the dimension line) and a text orientation
+    /// (in the dimension plane, or horizontal to the view).
+    /// This function maps them back onto the Rhino 5 values.
+    /// It reads the settings for linear and angular dimensions.</summary>
     /// <param name="dimStyle">(string) The name of an existing dimension style</param>
     /// <returns>(int) The current text alignment
-    ///    0 = Normal (same as 2)
     ///    1 = Horizontal to view
-    ///    2 = Above the dimension line
-    ///    3 = In the dimension line
+    ///    2 = In the dimension plane, above or below the dimension line
+    ///    3 = In the dimension plane, in the dimension line
+    ///    0 is never returned.
     /// </returns>
     static member DimStyleTextAlignment(dimStyle:string) : int = //GET
         let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then
             RhinoScriptingException.Raise "DimStyleTextAlignment get failed. dimStyle:'%s'" dimStyle
-        int ds.DimTextLocation
+        // https://github.com/mcneel/rhinoscriptsyntax/commit/b2bf485894 (RH-44732)
+        if   ds.DimTextOrientation = DocObjects.TextOrientation.InView then 1
+        elif ds.DimTextLocation    = DocObjects.DimensionStyle.TextLocation.InDimLine then 3
+        else 2
 
-    /// <summary>Changes the text alignment mode of a dimension style.</summary>
+    /// <summary>Changes the text alignment mode of a dimension style.
+    /// Rhino 6 replaced the single Rhino 5 text alignment setting with a text location
+    /// (above, in, or below the dimension line) and a text orientation
+    /// (in the dimension plane, or horizontal to the view),
+    /// stored separately for linear and angular dimensions and for radial dimensions.
+    /// This function sets both, for linear, angular and radial dimensions.</summary>
     /// <param name="dimStyle">(string) The name of an existing dimension style</param>
     /// <param name="alignment">(int) The new text alignment
-    ///    0 = Normal (same as 2)
-    ///    1 = Horizontal to view
-    ///    2 = Above the dimension line
-    ///    3 = In the dimension line
+    ///    0 = Same as 2
+    ///    1 = Orientation horizontal to view, location is left unchanged
+    ///    2 = Orientation in the dimension plane, location above the dimension line
+    ///    3 = Orientation in the dimension plane, location in the dimension line
     /// </param>
     /// <returns>(unit) void, nothing.</returns>
     static member DimStyleTextAlignment(dimStyle:string, alignment:int) : unit = //SET
@@ -6192,17 +6205,20 @@ type RhinoScriptSyntax private () =
         elif alignment<0 || alignment>3 then
             RhinoScriptingException.Raise "DimStyleTextAlignment invalid alignment. dimStyle:'%s' alignment:'%d' is not between 0 and 3" dimStyle alignment
 
-        // https://github.com/mcneel/rhinoscriptsyntax/commit/9c542c3c0084189d08dd19962e78745523226bd8
-        // for backward compatibility, lets set the "horizontal to view" if
-        // alignment value is '1' - eirannejad 2025-03-17 (RH-86539)
-        if alignment=1 then
-            ds.DimTextOrientation <- Rhino.DocObjects.TextOrientation.InView
-
-        // set dim text location
-        if alignment=3 then
-            ds.DimTextLocation <- Rhino.DocObjects.DimensionStyle.TextLocation.InDimLine
-        if alignment=0 || alignment=2 then
-            ds.DimTextLocation <- Rhino.DocObjects.DimensionStyle.TextLocation.AboveDimLine  // default
+        // https://github.com/mcneel/rhinoscriptsyntax/commit/b2bf485894 (RH-44732)
+        // Rhino 5 had one text alignment for every dimension type. Rhino 6 keeps
+        // the linear/angular and the radial settings apart, so write both pairs.
+        if alignment = 1 then
+            ds.DimTextOrientation       <- DocObjects.TextOrientation.InView
+            ds.DimRadialTextOrientation <- DocObjects.TextOrientation.InView
+        else
+            let location =
+                if alignment = 3 then DocObjects.DimensionStyle.TextLocation.InDimLine
+                else                  DocObjects.DimensionStyle.TextLocation.AboveDimLine
+            ds.DimTextOrientation       <- DocObjects.TextOrientation.InPlane
+            ds.DimRadialTextOrientation <- DocObjects.TextOrientation.InPlane
+            ds.DimTextLocation          <- location
+            ds.DimRadialTextLocation    <- location
 
         if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=false) then
             RhinoScriptingException.Raise "DimStyleTextAlignment set failed. dimStyle:'%s' alignment:'%A'" dimStyle alignment

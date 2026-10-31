@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ContextIsGrasshopper, it checks if the call stack of the current thread goes through the Grasshopper assembly
 ### Changed
 - Hide AutoOpen modules from editor completion lists with EditorBrowsable(EditorBrowsableState.Never).
+- DimStyleTextAlignment sets the text orientation and location for radial dimensions too, like in RhinoPython
+### Fixed
+- DimStyleTextAlignment returns the documented values 1, 2 or 3, instead of the index of the text location
 
 ## [0.15.0] - 2026-10-11
 ### Added
