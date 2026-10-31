@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - ContextIsGrasshopper, it checks if the call stack of the current thread goes through the Grasshopper assembly
 - MeshTextureCoordinates, like in RhinoPython
+- XformScale overloads with a Plane, to scale about the Plane's origin along the Plane's axes, like in RhinoPython
 ### Changed
 - Hide AutoOpen modules from editor completion lists with EditorBrowsable(EditorBrowsableState.Never).
 - DimStyleTextAlignment sets the text orientation and location for radial dimensions too, like in RhinoPython

@@ -225,6 +225,22 @@ module AutoOpenTransformation =
         let plane = Plane(point, Vector3d.ZAxis)
         Transform.Scale(plane, scale, scale, scale)
 
+    /// <summary>Creates a scale transformation about the origin of a Plane and along the Plane's axes.</summary>
+    /// <param name="scaleX">(float) Scale in the X direction of the Plane</param>
+    /// <param name="scaleY">(float) Scale in the Y direction of the Plane</param>
+    /// <param name="scaleZ">(float) Scale in the Z direction of the Plane</param>
+    /// <param name="plane">(Plane) The Plane, its origin is the center of scale</param>
+    /// <returns>(Transform) The 4x4 transformation matrix.</returns>
+    static member XformScale(scaleX:float, scaleY:float, scaleZ:float, plane:Plane) : Transform =
+        Transform.Scale(plane, scaleX, scaleY, scaleZ)
+
+    /// <summary>Creates a uniform scale transformation about the origin of a Plane.</summary>
+    /// <param name="scale">(float) Scale in X , Y and Z direction</param>
+    /// <param name="plane">(Plane) The Plane, its origin is the center of scale</param>
+    /// <returns>(Transform) The 4x4 transformation matrix.</returns>
+    static member XformScale(scale:float, plane:Plane) : Transform =
+        Transform.Scale(plane, scale, scale, scale)
+
 
     /// <summary>Transforms a point from either client-area coordinates of the specified view
     ///    or screen coordinates to world coordinates. The resulting coordinates are represented

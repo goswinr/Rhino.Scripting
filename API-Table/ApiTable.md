@@ -2,7 +2,7 @@
 
 All public types, members and functions of Rhino.Scripting, with the first sentence of their summary.
 
-- The 1252 static members of `RhinoScriptSyntax`, 1017 names with their overloads, have one table per source file,
+- The 1254 static members of `RhinoScriptSyntax`, 1017 names with their overloads, have one table per source file,
   e.g. [Curve](#curve) for `Src/Scripting_Curve.fs`. Scripts usually call them through an alias, `type rs = RhinoScriptSyntax`.
 - Overloads of the same name are in the order of the source.
 - `?name: type = value` marks an optional parameter and its default value.
@@ -38,7 +38,7 @@ Generated from the sources by `API-Table/ApiTable.fsx`. Do not edit by hand.
 - [Selection](#selection), 25 members
 - [Surface](#surface), 120 members
 - [Toolbar](#toolbar), 15 members
-- [Transformation](#transformation), 27 members
+- [Transformation](#transformation), 29 members
 - [UserData](#userdata), 21 members
 - [UserInterface](#userinterface), 40 members
 - [Utility](#utility), 31 members
@@ -1310,6 +1310,8 @@ From [Src/Scripting_Transformation.fs](../Src/Scripting_Transformation.fs).
 | `XformScale` | `scaleX: float * scaleY: float * scaleZ: float * point: Point3d -> Transform` | Creates a scale transformation. |
 | `XformScale` | `scale: float -> Transform` | Creates a scale transformation based on World Origin point. |
 | `XformScale` | `scale: float * point: Point3d -> Transform` | Creates a scale transformation. |
+| `XformScale` | `scaleX: float * scaleY: float * scaleZ: float * plane: Plane -> Transform` | Creates a scale transformation about the origin of a Plane and along the Plane's axes. |
+| `XformScale` | `scale: float * plane: Plane -> Transform` | Creates a uniform scale transformation about the origin of a Plane. |
 | `XformScreenToWorld` | `point: Point3d * ?view: string = null * ?screenCoordinates: bool = false -> Point3d` | Transforms a point from either client-area coordinates of the specified view or screen coordinates to world coordinates. |
 | `XformShear` | `plane: Plane * x: Vector3d * y: Vector3d * z: Vector3d -> Transform` | Returns a shear transformation matrix. |
 | `XformTranslation` | `vector: Vector3d -> Transform` | Creates a translation transformation matrix. |
