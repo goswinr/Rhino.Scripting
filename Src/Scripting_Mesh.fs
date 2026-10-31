@@ -21,7 +21,7 @@ module AutoOpenMesh =
     /// <summary>Adds a Mesh object to the document.</summary>
     /// <param name="vertices">(Point3d seq) List of 3D points defining the vertices of the mesh</param>
     /// <param name="faceVertices">(int IList seq) List containing lists of 3 or 4 numbers that define the
-    ///    vertex indices for each face of the mesh. If the third a fourth vertex
+    ///    vertex indices for each face of the mesh. If the third and fourth vertex
     ///    indices of a face are identical, a triangular face will be created</param>
     /// <param name="vertexNormals">(Vector3f seq) Optional, list of 3D vectors defining the vertex normals of
     ///    the mesh. Note, for every vertex, there must be a corresponding vertex normal</param>
@@ -77,7 +77,7 @@ module AutoOpenMesh =
     /// <summary>Adds a Mesh object to the document.</summary>
     /// <param name="vertices">(Point3d seq) List of 3D points defining the vertices of the mesh</param>
     /// <param name="faceVertices">(int*int*int*int seq) Tuple  of  4 integers that define the
-    ///    vertex indices for each face of the mesh. If the third a fourth vertex
+    ///    vertex indices for each face of the mesh. If the third and fourth vertex
     ///    indices of a face are identical, a triangular face will be created</param>
     /// <param name="vertexNormals">(Vector3f seq) Optional, list of 3D vectors defining the vertex normals of
     ///    the mesh. Note, for every vertex, there must be a corresponding vertex normal</param>
