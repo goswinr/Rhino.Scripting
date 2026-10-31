@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - DimStyleTextAlignment returns the documented values 1, 2 or 3, instead of the index of the text location
 - IsLinetype returned true for any name in Rhino 8, and IsLinetypeReference used the Continuous linetype for unknown names
 - ObjectPrintColorSource accepts 2 (print color by display)
+- LayerLinetype and GetLinetype used the Continuous linetype for unknown names in Rhino 8
+- ObjectLinetype can set the Continuous linetype
 
 ## [0.15.0] - 2026-10-11
 ### Added

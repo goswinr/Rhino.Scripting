@@ -478,7 +478,7 @@ module AutoOpenUserInterface =
             #else
             let preselect =
                 if isNull defaultValLinetype then State.Doc.Linetypes.CurrentLinetype
-                else State.Doc.Linetypes.FindName(defaultValLinetype) |? State.Doc.Linetypes.CurrentLinetype
+                else UtilLayer.findLinetype(defaultValLinetype) |? State.Doc.Linetypes.CurrentLinetype
             let objectId = UI.Dialogs.ShowLineTypes("Select Linetype", "Select Linetype", State.Doc, preselect.Id)
             #endif
             // https://github.com/mcneel/rhinoscriptsyntax/pull/211/files

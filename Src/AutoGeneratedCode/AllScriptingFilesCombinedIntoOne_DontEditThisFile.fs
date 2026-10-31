@@ -1388,18 +1388,13 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Changes the line type of a layer.</summary>
     /// <param name="layer">(string) Name of an existing layer</param>
-    /// <param name="lineType">(string) Name of a line type</param>
+    /// <param name="lineType">(string) Name of a line type, not case sensitive</param>
     /// <returns>(unit) void, nothing.</returns>
     static member LayerLinetype(layer:string, lineType:string) : unit = //SET
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
-        let mutable index = layer.LinetypeIndex
-        if lineType = State.Doc.Linetypes.ContinuousLinetypeName then
-            index <- -1
-        else
-            let lt = State.Doc.Linetypes.FindName(lineType)
-            if lt|> isNull  then RhinoScriptingException.Raise "LayerLinetype not found. layer:'%s' line typ:'%s'" layer.FullPath lineType
-            index <- lt.LinetypeIndex
-        layer.LinetypeIndex <- index
+        match UtilLayer.findLinetypeIndex lineType with
+        | Some index -> layer.LinetypeIndex <- index
+        | None -> RhinoScriptingException.Raise "LayerLinetype not found. layer:'%s' line typ:'%s'" layer.FullPath lineType
         State.Doc.Views.Redraw()
 
 
@@ -11533,12 +11528,14 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Modifies the linetype of an object.</summary>
     /// <param name="objectId">(Guid) Identifier of object</param>
-    /// <param name="linetype">(string) Name of an existing linetype</param>
+    /// <param name="linetype">(string) Name of an existing linetype, not case sensitive</param>
     /// <returns>(unit) void, nothing.</returns>
     static member ObjectLinetype(objectId:Guid, linetype:string) : unit = //SET
         let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        let newIndex = State.Doc.Linetypes.Find(linetype)
-        if newIndex <0 then RhinoScriptingException.Raise "ObjectLinetype: Setting it failed for '%A' and '%A'"  linetype objectId
+        let newIndex =
+            match UtilLayer.findLinetypeIndex linetype with
+            | Some i -> i
+            | None -> RhinoScriptingException.Raise "ObjectLinetype: Setting it failed for '%A' and '%A'"  linetype objectId
         rhinoObject.Attributes.LinetypeSource <- DocObjects.ObjectLinetypeSource.LinetypeFromObject
         rhinoObject.Attributes.LinetypeIndex <- newIndex
         rhinoObject.CommitChanges() |> ignore<bool>
@@ -11546,11 +11543,13 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Modifies the linetype of multiple object.</summary>
     /// <param name="objectIds">(Guid seq) Identifiers of objects</param>
-    /// <param name="linetype">(string) Name of an existing linetype</param>
+    /// <param name="linetype">(string) Name of an existing linetype, not case sensitive</param>
     /// <returns>(unit) void, nothing.</returns>
     static member ObjectLinetype(objectIds:Guid seq, linetype:string) : unit = //MULTISET
-        let newIndex = State.Doc.Linetypes.Find(linetype)
-        if newIndex <0 then RhinoScriptingException.Raise "ObjectLinetype: Setting it failed for '%A' and '%A'"  linetype objectIds
+        let newIndex =
+            match UtilLayer.findLinetypeIndex linetype with
+            | Some i -> i
+            | None -> RhinoScriptingException.Raise "ObjectLinetype: Setting it failed for '%A' and '%A'"  linetype objectIds
         for objectId in objectIds do
             let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             rhinoObject.Attributes.LinetypeSource <- DocObjects.ObjectLinetypeSource.LinetypeFromObject
@@ -17731,7 +17730,7 @@ type RhinoScriptSyntax private () =
             #else
             let preselect =
                 if isNull defaultValLinetype then State.Doc.Linetypes.CurrentLinetype
-                else State.Doc.Linetypes.FindName(defaultValLinetype) |? State.Doc.Linetypes.CurrentLinetype
+                else UtilLayer.findLinetype(defaultValLinetype) |? State.Doc.Linetypes.CurrentLinetype
             let objectId = UI.Dialogs.ShowLineTypes("Select Linetype", "Select Linetype", State.Doc, preselect.Id)
             #endif
             // https://github.com/mcneel/rhinoscriptsyntax/pull/211/files

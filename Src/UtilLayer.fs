@@ -179,5 +179,15 @@ module internal UtilLayer =
         else
             null
 
+    /// Finds the index of a linetype by name, ignoring case.
+    /// Returns -1 for the default "Continuous" linetype, and None if not found.
+    let internal findLinetypeIndex(name:string) : int option =
+        if String.Equals(name, State.Doc.Linetypes.ContinuousLinetypeName, StringComparison.OrdinalIgnoreCase) then
+            Some -1
+        else
+            match findLinetype name with
+            | null -> None
+            | lt -> Some lt.LinetypeIndex
+
 
 

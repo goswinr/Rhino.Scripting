@@ -671,12 +671,14 @@ module AutoOpenObject =
 
     /// <summary>Modifies the linetype of an object.</summary>
     /// <param name="objectId">(Guid) Identifier of object</param>
-    /// <param name="linetype">(string) Name of an existing linetype</param>
+    /// <param name="linetype">(string) Name of an existing linetype, not case sensitive</param>
     /// <returns>(unit) void, nothing.</returns>
     static member ObjectLinetype(objectId:Guid, linetype:string) : unit = //SET
         let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        let newIndex = State.Doc.Linetypes.Find(linetype)
-        if newIndex <0 then RhinoScriptingException.Raise "ObjectLinetype: Setting it failed for '%A' and '%A'"  linetype objectId
+        let newIndex =
+            match UtilLayer.findLinetypeIndex linetype with
+            | Some i -> i
+            | None -> RhinoScriptingException.Raise "ObjectLinetype: Setting it failed for '%A' and '%A'"  linetype objectId
         rhinoObject.Attributes.LinetypeSource <- DocObjects.ObjectLinetypeSource.LinetypeFromObject
         rhinoObject.Attributes.LinetypeIndex <- newIndex
         rhinoObject.CommitChanges() |> ignore<bool>
@@ -684,11 +686,13 @@ module AutoOpenObject =
 
     /// <summary>Modifies the linetype of multiple object.</summary>
     /// <param name="objectIds">(Guid seq) Identifiers of objects</param>
-    /// <param name="linetype">(string) Name of an existing linetype</param>
+    /// <param name="linetype">(string) Name of an existing linetype, not case sensitive</param>
     /// <returns>(unit) void, nothing.</returns>
     static member ObjectLinetype(objectIds:Guid seq, linetype:string) : unit = //MULTISET
-        let newIndex = State.Doc.Linetypes.Find(linetype)
-        if newIndex <0 then RhinoScriptingException.Raise "ObjectLinetype: Setting it failed for '%A' and '%A'"  linetype objectIds
+        let newIndex =
+            match UtilLayer.findLinetypeIndex linetype with
+            | Some i -> i
+            | None -> RhinoScriptingException.Raise "ObjectLinetype: Setting it failed for '%A' and '%A'"  linetype objectIds
         for objectId in objectIds do
             let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             rhinoObject.Attributes.LinetypeSource <- DocObjects.ObjectLinetypeSource.LinetypeFromObject

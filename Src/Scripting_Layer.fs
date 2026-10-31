@@ -400,18 +400,13 @@ module AutoOpenLayer =
 
     /// <summary>Changes the line type of a layer.</summary>
     /// <param name="layer">(string) Name of an existing layer</param>
-    /// <param name="lineType">(string) Name of a line type</param>
+    /// <param name="lineType">(string) Name of a line type, not case sensitive</param>
     /// <returns>(unit) void, nothing.</returns>
     static member LayerLinetype(layer:string, lineType:string) : unit = //SET
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
-        let mutable index = layer.LinetypeIndex
-        if lineType = State.Doc.Linetypes.ContinuousLinetypeName then
-            index <- -1
-        else
-            let lt = State.Doc.Linetypes.FindName(lineType)
-            if lt|> isNull  then RhinoScriptingException.Raise "LayerLinetype not found. layer:'%s' line typ:'%s'" layer.FullPath lineType
-            index <- lt.LinetypeIndex
-        layer.LinetypeIndex <- index
+        match UtilLayer.findLinetypeIndex lineType with
+        | Some index -> layer.LinetypeIndex <- index
+        | None -> RhinoScriptingException.Raise "LayerLinetype not found. layer:'%s' line typ:'%s'" layer.FullPath lineType
         State.Doc.Views.Redraw()
 
 
