@@ -9602,18 +9602,18 @@ type RhinoScriptSyntax private () =
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
 
-    /// <summary>Verifies the existence of a linetype in the document.</summary>
+    /// <summary>Verifies the existence of a linetype in the document. The name is not case sensitive.</summary>
     /// <param name="name">(string) The name of an existing linetype</param>
     /// <returns>(bool) True or False.</returns>
     static member IsLinetype(name:string) : bool =
-        notNull <| State.Doc.Linetypes.FindName(name)
+        notNull <| UtilLayer.findLinetype(name)
 
 
     /// <summary>Checks if an existing linetype is from a reference file.</summary>
     /// <param name="name">(string) The name of an existing linetype</param>
     /// <returns>(bool) True or False.</returns>
     static member IsLinetypeReference(name:string) : bool =
-        let lt = State.Doc.Linetypes.FindName(name)
+        let lt = UtilLayer.findLinetype(name)
         if isNull lt then RhinoScriptingException.Raise "IsLinetypeReference unable to find '%s' in linetypes" name
         lt.IsReference
 

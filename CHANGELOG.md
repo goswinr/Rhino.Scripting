@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CopyObject(s), and TransformObject(s), MirrorObject(s), RotateObject(s), ScaleObject(s) and ShearObject(s) with copy=true, put copies of grouped objects into new groups like the Copy command does, instead of adding them to the original groups, like in RhinoPython
 ### Fixed
 - DimStyleTextAlignment returns the documented values 1, 2 or 3, instead of the index of the text location
+- IsLinetype returned true for any name in Rhino 8, and IsLinetypeReference used the Continuous linetype for unknown names
 
 ## [0.15.0] - 2026-10-11
 ### Added

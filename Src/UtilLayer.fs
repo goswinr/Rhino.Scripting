@@ -163,4 +163,21 @@ module internal UtilLayer =
         )
 
 
+    /// Finds a linetype by name, ignoring case. Returns null if not found.
+    /// Don't use LinetypeTable.FindName: in Rhino 8 it returns the default "Continuous" linetype for any unknown name.
+    /// That is because LinetypeTable.Find returns -1 both for "not found" and as the index of the default "Continuous" linetype.
+    /// So a -1 result is disambiguated by comparing names.
+    /// https://github.com/mcneel/rhinoscriptsyntax/commit/4bd30051e0
+    let internal findLinetype(name:string) : Linetype =
+        let linetypes = State.Doc.Linetypes
+        let index = linetypes.Find(name)
+        let linetype = linetypes.FindIndex(index)
+        if index >= 0 then
+            linetype
+        elif notNull linetype && String.Equals(name, linetype.Name, StringComparison.OrdinalIgnoreCase) then
+            linetype
+        else
+            null
+
+
 
