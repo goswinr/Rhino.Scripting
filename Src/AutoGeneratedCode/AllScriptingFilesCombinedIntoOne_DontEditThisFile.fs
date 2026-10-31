@@ -19257,48 +19257,89 @@ type RhinoScriptSyntax private () =
         view.Redraw()
 
 
-    /// <summary>Get status of a view's construction Plane grid.</summary>
+    /// Internal helper: Returns the display mode of the viewport if its grid settings are "Custom" instead of "Use document setting".
+    /// Such a display mode shows or hides the grid, the grid axes and the world axes itself,
+    /// and the settings of the viewport are ignored.
+    /// https://github.com/mcneel/rhinoscriptsyntax/commit/af78176b78 (RH-82449)
+    static member private gridDisplayModeOverride(viewport:Display.RhinoViewport) : Display.DisplayModeDescription option =
+        match viewport.DisplayMode with
+        | null -> None
+        | mode -> if mode.DisplayAttributes.ViewSpecificAttributes.UseDocumentGrid then None else Some mode
+
+    /// Internal helper: Saves the changed grid settings of a display mode.
+    /// Display modes are shared by every viewport using them,
+    /// so this affects more than the view that was passed in.
+    static member private updateGridDisplayMode(mode:Display.DisplayModeDescription, caller:string) : unit =
+        if not <| Display.DisplayModeDescription.UpdateDisplayMode(mode) then
+            RhinoScriptingException.Raise "%s: Failed to update the display mode '%s'" caller mode.EnglishName
+        State.Doc.Views.Redraw()
+
+
+    /// <summary>Get status of a view's construction Plane grid.
+    /// When the view's display mode overrides the document's grid settings, the state
+    /// of the display mode is returned.</summary>
     /// <param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     /// <returns>(bool) The grid display state.</returns>
     static member ShowGrid(view:string) : bool = //GET
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
-        viewport.ConstructionGridVisible
+        match RhinoScriptSyntax.gridDisplayModeOverride viewport with
+        | None      -> viewport.ConstructionGridVisible
+        | Some mode -> mode.DisplayAttributes.ViewSpecificAttributes.DrawGrid
 
-    /// <summary>Shows or hides a view's construction Plane grid.</summary>
+    /// <summary>Shows or hides a view's construction Plane grid.
+    /// When the view's display mode overrides the document's grid settings, the state
+    /// of the display mode is set. This affects every view using this display mode.</summary>
     /// <param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     /// <param name="show">(bool) The grid state to set</param>
     /// <returns>(unit) void, nothing.</returns>
     static member ShowGrid(view:string, show:bool) : unit = //SET
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
-        let rc = viewport.ConstructionGridVisible
-        if  rc <> show then
-            viewport.ConstructionGridVisible <- show
-            view.Redraw()
+        match RhinoScriptSyntax.gridDisplayModeOverride viewport with
+        | None ->
+            if viewport.ConstructionGridVisible <> show then
+                viewport.ConstructionGridVisible <- show
+                view.Redraw()
+        | Some mode ->
+            let attrs = mode.DisplayAttributes.ViewSpecificAttributes
+            if attrs.DrawGrid <> show then
+                attrs.DrawGrid <- show
+                RhinoScriptSyntax.updateGridDisplayMode(mode, "ShowGrid")
 
 
 
-    /// <summary>Get status of a view's construction Plane grid axes.</summary>
+    /// <summary>Get status of a view's construction Plane grid axes.
+    /// When the view's display mode overrides the document's grid settings, the state
+    /// of the display mode is returned.</summary>
     /// <param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     /// <returns>(bool) The grid axes display state.</returns>
     static member ShowGridAxes(view:string) : bool = //GET
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
-        let rc = viewport.ConstructionAxesVisible
-        rc
+        match RhinoScriptSyntax.gridDisplayModeOverride viewport with
+        | None      -> viewport.ConstructionAxesVisible
+        | Some mode -> mode.DisplayAttributes.ViewSpecificAttributes.DrawGridAxes
 
-    /// <summary>Shows or hides a view's construction Plane grid axes.</summary>
+    /// <summary>Shows or hides a view's construction Plane grid axes.
+    /// When the view's display mode overrides the document's grid settings, the state
+    /// of the display mode is set. This affects every view using this display mode.</summary>
     /// <param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     /// <param name="show">(bool) The state to set</param>
     /// <returns>(unit) void, nothing.</returns>
     static member ShowGridAxes(view:string, show:bool) : unit = //SET
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
-        let rc = viewport.ConstructionAxesVisible
-        if  rc <> show then
-            viewport.ConstructionAxesVisible <- show
-            view.Redraw()
+        match RhinoScriptSyntax.gridDisplayModeOverride viewport with
+        | None ->
+            if viewport.ConstructionAxesVisible <> show then
+                viewport.ConstructionAxesVisible <- show
+                view.Redraw()
+        | Some mode ->
+            let attrs = mode.DisplayAttributes.ViewSpecificAttributes
+            if attrs.DrawGridAxes <> show then
+                attrs.DrawGridAxes <- show
+                RhinoScriptSyntax.updateGridDisplayMode(mode, "ShowGridAxes")
 
 
 
@@ -19318,26 +19359,37 @@ type RhinoScriptSyntax private () =
         view.TitleVisible <- show
 
 
-    /// <summary>Get status of a view's world axis icon.</summary>
+    /// <summary>Get status of a view's world axis icon.
+    /// When the view's display mode overrides the document's grid settings, the state
+    /// of the display mode is returned.</summary>
     /// <param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     /// <returns>(bool) The world axes display state.</returns>
     static member ShowWorldAxes(view:string) : bool = //GET
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
-        let rc = viewport.WorldAxesVisible
-        rc
+        match RhinoScriptSyntax.gridDisplayModeOverride viewport with
+        | None      -> viewport.WorldAxesVisible
+        | Some mode -> mode.DisplayAttributes.ViewSpecificAttributes.DrawWorldAxes
 
-    /// <summary>Shows or hides a view's world axis icon.</summary>
+    /// <summary>Shows or hides a view's world axis icon.
+    /// When the view's display mode overrides the document's grid settings, the state
+    /// of the display mode is set. This affects every view using this display mode.</summary>
     /// <param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     /// <param name="show">(bool) The state to set</param>
     /// <returns>(unit) void, nothing.</returns>
     static member ShowWorldAxes(view:string, show:bool) : unit = //SET
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
-        let rc = viewport.WorldAxesVisible
-        if rc <> show then
-            viewport.WorldAxesVisible <- show
-            view.Redraw()
+        match RhinoScriptSyntax.gridDisplayModeOverride viewport with
+        | None ->
+            if viewport.WorldAxesVisible <> show then
+                viewport.WorldAxesVisible <- show
+                view.Redraw()
+        | Some mode ->
+            let attrs = mode.DisplayAttributes.ViewSpecificAttributes
+            if attrs.DrawWorldAxes <> show then
+                attrs.DrawWorldAxes <- show
+                RhinoScriptSyntax.updateGridDisplayMode(mode, "ShowWorldAxes")
 
 
 
