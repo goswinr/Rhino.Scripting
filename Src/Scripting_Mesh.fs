@@ -65,9 +65,9 @@ module AutoOpenMesh =
         if notNull vertexColors then
             let count = Seq.length(vertexColors)
             let colors = Array.zeroCreate count
-            // for i, color in Seq.indexed(vertexColors) do
-                //colors.[i] = RhinoScriptSyntax.CoerceColor(color)
-            mesh.VertexColors.SetColors(colors)   |>   ignore
+            for i, color in Seq.indexed(vertexColors) do
+                colors.[i] <- color
+            mesh.VertexColors.SetColors(colors) |> ignore<bool>
 
         let rc = State.Doc.Objects.AddMesh(mesh)
         if rc = Guid.Empty then RhinoScriptingException.Raise "AddMesh: Unable to add mesh to document. vertices:'%A' faceVertices:'%A' vertexNormals:'%A' textureCoordinates:'%A' vertexColors:'%A'" vertices faceVertices vertexNormals textureCoordinates vertexColors
@@ -119,9 +119,9 @@ module AutoOpenMesh =
         if notNull vertexColors then
             let count = Seq.length(vertexColors)
             let colors = Array.zeroCreate count
-            // for i, color in Seq.indexed(vertexColors) do
-                //colors.[i] = RhinoScriptSyntax.CoerceColor(color)
-            mesh.VertexColors.SetColors(colors)   |>   ignore
+            for i, color in Seq.indexed(vertexColors) do
+                colors.[i] <- color
+            mesh.VertexColors.SetColors(colors) |> ignore<bool>
 
         let rc = State.Doc.Objects.AddMesh(mesh)
         if rc = Guid.Empty then RhinoScriptingException.Raise "AddMesh: Unable to add mesh to document.  vertices:'%A' faceVertices:'%A' vertexNormals:'%A' textureCoordinates:'%A' vertexColors:'%A'" vertices faceVertices vertexNormals textureCoordinates vertexColors

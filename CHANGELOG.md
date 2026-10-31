@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ObjectPrintColorSource accepts 2 (print color by display)
 - LayerLinetype and GetLinetype used the Continuous linetype for unknown names in Rhino 8
 - ObjectLinetype can set the Continuous linetype
+- AddMesh sets the given vertex colors, they were all empty before
 
 ## [0.15.0] - 2026-10-11
 ### Added
