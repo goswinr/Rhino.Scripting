@@ -920,6 +920,7 @@ module AutoOpenObject =
     /// <returns>(int) The object's current print color source
     ///    0 = print color by layer
     ///    1 = print color by object
+    ///    2 = print color by display
     ///    3 = print color by parent.</returns>
     static member ObjectPrintColorSource(objectId:Guid) : int = //GET
             let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
@@ -931,10 +932,11 @@ module AutoOpenObject =
     /// <param name="source">(int) New print color source
     ///    0 = print color by layer
     ///    1 = print color by object
+    ///    2 = print color by display
     ///    3 = print color by parent</param>
     /// <returns>(unit) void, nothing.</returns>
     static member ObjectPrintColorSource(objectId:Guid, source:int) : unit = //SET
-        if source <0 || source >3 || source = 2 then RhinoScriptingException.Raise "ObjectPrintColorSource: Setting it failed for '%A' and '%A'"  source objectId
+        if source <0 || source >3 then RhinoScriptingException.Raise "ObjectPrintColorSource: Setting it failed for '%A' and '%A'"  source objectId
         let source : DocObjects.ObjectPlotColorSource = LanguagePrimitives.EnumOfValue source
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.Attributes.PlotColorSource <- source
@@ -946,10 +948,11 @@ module AutoOpenObject =
     /// <param name="source">(int) New print color source
     ///    0 = print color by layer
     ///    1 = print color by objects
+    ///    2 = print color by display
     ///    3 = print color by parent</param>
     /// <returns>(unit) void, nothing.</returns>
     static member ObjectPrintColorSource(objectIds:Guid seq, source:int) : unit = //MULTISET
-        if source <0 || source >3 || source = 2 then RhinoScriptingException.Raise "ObjectPrintColorSource: Setting it failed for '%A' and '%A'"  source objectIds
+        if source <0 || source >3 then RhinoScriptingException.Raise "ObjectPrintColorSource: Setting it failed for '%A' and '%A'"  source objectIds
         let source : DocObjects.ObjectPlotColorSource = LanguagePrimitives.EnumOfValue source
         for objectId in objectIds do
             let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
