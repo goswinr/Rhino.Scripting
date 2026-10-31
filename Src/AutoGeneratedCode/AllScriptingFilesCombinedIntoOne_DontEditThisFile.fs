@@ -18352,10 +18352,23 @@ type RhinoScriptSyntax private () =
         Rhino.Runtime.HostUtils.RunningInRhino
 
 
-    // /// <summary>Return true if the script is being executed in a Grasshopper component (currently always false).</summary>
-    // static member ContextIsGrasshopper() : bool =
-    //     false //TODO implement correctly
-    //     // https://github.com/mcneel/rhinoscriptsyntax/blob/86c9ab1e97df384662a8548b4accee45dfd77a8c/Scripts/scriptcontext.py#L12
+    /// <summary>Return true if the script is being executed in a Grasshopper component.
+    /// Unlike in RhinoPython there is no host that sets a flag (scriptcontext.id).
+    /// Instead this checks if the call stack of the current thread contains a method from the Grasshopper assembly.
+    /// So it returns false for code that runs on another thread than the one of the Grasshopper component,
+    /// or after an await in an async method.</summary>
+    /// <returns>(bool) True if the script is being executed in a Grasshopper component.</returns>
+    static member ContextIsGrasshopper() : bool =
+        let isGrasshopper (frame:Diagnostics.StackFrame) =
+            match frame.GetMethod() with
+            | null -> false
+            | m ->
+                match m.DeclaringType with
+                | null -> false
+                | t -> t.Assembly.FullName.StartsWith("Grasshopper,", StringComparison.Ordinal)
+        match Diagnostics.StackTrace(false).GetFrames() with
+        | null -> false
+        | frames -> Array.exists isGrasshopper frames
 
     /// <summary>Measures the angle between two points.</summary>
     /// <param name="point1">(Point3d) Point1 of input points</param>

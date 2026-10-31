@@ -2,7 +2,7 @@
 
 All public types, members and functions of Rhino.Scripting, with the first sentence of their summary.
 
-- The 1250 static members of `RhinoScriptSyntax`, 1015 names with their overloads, have one table per source file,
+- The 1251 static members of `RhinoScriptSyntax`, 1016 names with their overloads, have one table per source file,
   e.g. [Curve](#curve) for `Src/Scripting_Curve.fs`. Scripts usually call them through an alias, `type rs = RhinoScriptSyntax`.
 - Overloads of the same name are in the order of the source.
 - `?name: type = value` marks an optional parameter and its default value.
@@ -41,7 +41,7 @@ Generated from the sources by `API-Table/ApiTable.fsx`. Do not edit by hand.
 - [Transformation](#transformation), 27 members
 - [UserData](#userdata), 21 members
 - [UserInterface](#userinterface), 40 members
-- [Utility](#utility), 30 members
+- [Utility](#utility), 31 members
 - [Views](#views), 76 members
 
 **Other types, modules and extensions**
@@ -1407,6 +1407,7 @@ From [Src/Scripting_Utility.fs](../Src/Scripting_Utility.fs).
 | `ColorHLSToRGB` | `hls: Color -> Color` | Converts colors from hue-luminance-saturation to RGB. |
 | `ColorRedValue` | `rgb: Color -> int` | Retrieves intensity value for the red component of an RGB color. |
 | `ColorRGBToHLS` | `rgb: Color -> ColorHSL` | Convert colors from RGB to HSL ( Hue, Saturation and Luminance). |
+| `ContextIsGrasshopper` | `unit -> bool` | Return true if the script is being executed in a Grasshopper component. |
 | `ContextIsRhino` | `unit -> bool` | Return true if the script is being executed in the context of Rhino (Rhino.Runtime.HostUtils.RunningInRhino). |
 | `CreateColor` | `red: int * green: int * blue: int -> Color` | Creates a RGB color from red, green and blue values as Integers. |
 | `CreateColor` | `red: byte * green: byte * blue: byte -> Color` | Creates a RGB color from red, green and blue values as Bytes. |
