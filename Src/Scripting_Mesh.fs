@@ -704,6 +704,19 @@ module AutoOpenMesh =
         rc
 
 
+    /// <summary>Returns the texture coordinates of a Mesh.</summary>
+    /// <param name="objectId">(Guid) Identifier of a Mesh object</param>
+    /// <returns>(Point2f ResizeArray) The (u, v) texture coordinates, one per Mesh vertex.
+    ///    An empty list if the Mesh has no texture coordinates.</returns>
+    static member MeshTextureCoordinates(objectId:Guid) : Point2f ResizeArray =
+        let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        let tcs = mesh.TextureCoordinates
+        let rc = ResizeArray(tcs.Count)
+        for i = 0 to tcs.Count - 1 do
+            rc.Add(tcs.[i])
+        rc
+
+
     /// <summary>Duplicates each polygon in a Mesh with a NURBS Surface. The resulting
     ///    Surfaces are then joined into a Polysurface and added to the document.</summary>
     /// <param name="objectId">(Guid) Identifier of a Mesh object</param>

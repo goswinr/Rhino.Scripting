@@ -2,7 +2,7 @@
 
 All public types, members and functions of Rhino.Scripting, with the first sentence of their summary.
 
-- The 1251 static members of `RhinoScriptSyntax`, 1016 names with their overloads, have one table per source file,
+- The 1252 static members of `RhinoScriptSyntax`, 1017 names with their overloads, have one table per source file,
   e.g. [Curve](#curve) for `Src/Scripting_Curve.fs`. Scripts usually call them through an alias, `type rs = RhinoScriptSyntax`.
 - Overloads of the same name are in the order of the source.
 - `?name: type = value` marks an optional parameter and its default value.
@@ -31,7 +31,7 @@ Generated from the sources by `API-Table/ApiTable.fsx`. Do not edit by hand.
 - [Line](#line), 14 members
 - [Linetype](#linetype), 4 members
 - [Material](#material), 25 members
-- [Mesh](#mesh), 54 members
+- [Mesh](#mesh), 55 members
 - [Object](#object), 87 members
 - [Plane](#plane), 20 members
 - [PointVector](#pointvector), 33 members
@@ -924,6 +924,7 @@ From [Src/Scripting_Mesh.fs](../Src/Scripting_Mesh.fs).
 | `MeshOutline` | `objectIds: Guid seq * ?view: string = null -> ResizeArray<Guid>` | Creates Polyline Curve outlines of Mesh objects. |
 | `MeshQuadCount` | `objectId: Guid -> int` | Returns the number of quad faces of a Mesh object. |
 | `MeshQuadsToTriangles` | `objectId: Guid -> bool` | Converts a Mesh object's quad faces to triangles. |
+| `MeshTextureCoordinates` | `objectId: Guid -> ResizeArray<Point2f>` | Returns the texture coordinates of a Mesh. |
 | `MeshToNurb` | `objectId: Guid * ?trimmedTriangles: bool = true * ?deleteInput: bool = false -> ResizeArray<Guid>` | Duplicates each polygon in a Mesh with a NURBS Surface. |
 | `MeshTriangleCount` | `objectId: Guid -> int` | Returns number of triangular faces of a Mesh. |
 | `MeshVertexColors` | `meshId: Guid -> ResizeArray<Color>` | Returns vertex colors of a Mesh. |
