@@ -1193,7 +1193,7 @@ From [Src/Scripting_Surface.fs](../Src/Scripting_Surface.fs).
 | `IntersectSpheres` | `spherePlane0: Plane * sphereRadius0: float * spherePlane1: Plane * sphereRadius1: float -> int * Circle * float` | Calculates intersections of two spheres. |
 | `IsBrep` | `objectId: Guid -> bool` | Verifies an object is a Brep. |
 | `IsCone` | `objectId: Guid -> bool` | Determines if a Surface is a portion of a cone. |
-| `IsCylinder` | `objectId: Guid -> bool` | Determines if a Surface is a portion of a cone. |
+| `IsCylinder` | `objectId: Guid -> bool` | Determines if a Surface is a portion of a cylinder. |
 | `IsExtrusion` | `objectId: Guid -> bool` | Verifies an object is a or Extrusion. |
 | `IsPlaneSurface` | `objectId: Guid -> bool` | Verifies an object is a Plane Surface. |
 | `IsPointInSurface` | `objectId: Guid * point: Point3d * ?strictlyIn: bool = false * ?tolerance: float = 0.0 -> bool` | Checks if a point is inside a closed Mesh , Surface or Polysurface. |

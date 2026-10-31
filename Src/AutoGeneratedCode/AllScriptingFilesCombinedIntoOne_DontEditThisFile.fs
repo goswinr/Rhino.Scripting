@@ -15185,7 +15185,7 @@ type RhinoScriptSyntax private () =
         | None -> false
 
 
-    /// <summary>Determines if a Surface is a portion of a cone.
+    /// <summary>Determines if a Surface is a portion of a cylinder.
     /// Returns false for any other Rhino object or if the object does not exist.</summary>
     /// <param name="objectId">(Guid) The cylinder object's identifier</param>
     /// <returns>(bool) True , otherwise False.</returns>
