@@ -19353,8 +19353,8 @@ type RhinoScriptSyntax private () =
 
 
     /// <summary>Returns the 35mm camera lens length of the specified perspective
-    /// <param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     /// projection view.</summary>
+    /// <param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     /// <returns>(float) The current lens length.</returns>
     static member ViewCameraLens(view:string) : float = //GET
         let view = RhinoScriptSyntax.CoerceView(view)
