@@ -427,16 +427,21 @@ let crv = rs.GetObject("Select a curve", rs.Filter.Curve)
 
 ### Coercion Functions
 
-Coercion functions convert flexible inputs to specific types:
+Coercion functions convert inputs to specific types. They have one overload per accepted input type, so a wrong type is a compile error.
+Pass coordinates and color values as separate arguments, like `rs.CoerceColor(255, 0, 0)`; a tuple value like `rs.CoerceColor(rgb)` does not compile.
 
 | Method | Description |
 |--------|-------------|
-| `CoercePoint3d(...)` | Convert to Point3d |
-| `CoercePoint2d(...)` | Convert to Point2d |
-| `CoerceVector3d(...)` | Convert to Vector3d |
-| `CoercePlane(...)` | Convert to Plane |
-| `CoerceLine(...)` | Convert to Line |
-| `CoerceGuid(...)` | Convert to Guid |
+| `Coerce3dPoint(...)` | Point3d from `x, y, z`, a seq of 3 floats, a string `"1, 2, 3"`, the Guid of a point object, a Point3f, PointObject or TextDot |
+| `Coerce2dPoint(...)` | Point2d from `x, y` or a Point3d |
+| `Coerce3dVector(...)` | Vector3d from `x, y, z`, a seq of 3 floats, a string `"1, 2, 3"`, a Vector3f, or the Guid of a linear curve (its direction) |
+| `CoercePlane(...)` | World XY plane at a Point3d or at `x, y, z` |
+| `CoerceLine(...)` | Line from a linear Curve, the Guid of one, or two Point3d |
+| `CoerceArc(...)`, `CoerceCircle(...)`, `CoerceEllipse(...)`, `CoercePolyline(...)` | From a Curve or the Guid of a curve object |
+| `CoerceGuid(...)` | Guid from a string, RhinoObject or ObjRef; raises on the empty Guid |
+| `CoerceXform(...)` | Transform from a 4x4 matrix as nested lists or arrays, or a `float[,]` |
+| `CoerceColor(...)` | Color from `red, green, blue` or `red, green, blue, alpha` ints, or a name or hex string |
+| `CoerceView(...)`, `CoercePageView(...)` | View from its name or Guid |
 | `CoerceRhinoObject(guid)` | Get RhinoObject from Guid |
 | `CoerceCurve(guid)` | Get Curve geometry |
 | `CoerceSurface(guid)` | Get Surface geometry |
@@ -444,9 +449,8 @@ Coercion functions convert flexible inputs to specific types:
 | `CoerceMesh(guid)` | Get Mesh geometry |
 | `CoerceGeometry(guid)` | Get any geometry |
 | `CoerceLayer(name)` | Get Layer object |
-| `CoerceColor(...)` | Convert to Color |
-| `Coerce3dPoint(...)` | Legacy: convert to Point3d |
-| `Coerce3dVector(...)` | Legacy: convert to Vector3d |
+
+The functions for Guids, objects, geometry, lines, arcs, circles, ellipses, polylines and views also have a `TryCoerce...` variant that returns an option and never throws.
 
 ## Common Patterns
 

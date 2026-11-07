@@ -11,6 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - MeshTextureCoordinates, like in RhinoPython
 - XformScale overloads with a Plane, to scale about the Plane's origin along the Plane's axes, like in RhinoPython
 ### Changed
+- Breaking: Add, CreatePoint, CreateVector and the Coerce and TryCoerce functions for Guids, lines, arcs, circles, ellipses, polylines, views, points, vectors, planes, transforms and colors have one overload per accepted input type instead of a generic parameter that was checked at runtime, so a wrong input type is a compile error now
+- Breaking: these functions take coordinates and color values as separate arguments, like Coerce3dPoint(1, 2, 3) or CoerceColor(255, 0, 0), a tuple value like CoerceColor(rgb) does not compile any more
+- Breaking: Coerce3dPoint, Coerce3dVector, CreatePoint and CreateVector don't accept options, tuples of decimals, singles or strings, or sequences of ints or strings any more, and a sequence of floats or a string like "1, 2, 3" must have exactly three values
+- Breaking: CoerceGuid doesn't accept a Guid option any more, and raises an exception for a string of the empty Guid
+- Breaking: CoercePlane only accepts a Plane, a Point3d or three floats, not all inputs of Coerce3dPoint
+- Coerce3dVector with a Guid accepts any curve that is linear within tolerance, not only a LineCurve
+- CreateXform accepts nested lists and arrays of floats, like CoerceXform
 - Hide AutoOpen modules from editor completion lists with EditorBrowsable(EditorBrowsableState.Never).
 - DimStyleTextAlignment sets the text orientation and location for radial dimensions too, like in RhinoPython
 - ShowGrid, ShowGridAxes and ShowWorldAxes get and set the grid settings of the view's display mode if it overrides the document grid settings, like in RhinoPython

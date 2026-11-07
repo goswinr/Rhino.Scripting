@@ -290,6 +290,23 @@ module AutoOpenRsUtils =
         | Some f -> f
         | None ->  RhinoScriptingException.Raise "Rhino.Scripting.FsExUtils.parseFloatEnDe Could not parse '%s' into a floating point number using English or German culture settings" x
 
+    /// Parses three floats from a string like "1, 2, 3", or "1,5; 2,5; 3,5" with a German decimal comma.
+    /// The values are separated by semicolons if there are at least three of them, otherwise by commas.
+    /// Returns None if there are not exactly three values or if one of them is not a float.
+    let internal tryParseXYZ (s:string) : option<float*float*float> =
+        if isNull s then
+            None
+        else
+            let parts =
+                let bySemicolon = s.Split(';')
+                if bySemicolon.Length > 2 then bySemicolon else s.Split(',')
+            if parts.Length <> 3 then
+                None
+            else
+                match tryParseFloatEnDe parts.[0], tryParseFloatEnDe parts.[1], tryParseFloatEnDe parts.[2] with
+                | Some x, Some y, Some z -> Some (x, y, z)
+                | _ -> None
+
 
     /// Get first element of Triple (Tuple of three elements)
     let inline t1 (a,_,_) = a

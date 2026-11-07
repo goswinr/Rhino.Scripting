@@ -106,22 +106,16 @@ type RhinoScriptSyntax private () =
     static member FrangePython (start:float, stop:float, step:float) : float ResizeArray =
         RhinoScriptSyntax.FxrangePython (start, stop, step) |> ResizeArray
 
-    /// <summary>Adds any geometry object (struct or class) to the Rhino document.
-    /// Works not only on any subclass of GeometryBase but also on Point3d, Line, Arc, and similar structs.</summary>
-    /// <param name="geo">The geometry object.</param>
-    /// <param name="layerIndex">(int) The layer index.</param>
-    /// <param name="objectName">(string) Default value: <c>""</c>. The object name.</param>
-    /// <param name="userTextKeysAndValues">(string*string seq) Default value: <c>[]</c>. List of key-value pairs for user text.</param>
-    /// <param name="stringSafetyCheck">(bool) Optional, default value: <c>true</c>. Checks that object name and user text do not include line returns, tabs, or leading/trailing whitespace.</param>
-    /// <param name="collapseParents">(bool) Optional, default value: <c>false</c>. Collapse parent layers in the Layer UI.</param>
-    /// <returns>(Guid) The Guid of the added object.</returns>
-    static member Add (  geo:'T
-                      ,  layerIndex:int // don't make it  optional , so that method overload resolution works for rs.Add(..)
-                      ,  [<OPT;DEF("")>]objectName:string
-                      ,  [<OPT;DEF(null:seq<string*string>)>]userTextKeysAndValues:seq<string*string>
-                      ,  [<OPT;DEF(true)>]stringSafetyCheck:bool
-                      ,  [<OPT;DEF(false:bool)>]collapseParents:bool
-                      ) : Guid =
+    /// Shared implementation of the Add overloads with a layer index.
+    /// 'geo' is only used for the error message, 'addWithAttributes' adds it to the document.
+    static member private AddToDoc(  geo:'T
+                                  ,  addWithAttributes:DocObjects.ObjectAttributes -> Guid
+                                  ,  layerIndex:int
+                                  ,  objectName:string
+                                  ,  userTextKeysAndValues:seq<string*string>
+                                  ,  stringSafetyCheck:bool
+                                  ,  collapseParents:bool
+                                  ) : Guid =
         let attr =
             if layerIndex = -1 && objectName="" && isNull userTextKeysAndValues  then
                 null
@@ -145,44 +139,13 @@ type RhinoScriptSyntax private () =
                     State.Doc.Layers.[layerIndex].IsExpanded <- false
                 a
 
-        let id =
-            match box geo with
-            | :? GeometryBase as g ->  State.Doc.Objects.Add(g,attr)
-            // now the structs:
-            | :? Point3d     as pt->   State.Doc.Objects.AddPoint(pt,attr)
-            | :? Point3f     as pt->   State.Doc.Objects.AddPoint(pt,attr)
-            | :? Line        as ln->   State.Doc.Objects.AddLine(ln,attr)
-            | :? Arc         as a->    State.Doc.Objects.AddArc(a,attr)
-            | :? Circle      as c->   State.Doc.Objects.AddCircle(c,attr)
-            | :? Ellipse     as e->    State.Doc.Objects.AddEllipse(e,attr)
-            | :? Polyline    as pl ->  State.Doc.Objects.AddPolyline(pl,attr)
-            | :? Box         as b ->   State.Doc.Objects.AddBox(b,attr)
-            | :? BoundingBox as b ->   State.Doc.Objects.AddBox(Box(b),attr)
-            | :? Sphere      as b ->   State.Doc.Objects.AddSphere(b,attr)
-            | :? Cylinder    as cl ->  State.Doc.Objects.AddSurface (cl.ToNurbsSurface(),attr)
-            | :? Cone        as c ->   State.Doc.Objects.AddSurface (c.ToNurbsSurface(),attr)
-            | _ -> RhinoScriptingException.Raise $"RhinoScriptSyntax.Add: object of type {geo.GetType().FullName} not implemented yet"
+        let id = addWithAttributes attr
         if id = Guid.Empty then RhinoScriptingException.Raise "Add: Unable to add object to document. geo:'%A' layerIndex:'%A'" geo layerIndex
         id
 
-    /// <summary>Adds any geometry object (struct or class) to the Rhino document.
-    /// Works not only on any subclass of GeometryBase but also on Point3d, Line, Arc, and similar structs.</summary>
-    /// <param name="geo">The geometry object.</param>
-    /// <param name="layer">(string) Optional. The layer name; parent layers separated by '::'.</param>
-    /// <param name="objectName">(string) Optional, default value: <c>""</c>. The object name.</param>
-    /// <param name="userTextKeysAndValues">(string*string seq) Optional, default value: <c>[]</c>. List of key-value pairs for user text.</param>
-    /// <param name="layerColor">(Drawing.Color) Optional, default value: <c>UtilLayer.randomLayerColor()</c>. The color for the layer. The layer color will NOT be changed if the layer already exists.</param>
-    /// <param name="stringSafetyCheck">(bool) Optional, default value: <c>true</c>. Checks that object name and user text do not include line returns, tabs, or leading/trailing whitespace.</param>
-    /// <param name="collapseParents">(bool) Optional, default value: <c>false</c>. Collapse parent layers in the Layer UI.</param>
-    /// <returns>(Guid) The Guid of the added object.</returns>
-    static member Add (  geo:'T
-                      ,  [<OPT;DEF("")>]layer:string
-                      ,  [<OPT;DEF("")>]objectName:string
-                      ,  [<OPT;DEF(null:seq<string*string>)>]userTextKeysAndValues:seq<string*string>
-                      ,  [<OPT;DEF(Drawing.Color():Drawing.Color)>]layerColor:Drawing.Color
-                      ,  [<OPT;DEF(true)>]stringSafetyCheck:bool
-                      ,  [<OPT;DEF(false:bool)>]collapseParents:bool
-                      ) : Guid =
+    /// Shared implementation of the Add overloads with a layer name.
+    /// Gets or creates the layer and returns its index.
+    static member private AddLayerIndex(layer:string, layerColor:Drawing.Color, collapseParents:bool) : int =
         let layCorF =
             if layer<>""then
                 if layerColor.IsEmpty then
@@ -192,23 +155,497 @@ type RhinoScriptSyntax private () =
             else
                 UtilLayer.LayerFound State.Doc.Layers.CurrentLayerIndex
 
-        let layIdx =
-            match layCorF with
-            |UtilLayer.LayerCreated ci -> ci
-            |UtilLayer.LayerFound fi ->  fi
-                (*
-                // now update the layer color if one is given, even if the layer exists already
-                if layerColor.IsEmpty then
-                    fi
-                else
-                    let lay = State.Doc.Layers.[fi]
-                    if not <| lay.Color.EqualsARGB(layerColor) then
-                        lay.Color <- layerColor
-                    fi
-                *)
+        match layCorF with
+        |UtilLayer.LayerCreated ci -> ci
+        |UtilLayer.LayerFound fi ->  fi
+            (*
+            // now update the layer color if one is given, even if the layer exists already
+            if layerColor.IsEmpty then
+                fi
+            else
+                let lay = State.Doc.Layers.[fi]
+                if not <| lay.Color.EqualsARGB(layerColor) then
+                    lay.Color <- layerColor
+                fi
+            *)
 
-        let g = RhinoScriptSyntax.Add( geo, layIdx, objectName, userTextKeysAndValues, stringSafetyCheck)
-        g
+    /// <summary>Adds any geometry object that is a subclass of GeometryBase to the Rhino document, such as a Curve, Brep, Mesh or Point.</summary>
+    /// <param name="geo">(GeometryBase) The geometry object.</param>
+    /// <param name="layerIndex">(int) The layer index.</param>
+    /// <param name="objectName">(string) Optional, default value: <c>""</c>. The object name.</param>
+    /// <param name="userTextKeysAndValues">(string*string seq) Optional, default value: <c>[]</c>. List of key-value pairs for user text.</param>
+    /// <param name="stringSafetyCheck">(bool) Optional, default value: <c>true</c>. Checks that object name and user text do not include line returns, tabs, or leading/trailing whitespace.</param>
+    /// <param name="collapseParents">(bool) Optional, default value: <c>false</c>. Collapse parent layers in the Layer UI.</param>
+    /// <returns>(Guid) The Guid of the added object.</returns>
+    static member Add (  geo:GeometryBase
+                      ,  layerIndex:int // don't make it  optional , so that method overload resolution works for rs.Add(..)
+                      ,  [<OPT;DEF("")>]objectName:string
+                      ,  [<OPT;DEF(null:seq<string*string>)>]userTextKeysAndValues:seq<string*string>
+                      ,  [<OPT;DEF(true)>]stringSafetyCheck:bool
+                      ,  [<OPT;DEF(false:bool)>]collapseParents:bool
+                      ) : Guid =
+        RhinoScriptSyntax.AddToDoc(geo, (fun a -> State.Doc.Objects.Add(geo, a)), layerIndex, objectName, userTextKeysAndValues, stringSafetyCheck, collapseParents)
 
+    /// <summary>Adds any geometry object that is a subclass of GeometryBase to the Rhino document, such as a Curve, Brep, Mesh or Point.</summary>
+    /// <param name="geo">(GeometryBase) The geometry object.</param>
+    /// <param name="layer">(string) Optional, default value: <c>""</c>. The layer name; parent layers separated by '::'. The current layer if empty.</param>
+    /// <param name="objectName">(string) Optional, default value: <c>""</c>. The object name.</param>
+    /// <param name="userTextKeysAndValues">(string*string seq) Optional, default value: <c>[]</c>. List of key-value pairs for user text.</param>
+    /// <param name="layerColor">(Drawing.Color) Optional, default value: <c>UtilLayer.randomLayerColor()</c>. The color for the layer. The layer color will NOT be changed if the layer already exists.</param>
+    /// <param name="stringSafetyCheck">(bool) Optional, default value: <c>true</c>. Checks that object name and user text do not include line returns, tabs, or leading/trailing whitespace.</param>
+    /// <param name="collapseParents">(bool) Optional, default value: <c>false</c>. Collapse parent layers in the Layer UI.</param>
+    /// <returns>(Guid) The Guid of the added object.</returns>
+    static member Add (  geo:GeometryBase
+                      ,  [<OPT;DEF("")>]layer:string
+                      ,  [<OPT;DEF("")>]objectName:string
+                      ,  [<OPT;DEF(null:seq<string*string>)>]userTextKeysAndValues:seq<string*string>
+                      ,  [<OPT;DEF(Drawing.Color():Drawing.Color)>]layerColor:Drawing.Color
+                      ,  [<OPT;DEF(true)>]stringSafetyCheck:bool
+                      ,  [<OPT;DEF(false:bool)>]collapseParents:bool
+                      ) : Guid =
+        let layIdx = RhinoScriptSyntax.AddLayerIndex(layer, layerColor, collapseParents)
+        RhinoScriptSyntax.AddToDoc(geo, (fun a -> State.Doc.Objects.Add(geo, a)), layIdx, objectName, userTextKeysAndValues, stringSafetyCheck, false)
 
+    /// <summary>Adds a Point3d to the Rhino document as a point object.</summary>
+    /// <param name="geo">(Point3d) The point.</param>
+    /// <param name="layerIndex">(int) The layer index.</param>
+    /// <param name="objectName">(string) Optional, default value: <c>""</c>. The object name.</param>
+    /// <param name="userTextKeysAndValues">(string*string seq) Optional, default value: <c>[]</c>. List of key-value pairs for user text.</param>
+    /// <param name="stringSafetyCheck">(bool) Optional, default value: <c>true</c>. Checks that object name and user text do not include line returns, tabs, or leading/trailing whitespace.</param>
+    /// <param name="collapseParents">(bool) Optional, default value: <c>false</c>. Collapse parent layers in the Layer UI.</param>
+    /// <returns>(Guid) The Guid of the added object.</returns>
+    static member Add (  geo:Point3d
+                      ,  layerIndex:int // don't make it  optional , so that method overload resolution works for rs.Add(..)
+                      ,  [<OPT;DEF("")>]objectName:string
+                      ,  [<OPT;DEF(null:seq<string*string>)>]userTextKeysAndValues:seq<string*string>
+                      ,  [<OPT;DEF(true)>]stringSafetyCheck:bool
+                      ,  [<OPT;DEF(false:bool)>]collapseParents:bool
+                      ) : Guid =
+        RhinoScriptSyntax.AddToDoc(geo, (fun a -> State.Doc.Objects.AddPoint(geo, a)), layerIndex, objectName, userTextKeysAndValues, stringSafetyCheck, collapseParents)
 
+    /// <summary>Adds a Point3d to the Rhino document as a point object.</summary>
+    /// <param name="geo">(Point3d) The point.</param>
+    /// <param name="layer">(string) Optional, default value: <c>""</c>. The layer name; parent layers separated by '::'. The current layer if empty.</param>
+    /// <param name="objectName">(string) Optional, default value: <c>""</c>. The object name.</param>
+    /// <param name="userTextKeysAndValues">(string*string seq) Optional, default value: <c>[]</c>. List of key-value pairs for user text.</param>
+    /// <param name="layerColor">(Drawing.Color) Optional, default value: <c>UtilLayer.randomLayerColor()</c>. The color for the layer. The layer color will NOT be changed if the layer already exists.</param>
+    /// <param name="stringSafetyCheck">(bool) Optional, default value: <c>true</c>. Checks that object name and user text do not include line returns, tabs, or leading/trailing whitespace.</param>
+    /// <param name="collapseParents">(bool) Optional, default value: <c>false</c>. Collapse parent layers in the Layer UI.</param>
+    /// <returns>(Guid) The Guid of the added object.</returns>
+    static member Add (  geo:Point3d
+                      ,  [<OPT;DEF("")>]layer:string
+                      ,  [<OPT;DEF("")>]objectName:string
+                      ,  [<OPT;DEF(null:seq<string*string>)>]userTextKeysAndValues:seq<string*string>
+                      ,  [<OPT;DEF(Drawing.Color():Drawing.Color)>]layerColor:Drawing.Color
+                      ,  [<OPT;DEF(true)>]stringSafetyCheck:bool
+                      ,  [<OPT;DEF(false:bool)>]collapseParents:bool
+                      ) : Guid =
+        let layIdx = RhinoScriptSyntax.AddLayerIndex(layer, layerColor, collapseParents)
+        RhinoScriptSyntax.AddToDoc(geo, (fun a -> State.Doc.Objects.AddPoint(geo, a)), layIdx, objectName, userTextKeysAndValues, stringSafetyCheck, false)
+
+    /// <summary>Adds a Point3f to the Rhino document as a point object.</summary>
+    /// <param name="geo">(Point3f) The point.</param>
+    /// <param name="layerIndex">(int) The layer index.</param>
+    /// <param name="objectName">(string) Optional, default value: <c>""</c>. The object name.</param>
+    /// <param name="userTextKeysAndValues">(string*string seq) Optional, default value: <c>[]</c>. List of key-value pairs for user text.</param>
+    /// <param name="stringSafetyCheck">(bool) Optional, default value: <c>true</c>. Checks that object name and user text do not include line returns, tabs, or leading/trailing whitespace.</param>
+    /// <param name="collapseParents">(bool) Optional, default value: <c>false</c>. Collapse parent layers in the Layer UI.</param>
+    /// <returns>(Guid) The Guid of the added object.</returns>
+    static member Add (  geo:Point3f
+                      ,  layerIndex:int // don't make it  optional , so that method overload resolution works for rs.Add(..)
+                      ,  [<OPT;DEF("")>]objectName:string
+                      ,  [<OPT;DEF(null:seq<string*string>)>]userTextKeysAndValues:seq<string*string>
+                      ,  [<OPT;DEF(true)>]stringSafetyCheck:bool
+                      ,  [<OPT;DEF(false:bool)>]collapseParents:bool
+                      ) : Guid =
+        RhinoScriptSyntax.AddToDoc(geo, (fun a -> State.Doc.Objects.AddPoint(geo, a)), layerIndex, objectName, userTextKeysAndValues, stringSafetyCheck, collapseParents)
+
+    /// <summary>Adds a Point3f to the Rhino document as a point object.</summary>
+    /// <param name="geo">(Point3f) The point.</param>
+    /// <param name="layer">(string) Optional, default value: <c>""</c>. The layer name; parent layers separated by '::'. The current layer if empty.</param>
+    /// <param name="objectName">(string) Optional, default value: <c>""</c>. The object name.</param>
+    /// <param name="userTextKeysAndValues">(string*string seq) Optional, default value: <c>[]</c>. List of key-value pairs for user text.</param>
+    /// <param name="layerColor">(Drawing.Color) Optional, default value: <c>UtilLayer.randomLayerColor()</c>. The color for the layer. The layer color will NOT be changed if the layer already exists.</param>
+    /// <param name="stringSafetyCheck">(bool) Optional, default value: <c>true</c>. Checks that object name and user text do not include line returns, tabs, or leading/trailing whitespace.</param>
+    /// <param name="collapseParents">(bool) Optional, default value: <c>false</c>. Collapse parent layers in the Layer UI.</param>
+    /// <returns>(Guid) The Guid of the added object.</returns>
+    static member Add (  geo:Point3f
+                      ,  [<OPT;DEF("")>]layer:string
+                      ,  [<OPT;DEF("")>]objectName:string
+                      ,  [<OPT;DEF(null:seq<string*string>)>]userTextKeysAndValues:seq<string*string>
+                      ,  [<OPT;DEF(Drawing.Color():Drawing.Color)>]layerColor:Drawing.Color
+                      ,  [<OPT;DEF(true)>]stringSafetyCheck:bool
+                      ,  [<OPT;DEF(false:bool)>]collapseParents:bool
+                      ) : Guid =
+        let layIdx = RhinoScriptSyntax.AddLayerIndex(layer, layerColor, collapseParents)
+        RhinoScriptSyntax.AddToDoc(geo, (fun a -> State.Doc.Objects.AddPoint(geo, a)), layIdx, objectName, userTextKeysAndValues, stringSafetyCheck, false)
+
+    /// <summary>Adds a Line to the Rhino document as a line curve.</summary>
+    /// <param name="geo">(Line) The line.</param>
+    /// <param name="layerIndex">(int) The layer index.</param>
+    /// <param name="objectName">(string) Optional, default value: <c>""</c>. The object name.</param>
+    /// <param name="userTextKeysAndValues">(string*string seq) Optional, default value: <c>[]</c>. List of key-value pairs for user text.</param>
+    /// <param name="stringSafetyCheck">(bool) Optional, default value: <c>true</c>. Checks that object name and user text do not include line returns, tabs, or leading/trailing whitespace.</param>
+    /// <param name="collapseParents">(bool) Optional, default value: <c>false</c>. Collapse parent layers in the Layer UI.</param>
+    /// <returns>(Guid) The Guid of the added object.</returns>
+    static member Add (  geo:Line
+                      ,  layerIndex:int // don't make it  optional , so that method overload resolution works for rs.Add(..)
+                      ,  [<OPT;DEF("")>]objectName:string
+                      ,  [<OPT;DEF(null:seq<string*string>)>]userTextKeysAndValues:seq<string*string>
+                      ,  [<OPT;DEF(true)>]stringSafetyCheck:bool
+                      ,  [<OPT;DEF(false:bool)>]collapseParents:bool
+                      ) : Guid =
+        RhinoScriptSyntax.AddToDoc(geo, (fun a -> State.Doc.Objects.AddLine(geo, a)), layerIndex, objectName, userTextKeysAndValues, stringSafetyCheck, collapseParents)
+
+    /// <summary>Adds a Line to the Rhino document as a line curve.</summary>
+    /// <param name="geo">(Line) The line.</param>
+    /// <param name="layer">(string) Optional, default value: <c>""</c>. The layer name; parent layers separated by '::'. The current layer if empty.</param>
+    /// <param name="objectName">(string) Optional, default value: <c>""</c>. The object name.</param>
+    /// <param name="userTextKeysAndValues">(string*string seq) Optional, default value: <c>[]</c>. List of key-value pairs for user text.</param>
+    /// <param name="layerColor">(Drawing.Color) Optional, default value: <c>UtilLayer.randomLayerColor()</c>. The color for the layer. The layer color will NOT be changed if the layer already exists.</param>
+    /// <param name="stringSafetyCheck">(bool) Optional, default value: <c>true</c>. Checks that object name and user text do not include line returns, tabs, or leading/trailing whitespace.</param>
+    /// <param name="collapseParents">(bool) Optional, default value: <c>false</c>. Collapse parent layers in the Layer UI.</param>
+    /// <returns>(Guid) The Guid of the added object.</returns>
+    static member Add (  geo:Line
+                      ,  [<OPT;DEF("")>]layer:string
+                      ,  [<OPT;DEF("")>]objectName:string
+                      ,  [<OPT;DEF(null:seq<string*string>)>]userTextKeysAndValues:seq<string*string>
+                      ,  [<OPT;DEF(Drawing.Color():Drawing.Color)>]layerColor:Drawing.Color
+                      ,  [<OPT;DEF(true)>]stringSafetyCheck:bool
+                      ,  [<OPT;DEF(false:bool)>]collapseParents:bool
+                      ) : Guid =
+        let layIdx = RhinoScriptSyntax.AddLayerIndex(layer, layerColor, collapseParents)
+        RhinoScriptSyntax.AddToDoc(geo, (fun a -> State.Doc.Objects.AddLine(geo, a)), layIdx, objectName, userTextKeysAndValues, stringSafetyCheck, false)
+
+    /// <summary>Adds an Arc to the Rhino document as an arc curve.</summary>
+    /// <param name="geo">(Arc) The arc.</param>
+    /// <param name="layerIndex">(int) The layer index.</param>
+    /// <param name="objectName">(string) Optional, default value: <c>""</c>. The object name.</param>
+    /// <param name="userTextKeysAndValues">(string*string seq) Optional, default value: <c>[]</c>. List of key-value pairs for user text.</param>
+    /// <param name="stringSafetyCheck">(bool) Optional, default value: <c>true</c>. Checks that object name and user text do not include line returns, tabs, or leading/trailing whitespace.</param>
+    /// <param name="collapseParents">(bool) Optional, default value: <c>false</c>. Collapse parent layers in the Layer UI.</param>
+    /// <returns>(Guid) The Guid of the added object.</returns>
+    static member Add (  geo:Arc
+                      ,  layerIndex:int // don't make it  optional , so that method overload resolution works for rs.Add(..)
+                      ,  [<OPT;DEF("")>]objectName:string
+                      ,  [<OPT;DEF(null:seq<string*string>)>]userTextKeysAndValues:seq<string*string>
+                      ,  [<OPT;DEF(true)>]stringSafetyCheck:bool
+                      ,  [<OPT;DEF(false:bool)>]collapseParents:bool
+                      ) : Guid =
+        RhinoScriptSyntax.AddToDoc(geo, (fun a -> State.Doc.Objects.AddArc(geo, a)), layerIndex, objectName, userTextKeysAndValues, stringSafetyCheck, collapseParents)
+
+    /// <summary>Adds an Arc to the Rhino document as an arc curve.</summary>
+    /// <param name="geo">(Arc) The arc.</param>
+    /// <param name="layer">(string) Optional, default value: <c>""</c>. The layer name; parent layers separated by '::'. The current layer if empty.</param>
+    /// <param name="objectName">(string) Optional, default value: <c>""</c>. The object name.</param>
+    /// <param name="userTextKeysAndValues">(string*string seq) Optional, default value: <c>[]</c>. List of key-value pairs for user text.</param>
+    /// <param name="layerColor">(Drawing.Color) Optional, default value: <c>UtilLayer.randomLayerColor()</c>. The color for the layer. The layer color will NOT be changed if the layer already exists.</param>
+    /// <param name="stringSafetyCheck">(bool) Optional, default value: <c>true</c>. Checks that object name and user text do not include line returns, tabs, or leading/trailing whitespace.</param>
+    /// <param name="collapseParents">(bool) Optional, default value: <c>false</c>. Collapse parent layers in the Layer UI.</param>
+    /// <returns>(Guid) The Guid of the added object.</returns>
+    static member Add (  geo:Arc
+                      ,  [<OPT;DEF("")>]layer:string
+                      ,  [<OPT;DEF("")>]objectName:string
+                      ,  [<OPT;DEF(null:seq<string*string>)>]userTextKeysAndValues:seq<string*string>
+                      ,  [<OPT;DEF(Drawing.Color():Drawing.Color)>]layerColor:Drawing.Color
+                      ,  [<OPT;DEF(true)>]stringSafetyCheck:bool
+                      ,  [<OPT;DEF(false:bool)>]collapseParents:bool
+                      ) : Guid =
+        let layIdx = RhinoScriptSyntax.AddLayerIndex(layer, layerColor, collapseParents)
+        RhinoScriptSyntax.AddToDoc(geo, (fun a -> State.Doc.Objects.AddArc(geo, a)), layIdx, objectName, userTextKeysAndValues, stringSafetyCheck, false)
+
+    /// <summary>Adds a Circle to the Rhino document as a curve.</summary>
+    /// <param name="geo">(Circle) The circle.</param>
+    /// <param name="layerIndex">(int) The layer index.</param>
+    /// <param name="objectName">(string) Optional, default value: <c>""</c>. The object name.</param>
+    /// <param name="userTextKeysAndValues">(string*string seq) Optional, default value: <c>[]</c>. List of key-value pairs for user text.</param>
+    /// <param name="stringSafetyCheck">(bool) Optional, default value: <c>true</c>. Checks that object name and user text do not include line returns, tabs, or leading/trailing whitespace.</param>
+    /// <param name="collapseParents">(bool) Optional, default value: <c>false</c>. Collapse parent layers in the Layer UI.</param>
+    /// <returns>(Guid) The Guid of the added object.</returns>
+    static member Add (  geo:Circle
+                      ,  layerIndex:int // don't make it  optional , so that method overload resolution works for rs.Add(..)
+                      ,  [<OPT;DEF("")>]objectName:string
+                      ,  [<OPT;DEF(null:seq<string*string>)>]userTextKeysAndValues:seq<string*string>
+                      ,  [<OPT;DEF(true)>]stringSafetyCheck:bool
+                      ,  [<OPT;DEF(false:bool)>]collapseParents:bool
+                      ) : Guid =
+        RhinoScriptSyntax.AddToDoc(geo, (fun a -> State.Doc.Objects.AddCircle(geo, a)), layerIndex, objectName, userTextKeysAndValues, stringSafetyCheck, collapseParents)
+
+    /// <summary>Adds a Circle to the Rhino document as a curve.</summary>
+    /// <param name="geo">(Circle) The circle.</param>
+    /// <param name="layer">(string) Optional, default value: <c>""</c>. The layer name; parent layers separated by '::'. The current layer if empty.</param>
+    /// <param name="objectName">(string) Optional, default value: <c>""</c>. The object name.</param>
+    /// <param name="userTextKeysAndValues">(string*string seq) Optional, default value: <c>[]</c>. List of key-value pairs for user text.</param>
+    /// <param name="layerColor">(Drawing.Color) Optional, default value: <c>UtilLayer.randomLayerColor()</c>. The color for the layer. The layer color will NOT be changed if the layer already exists.</param>
+    /// <param name="stringSafetyCheck">(bool) Optional, default value: <c>true</c>. Checks that object name and user text do not include line returns, tabs, or leading/trailing whitespace.</param>
+    /// <param name="collapseParents">(bool) Optional, default value: <c>false</c>. Collapse parent layers in the Layer UI.</param>
+    /// <returns>(Guid) The Guid of the added object.</returns>
+    static member Add (  geo:Circle
+                      ,  [<OPT;DEF("")>]layer:string
+                      ,  [<OPT;DEF("")>]objectName:string
+                      ,  [<OPT;DEF(null:seq<string*string>)>]userTextKeysAndValues:seq<string*string>
+                      ,  [<OPT;DEF(Drawing.Color():Drawing.Color)>]layerColor:Drawing.Color
+                      ,  [<OPT;DEF(true)>]stringSafetyCheck:bool
+                      ,  [<OPT;DEF(false:bool)>]collapseParents:bool
+                      ) : Guid =
+        let layIdx = RhinoScriptSyntax.AddLayerIndex(layer, layerColor, collapseParents)
+        RhinoScriptSyntax.AddToDoc(geo, (fun a -> State.Doc.Objects.AddCircle(geo, a)), layIdx, objectName, userTextKeysAndValues, stringSafetyCheck, false)
+
+    /// <summary>Adds an Ellipse to the Rhino document as a curve.</summary>
+    /// <param name="geo">(Ellipse) The ellipse.</param>
+    /// <param name="layerIndex">(int) The layer index.</param>
+    /// <param name="objectName">(string) Optional, default value: <c>""</c>. The object name.</param>
+    /// <param name="userTextKeysAndValues">(string*string seq) Optional, default value: <c>[]</c>. List of key-value pairs for user text.</param>
+    /// <param name="stringSafetyCheck">(bool) Optional, default value: <c>true</c>. Checks that object name and user text do not include line returns, tabs, or leading/trailing whitespace.</param>
+    /// <param name="collapseParents">(bool) Optional, default value: <c>false</c>. Collapse parent layers in the Layer UI.</param>
+    /// <returns>(Guid) The Guid of the added object.</returns>
+    static member Add (  geo:Ellipse
+                      ,  layerIndex:int // don't make it  optional , so that method overload resolution works for rs.Add(..)
+                      ,  [<OPT;DEF("")>]objectName:string
+                      ,  [<OPT;DEF(null:seq<string*string>)>]userTextKeysAndValues:seq<string*string>
+                      ,  [<OPT;DEF(true)>]stringSafetyCheck:bool
+                      ,  [<OPT;DEF(false:bool)>]collapseParents:bool
+                      ) : Guid =
+        RhinoScriptSyntax.AddToDoc(geo, (fun a -> State.Doc.Objects.AddEllipse(geo, a)), layerIndex, objectName, userTextKeysAndValues, stringSafetyCheck, collapseParents)
+
+    /// <summary>Adds an Ellipse to the Rhino document as a curve.</summary>
+    /// <param name="geo">(Ellipse) The ellipse.</param>
+    /// <param name="layer">(string) Optional, default value: <c>""</c>. The layer name; parent layers separated by '::'. The current layer if empty.</param>
+    /// <param name="objectName">(string) Optional, default value: <c>""</c>. The object name.</param>
+    /// <param name="userTextKeysAndValues">(string*string seq) Optional, default value: <c>[]</c>. List of key-value pairs for user text.</param>
+    /// <param name="layerColor">(Drawing.Color) Optional, default value: <c>UtilLayer.randomLayerColor()</c>. The color for the layer. The layer color will NOT be changed if the layer already exists.</param>
+    /// <param name="stringSafetyCheck">(bool) Optional, default value: <c>true</c>. Checks that object name and user text do not include line returns, tabs, or leading/trailing whitespace.</param>
+    /// <param name="collapseParents">(bool) Optional, default value: <c>false</c>. Collapse parent layers in the Layer UI.</param>
+    /// <returns>(Guid) The Guid of the added object.</returns>
+    static member Add (  geo:Ellipse
+                      ,  [<OPT;DEF("")>]layer:string
+                      ,  [<OPT;DEF("")>]objectName:string
+                      ,  [<OPT;DEF(null:seq<string*string>)>]userTextKeysAndValues:seq<string*string>
+                      ,  [<OPT;DEF(Drawing.Color():Drawing.Color)>]layerColor:Drawing.Color
+                      ,  [<OPT;DEF(true)>]stringSafetyCheck:bool
+                      ,  [<OPT;DEF(false:bool)>]collapseParents:bool
+                      ) : Guid =
+        let layIdx = RhinoScriptSyntax.AddLayerIndex(layer, layerColor, collapseParents)
+        RhinoScriptSyntax.AddToDoc(geo, (fun a -> State.Doc.Objects.AddEllipse(geo, a)), layIdx, objectName, userTextKeysAndValues, stringSafetyCheck, false)
+
+    /// <summary>Adds a Polyline to the Rhino document as a polyline curve.</summary>
+    /// <param name="geo">(Polyline) The polyline.</param>
+    /// <param name="layerIndex">(int) The layer index.</param>
+    /// <param name="objectName">(string) Optional, default value: <c>""</c>. The object name.</param>
+    /// <param name="userTextKeysAndValues">(string*string seq) Optional, default value: <c>[]</c>. List of key-value pairs for user text.</param>
+    /// <param name="stringSafetyCheck">(bool) Optional, default value: <c>true</c>. Checks that object name and user text do not include line returns, tabs, or leading/trailing whitespace.</param>
+    /// <param name="collapseParents">(bool) Optional, default value: <c>false</c>. Collapse parent layers in the Layer UI.</param>
+    /// <returns>(Guid) The Guid of the added object.</returns>
+    static member Add (  geo:Polyline
+                      ,  layerIndex:int // don't make it  optional , so that method overload resolution works for rs.Add(..)
+                      ,  [<OPT;DEF("")>]objectName:string
+                      ,  [<OPT;DEF(null:seq<string*string>)>]userTextKeysAndValues:seq<string*string>
+                      ,  [<OPT;DEF(true)>]stringSafetyCheck:bool
+                      ,  [<OPT;DEF(false:bool)>]collapseParents:bool
+                      ) : Guid =
+        RhinoScriptSyntax.AddToDoc(geo, (fun a -> State.Doc.Objects.AddPolyline(geo, a)), layerIndex, objectName, userTextKeysAndValues, stringSafetyCheck, collapseParents)
+
+    /// <summary>Adds a Polyline to the Rhino document as a polyline curve.</summary>
+    /// <param name="geo">(Polyline) The polyline.</param>
+    /// <param name="layer">(string) Optional, default value: <c>""</c>. The layer name; parent layers separated by '::'. The current layer if empty.</param>
+    /// <param name="objectName">(string) Optional, default value: <c>""</c>. The object name.</param>
+    /// <param name="userTextKeysAndValues">(string*string seq) Optional, default value: <c>[]</c>. List of key-value pairs for user text.</param>
+    /// <param name="layerColor">(Drawing.Color) Optional, default value: <c>UtilLayer.randomLayerColor()</c>. The color for the layer. The layer color will NOT be changed if the layer already exists.</param>
+    /// <param name="stringSafetyCheck">(bool) Optional, default value: <c>true</c>. Checks that object name and user text do not include line returns, tabs, or leading/trailing whitespace.</param>
+    /// <param name="collapseParents">(bool) Optional, default value: <c>false</c>. Collapse parent layers in the Layer UI.</param>
+    /// <returns>(Guid) The Guid of the added object.</returns>
+    static member Add (  geo:Polyline
+                      ,  [<OPT;DEF("")>]layer:string
+                      ,  [<OPT;DEF("")>]objectName:string
+                      ,  [<OPT;DEF(null:seq<string*string>)>]userTextKeysAndValues:seq<string*string>
+                      ,  [<OPT;DEF(Drawing.Color():Drawing.Color)>]layerColor:Drawing.Color
+                      ,  [<OPT;DEF(true)>]stringSafetyCheck:bool
+                      ,  [<OPT;DEF(false:bool)>]collapseParents:bool
+                      ) : Guid =
+        let layIdx = RhinoScriptSyntax.AddLayerIndex(layer, layerColor, collapseParents)
+        RhinoScriptSyntax.AddToDoc(geo, (fun a -> State.Doc.Objects.AddPolyline(geo, a)), layIdx, objectName, userTextKeysAndValues, stringSafetyCheck, false)
+
+    /// <summary>Adds a Box to the Rhino document.</summary>
+    /// <param name="geo">(Box) The box.</param>
+    /// <param name="layerIndex">(int) The layer index.</param>
+    /// <param name="objectName">(string) Optional, default value: <c>""</c>. The object name.</param>
+    /// <param name="userTextKeysAndValues">(string*string seq) Optional, default value: <c>[]</c>. List of key-value pairs for user text.</param>
+    /// <param name="stringSafetyCheck">(bool) Optional, default value: <c>true</c>. Checks that object name and user text do not include line returns, tabs, or leading/trailing whitespace.</param>
+    /// <param name="collapseParents">(bool) Optional, default value: <c>false</c>. Collapse parent layers in the Layer UI.</param>
+    /// <returns>(Guid) The Guid of the added object.</returns>
+    static member Add (  geo:Box
+                      ,  layerIndex:int // don't make it  optional , so that method overload resolution works for rs.Add(..)
+                      ,  [<OPT;DEF("")>]objectName:string
+                      ,  [<OPT;DEF(null:seq<string*string>)>]userTextKeysAndValues:seq<string*string>
+                      ,  [<OPT;DEF(true)>]stringSafetyCheck:bool
+                      ,  [<OPT;DEF(false:bool)>]collapseParents:bool
+                      ) : Guid =
+        RhinoScriptSyntax.AddToDoc(geo, (fun a -> State.Doc.Objects.AddBox(geo, a)), layerIndex, objectName, userTextKeysAndValues, stringSafetyCheck, collapseParents)
+
+    /// <summary>Adds a Box to the Rhino document.</summary>
+    /// <param name="geo">(Box) The box.</param>
+    /// <param name="layer">(string) Optional, default value: <c>""</c>. The layer name; parent layers separated by '::'. The current layer if empty.</param>
+    /// <param name="objectName">(string) Optional, default value: <c>""</c>. The object name.</param>
+    /// <param name="userTextKeysAndValues">(string*string seq) Optional, default value: <c>[]</c>. List of key-value pairs for user text.</param>
+    /// <param name="layerColor">(Drawing.Color) Optional, default value: <c>UtilLayer.randomLayerColor()</c>. The color for the layer. The layer color will NOT be changed if the layer already exists.</param>
+    /// <param name="stringSafetyCheck">(bool) Optional, default value: <c>true</c>. Checks that object name and user text do not include line returns, tabs, or leading/trailing whitespace.</param>
+    /// <param name="collapseParents">(bool) Optional, default value: <c>false</c>. Collapse parent layers in the Layer UI.</param>
+    /// <returns>(Guid) The Guid of the added object.</returns>
+    static member Add (  geo:Box
+                      ,  [<OPT;DEF("")>]layer:string
+                      ,  [<OPT;DEF("")>]objectName:string
+                      ,  [<OPT;DEF(null:seq<string*string>)>]userTextKeysAndValues:seq<string*string>
+                      ,  [<OPT;DEF(Drawing.Color():Drawing.Color)>]layerColor:Drawing.Color
+                      ,  [<OPT;DEF(true)>]stringSafetyCheck:bool
+                      ,  [<OPT;DEF(false:bool)>]collapseParents:bool
+                      ) : Guid =
+        let layIdx = RhinoScriptSyntax.AddLayerIndex(layer, layerColor, collapseParents)
+        RhinoScriptSyntax.AddToDoc(geo, (fun a -> State.Doc.Objects.AddBox(geo, a)), layIdx, objectName, userTextKeysAndValues, stringSafetyCheck, false)
+
+    /// <summary>Adds a BoundingBox to the Rhino document as a box.</summary>
+    /// <param name="geo">(BoundingBox) The bounding box.</param>
+    /// <param name="layerIndex">(int) The layer index.</param>
+    /// <param name="objectName">(string) Optional, default value: <c>""</c>. The object name.</param>
+    /// <param name="userTextKeysAndValues">(string*string seq) Optional, default value: <c>[]</c>. List of key-value pairs for user text.</param>
+    /// <param name="stringSafetyCheck">(bool) Optional, default value: <c>true</c>. Checks that object name and user text do not include line returns, tabs, or leading/trailing whitespace.</param>
+    /// <param name="collapseParents">(bool) Optional, default value: <c>false</c>. Collapse parent layers in the Layer UI.</param>
+    /// <returns>(Guid) The Guid of the added object.</returns>
+    static member Add (  geo:BoundingBox
+                      ,  layerIndex:int // don't make it  optional , so that method overload resolution works for rs.Add(..)
+                      ,  [<OPT;DEF("")>]objectName:string
+                      ,  [<OPT;DEF(null:seq<string*string>)>]userTextKeysAndValues:seq<string*string>
+                      ,  [<OPT;DEF(true)>]stringSafetyCheck:bool
+                      ,  [<OPT;DEF(false:bool)>]collapseParents:bool
+                      ) : Guid =
+        RhinoScriptSyntax.AddToDoc(geo, (fun a -> State.Doc.Objects.AddBox(Box(geo), a)), layerIndex, objectName, userTextKeysAndValues, stringSafetyCheck, collapseParents)
+
+    /// <summary>Adds a BoundingBox to the Rhino document as a box.</summary>
+    /// <param name="geo">(BoundingBox) The bounding box.</param>
+    /// <param name="layer">(string) Optional, default value: <c>""</c>. The layer name; parent layers separated by '::'. The current layer if empty.</param>
+    /// <param name="objectName">(string) Optional, default value: <c>""</c>. The object name.</param>
+    /// <param name="userTextKeysAndValues">(string*string seq) Optional, default value: <c>[]</c>. List of key-value pairs for user text.</param>
+    /// <param name="layerColor">(Drawing.Color) Optional, default value: <c>UtilLayer.randomLayerColor()</c>. The color for the layer. The layer color will NOT be changed if the layer already exists.</param>
+    /// <param name="stringSafetyCheck">(bool) Optional, default value: <c>true</c>. Checks that object name and user text do not include line returns, tabs, or leading/trailing whitespace.</param>
+    /// <param name="collapseParents">(bool) Optional, default value: <c>false</c>. Collapse parent layers in the Layer UI.</param>
+    /// <returns>(Guid) The Guid of the added object.</returns>
+    static member Add (  geo:BoundingBox
+                      ,  [<OPT;DEF("")>]layer:string
+                      ,  [<OPT;DEF("")>]objectName:string
+                      ,  [<OPT;DEF(null:seq<string*string>)>]userTextKeysAndValues:seq<string*string>
+                      ,  [<OPT;DEF(Drawing.Color():Drawing.Color)>]layerColor:Drawing.Color
+                      ,  [<OPT;DEF(true)>]stringSafetyCheck:bool
+                      ,  [<OPT;DEF(false:bool)>]collapseParents:bool
+                      ) : Guid =
+        let layIdx = RhinoScriptSyntax.AddLayerIndex(layer, layerColor, collapseParents)
+        RhinoScriptSyntax.AddToDoc(geo, (fun a -> State.Doc.Objects.AddBox(Box(geo), a)), layIdx, objectName, userTextKeysAndValues, stringSafetyCheck, false)
+
+    /// <summary>Adds a Sphere to the Rhino document.</summary>
+    /// <param name="geo">(Sphere) The sphere.</param>
+    /// <param name="layerIndex">(int) The layer index.</param>
+    /// <param name="objectName">(string) Optional, default value: <c>""</c>. The object name.</param>
+    /// <param name="userTextKeysAndValues">(string*string seq) Optional, default value: <c>[]</c>. List of key-value pairs for user text.</param>
+    /// <param name="stringSafetyCheck">(bool) Optional, default value: <c>true</c>. Checks that object name and user text do not include line returns, tabs, or leading/trailing whitespace.</param>
+    /// <param name="collapseParents">(bool) Optional, default value: <c>false</c>. Collapse parent layers in the Layer UI.</param>
+    /// <returns>(Guid) The Guid of the added object.</returns>
+    static member Add (  geo:Sphere
+                      ,  layerIndex:int // don't make it  optional , so that method overload resolution works for rs.Add(..)
+                      ,  [<OPT;DEF("")>]objectName:string
+                      ,  [<OPT;DEF(null:seq<string*string>)>]userTextKeysAndValues:seq<string*string>
+                      ,  [<OPT;DEF(true)>]stringSafetyCheck:bool
+                      ,  [<OPT;DEF(false:bool)>]collapseParents:bool
+                      ) : Guid =
+        RhinoScriptSyntax.AddToDoc(geo, (fun a -> State.Doc.Objects.AddSphere(geo, a)), layerIndex, objectName, userTextKeysAndValues, stringSafetyCheck, collapseParents)
+
+    /// <summary>Adds a Sphere to the Rhino document.</summary>
+    /// <param name="geo">(Sphere) The sphere.</param>
+    /// <param name="layer">(string) Optional, default value: <c>""</c>. The layer name; parent layers separated by '::'. The current layer if empty.</param>
+    /// <param name="objectName">(string) Optional, default value: <c>""</c>. The object name.</param>
+    /// <param name="userTextKeysAndValues">(string*string seq) Optional, default value: <c>[]</c>. List of key-value pairs for user text.</param>
+    /// <param name="layerColor">(Drawing.Color) Optional, default value: <c>UtilLayer.randomLayerColor()</c>. The color for the layer. The layer color will NOT be changed if the layer already exists.</param>
+    /// <param name="stringSafetyCheck">(bool) Optional, default value: <c>true</c>. Checks that object name and user text do not include line returns, tabs, or leading/trailing whitespace.</param>
+    /// <param name="collapseParents">(bool) Optional, default value: <c>false</c>. Collapse parent layers in the Layer UI.</param>
+    /// <returns>(Guid) The Guid of the added object.</returns>
+    static member Add (  geo:Sphere
+                      ,  [<OPT;DEF("")>]layer:string
+                      ,  [<OPT;DEF("")>]objectName:string
+                      ,  [<OPT;DEF(null:seq<string*string>)>]userTextKeysAndValues:seq<string*string>
+                      ,  [<OPT;DEF(Drawing.Color():Drawing.Color)>]layerColor:Drawing.Color
+                      ,  [<OPT;DEF(true)>]stringSafetyCheck:bool
+                      ,  [<OPT;DEF(false:bool)>]collapseParents:bool
+                      ) : Guid =
+        let layIdx = RhinoScriptSyntax.AddLayerIndex(layer, layerColor, collapseParents)
+        RhinoScriptSyntax.AddToDoc(geo, (fun a -> State.Doc.Objects.AddSphere(geo, a)), layIdx, objectName, userTextKeysAndValues, stringSafetyCheck, false)
+
+    /// <summary>Adds a Cylinder to the Rhino document as a NURBS surface.</summary>
+    /// <param name="geo">(Cylinder) The cylinder.</param>
+    /// <param name="layerIndex">(int) The layer index.</param>
+    /// <param name="objectName">(string) Optional, default value: <c>""</c>. The object name.</param>
+    /// <param name="userTextKeysAndValues">(string*string seq) Optional, default value: <c>[]</c>. List of key-value pairs for user text.</param>
+    /// <param name="stringSafetyCheck">(bool) Optional, default value: <c>true</c>. Checks that object name and user text do not include line returns, tabs, or leading/trailing whitespace.</param>
+    /// <param name="collapseParents">(bool) Optional, default value: <c>false</c>. Collapse parent layers in the Layer UI.</param>
+    /// <returns>(Guid) The Guid of the added object.</returns>
+    static member Add (  geo:Cylinder
+                      ,  layerIndex:int // don't make it  optional , so that method overload resolution works for rs.Add(..)
+                      ,  [<OPT;DEF("")>]objectName:string
+                      ,  [<OPT;DEF(null:seq<string*string>)>]userTextKeysAndValues:seq<string*string>
+                      ,  [<OPT;DEF(true)>]stringSafetyCheck:bool
+                      ,  [<OPT;DEF(false:bool)>]collapseParents:bool
+                      ) : Guid =
+        RhinoScriptSyntax.AddToDoc(geo, (fun a -> State.Doc.Objects.AddSurface(geo.ToNurbsSurface(), a)), layerIndex, objectName, userTextKeysAndValues, stringSafetyCheck, collapseParents)
+
+    /// <summary>Adds a Cylinder to the Rhino document as a NURBS surface.</summary>
+    /// <param name="geo">(Cylinder) The cylinder.</param>
+    /// <param name="layer">(string) Optional, default value: <c>""</c>. The layer name; parent layers separated by '::'. The current layer if empty.</param>
+    /// <param name="objectName">(string) Optional, default value: <c>""</c>. The object name.</param>
+    /// <param name="userTextKeysAndValues">(string*string seq) Optional, default value: <c>[]</c>. List of key-value pairs for user text.</param>
+    /// <param name="layerColor">(Drawing.Color) Optional, default value: <c>UtilLayer.randomLayerColor()</c>. The color for the layer. The layer color will NOT be changed if the layer already exists.</param>
+    /// <param name="stringSafetyCheck">(bool) Optional, default value: <c>true</c>. Checks that object name and user text do not include line returns, tabs, or leading/trailing whitespace.</param>
+    /// <param name="collapseParents">(bool) Optional, default value: <c>false</c>. Collapse parent layers in the Layer UI.</param>
+    /// <returns>(Guid) The Guid of the added object.</returns>
+    static member Add (  geo:Cylinder
+                      ,  [<OPT;DEF("")>]layer:string
+                      ,  [<OPT;DEF("")>]objectName:string
+                      ,  [<OPT;DEF(null:seq<string*string>)>]userTextKeysAndValues:seq<string*string>
+                      ,  [<OPT;DEF(Drawing.Color():Drawing.Color)>]layerColor:Drawing.Color
+                      ,  [<OPT;DEF(true)>]stringSafetyCheck:bool
+                      ,  [<OPT;DEF(false:bool)>]collapseParents:bool
+                      ) : Guid =
+        let layIdx = RhinoScriptSyntax.AddLayerIndex(layer, layerColor, collapseParents)
+        RhinoScriptSyntax.AddToDoc(geo, (fun a -> State.Doc.Objects.AddSurface(geo.ToNurbsSurface(), a)), layIdx, objectName, userTextKeysAndValues, stringSafetyCheck, false)
+
+    /// <summary>Adds a Cone to the Rhino document as a NURBS surface.</summary>
+    /// <param name="geo">(Cone) The cone.</param>
+    /// <param name="layerIndex">(int) The layer index.</param>
+    /// <param name="objectName">(string) Optional, default value: <c>""</c>. The object name.</param>
+    /// <param name="userTextKeysAndValues">(string*string seq) Optional, default value: <c>[]</c>. List of key-value pairs for user text.</param>
+    /// <param name="stringSafetyCheck">(bool) Optional, default value: <c>true</c>. Checks that object name and user text do not include line returns, tabs, or leading/trailing whitespace.</param>
+    /// <param name="collapseParents">(bool) Optional, default value: <c>false</c>. Collapse parent layers in the Layer UI.</param>
+    /// <returns>(Guid) The Guid of the added object.</returns>
+    static member Add (  geo:Cone
+                      ,  layerIndex:int // don't make it  optional , so that method overload resolution works for rs.Add(..)
+                      ,  [<OPT;DEF("")>]objectName:string
+                      ,  [<OPT;DEF(null:seq<string*string>)>]userTextKeysAndValues:seq<string*string>
+                      ,  [<OPT;DEF(true)>]stringSafetyCheck:bool
+                      ,  [<OPT;DEF(false:bool)>]collapseParents:bool
+                      ) : Guid =
+        RhinoScriptSyntax.AddToDoc(geo, (fun a -> State.Doc.Objects.AddSurface(geo.ToNurbsSurface(), a)), layerIndex, objectName, userTextKeysAndValues, stringSafetyCheck, collapseParents)
+
+    /// <summary>Adds a Cone to the Rhino document as a NURBS surface.</summary>
+    /// <param name="geo">(Cone) The cone.</param>
+    /// <param name="layer">(string) Optional, default value: <c>""</c>. The layer name; parent layers separated by '::'. The current layer if empty.</param>
+    /// <param name="objectName">(string) Optional, default value: <c>""</c>. The object name.</param>
+    /// <param name="userTextKeysAndValues">(string*string seq) Optional, default value: <c>[]</c>. List of key-value pairs for user text.</param>
+    /// <param name="layerColor">(Drawing.Color) Optional, default value: <c>UtilLayer.randomLayerColor()</c>. The color for the layer. The layer color will NOT be changed if the layer already exists.</param>
+    /// <param name="stringSafetyCheck">(bool) Optional, default value: <c>true</c>. Checks that object name and user text do not include line returns, tabs, or leading/trailing whitespace.</param>
+    /// <param name="collapseParents">(bool) Optional, default value: <c>false</c>. Collapse parent layers in the Layer UI.</param>
+    /// <returns>(Guid) The Guid of the added object.</returns>
+    static member Add (  geo:Cone
+                      ,  [<OPT;DEF("")>]layer:string
+                      ,  [<OPT;DEF("")>]objectName:string
+                      ,  [<OPT;DEF(null:seq<string*string>)>]userTextKeysAndValues:seq<string*string>
+                      ,  [<OPT;DEF(Drawing.Color():Drawing.Color)>]layerColor:Drawing.Color
+                      ,  [<OPT;DEF(true)>]stringSafetyCheck:bool
+                      ,  [<OPT;DEF(false:bool)>]collapseParents:bool
+                      ) : Guid =
+        let layIdx = RhinoScriptSyntax.AddLayerIndex(layer, layerColor, collapseParents)
+        RhinoScriptSyntax.AddToDoc(geo, (fun a -> State.Doc.Objects.AddSurface(geo.ToNurbsSurface(), a)), layIdx, objectName, userTextKeysAndValues, stringSafetyCheck, false)
