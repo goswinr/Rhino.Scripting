@@ -4967,7 +4967,7 @@ type RhinoScriptSyntax private () =
                 Intersect.Intersection.CurveSelf(curve1, tolerance0)
             else
                 let curve2 = RhinoScriptSyntax.DirectCurveInput(curveB, -1)
-                Intersect.Intersection.CurveCurve(curve1, curve2, tolerance0, State.Doc.ModelAbsoluteTolerance)
+                Intersect.Intersection.CurveCurve(curve1, curve2, tolerance0, 0.0)
         if isNull rc then RhinoScriptingException.Raise "CurveCurveIntersection failed on %A; %A tolerance %f" curveB curveA tolerance
         let events = ResizeArray()
         for i =0 to rc.Count-1 do
