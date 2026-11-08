@@ -7329,12 +7329,12 @@ type RhinoScriptSyntax private () =
     ///    The 3D points passed will define the plane if no plane is given.
     ///    If there are only two points, the World XY plane is used, except for a vertical segment, which uses a plane containing the segment.</summary>
     /// <param name="points">(Point3d seq) List of (at least 2) 3D points.</param>
-    /// <param name="text">(string) Optional, default value: <c>""</c>. Leader text; omit to create a leader without text.</param>
+    /// <param name="text">(string) Optional, default value: <c>null</c>. Leader text; omit to create a leader without text.</param>
     /// <param name="plane">(Geometry.Plane) Optional, default value: <c>defined by points arg</c>.
     ///    Points will be projected to this plane if provided.</param>
     /// <returns>(Guid) Identifier of the new leader.</returns>
     static member AddLeader( points:Point3d seq,
-                             [<OPT;DEF("")>]text:string,
+                             [<OPT;DEF(null:string)>]text:string,
                              [<OPT;DEF(Plane())>]plane:Plane) : Guid =
         let points = points |> Seq.toArray
         if points.Length < 2 then RhinoScriptingException.Raise "AddLeader: at least two points are required"
@@ -7356,7 +7356,9 @@ type RhinoScriptSyntax private () =
             let cprc, s, t = plane0.ClosestParameter( point )
             if not cprc then  RhinoScriptingException.Raise "AddLeader failed.  points %A, text:%s, plane %A" points text plane
             points2d.Add( Rhino.Geometry.Point2d(s, t))
-        let rc = State.Doc.Objects.AddLeader(text, plane0, points2d)
+        let rc =
+            if isNull text then State.Doc.Objects.AddLeader(plane0, points2d)
+            else State.Doc.Objects.AddLeader(text, plane0, points2d)
         if rc = Guid.Empty then RhinoScriptingException.Raise "AddLeader: Unable to add leader to document. points:'%A' text:'%A' plane:'%A'" points text plane0
         State.Doc.Views.Redraw()
         rc
