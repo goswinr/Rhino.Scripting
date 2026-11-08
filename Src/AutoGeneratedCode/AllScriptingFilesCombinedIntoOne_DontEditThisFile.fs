@@ -7684,6 +7684,15 @@ type RhinoScriptSyntax private () =
         State.Doc.DimStyles |> RArr.mapSeq _.Name
 
 
+    /// <summary>Returns the names, optionally sorted in ordinal order, like in RhinoPython.</summary>
+    /// <param name="sort">(bool) True to sort the names; False to preserve document order.</param>
+    /// <returns>(string ResizeArray) The names.</returns>
+    static member DimStyleNames(sort:bool) : string ResizeArray =
+        let names = RhinoScriptSyntax.DimStyleNames()
+        if sort then names.Sort(StringComparer.Ordinal)
+        names
+
+
     /// <summary>Returns the number display format of a dimension style.</summary>
     /// <param name="dimStyle">(string) The name of an existing dimension style</param>
     /// <returns>(int) The current display format

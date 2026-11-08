@@ -2,7 +2,7 @@
 
 All public types, members and functions of Rhino.Scripting, with the first sentence of their summary.
 
-- The 1661 static members of `RhinoScriptSyntax`, 1038 names with their overloads, have one table per source file,
+- The 1662 static members of `RhinoScriptSyntax`, 1038 names with their overloads, have one table per source file,
   e.g. [Curve](#curve) for `Src/Scripting_Curve.fs`. Scripts usually call them through an alias, `type rs = RhinoScriptSyntax`.
 - Overloads of the same name are in the order of the source.
 - Geometry-only `Make...` methods are listed immediately after their corresponding document-adding `Add...` methods.
@@ -21,7 +21,7 @@ Generated from the sources by `API-Table/ApiTable.fsx`. Do not edit by hand.
 - [Block](#block), 29 members
 - [Coerce](#coerce), 103 members
 - [Curve](#curve), 247 members
-- [Dimension](#dimension), 70 members
+- [Dimension](#dimension), 71 members
 - [Document](#document), 51 members
 - [Geometry](#geometry), 101 members
 - [Grips](#grips), 17 members
@@ -631,6 +631,7 @@ From [Src/Scripting_Dimension.fs](../Src/Scripting_Dimension.fs).
 | `DimStyleLinearPrecision` | `dimStyle: string -> int` | Returns the linear display precision of a dimension style. |
 | `DimStyleLinearPrecision` | `dimStyle: string * precision: int -> unit` | Changes the linear display precision of a dimension style. |
 | `DimStyleNames` | `unit -> ResizeArray<string>` | Returns the names of all dimension styles in the document. |
+| `DimStyleNames` | `sort: bool -> ResizeArray<string>` | Returns the names, optionally sorted in ordinal order, like in RhinoPython. |
 | `DimStyleNumberFormat` | `dimStyle: string -> int` | Returns the number display format of a dimension style. |
 | `DimStyleNumberFormat` | `dimStyle: string * format: int -> unit` | Changes the number display format of a dimension style. |
 | `DimStyleOffset` | `dimStyle: string -> float` | Returns the extension line offset of a dimension style. |

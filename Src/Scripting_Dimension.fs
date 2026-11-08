@@ -1,4 +1,4 @@
-﻿namespace Rhino.Scripting
+namespace Rhino.Scripting
 
 open Rhino
 open System.ComponentModel
@@ -435,6 +435,15 @@ module AutoOpenDimension =
     /// <returns>(string ResizeArray) The names of all dimension styles in the document.</returns>
     static member DimStyleNames() : string ResizeArray =
         State.Doc.DimStyles |> RArr.mapSeq _.Name
+
+
+    /// <summary>Returns the names, optionally sorted in ordinal order, like in RhinoPython.</summary>
+    /// <param name="sort">(bool) True to sort the names; False to preserve document order.</param>
+    /// <returns>(string ResizeArray) The names.</returns>
+    static member DimStyleNames(sort:bool) : string ResizeArray =
+        let names = RhinoScriptSyntax.DimStyleNames()
+        if sort then names.Sort(StringComparer.Ordinal)
+        names
 
 
     /// <summary>Returns the number display format of a dimension style.</summary>
