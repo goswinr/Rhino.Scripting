@@ -2,7 +2,7 @@
 
 All public types, members and functions of Rhino.Scripting, with the first sentence of their summary.
 
-- The 1663 static members of `RhinoScriptSyntax`, 1038 names with their overloads, have one table per source file,
+- The 1664 static members of `RhinoScriptSyntax`, 1038 names with their overloads, have one table per source file,
   e.g. [Curve](#curve) for `Src/Scripting_Curve.fs`. Scripts usually call them through an alias, `type rs = RhinoScriptSyntax`.
 - Overloads of the same name are in the order of the source.
 - Geometry-only `Make...` methods are listed immediately after their corresponding document-adding `Add...` methods.
@@ -30,7 +30,7 @@ Generated from the sources by `API-Table/ApiTable.fsx`. Do not edit by hand.
 - [Layer](#layer), 61 members
 - [Light](#light), 56 members
 - [Line](#line), 15 members
-- [Linetype](#linetype), 4 members
+- [Linetype](#linetype), 5 members
 - [Material](#material), 25 members
 - [Mesh](#mesh), 97 members
 - [Object](#object), 104 members
@@ -1088,6 +1088,7 @@ From [Src/Scripting_Linetype.fs](../Src/Scripting_Linetype.fs).
 | `IsLinetypeReference` | `name: string -> bool` | Checks if an existing linetype is from a reference file. |
 | `LinetypeCount` | `unit -> int` | Returns the number of linetypes in the document. |
 | `LinetypeNames` | `unit -> ResizeArray<string>` | Returns names of all linetypes in the document. |
+| `LinetypeNames` | `sort: bool -> ResizeArray<string>` | Returns the names, optionally sorted in ordinal order, like in RhinoPython. |
 
 ## Material
 

@@ -11821,6 +11821,15 @@ type RhinoScriptSyntax private () =
 
 
 
+    /// <summary>Returns the names, optionally sorted in ordinal order, like in RhinoPython.</summary>
+    /// <param name="sort">(bool) True to sort the names; False to preserve document order.</param>
+    /// <returns>(string ResizeArray) The names.</returns>
+    static member LinetypeNames(sort:bool) : string ResizeArray =
+        let names = RhinoScriptSyntax.LinetypeNames()
+        if sort then names.Sort(System.StringComparer.Ordinal)
+        names
+
+
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
 

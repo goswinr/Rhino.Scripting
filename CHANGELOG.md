@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- LinetypeNames accepts a sort flag to return names in ordinal order, like in RhinoPython.
 - LayerNames accepts a sort flag to return names in ordinal order, like in RhinoPython.
 - DimStyleNames accepts a sort flag to return names in ordinal order, like in RhinoPython.
 - BlockNames accepts a sort flag to return names in ordinal order, like in RhinoPython.
