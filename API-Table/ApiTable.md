@@ -2,7 +2,7 @@
 
 All public types, members and functions of Rhino.Scripting, with the first sentence of their summary.
 
-- The 1682 static members of `RhinoScriptSyntax`, 1041 names with their overloads, have one table per source file,
+- The 1681 static members of `RhinoScriptSyntax`, 1041 names with their overloads, have one table per source file,
   e.g. [Curve](#curve) for `Src/Scripting_Curve.fs`. Scripts usually call them through an alias, `type rs = RhinoScriptSyntax`.
 - Overloads of the same name are in the order of the source.
 - Geometry-only `Make...` methods are listed immediately after their corresponding document-adding `Add...` methods.
@@ -27,7 +27,7 @@ Generated from the sources by `API-Table/ApiTable.fsx`. Do not edit by hand.
 - [Grips](#grips), 17 members
 - [Group](#group), 20 members
 - [Hatch](#hatch), 30 members
-- [Layer](#layer), 61 members
+- [Layer](#layer), 60 members
 - [Light](#light), 57 members
 - [Line](#line), 15 members
 - [Linetype](#linetype), 4 members
@@ -977,8 +977,7 @@ From [Src/Scripting_Layer.fs](../Src/Scripting_Layer.fs).
 | `LayerMaterialIndex` | `layer: string -> int` | Returns the material index of a layer. |
 | `LayerMaterialIndex` | `layer: string * index: int -> unit` | Changes the material index of a layer. |
 | `LayerName` | `layerId: Guid * ?fullPath: bool = true -> string` | Return the name of a layer given it's identifier. |
-| `LayerNames` | `unit -> ResizeArray<string>` | Returns the names of all layers in the document. |
-| `LayerNames` | `sort: bool -> ResizeArray<string>` | Returns the names, optionally sorted in ordinal order, like in RhinoPython. |
+| `LayerNames` | `?sort: bool = false -> ResizeArray<string>` | Returns the names of all layers in the document, optionally sorted in ordinal order. |
 | `LayerOff` | `layer: string -> unit` | Turn a layer off if visible, does nothing if parent layer is already invisible. . |
 | `LayerOn` | `layer: string -> unit` | Turn a layer on if not visible , enforces visibility of parents. |
 | `LayerOrder` | `layer: string -> int` | Returns the current display order index of a layer as displayed in Rhino's layer dialog box. |

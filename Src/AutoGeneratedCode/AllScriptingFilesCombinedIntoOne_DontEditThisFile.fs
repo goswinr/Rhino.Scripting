@@ -2203,22 +2203,15 @@ type RhinoScriptSyntax private () =
         else layer.Name
 
 
-    /// <summary>Returns the names of all layers in the document.</summary>
-    /// <returns>(string ResizeArray) list of layer names.</returns>
-    static member LayerNames() : string ResizeArray =
+    /// <summary>Returns the names of all layers in the document, optionally sorted in ordinal order.</summary>
+    /// <param name="sort">(bool) Optional, default value: <c>false</c>. True to sort the names; False to preserve document order.</param>
+    /// <returns>(string ResizeArray) List of layer names.</returns>
+    static member LayerNames([<OPT;DEF(false)>]sort:bool) : string ResizeArray =
         let rc = ResizeArray()
         for layer in State.Doc.Layers do
             if not layer.IsDeleted then rc.Add(layer.FullPath)
+        if sort then rc.Sort(StringComparer.Ordinal)
         rc
-
-
-    /// <summary>Returns the names, optionally sorted in ordinal order, like in RhinoPython.</summary>
-    /// <param name="sort">(bool) True to sort the names; False to preserve document order.</param>
-    /// <returns>(string ResizeArray) The names.</returns>
-    static member LayerNames(sort:bool) : string ResizeArray =
-        let names = RhinoScriptSyntax.LayerNames()
-        if sort then names.Sort(StringComparer.Ordinal)
-        names
 
 
     /// <summary>Returns the current display order index of a layer as displayed in Rhino's
