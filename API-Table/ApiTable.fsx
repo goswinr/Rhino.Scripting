@@ -444,6 +444,15 @@ let itemsOf (s: Section) : Item list =
             && not m.IsProperty // properties are listed through their getter and setter methods
             && not (s.SkipNames.Contains m.DisplayName))
         |> List.ofSeq
+    let names = visible |> List.map (fun m -> m.DisplayName) |> Set.ofList
+    // Keep geometry factories beside their document-adding counterparts in the main API tables.
+    let nameOrder (i: Item) =
+        if i.Rank <> 2 then "", 0
+        elif s.Prefix = "" && i.Bare.StartsWith("Make", StringComparison.Ordinal) then
+            let addName = "Add" + i.Bare.Substring(4)
+            if names.Contains addName then addName.ToLowerInvariant(), 1
+            else i.Bare.ToLowerInvariant(), 0
+        else i.Bare.ToLowerInvariant(), 0
     let indexCount (m: FSharpMemberOrFunctionOrValue) =
         m.CurriedParameterGroups |> Seq.concat |> Seq.filter (fun p -> not (isUnit p.Type)) |> Seq.length
     let isAccessorPair (getter: FSharpMemberOrFunctionOrValue) (setter: FSharpMemberOrFunctionOrValue) =
@@ -479,8 +488,11 @@ let itemsOf (s: Section) : Item list =
         else
             yield item 2 (fmtFunction m)
     ]
-    // constructors, then fields in declaration order, then members by name, the instance member before the static one of the same name
-    |> List.sortBy (fun i -> i.Rank, (if i.Rank = 2 then i.Bare.ToLowerInvariant() else ""), i.IsStatic, i.Order)
+    // Constructors, then fields in declaration order, then member families by name.
+    // Add overloads precede matching Make overloads; overloads of each name retain source order.
+    |> List.sortBy (fun i ->
+        let name, factoryOrder = nameOrder i
+        i.Rank, name, factoryOrder, i.IsStatic, i.Order)
 
 // #endregion
 // #region Markdown
@@ -520,6 +532,7 @@ let mainMembers = plural mainCount "static member"
 line $"- The {mainMembers} of `RhinoScriptSyntax`, {mainNames} names with their overloads, have one table per source file,"
 line "  e.g. [Curve](#curve) for `Src/Scripting_Curve.fs`. Scripts usually call them through an alias, `type rs = RhinoScriptSyntax`."
 line "- Overloads of the same name are in the order of the source."
+line "- Geometry-only `Make...` methods are listed immediately after their corresponding document-adding `Add...` methods."
 line "- `?name: type = value` marks an optional parameter and its default value."
 line "- In the other tables, instance members and fields start with `.`, e.g. `.Pretty`. Static members are qualified with their type name."
 line "- A property shows only its type. `with get, set` marks a property that can be set."

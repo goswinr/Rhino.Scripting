@@ -52,8 +52,71 @@ module AutoOpenObject =
             #endif
 
 
+    /// Computes the orient matrix shared by document and geometry operations.
+    static member private objectOrientTransform(referencePts:IList<Point3d>, targetPts:IList<Point3d>, scale:bool) : Transform =
+        if referencePts.Count <> targetPts.Count then
+            RhinoScriptingException.Raise "OrientObject referencePts.Count <> targetPts.Count: %d <> %d " referencePts.Count targetPts.Count
+        if referencePts.Count < 2 then
+            RhinoScriptingException.Raise "OrientObject referencePts.Count < 2: %d  " referencePts.Count
+        if targetPts.Count < 2 then
+            RhinoScriptingException.Raise "OrientObject targetPts.Count < 2 : %d"  targetPts.Count
+
+        let xform =
+            if referencePts.Count > 2 then
+                //Orient3Pt
+                let fromPlane = Rhino.Geometry.Plane(referencePts.[0], referencePts.[1], referencePts.[2])
+                let toPlane = Rhino.Geometry.Plane(targetPts.[0], targetPts.[1], targetPts.[2])
+                if not fromPlane.IsValid || not toPlane.IsValid then
+                    RhinoScriptingException.Raise "OrientObject unable to create valid planes from point lists %A and %A " referencePts targetPts
+                Rhino.Geometry.Transform.PlaneToPlane(fromPlane, toPlane)
+            else
+                //Orient2Pt
+                let xformMove = Rhino.Geometry.Transform.Translation( targetPts.[0]-referencePts.[0] )
+                let v0 = referencePts.[1] - referencePts.[0]
+                let v1 = targetPts.[1] - targetPts.[0]
+                let xformScale =
+                    if scale then
+                        let len0 = v0.Length
+                        let len1 = v1.Length
+                        if len0 < 0.000001 || len1 < 0.000001 then RhinoScriptingException.Raise "OrientObject vector lengths too short"
+                        let scaleF = len1 / len0
+                        if abs(1.0-scaleF) >= 0.000001 then
+                            let plane = Rhino.Geometry.Plane(referencePts.[0], v0)
+                            Rhino.Geometry.Transform.Scale(plane, scaleF, scaleF, scaleF)
+                        else
+                            Rhino.Geometry.Transform.Identity
+                    else
+                        Rhino.Geometry.Transform.Identity
+                v0.Unitize()  |> ignore<bool>
+                v1.Unitize()  |> ignore<bool>
+                let xformRotate = Rhino.Geometry.Transform.Rotation(v0, v1, referencePts.[0])
+                xformMove * xformScale * xformRotate
+
+        xform
+
+
+    /// Computes the shear matrix shared by document and geometry operations.
+    static member private objectShearTransform(origin:Point3d, referencePoint:Point3d, angleDegrees:float, plane:Plane) : Transform =
+        let mutable frame = Plane(plane)
+        frame.Origin <- origin
+        frame.ZAxis <- plane.Normal
+        let yAxis = referencePoint-origin
+        yAxis.Unitize() |> ignore<bool>
+        frame.YAxis <- yAxis
+        let xAxis = Vector3d.CrossProduct(frame.ZAxis, frame.YAxis)
+        xAxis.Unitize() |> ignore<bool>
+        frame.XAxis <- xAxis
+        let worldPlane = Plane.WorldXY
+        let cob = Transform.ChangeBasis(worldPlane, frame)
+        let mutable shear2d = Transform.Identity
+        shear2d.[0, 1] <- tan(toRadians(angleDegrees))
+        let cobinv = Transform.ChangeBasis(frame, worldPlane)
+        let xf = cobinv * shear2d * cob
+        xf
+
+
     /// <summary>Moves, scales, or rotates a list of objects given a 4x4 transformation
-    ///    matrix. The matrix acts on the left. To transform geometry objects instead of DocObjects or Guids use their .Transform(xForm) member.</summary>
+    ///    matrix. The matrix acts on the left. Use the geometry overload to return transformed duplicates without modifying document objects.</summary>
     /// <param name="objectIds">(Guid seq) List of object identifiers</param>
     /// <param name="matrix">(Transform) The transformation matrix (4x4 array of numbers)</param>
     /// <param name="copy">(bool) Optional, default value: <c>false</c>
@@ -72,8 +135,25 @@ module AutoOpenObject =
         State.Doc.Views.Redraw()
         rc
 
+
+    /// <summary>Returns transformed duplicates of the input geometries. The input is unchanged and the result is not added to a document.</summary>
+    /// <param name="geometries">(GeometryBase seq) Input geometry to duplicate and transform.</param>
+    /// <param name="matrix">(Transform) The transformation matrix (4x4 array of numbers)</param>
+    /// <returns>(GeometryBase ResizeArray) The transformed geometry duplicates.</returns>
+    static member TransformObjects( geometries:GeometryBase seq,
+                                    matrix:Transform) : GeometryBase ResizeArray =   //PLURAL
+        let results = ResizeArray<GeometryBase>()
+        try
+            for geometry in geometries do
+                results.Add(RhinoScriptSyntax.TransformObject(geometry, matrix))
+            results
+        with _ ->
+            for geometry in results do geometry.Dispose()
+            reraise()
+
+
     /// <summary>Moves, scales, or rotates an object given a 4x4 transformation matrix.
-    ///    The matrix acts on the left. To transform geometry objects instead of DocObjects or Guids use their .Transform(xForm) member.</summary>
+    ///    The matrix acts on the left. Use the geometry overload to return transformed duplicates without modifying document objects.</summary>
     /// <param name="objectId">(Guid) The identifier of the object</param>
     /// <param name="matrix">(Transform) The transformation matrix (4x4 array of numbers)</param>
     /// <param name="copy">(bool) Optional, default value: <c>false</c>
@@ -86,6 +166,25 @@ module AutoOpenObject =
         if res = Guid.Empty then RhinoScriptingException.Raise "TransformObject: Cannot apply transform to objectId:'%s' matrix:'%A' copy:'%A'"  (Pretty.str objectId) matrix copy
         if copy then RhinoScriptSyntax.putCopiesInNewGroups [res]
         res
+
+
+    /// <summary>Returns a transformed duplicate of the input geometry. The input is unchanged and the result is not added to a document.</summary>
+    /// <param name="geometry">(GeometryBase) Input geometry to duplicate and transform.</param>
+    /// <param name="matrix">(Transform) The transformation matrix (4x4 array of numbers)</param>
+    /// <returns>(GeometryBase) The transformed geometry duplicate.</returns>
+    static member TransformObject(  geometry:GeometryBase,
+                                    matrix:Transform) : GeometryBase =
+        if isNull geometry then RhinoScriptingException.Raise "TransformObject: Input geometry is null."
+        let result = geometry.Duplicate()
+        if isNull result then RhinoScriptingException.Raise "TransformObject: Unable to duplicate the input geometry."
+        try
+            if matrix.SimilarityType = TransformSimilarityType.NotSimilarity then
+                result.MakeDeformable() |> ignore<bool>
+            if not (result.Transform(matrix)) then RhinoScriptingException.Raise "TransformObject: Unable to apply the transformation to the geometry."
+            result
+        with _ ->
+            result.Dispose()
+            reraise()
 
 
     /// <summary>Copies an object from one location to another, or in-place.
@@ -104,6 +203,18 @@ module AutoOpenObject =
         RhinoScriptSyntax.putCopiesInNewGroups [res]
         res
 
+
+    /// <summary>Returns a transformed duplicate of the input geometry. The input is unchanged and the result is not added to a document.</summary>
+    /// <param name="geometry">(GeometryBase) Input geometry to duplicate and transform.</param>
+    /// <param name="translation">(Vector3d) Optional, additional translation vector to apply</param>
+    /// <returns>(GeometryBase) The transformed geometry duplicate.</returns>
+    static member CopyObject(geometry:GeometryBase, [<OPT;DEF(Vector3d())>]translation:Vector3d) : GeometryBase =
+        let translation =
+            if not translation.IsZero then
+                Transform.Translation(translation)
+            else
+                Transform.Identity
+        RhinoScriptSyntax.TransformObject(geometry, translation)
 
 
     /// <summary>Copies one or more objects from one location to another, or in-place.
@@ -124,6 +235,19 @@ module AutoOpenObject =
             rc.Add res
         RhinoScriptSyntax.putCopiesInNewGroups rc
         rc
+
+
+    /// <summary>Returns transformed duplicates of the input geometries. The input is unchanged and the result is not added to a document.</summary>
+    /// <param name="geometries">(GeometryBase seq) Input geometry to duplicate and transform.</param>
+    /// <param name="translation">(Vector3d) Optional, translation vector to apply to copied set</param>
+    /// <returns>(GeometryBase ResizeArray) The transformed geometry duplicates.</returns>
+    static member CopyObjects(geometries:GeometryBase seq, [<OPT;DEF(Vector3d())>]translation:Vector3d) : GeometryBase ResizeArray = //PLURAL
+        let translation =
+            if not translation.IsZero then
+                Transform.Translation(translation)
+            else
+                Transform.Identity
+        RhinoScriptSyntax.TransformObjects(geometries, translation)
 
 
     /// <summary>Deletes a single object from the document.</summary>
@@ -210,8 +334,21 @@ module AutoOpenObject =
     static member IsObjectInBox( objectId:Guid,
                                  box:BoundingBox,
                                  [<OPT;DEF(true)>]testMode:bool) : bool =
-        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        let objbox = rhobj.Geometry.GetBoundingBox(true)
+        RhinoScriptSyntax.IsObjectInBox((RhinoScriptSyntax.CoerceRhinoObject(objectId)).Geometry, box, testMode)
+
+
+    /// <summary>Verifies an object's bounding box is inside of another bounding box.</summary>
+    /// <param name="geometryObject">(GeometryBase) Input geometry.</param>
+    /// <param name="box">(Geometry.BoundingBox) Bounding box to test for containment</param>
+    /// <param name="testMode">(bool) Optional, default value: <c>true</c>
+    ///    If True, the object's bounding box must be contained by box
+    ///    If False, the object's bounding box must be contained by or intersect box</param>
+    /// <returns>(bool) True if object is inside box, False is object is not inside box.</returns>
+    static member IsObjectInBox( geometryObject:GeometryBase,
+                                 box:BoundingBox,
+                                 [<OPT;DEF(true)>]testMode:bool) : bool =
+        let rhobj = geometryObject
+        let objbox = rhobj.GetBoundingBox(true)
         if testMode then
             box.Contains(objbox)
         else
@@ -294,10 +431,17 @@ module AutoOpenObject =
     /// <param name="objectId">(Guid) The identifier of an object to test</param>
     /// <returns>(bool) True if the object is solid, or a Mesh is closed, False otherwise.</returns>
     static member IsObjectSolid(objectId:Guid) : bool =
-        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        RhinoScriptSyntax.IsObjectSolid((RhinoScriptSyntax.CoerceRhinoObject(objectId)).Geometry)
+
+
+    /// <summary>Determines if an object is closed or solid.</summary>
+    /// <param name="geometryObject">(GeometryBase) Input geometry.</param>
+    /// <returns>(bool) True if the object is solid, or a Mesh is closed, False otherwise.</returns>
+    static member IsObjectSolid(geometryObject:GeometryBase) : bool =
+        let rhobj = geometryObject
         // rhobj.IsSolid //TODO  'rhobj.IsSolid'  could be used from RhCommon 7.5 onwards see https://github.com/mcneel/rhinoscriptsyntax/pull/197
         // and https://github.com/mcneel/rhinoscriptsyntax/commit/aaa0906fa43003db093c1e6f58bf12c813eddbeb
-        let geom = rhobj.Geometry
+        let geom = rhobj
         match geom with
         | :? Mesh      as m -> m.IsClosed
         | :? Extrusion as s -> s.IsSolid
@@ -305,7 +449,7 @@ module AutoOpenObject =
         | :? Brep      as s -> s.IsSolid
         | :? SubD      as s -> s.IsSolid // only for Rh7 and higher
         | _                 ->
-            RhinoScriptingException.Raise "IsObjectSolid only Mesh, Extrusion, Surface, Brep or SubD can be tested for solidity but not %s" (Pretty.str objectId)
+            RhinoScriptingException.Raise "IsObjectSolid only Mesh, Extrusion, Surface, Brep or SubD can be tested for solidity but not %s" (Pretty.str geometryObject)
 
 
 
@@ -392,6 +536,23 @@ module AutoOpenObject =
         res
 
 
+    /// <summary>Returns a transformed duplicate of the input geometry. The input is unchanged and the result is not added to a document.</summary>
+    /// <param name="geometry">(GeometryBase) Input geometry to duplicate and transform.</param>
+    /// <param name="startPoint">(Point3d) Start of the mirror Plane</param>
+    /// <param name="endPoint">(Point3d) End of the mirror Plane</param>
+    /// <returns>(GeometryBase) The transformed geometry duplicate.</returns>
+    static member MirrorObject( geometry:GeometryBase,
+                                startPoint:Point3d,
+                                endPoint:Point3d) : GeometryBase =
+        let vec = endPoint-startPoint
+        if vec.IsTiny() then RhinoScriptingException.Raise "MirrorObject Start and  end points are too close to each other.  geometry:'%s' startPoint:'%A' endPoint:'%A'" (Pretty.str geometry) startPoint endPoint
+        let normal = Plane.WorldXY.Normal
+        let xv = Vector3d.CrossProduct(vec, normal)
+        xv.Unitize() |> ignore<bool>
+        let xf = Transform.Mirror(startPoint, vec)
+        RhinoScriptSyntax.TransformObject(geometry, xf)
+
+
     /// <summary>Mirrors a list of objects on World XY Plane.</summary>
     /// <param name="objectIds">(Guid seq) Identifiers of objects to mirror</param>
     /// <param name="startPoint">(Point3d) Start of the mirror Plane</param>
@@ -417,6 +578,22 @@ module AutoOpenObject =
         if copy then RhinoScriptSyntax.putCopiesInNewGroups rc
         rc
 
+
+    /// <summary>Returns transformed duplicates of the input geometries. The input is unchanged and the result is not added to a document.</summary>
+    /// <param name="geometries">(GeometryBase seq) Input geometry to duplicate and transform.</param>
+    /// <param name="startPoint">(Point3d) Start of the mirror Plane</param>
+    /// <param name="endPoint">(Point3d) End of the mirror Plane</param>
+    /// <returns>(GeometryBase ResizeArray) The transformed geometry duplicates.</returns>
+    static member MirrorObjects(  geometries:GeometryBase seq,
+                                 startPoint:Point3d,
+                                 endPoint:Point3d) : GeometryBase ResizeArray = //PLURAL
+        let vec = endPoint-startPoint
+        if vec.IsTiny() then RhinoScriptingException.Raise "MirrorObjects Start and  end points are too close to each other.  objectId:'%s' startPoint:'%A' endPoint:'%A'" (Pretty.str geometries) startPoint endPoint
+        let normal = Plane.WorldXY.Normal
+        let xv = Vector3d.CrossProduct(vec, normal)
+        xv.Unitize() |> ignore<bool>
+        let xf = Transform.Mirror(startPoint, vec)
+        RhinoScriptSyntax.TransformObjects(geometries, xf)
 
 
     /// <summary>Moves a single object.</summary>
@@ -1091,51 +1268,24 @@ module AutoOpenObject =
     /// </param>
     /// <returns>(Guid) The identifier of the oriented object. The original or the copied object. Depending on given flags</returns>
     static member OrientObject( objectId:Guid,  referencePts:IList<Point3d>,  targetPts:IList<Point3d>,   [<OPT;DEF(0)>]flags:int) : Guid =
-        if referencePts.Count <> targetPts.Count then
-            RhinoScriptingException.Raise "OrientObject referencePts.Count <> targetPts.Count: %d <> %d " referencePts.Count targetPts.Count
-        if referencePts.Count < 2 then
-            RhinoScriptingException.Raise "OrientObject referencePts.Count < 2: %d  " referencePts.Count
-        if targetPts.Count < 2 then
-            RhinoScriptingException.Raise "OrientObject targetPts.Count < 2 : %d"  targetPts.Count
-
-        let copy  = (flags &&& 1) = 1
-        let scale = (flags &&& 2) = 2
-        let xform =
-            if referencePts.Count > 2 then
-                //Orient3Pt
-                let fromPlane = Rhino.Geometry.Plane(referencePts.[0], referencePts.[1], referencePts.[2])
-                let toPlane = Rhino.Geometry.Plane(targetPts.[0], targetPts.[1], targetPts.[2])
-                if not fromPlane.IsValid || not toPlane.IsValid then
-                    RhinoScriptingException.Raise "OrientObject unable to create valid planes from point lists %A and %A " referencePts targetPts
-                Rhino.Geometry.Transform.PlaneToPlane(fromPlane, toPlane)
-            else
-                //Orient2Pt
-                let xformMove = Rhino.Geometry.Transform.Translation( targetPts.[0]-referencePts.[0] )
-                let v0 = referencePts.[1] - referencePts.[0]
-                let v1 = targetPts.[1] - targetPts.[0]
-                let xformScale =
-                    if scale then
-                        let len0 = v0.Length
-                        let len1 = v1.Length
-                        if len0 < 0.000001 || len1 < 0.000001 then RhinoScriptingException.Raise "OrientObject vector lengths too short"
-                        let scaleF = len1 / len0
-                        if abs(1.0-scaleF) >= 0.000001 then
-                            let plane = Rhino.Geometry.Plane(referencePts.[0], v0)
-                            Rhino.Geometry.Transform.Scale(plane, scaleF, scaleF, scaleF)
-                        else
-                            Rhino.Geometry.Transform.Identity
-                    else
-                        Rhino.Geometry.Transform.Identity
-                v0.Unitize()  |> ignore<bool>
-                v1.Unitize()  |> ignore<bool>
-                let xformRotate = Rhino.Geometry.Transform.Rotation(v0, v1, referencePts.[0])
-                xformMove * xformScale * xformRotate
-
+        let copy = (flags &&& 1) = 1
+        let xform = RhinoScriptSyntax.objectOrientTransform(referencePts, targetPts, (flags &&& 2) = 2)
         let rc = RhinoScriptSyntax.Ot.Transform(objectId, xform, not copy)
         if rc=System.Guid.Empty then
             RhinoScriptingException.Raise "OrientObject failed"
         RhinoScriptSyntax.Doc.Views.Redraw()
         rc
+
+
+    /// <summary>Returns a transformed duplicate of the input geometry. The input is unchanged and the result is not added to a document.</summary>
+    /// <param name="geometry">(GeometryBase) Input geometry to duplicate and transform.</param>
+    /// <param name="referencePts">(IList of Point3d) list of 3D reference points.</param>
+    /// <param name="targetPts">(IList of Point3d) list of 3D target points.</param>
+    /// <param name="scale">(bool) Optional, default value: <c>false</c>. Scale to match the target distance when both point lists contain two points.</param>
+    /// <returns>(GeometryBase) The transformed geometry duplicate.</returns>
+    static member OrientObject( geometry:GeometryBase,  referencePts:IList<Point3d>,  targetPts:IList<Point3d>,   [<OPT;DEF(false)>]scale:bool) : GeometryBase =
+        let xform = RhinoScriptSyntax.objectOrientTransform(referencePts, targetPts, scale)
+        RhinoScriptSyntax.TransformObject(geometry, xform)
 
 
     /// <summary>Rotates a single object.</summary>
@@ -1158,6 +1308,23 @@ module AutoOpenObject =
         if res = Guid.Empty then RhinoScriptingException.Raise "RotateObject failed.  objectId:'%s' centerPoint:'%A' rotationAngle:'%A' axis:'%A' copy:'%A'" (Pretty.str objectId) centerPoint rotationAngle axis copy
         if copy then RhinoScriptSyntax.putCopiesInNewGroups [res]
         res
+
+
+    /// <summary>Returns a transformed duplicate of the input geometry. The input is unchanged and the result is not added to a document.</summary>
+    /// <param name="geometry">(GeometryBase) Input geometry to duplicate and transform.</param>
+    /// <param name="centerPoint">(Point3d) The center of rotation</param>
+    /// <param name="rotationAngle">(float) In degrees</param>
+    /// <param name="axis">(Vector3d) Optional, default value: <c>Vector3d.ZAxis</c>
+    ///    Axis of rotation, If omitted, the Vector3d.ZAxis is used as the rotation axis</param>
+    /// <returns>(GeometryBase) The transformed geometry duplicate.</returns>
+    static member RotateObject( geometry:GeometryBase,
+                                centerPoint:Point3d,
+                                rotationAngle:float,
+                                [<OPT;DEF(Vector3d())>]axis:Vector3d) : GeometryBase =
+        let axis = if axis.IsZero then Vector3d.ZAxis else axis
+        let rotationAngle = RhinoMath.ToRadians(rotationAngle)
+        let xf = Transform.Rotation(rotationAngle, axis, centerPoint)
+        RhinoScriptSyntax.TransformObject(geometry, xf)
 
 
     /// <summary>Rotates multiple objects.</summary>
@@ -1185,6 +1352,23 @@ module AutoOpenObject =
         rc
 
 
+    /// <summary>Returns transformed duplicates of the input geometries. The input is unchanged and the result is not added to a document.</summary>
+    /// <param name="geometries">(GeometryBase seq) Input geometry to duplicate and transform.</param>
+    /// <param name="centerPoint">(Point3d) The center of rotation</param>
+    /// <param name="rotationAngle">(float) In degrees</param>
+    /// <param name="axis">(Vector3d) Optional, default value: <c>Vector3d.ZAxis</c>
+    ///    Axis of rotation, If omitted, the Vector3d.ZAxis is used as the rotation axis</param>
+    /// <returns>(GeometryBase ResizeArray) The transformed geometry duplicates.</returns>
+    static member RotateObjects( geometries:GeometryBase seq,
+                                 centerPoint:Point3d,
+                                 rotationAngle:float,
+                                 [<OPT;DEF(Vector3d())>]axis:Vector3d) : GeometryBase ResizeArray = //PLURAL
+        let axis = if axis.IsZero then Vector3d.ZAxis else axis
+        let rotationAngle = RhinoMath.ToRadians(rotationAngle)
+        let xf = Transform.Rotation(rotationAngle, axis, centerPoint)
+        RhinoScriptSyntax.TransformObjects(geometries, xf)
+
+
     /// <summary>Scales a single object. Can be used to perform a uniform or non-uniform
     ///    scale transformation. Scaling is based on the WorldXY Plane.</summary>
     /// <param name="objectId">(Guid) The identifier of an object</param>
@@ -1205,6 +1389,22 @@ module AutoOpenObject =
         if copy then RhinoScriptSyntax.putCopiesInNewGroups [res]
         res
 
+
+    /// <summary>Returns a transformed duplicate of the input geometry. The input is unchanged and the result is not added to a document.</summary>
+    /// <param name="geometry">(GeometryBase) Input geometry to duplicate and transform.</param>
+    /// <param name="origin">(Point3d) The origin of the scale transformation</param>
+    /// <param name="scale">(float*float*float) Three numbers that identify the X, Y, and Z axis scale factors to apply</param>
+    /// <returns>(GeometryBase) The transformed geometry duplicate.</returns>
+    static member ScaleObject( geometry:GeometryBase,
+                               origin:Point3d,
+                               scale:float*float*float) : GeometryBase =
+        let mutable plane = Plane.WorldXY
+        plane.Origin <- origin
+        let x, y, z = scale
+        let xf = Transform.Scale(plane, x, y, z)
+        RhinoScriptSyntax.TransformObject(geometry, xf)
+
+
     /// <summary>Scales a single object. Uniform scale transformation. Scaling is based on the WorldXY Plane.</summary>
     /// <param name="objectId">(Guid) The identifier of an object</param>
     /// <param name="origin">(Point3d) The origin of the scale transformation</param>
@@ -1222,6 +1422,21 @@ module AutoOpenObject =
         if res = Guid.Empty then RhinoScriptingException.Raise "ScaleObject failed.  objectId:'%s' origin:'%A' scale:'%A' copy:'%A'" (Pretty.str objectId) origin scale  copy
         if copy then RhinoScriptSyntax.putCopiesInNewGroups [res]
         res
+
+
+    /// <summary>Returns a transformed duplicate of the input geometry. The input is unchanged and the result is not added to a document.</summary>
+    /// <param name="geometry">(GeometryBase) Input geometry to duplicate and transform.</param>
+    /// <param name="origin">(Point3d) The origin of the scale transformation</param>
+    /// <param name="scale">(float) One numbers that identify the X, Y, and Z axis scale factors to apply</param>
+    /// <returns>(GeometryBase) The transformed geometry duplicate.</returns>
+    static member ScaleObject( geometry:GeometryBase,
+                               origin:Point3d,
+                               scale:float) : GeometryBase = //ALT
+        let mutable plane = Plane.WorldXY
+        plane.Origin <- origin
+        let xf = Transform.Scale(plane, scale, scale, scale)
+        RhinoScriptSyntax.TransformObject(geometry, xf)
+
 
     /// <summary>Scales one or more objects. Can be used to perform a uniform or non-
     ///    uniform scale transformation. Scaling is based on the WorldXY Plane.</summary>
@@ -1246,6 +1461,22 @@ module AutoOpenObject =
         if copy then RhinoScriptSyntax.putCopiesInNewGroups rc
         rc
 
+
+    /// <summary>Returns transformed duplicates of the input geometries. The input is unchanged and the result is not added to a document.</summary>
+    /// <param name="geometries">(GeometryBase seq) Input geometry to duplicate and transform.</param>
+    /// <param name="origin">(Point3d) The origin of the scale transformation</param>
+    /// <param name="scale">(float*float*float) Three numbers that identify the X, Y, and Z axis scale factors to apply</param>
+    /// <returns>(GeometryBase ResizeArray) The transformed geometry duplicates.</returns>
+    static member ScaleObjects( geometries:GeometryBase seq,
+                                origin:Point3d,
+                                scale:float*float*float) : GeometryBase ResizeArray =  //PLURAL
+        let mutable plane = Plane.WorldXY
+        plane.Origin <- origin
+        let x, y, z = scale
+        let xf = Transform.Scale(plane, x, y, z)
+        RhinoScriptSyntax.TransformObjects(geometries, xf)
+
+
     /// <summary>Scales one or more objects. Uniform scale transformation. Scaling is based on the WorldXY Plane.</summary>
     /// <param name="objectIds">(Guid seq) Identifiers of objects to scale</param>
     /// <param name="origin">(Point3d) The origin of the scale transformation</param>
@@ -1268,6 +1499,19 @@ module AutoOpenObject =
         if copy then RhinoScriptSyntax.putCopiesInNewGroups rc
         rc
 
+
+    /// <summary>Returns transformed duplicates of the input geometries. The input is unchanged and the result is not added to a document.</summary>
+    /// <param name="geometries">(GeometryBase seq) Input geometry to duplicate and transform.</param>
+    /// <param name="origin">(Point3d) The origin of the scale transformation</param>
+    /// <param name="scale">(float) One numbers that identify the X, Y, and Z axis scale factors to apply</param>
+    /// <returns>(GeometryBase ResizeArray) The transformed geometry duplicates.</returns>
+    static member ScaleObjects( geometries:GeometryBase seq,
+                                origin:Point3d,
+                                scale:float) : GeometryBase ResizeArray =  //PLURAL ALT
+        let mutable plane = Plane.WorldXY
+        plane.Origin <- origin
+        let xf = Transform.Scale(plane, scale, scale, scale)
+        RhinoScriptSyntax.TransformObjects(geometries, xf)
 
 
     /// <summary>Selects a single object.
@@ -1357,27 +1601,29 @@ module AutoOpenObject =
                                referencePoint:Point3d,
                                angleDegrees:float,
                                [<OPT;DEF(false)>]copy:bool) : Guid =
-       if (origin-referencePoint).IsTiny() then RhinoScriptingException.Raise "ShearObject failed because (origin-referencePoint).IsTiny() : %s and %s" origin.Pretty referencePoint.Pretty
-       let plane = State.Doc.Views.ActiveView.MainViewport.ConstructionPlane()
-       let mutable frame = Plane(plane)
-       frame.Origin <- origin
-       frame.ZAxis <- plane.Normal
-       let yAxis = referencePoint-origin
-       yAxis.Unitize() |> ignore<bool>
-       frame.YAxis <- yAxis
-       let xAxis = Vector3d.CrossProduct(frame.ZAxis, frame.YAxis)
-       xAxis.Unitize() |> ignore<bool>
-       frame.XAxis <- xAxis
-       let worldPlane = Plane.WorldXY
-       let cob = Transform.ChangeBasis(worldPlane, frame)
-       let mutable shear2d = Transform.Identity
-       shear2d.[0, 1] <- tan(toRadians(angleDegrees))
-       let cobinv = Transform.ChangeBasis(frame, worldPlane)
-       let xf = cobinv * shear2d * cob
-       let res = State.Doc.Objects.Transform(objectId, xf, not copy)
-       if res = Guid.Empty then RhinoScriptingException.Raise "ShearObject failed for %s, origin %s, ref point  %s and angle in Deg  %f" (Pretty.str objectId) origin.Pretty referencePoint.Pretty angleDegrees
-       if copy then RhinoScriptSyntax.putCopiesInNewGroups [res]
-       res
+        if (origin-referencePoint).IsTiny() then RhinoScriptingException.Raise "ShearObject failed because (origin-referencePoint).IsTiny() : %s and %s" origin.Pretty referencePoint.Pretty
+        let plane = State.Doc.Views.ActiveView.MainViewport.ConstructionPlane()
+        let xf = RhinoScriptSyntax.objectShearTransform(origin, referencePoint, angleDegrees, plane)
+        let res = State.Doc.Objects.Transform(objectId, xf, not copy)
+        if res = Guid.Empty then RhinoScriptingException.Raise "ShearObject failed for %s, origin %s, ref point  %s and angle in Deg  %f" (Pretty.str objectId) origin.Pretty referencePoint.Pretty angleDegrees
+        if copy then RhinoScriptSyntax.putCopiesInNewGroups [res]
+        res
+
+
+    /// <summary>Returns a transformed duplicate of the input geometry. The input is unchanged and the result is not added to a document. Uses the active view construction plane.</summary>
+    /// <param name="geometry">(GeometryBase) Input geometry to duplicate and transform.</param>
+    /// <param name="origin">(Point3d) Origin point of the shear transformation</param>
+    /// <param name="referencePoint">(Point3d) Reference point of the shear transformation</param>
+    /// <param name="angleDegrees">(float) The shear angle in degrees</param>
+    /// <returns>(GeometryBase) The transformed geometry duplicate.</returns>
+    static member ShearObject( geometry:GeometryBase,
+                               origin:Point3d,
+                               referencePoint:Point3d,
+                               angleDegrees:float) : GeometryBase =
+        if (origin-referencePoint).IsTiny() then RhinoScriptingException.Raise "ShearObject failed because (origin-referencePoint).IsTiny() : %s and %s" origin.Pretty referencePoint.Pretty
+        let plane = State.Doc.Views.ActiveView.MainViewport.ConstructionPlane()
+        let xf = RhinoScriptSyntax.objectShearTransform(origin, referencePoint, angleDegrees, plane)
+        RhinoScriptSyntax.TransformObject(geometry, xf)
 
 
     /// <summary>Shears one or more objects.</summary>
@@ -1395,21 +1641,7 @@ module AutoOpenObject =
                                 [<OPT;DEF(false)>]copy:bool) : Guid ResizeArray = //PLURAL
         if (origin-referencePoint).IsTiny() then RhinoScriptingException.Raise "ShearObjects failed because (origin-referencePoint).IsTiny() : %s and %s" origin.Pretty referencePoint.Pretty
         let plane = State.Doc.Views.ActiveView.MainViewport.ConstructionPlane()
-        let mutable frame = Plane(plane)
-        frame.Origin <- origin
-        frame.ZAxis <- plane.Normal
-        let yAxis = referencePoint-origin
-        yAxis.Unitize() |> ignore<bool>
-        frame.YAxis <- yAxis
-        let xAxis = Vector3d.CrossProduct(frame.ZAxis, frame.YAxis)
-        xAxis.Unitize() |> ignore<bool>
-        frame.XAxis <- xAxis
-        let worldPlane = Plane.WorldXY
-        let cob = Transform.ChangeBasis(worldPlane, frame)
-        let mutable shear2d = Transform.Identity
-        shear2d.[0, 1] <- tan(toRadians(angleDegrees))
-        let cobinv = Transform.ChangeBasis(frame, worldPlane)
-        let xf = cobinv * shear2d * cob
+        let xf = RhinoScriptSyntax.objectShearTransform(origin, referencePoint, angleDegrees, plane)
         let r = ResizeArray()
         for ob in objectIds do
             let res = State.Doc.Objects.Transform(ob, xf, not copy)
@@ -1419,6 +1651,22 @@ module AutoOpenObject =
                 r.Add res
         if copy then RhinoScriptSyntax.putCopiesInNewGroups r
         r
+
+
+    /// <summary>Returns transformed duplicates of the input geometries. The input is unchanged and the result is not added to a document. Uses the active view construction plane.</summary>
+    /// <param name="geometries">(GeometryBase seq) Input geometry to duplicate and transform.</param>
+    /// <param name="origin">(Point3d) Origin point of the shear transformation</param>
+    /// <param name="referencePoint">(Point3d) Reference point of the shear transformation</param>
+    /// <param name="angleDegrees">(float) The shear angle in degrees</param>
+    /// <returns>(GeometryBase ResizeArray) The transformed geometry duplicates.</returns>
+    static member ShearObjects( geometries:GeometryBase seq,
+                                origin:Point3d,
+                                referencePoint:Point3d,
+                                angleDegrees:float) : GeometryBase ResizeArray = //PLURAL
+        if (origin-referencePoint).IsTiny() then RhinoScriptingException.Raise "ShearObjects failed because (origin-referencePoint).IsTiny() : %s and %s" origin.Pretty referencePoint.Pretty
+        let plane = State.Doc.Views.ActiveView.MainViewport.ConstructionPlane()
+        let xf = RhinoScriptSyntax.objectShearTransform(origin, referencePoint, angleDegrees, plane)
+        RhinoScriptSyntax.TransformObjects(geometries, xf)
 
 
     /// <summary>Shows a previously hidden object. Hidden objects are not visible, cannot

@@ -785,4 +785,3 @@ module AutoOpenLayer =
         let layer = RhinoScriptSyntax.CoerceLayer(layerName)
         if layer.ParentLayerId <> Guid.Empty then
             expand <| State.Doc.Layers.FindId(layer.ParentLayerId)
-

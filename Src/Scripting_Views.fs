@@ -141,8 +141,7 @@ module AutoOpenViews =
     /// <param name="detailId">(Guid) Identifier of a detail rectangle object</param>
     /// <returns>(bool) The current detail projection locked state.</returns>
     static member DetailLock(detailId:Guid) : bool = //GET
-        let detail = RhinoScriptSyntax.CoerceDetailView(detailId)
-        detail.IsProjectionLocked
+        RhinoScriptSyntax.DetailLock(RhinoScriptSyntax.CoerceDetailView(detailId))
 
     /// <summary>Modifies the projection locked state of a detail.</summary>
     /// <param name="detailId">(Guid) Identifier of a detail object</param>
@@ -157,6 +156,13 @@ module AutoOpenViews =
             detail.CommitChanges() |> ignore<bool>
 
 
+
+
+    /// <summary>Returns the projection locked state of a detail view-port rectangle.</summary>
+    /// <param name="detailGeo">(DetailView) The detail geometry to query.</param>
+    /// <returns>(bool) The current detail projection locked state.</returns>
+    static member DetailLock(detailGeo:DetailView) : bool = //GET
+        detailGeo.IsProjectionLocked
 
     /// <summary>Returns the scale of a detail object.</summary>
     /// <param name="detailId">(Guid) Identifier of a detail object</param>
@@ -180,7 +186,11 @@ module AutoOpenViews =
         else
             RhinoScriptingException.Raise "DetailScale failed.  detailId:'%s' modelLength:'%A' pageLength:'%A'" (Pretty.str detailId) modelLength pageLength
 
-
+    /// <summary>Returns the scale of a detail geometry object.</summary>
+    /// <param name="detailGeo">(DetailView) The detail geometry to query.</param>
+    /// <returns>(float) The current page to model scale ratio.</returns>
+    static member DetailScale(detailGeo:DetailView) : float = //GET
+        detailGeo.PageToModelRatio
 
     /// <summary>Checks if a detail view exists on a page layout view.</summary>
     /// <param name="layout">(string) Title of an existing page layout</param>
@@ -900,7 +910,6 @@ module AutoOpenViews =
         let view = RhinoScriptSyntax.CoerceView(viewId)
         view.MainViewport.Name
 
-
     /// <summary>Returns the wallpaper bitmap of the specified view. To remove a
     /// <param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     /// wallpaper bitmap, pass an empty string "".</summary>
@@ -1029,5 +1038,3 @@ module AutoOpenViews =
             let view = RhinoScriptSyntax.CoerceView(view)
             view.ActiveViewport.ZoomExtentsSelected()|> ignore<bool>
         State.Doc.Views.Redraw()
-
-

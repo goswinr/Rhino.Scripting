@@ -2,9 +2,10 @@
 
 All public types, members and functions of Rhino.Scripting, with the first sentence of their summary.
 
-- The 1254 static members of `RhinoScriptSyntax`, 1017 names with their overloads, have one table per source file,
+- The 1574 static members of `RhinoScriptSyntax`, 1038 names with their overloads, have one table per source file,
   e.g. [Curve](#curve) for `Src/Scripting_Curve.fs`. Scripts usually call them through an alias, `type rs = RhinoScriptSyntax`.
 - Overloads of the same name are in the order of the source.
+- Geometry-only `Make...` methods are listed immediately after their corresponding document-adding `Add...` methods.
 - `?name: type = value` marks an optional parameter and its default value.
 - In the other tables, instance members and fields start with `.`, e.g. `.Pretty`. Static members are qualified with their type name.
 - A property shows only its type. `with get, set` marks a property that can be set.
@@ -17,32 +18,32 @@ Generated from the sources by `API-Table/ApiTable.fsx`. Do not edit by hand.
 
 - [Header](#header), 10 members
 - [Application](#application), 79 members
-- [Block](#block), 27 members
+- [Block](#block), 28 members
 - [Coerce](#coerce), 51 members
-- [Curve](#curve), 146 members
-- [Dimension](#dimension), 62 members
+- [Curve](#curve), 247 members
+- [Dimension](#dimension), 70 members
 - [Document](#document), 51 members
-- [Geometry](#geometry), 71 members
+- [Geometry](#geometry), 101 members
 - [Grips](#grips), 17 members
 - [Group](#group), 20 members
-- [Hatch](#hatch), 25 members
+- [Hatch](#hatch), 30 members
 - [Layer](#layer), 60 members
-- [Light](#light), 40 members
-- [Line](#line), 14 members
+- [Light](#light), 56 members
+- [Line](#line), 15 members
 - [Linetype](#linetype), 4 members
 - [Material](#material), 25 members
-- [Mesh](#mesh), 55 members
-- [Object](#object), 87 members
-- [Plane](#plane), 20 members
-- [PointVector](#pointvector), 33 members
+- [Mesh](#mesh), 97 members
+- [Object](#object), 104 members
+- [Plane](#plane), 21 members
+- [PointVector](#pointvector), 37 members
 - [Selection](#selection), 25 members
-- [Surface](#surface), 120 members
+- [Surface](#surface), 210 members
 - [Toolbar](#toolbar), 15 members
 - [Transformation](#transformation), 29 members
 - [UserData](#userdata), 21 members
-- [UserInterface](#userinterface), 40 members
+- [UserInterface](#userinterface), 42 members
 - [Utility](#utility), 31 members
-- [Views](#views), 76 members
+- [Views](#views), 78 members
 
 **Other types, modules and extensions**
 
@@ -192,6 +193,7 @@ From [Src/Scripting_Block.fs](../Src/Scripting_Block.fs).
 | `BlockStatus` | `blockName: string -> int` | Returns the status of a linked block. |
 | `DeleteBlock` | `blockName: string -> bool` | Deletes a block definition and all of it's inserted instances. |
 | `ExplodeBlockInstance` | `objectId: Guid * ?explodeNestedInstances: bool = false -> Guid array` | Explodes a block instance into it's geometric components. |
+| `ExplodeBlockInstance` | `geometryObject: InstanceReferenceGeometry * ?explodeNestedInstances: bool = false -> GeometryBase array` | Explodes block reference geometry into transformed copies of its component geometry. |
 | `InsertBlock` | `blockName: string * insertionPoint: Point3d * ?scale: Vector3d = Vector3d() * ?angleDegrees: float = 0.0 * ?rotationNormal: Vector3d = Vector3d() -> Guid` | Inserts a block whose definition already exists in the document. |
 | `InsertBlock2` | `blockName: string * xForm: Transform -> Guid` | Inserts a block whose definition already exists in the document. |
 | `IsBlock` | `blockName: string -> bool` | Checks if the existence of a block definition in the document. |
@@ -233,7 +235,7 @@ From [Src/Scripting_Coerce.fs](../Src/Scripting_Coerce.fs).
 | `CoerceLinearDimension` | `objectId: Guid -> LinearDimensionObject` | Attempt to get Rhino LinearDimension Annotation Object. |
 | `CoerceMesh` | `objectId: Guid -> Mesh` | Attempt to get Mesh geometry from the document with a given objectId. |
 | `CoerceNurbsSurface` | `objectId: Guid -> NurbsSurface` | Attempt to get Surface geometry from the document with a given objectId. |
-| `CoercePageView` | `nameOrId: 'T -> RhinoPageView` | Attempt to get Rhino Page (or Layout) View Object from the name of the Layout. |
+| `CoercePageView` | `input: 'T -> RhinoPageView` | Attempt to get Rhino Page (or Layout) View Object from the name of the Layout. |
 | `CoercePlane` | `plane: 'T -> Plane` | Convert input into a Rhino.Geometry.Plane if possible. |
 | `CoercePointCloud` | `objectId: Guid -> PointCloud` | Attempt to get Rhino PointCloud Geometry. |
 | `CoercePointObject` | `objectId: Guid -> PointObject` | Attempt to get Rhino Point Object. |
@@ -243,7 +245,7 @@ From [Src/Scripting_Coerce.fs](../Src/Scripting_Coerce.fs).
 | `CoerceTextDot` | `objectId: Guid -> TextDot` | Attempt to get TextDot Geometry. |
 | `CoerceTextEntity` | `objectId: Guid -> TextEntity` | Attempt to get TextEntity Geometry (for the text Object use rs.CoerceTextObject) . |
 | `CoerceTextObject` | `objectId: Guid -> TextObject` | Attempt to get Rhino TextObject Annotation Object. |
-| `CoerceView` | `nameOrId: 'T -> RhinoView` | Attempt to get Rhino View Object from the name of the view, can be a standard or page view. |
+| `CoerceView` | `input: 'T -> RhinoView` | Attempt to get Rhino View Object from the name of the view, can be a standard or page view. |
 | `CoerceXform` | `xForm: 'T -> Transform` | Convert input into a Rhino.Geometry.Transform Transformation Matrix if possible. |
 | `TryCoerceArc` | `arc: 'T -> Arc option` | Attempt to get Rhino Arc Geometry using the current Documents Absolute Tolerance. does not return circles as arcs. |
 | `TryCoerceBrep` | `objectId: Guid -> Brep option` | Attempt to get a Polysurface or Brep class from given Guid. |
@@ -251,14 +253,14 @@ From [Src/Scripting_Coerce.fs](../Src/Scripting_Coerce.fs).
 | `TryCoerceCurve` | `objectId: Guid * ?segmentIndex: int = -1 -> Curve option` | Attempt to get Curve geometry from the document with a given objectId. |
 | `TryCoerceEllipse` | `cir: 'T -> Ellipse option` | Attempt to get Rhino Ellipse Geometry using the current Documents Absolute Tolerance. |
 | `TryCoerceGeometry` | `objectId: Guid -> GeometryBase option` | Attempt to get GeometryBase from a given Guid. |
-| `TryCoerceGuid` | `objectId: 'T -> Guid option` | Attempt to get a Guid from input. |
+| `TryCoerceGuid` | `input: 'T -> Guid option` | Attempt to get a Guid from input. |
 | `TryCoerceLight` | `objectId: Guid -> Light option` | Attempt to get Rhino LightObject from the document with a given objectId. |
 | `TryCoerceLine` | `line: 'T -> Line option` | Attempt to get Rhino Line Geometry using the current Documents Absolute Tolerance. |
 | `TryCoerceMesh` | `objectId: Guid -> Mesh option` | Attempt to get Mesh class from given Guid. |
 | `TryCoercePolyline` | `poly: 'T -> Polyline option` | Attempt to get Rhino Polyline Geometry. |
 | `TryCoerceRhinoObject` | `objectId: Guid -> RhinoObject option` | Attempt to get a RhinoObject from the document with a given objectId. |
 | `TryCoerceSurface` | `objectId: Guid -> Surface option` | Attempt to get Surface class from given Guid. |
-| `TryCoerceView` | `nameOrId: 'T -> Option<RhinoView>` | Attempt to get Rhino View Object from the name of the view, can be a standard or page view. |
+| `TryCoerceView` | `input: 'T -> Option<RhinoView>` | Attempt to get Rhino View Object from the name of the view, can be a standard or page view. |
 
 ## Curve
 
@@ -270,6 +272,7 @@ From [Src/Scripting_Curve.fs](../Src/Scripting_Curve.fs).
 | `AddArc3Pt` | `start: Point3d * ende: Point3d * pointOnArc: Point3d -> Guid` | Adds a 3-point arc curve to the document. |
 | `AddArcPtTanPt` | `start: Point3d * direction: Vector3d * ende: Point3d -> Guid` | Adds an arc curve, created from a start point, a start direction, and an end point, to the document. |
 | `AddBlendCurve` | `curves: (Guid * Guid) * parameters: (float * float) * reverses: (bool * bool) * continuities: (int * int) -> Guid` | Makes a curve blend between two curves. |
+| `MakeBlendCurve` | `curves: (Curve * Curve) * parameters: (float * float) * reverses: (bool * bool) * continuities: (int * int) -> Curve` | Computes MakeBlendCurve from geometry without modifying the document. |
 | `AddCircle` | `plane: Plane * radius: float -> Guid` | Adds a circle curve to the document. |
 | `AddCircle` | `center: Point3d * radius: float -> Guid` | Adds a circle curve to the document. |
 | `AddCircle3Pt` | `first: Point3d * second: Point3d * third: Point3d -> Guid` | Adds a 3-point circle curve to the document. |
@@ -277,8 +280,11 @@ From [Src/Scripting_Curve.fs](../Src/Scripting_Curve.fs).
 | `AddEllipse` | `plane: Plane * radiusX: float * radiusY: float -> Guid` | Adds an elliptical curve to the document. |
 | `AddEllipse3Pt` | `center: Point3d * second: Point3d * third: Point3d -> Guid` | Adds a 3-point elliptical curve to the document. |
 | `AddFilletCurve` | `curveA: Guid * curveB: Guid * ?radius: float = 1.0 * ?basePointA: Point3d = Point3d() * ?basePointB: Point3d = Point3d() -> Guid` | Adds a fillet curve between two curve objects. |
+| `MakeFilletCurve` | `curveA: Curve * curveB: Curve * ?radius: float = 1.0 * ?basePointA: Point3d = Point3d() * ?basePointB: Point3d = Point3d() -> ArcCurve` | Computes MakeFilletCurve from geometry without modifying the document. |
 | `AddInterpCrvOnSrf` | `surfaceId: Guid * points: Point3d seq -> Guid` | Adds an interpolated curve object that lies on a specified surface. |
+| `MakeInterpCrvOnSrf` | `surfaceGeo: Surface * points: Point3d seq -> Curve` | Computes MakeInterpCrvOnSrf from geometry without modifying the document. |
 | `AddInterpCrvOnSrfUV` | `surfaceId: Guid * points: Point2d seq -> Guid` | Adds an interpolated curve object based on surface parameters, that lies on a specified surface. |
+| `MakeInterpCrvOnSrfUV` | `surfaceGeo: Surface * points: Point2d seq -> Curve` | Computes MakeInterpCrvOnSrfUV from geometry without modifying the document. |
 | `AddInterpCurve` | `points: Point3d seq * ?degree: int = 3 * ?knotStyle: int = 0 * ?startTangent: Vector3d = Vector3d() * ?endTangent: Vector3d = Vector3d() -> Guid` | Adds an interpolated Curve object to the document. |
 | `AddLine` | `start: Point3d * ende: Point3d -> Guid` | Adds a line curve to the current model. |
 | `AddLine` | `startX: float * startY: float * startZ: float * endX: float * endY: float * endZ: float -> Guid` | Adds a line curve to the current model. |
@@ -289,72 +295,129 @@ From [Src/Scripting_Curve.fs](../Src/Scripting_Curve.fs).
 | `AddRectangle` | `plane: Plane * width: float * height: float -> Guid` | Add a rectangular Curve to the document. |
 | `AddSpiral` | `point0: Point3d * point1: Point3d * pitch: float * turns: float * radius0: float * ?radius1: float = 0.0 -> Guid` | Adds a spiral or helical curve to the document. |
 | `AddSubCrv` | `curveId: Guid * param0: float * param1: float -> Guid` | Add a Curve object based on a portion, or interval of an existing Curve object. |
+| `MakeSubCrv` | `curveGeo: Curve * param0: float * param1: float -> Curve` | Computes MakeSubCrv from geometry without modifying the document. |
 | `AddTweenCurves` | `fromCurveId: Guid * toCurveId: Guid * ?numberOfCurves: int = 1 * ?method: int = 0 * ?sampleNumber: int = 10 -> ResizeArray<Guid>` | Creates Curves between two open or closed input Curves. |
+| `MakeTweenCurves` | `fromCurve: Curve * toCurve: Curve * ?numberOfCurves: int = 1 * ?method: int = 0 * ?sampleNumber: int = 10 -> ResizeArray<Curve>` | Computes MakeTweenCurves from geometry without modifying the document. |
 | `ArcAngle` | `curveId: Guid * ?segmentIndex: int = -1 -> float` | Returns the angle of an arc Curve object. |
+| `ArcAngle` | `curveGeo: Curve * ?segmentIndex: int = -1 -> float` | Returns the angle of an arc Curve object. |
 | `ArcCenterPoint` | `curveId: Guid * ?segmentIndex: int = -1 -> Point3d` | Returns the center point of an arc Curve object. |
+| `ArcCenterPoint` | `curveGeo: Curve * ?segmentIndex: int = -1 -> Point3d` | Returns the center point of an arc Curve object. |
 | `ArcMidPoint` | `curveId: Guid * ?segmentIndex: int = -1 -> Point3d` | Returns the mid point of an arc Curve object. |
+| `ArcMidPoint` | `curveGeo: Curve * ?segmentIndex: int = -1 -> Point3d` | Returns the mid point of an arc Curve object. |
 | `ArcRadius` | `curveId: Guid * ?segmentIndex: int = -1 -> float` | Returns the radius of an arc Curve object. |
+| `ArcRadius` | `curveGeo: Curve * ?segmentIndex: int = -1 -> float` | Returns the radius of an arc Curve object. |
 | `ChangeCurveDegree` | `curveId: Guid * degree: int -> bool` | Changes the degree of a Curve object. |
 | `CircleCenterPlane` | `curveId: Guid * ?segmentIndex: int = -1 -> Plane` | Returns the center Plane of a circle Curve object. |
+| `CircleCenterPlane` | `curveGeo: Curve * ?segmentIndex: int = -1 -> Plane` | Returns the center Plane of a circle Curve object. |
 | `CircleCenterPoint` | `curveId: Guid * ?segmentIndex: int = -1 -> Point3d` | Returns the center point of a circle Curve object. |
+| `CircleCenterPoint` | `curveGeo: Curve * ?segmentIndex: int = -1 -> Point3d` | Returns the center point of a circle Curve object. |
 | `CircleCircumference` | `curveId: Guid * ?segmentIndex: int = -1 -> float` | Returns the circumference of a circle Curve object. |
+| `CircleCircumference` | `curveGeo: Curve * ?segmentIndex: int = -1 -> float` | Returns the circumference of a circle Curve object. |
 | `CircleRadius` | `curveId: Guid * ?segmentIndex: int = -1 -> float` | Returns the radius of a circle Curve object. |
+| `CircleRadius` | `curveGeo: Curve * ?segmentIndex: int = -1 -> float` | Returns the radius of a circle Curve object. |
 | `CloseCurve` | `curveId: Guid * ?tolerance: float = 0.0 -> Guid` | Closes an open Curve object by making adjustments to the end points so they meet at a point. |
+| `CloseCurve` | `curveGeo: Curve * ?tolerance: float = 0.0 -> Curve` | Computes CloseCurve from geometry without modifying the document. |
 | `ClosedCurveOrientation` | `curveId: Guid * ?direction: Vector3d = Vector3d() -> int` | Determine the orientation (counter-clockwise or clockwise) of a closed, planar Curve. |
+| `ClosedCurveOrientation` | `curveGeo: Curve * ?direction: Vector3d = Vector3d() -> int` | Determine the orientation (counter-clockwise or clockwise) of a closed, planar Curve. |
 | `ConvertCurveToPolyline` | `curveId: Guid * ?angleTolerance: float = 0.0 * ?tolerance: float = 0.0 * ?deleteInput: bool = false * ?minEdgeLength: float = 0.0 * ?maxEdgeLength: float = 0.0 -> Guid` | Convert Curve to a Polyline Curve. |
+| `ConvertCurveToPolyline` | `curveGeo: Curve * ?angleTolerance: float = 0.0 * ?tolerance: float = 0.0 * ?minEdgeLength: float = 0.0 * ?maxEdgeLength: float = 0.0 -> PolylineCurve` | Computes ConvertCurveToPolyline from geometry without modifying the document. |
 | `CreateNurbsCurve` | `points: Point3d seq * knots: float seq * degree: int * ?weights: float seq = null -> NurbsCurve` | Creates a NURBS Curve geometry, but does not add or draw it to the document. |
 | `CurveArcLengthPoint` | `curveId: Guid * length: float * ?fromStart: bool = true -> Point3d` | Returns the point on the Curve that is a specified arc length from the start of the Curve. |
+| `CurveArcLengthPoint` | `curveGeo: Curve * length: float * ?fromStart: bool = true -> Point3d` | Returns the point on the Curve that is a specified arc length from the start of the Curve. |
 | `CurveArea` | `curveId: Guid -> float` | Returns area of closed planar Curves. |
+| `CurveArea` | `curveGeo: Curve -> float` | Returns area of closed planar Curves. |
 | `CurveAreaCentroid` | `curveId: Guid -> Point3d` | Returns area centroid of closed, planar Curves. |
+| `CurveAreaCentroid` | `curveGeo: Curve -> Point3d` | Returns area centroid of closed, planar Curves. |
 | `CurveArrows` | `curveId: Guid -> int` | Get status of a Curve object's annotation arrows. |
 | `CurveArrows` | `curveId: Guid * arrowStyle: int -> unit` | Enables or disables a Curve object's annotation arrows. |
 | `CurveArrows` | `curveIds: Guid seq * arrowStyle: int -> unit` | Enables or disables multiple Curve objects's annotation arrows. |
 | `CurveBooleanDifference` | `curveA: Guid * curveB: Guid * ?tolerance: float = 0.0 -> ResizeArray<Guid>` | Calculates the difference between two closed, planar Curves and adds the results to the document. |
+| `CurveBooleanDifference` | `curveA: Curve * curveB: Curve * ?tolerance: float = 0.0 -> ResizeArray<Curve>` | Computes CurveBooleanDifference from geometry without modifying the document. |
 | `CurveBooleanIntersection` | `curveA: Guid * curveB: Guid * ?tolerance: float = 0.0 -> ResizeArray<Guid>` | Calculates the intersection of two closed, planar Curves and adds the results to the document. |
+| `CurveBooleanIntersection` | `curveA: Curve * curveB: Curve * ?tolerance: float = 0.0 -> ResizeArray<Curve>` | Computes CurveBooleanIntersection from geometry without modifying the document. |
 | `CurveBooleanUnion` | `curveIds: Guid seq * ?tolerance: float = 0.0 -> ResizeArray<Guid>` | Calculate the union of two or more closed, planar Curves and add the results to the document. |
+| `CurveBooleanUnion` | `curveInputs: Curve seq * ?tolerance: float = 0.0 -> ResizeArray<Curve>` | Computes CurveBooleanUnion from geometry without modifying the document. |
 | `CurveBrepIntersect` | `curveId: Guid * brepId: Guid * ?tolerance: float = 0.0 -> ResizeArray<Point3d> * ResizeArray<Curve>` | Intersects a Curve object with a brep object. |
+| `CurveBrepIntersect` | `curveGeo: Curve * brepInput: Brep * ?tolerance: float = 0.0 -> ResizeArray<Point3d> * ResizeArray<Curve>` | Intersects a Curve object with a brep object. |
 | `CurveClosestObject` | `curveId: Guid * objectIds: Guid seq -> Guid * Point3d * Point3d` | Returns the 3D point locations on two objects where they are closest to each other. |
+| `CurveClosestObject` | `curveGeo: Curve * objectInputs: GeometryBase seq -> GeometryBase * Point3d * Point3d` | Computes CurveClosestObject from geometry without modifying the document. |
 | `CurveClosestParameter` | `curveId: Guid * point: Point3d * ?segmentIndex: int = -1 -> float` | Returns parameter of the point on a Curve that is closest to a test point. |
+| `CurveClosestParameter` | `curveGeo: Curve * point: Point3d * segmentIndex: int -> float` | Returns parameter of the point on a Curve that is closest to a test point. |
 | `CurveClosestParameter` | `curve: Curve * point: Point3d -> float` | Returns parameter of the point on a Curve that is closest to a test point. |
 | `CurveClosestPoint` | `curveId: Guid * point: Point3d * ?segmentIndex: int = -1 -> Point3d` | Returns the point on a Curve that is closest to a test point. |
+| `CurveClosestPoint` | `curveGeo: Curve * point: Point3d * segmentIndex: int -> Point3d` | Returns the point on a Curve that is closest to a test point. |
 | `CurveClosestPoint` | `curve: Curve * point: Point3d -> Point3d` | Returns the point on a Curve that is closest to a test point. |
 | `CurveContourPoints` | `curveId: Guid * startPoint: Point3d * endPoint: Point3d * interval: float -> Point3d array` | Returns the 3D point locations calculated by contouring a Curve object. |
+| `CurveContourPoints` | `curveGeo: Curve * startPoint: Point3d * endPoint: Point3d * interval: float -> Point3d array` | Returns the 3D point locations calculated by contouring a Curve object. |
 | `CurveCurvature` | `curveId: Guid * parameter: float -> Point3d * Vector3d * Point3d * float * Vector3d` | Returns the curvature of a Curve at a parameter. |
+| `CurveCurvature` | `curveGeo: Curve * parameter: float -> Point3d * Vector3d * Point3d * float * Vector3d` | Returns the curvature of a Curve at a parameter. |
 | `CurveCurveIntersection` | `curveA: Guid * ?curveB: Guid = Guid() * ?tolerance: float = 0.0 -> ResizeArray<int * Point3d * Point3d * Point3d * Point3d * float * float * float * float>` | Calculates intersection of two Curve objects. |
+| `CurveCurveIntersection` | `curveA: Curve * ?curveB: Curve = null * ?tolerance: float = 0.0 -> ResizeArray<int * Point3d * Point3d * Point3d * Point3d * float * float * float * float>` | Calculates intersection of two Curve objects. |
 | `CurveDegree` | `curveId: Guid * ?segmentIndex: int = -1 -> int` | Returns the degree of a Curve object. |
+| `CurveDegree` | `curveGeo: Curve * ?segmentIndex: int = -1 -> int` | Returns the degree of a Curve object. |
 | `CurveDeviation` | `curveA: Guid * curveB: Guid -> float * float * float * float * float * float` | Returns the minimum and maximum deviation between two Curve objects. |
+| `CurveDeviation` | `curveA: Curve * curveB: Curve -> float * float * float * float * float * float` | Returns the minimum and maximum deviation between two Curve objects. |
 | `CurveDim` | `curveId: Guid * ?segmentIndex: int = -1 -> int` | Returns the dimension of a Curve object. |
+| `CurveDim` | `curveGeo: Curve * ?segmentIndex: int = -1 -> int` | Returns the dimension of a Curve object. |
 | `CurveDirection` | `curveId: Guid * ?allowNonLinear: bool = false * ?segmentIndex: int = -1 -> Vector3d` | Returns the average unitized direction of a Curve object between start and end point, Optionally allows non linear Curves too. |
+| `CurveDirection` | `curveGeo: Curve * ?allowNonLinear: bool = false * ?segmentIndex: int = -1 -> Vector3d` | Returns the average unitized direction of a Curve object between start and end point, Optionally allows non linear Curves too. |
 | `CurveDirectionsMatch` | `curveA: Guid * curveB: Guid -> bool` | Tests if two Curve objects are generally in the same direction or if they would be more in the same direction if one of them were flipped. |
+| `CurveDirectionsMatch` | `curveA: Curve * curveB: Curve -> bool` | Tests if two Curve objects are generally in the same direction or if they would be more in the same direction if one of them were flipped. |
 | `CurveDiscontinuity` | `curveId: Guid * style: int -> ResizeArray<Point3d>` | Search for a derivative, tangent, or curvature discontinuity in a Curve object. |
+| `CurveDiscontinuity` | `curveGeo: Curve * style: int -> ResizeArray<Point3d>` | Search for a derivative, tangent, or curvature discontinuity in a Curve object. |
 | `CurveDomain` | `curveId: Guid * ?segmentIndex: int = -1 -> Interval` | Returns the domain of a Curve object as an indexable object with two elements. |
+| `CurveDomain` | `curveGeo: Curve * ?segmentIndex: int = -1 -> Interval` | Returns the domain of a Curve object as an indexable object with two elements. |
 | `CurveEditParameters` | `curveId: Guid * ?segmentIndex: int = -1 -> float array` | Returns the Edit-, or Greville-Parameters of a Curve object. |
+| `CurveEditParameters` | `curveGeo: Curve * ?segmentIndex: int = -1 -> float array` | Returns the Edit-, or Greville-Parameters of a Curve object. |
 | `CurveEditPoints` | `curveId: Guid * ?segmentIndex: int = -1 -> Point3dList` | Returns the Edit-, or Greville-Points of a Curve object. |
+| `CurveEditPoints` | `curveGeo: Curve * ?segmentIndex: int = -1 -> Point3dList` | Returns the Edit-, or Greville-Points of a Curve object. |
 | `CurveEndPoint` | `curveId: Guid * ?segmentIndex: int = -1 -> Point3d` | Returns the end point of a Curve object. |
+| `CurveEndPoint` | `curveGeo: Curve * ?segmentIndex: int = -1 -> Point3d` | Returns the end point of a Curve object. |
 | `CurveEndTangent` | `curveId: Guid * ?segmentIndex: int = -1 -> Vector3d` | Returns the tangent at end point of a Curve object pointing away from the Curve . |
+| `CurveEndTangent` | `curveGeo: Curve * ?segmentIndex: int = -1 -> Vector3d` | Returns the tangent at end point of a Curve object pointing away from the Curve . |
 | `CurveFilletPoints` | `curveA: Guid * curveB: Guid * radius: float * ?basePointA: Point3d = Point3d() * ?basePointB: Point3d = Point3d() -> Point3d * Point3d * Plane` | Find points at which to cut a pair of Curves so that a fillet of a specified radius fits. |
+| `CurveFilletPoints` | `curveA: Curve * curveB: Curve * radius: float * ?basePointA: Point3d = Point3d() * ?basePointB: Point3d = Point3d() -> Point3d * Point3d * Plane` | Find points at which to cut a pair of Curves so that a fillet of a specified radius fits. |
 | `CurveFrame` | `curveId: Guid * parameter: float * ?segmentIndex: int = -1 -> Plane` | Returns the Plane at a parameter of a Curve. |
+| `CurveFrame` | `curveGeo: Curve * parameter: float * ?segmentIndex: int = -1 -> Plane` | Returns the Plane at a parameter of a Curve. |
 | `CurveKnotCount` | `curveId: Guid * ?segmentIndex: int = -1 -> int` | Returns the knot count of a Curve object. |
+| `CurveKnotCount` | `curveGeo: Curve * ?segmentIndex: int = -1 -> int` | Returns the knot count of a Curve object. |
 | `CurveKnots` | `curveId: Guid * ?segmentIndex: int = -1 -> ResizeArray<float>` | Returns the knots, or knot vector, of a Curve object. |
+| `CurveKnots` | `curveGeo: Curve * ?segmentIndex: int = -1 -> ResizeArray<float>` | Returns the knots, or knot vector, of a Curve object. |
 | `CurveLength` | `curveId: Guid * ?segmentIndex: int = -1 * ?subDomain: Interval = Interval() -> float` | Returns the length of a Curve object. |
+| `CurveLength` | `curveGeo: Curve * ?segmentIndex: int = -1 * ?subDomain: Interval = Interval() -> float` | Returns the length of a Curve object. |
 | `CurveLineClosestPoint` | `curveId: Guid * line: Line -> Point3d * Point3d` | Returns the 3D point locations on the Curve and finite line where they are closest to each other. |
+| `CurveLineClosestPoint` | `curveGeo: Curve * line: Line -> Point3d * Point3d` | Returns the 3D point locations on the Curve and finite line where they are closest to each other. |
 | `CurveMidPoint` | `curveId: Guid * ?segmentIndex: int = -1 -> Point3d` | Returns the mid point of a Curve object. |
+| `CurveMidPoint` | `curveGeo: Curve * ?segmentIndex: int = -1 -> Point3d` | Returns the mid point of a Curve object. |
 | `CurveNormal` | `curveId: Guid * ?segmentIndex: int = -1 -> Vector3d` | Returns the normal direction of the Plane in which a planar Curve object lies. |
+| `CurveNormal` | `curveGeo: Curve * ?segmentIndex: int = -1 -> Vector3d` | Returns the normal direction of the Plane in which a planar Curve object lies. |
 | `CurveNormalizedParameter` | `curveId: Guid * parameter: float -> float` | Converts a Curve parameter to a normalized Curve parameter; one that ranges between 0-1. |
+| `CurveNormalizedParameter` | `curveGeo: Curve * parameter: float -> float` | Converts a Curve parameter to a normalized Curve parameter; one that ranges between 0-1. |
 | `CurveParameter` | `curveId: Guid * parameter: float -> float` | Converts a normalized Curve parameter to a Curve parameter; one within the Curve's domain. |
+| `CurveParameter` | `curveGeo: Curve * parameter: float -> float` | Converts a normalized Curve parameter to a Curve parameter; one within the Curve's domain. |
 | `CurvePerpFrame` | `curveId: Guid * parameter: float -> Plane` | Returns the perpendicular Plane at a parameter of a Curve. |
+| `CurvePerpFrame` | `curveGeo: Curve * parameter: float -> Plane` | Returns the perpendicular Plane at a parameter of a Curve. |
 | `CurvePlane` | `curveId: Guid * ?segmentIndex: int = -1 -> Plane` | Returns the Plane in which a planar Curve lies. |
+| `CurvePlane` | `curveGeo: Curve * ?segmentIndex: int = -1 -> Plane` | Returns the Plane in which a planar Curve lies. |
 | `CurvePointCount` | `curveId: Guid * ?segmentIndex: int = -1 -> int` | Returns the control points count of a Curve object. |
+| `CurvePointCount` | `curveGeo: Curve * ?segmentIndex: int = -1 -> int` | Returns the control points count of a Curve object. |
 | `CurvePoints` | `curve: Curve -> ResizeArray<Point3d>` | Returns the control points, or control vertices, of a Curve object. |
 | `CurvePoints` | `curveId: Guid * ?segmentIndex: int = -1 -> ResizeArray<Point3d>` | Returns the control points, or control vertices, of a Curve object. |
+| `CurvePoints` | `curveGeo: Curve * segmentIndex: int -> ResizeArray<Point3d>` | Returns the control points, or control vertices, of a Curve object. |
 | `CurveRadius` | `curveId: Guid * testPoint: Point3d * ?segmentIndex: int = -1 -> float` | Returns the radius of curvature at a point on a Curve. |
+| `CurveRadius` | `curveGeo: Curve * testPoint: Point3d * ?segmentIndex: int = -1 -> float` | Returns the radius of curvature at a point on a Curve. |
 | `CurveSeam` | `curveId: Guid * parameter: float -> bool` | Adjusts the seam, or start/end, point of a closed Curve. |
 | `CurveStartPoint` | `curveId: Guid * ?segmentIndex: int = -1 -> Point3d` | Returns the start point of a Curve object. |
+| `CurveStartPoint` | `curveGeo: Curve * ?segmentIndex: int = -1 -> Point3d` | Returns the start point of a Curve object. |
 | `CurveStartPoint` | `curveId: Guid * point: Point3d -> unit` | Sets the start point of a Curve object. |
 | `CurveStartTangent` | `curveId: Guid * ?segmentIndex: int = -1 -> Vector3d` | Returns the tangent at start point of a Curve object pointing in direction of the Curve . |
+| `CurveStartTangent` | `curveGeo: Curve * ?segmentIndex: int = -1 -> Vector3d` | Returns the tangent at start point of a Curve object pointing in direction of the Curve . |
 | `CurveSurfaceIntersection` | `curveId: Guid * surfaceId: Guid * ?tolerance: float = 0.0 * ?angleTolerance: float = 0.0 -> ResizeArray<int * Point3d * Point3d * Point3d * Point3d * float * float * float * float * float * float>` | Calculates intersection of a Curve object with a Surface object. |
+| `CurveSurfaceIntersection` | `curveGeo: Curve * surfaceGeo: Surface * ?tolerance: float = 0.0 * ?angleTolerance: float = 0.0 -> ResizeArray<int * Point3d * Point3d * Point3d * Point3d * float * float * float * float * float * float>` | Calculates intersection of a Curve object with a Surface object. |
 | `CurveTangent` | `curveId: Guid * parameter: float * ?segmentIndex: int = -1 -> Vector3d` | Returns a 3D vector that is the tangent to a Curve at a parameter. |
+| `CurveTangent` | `curveGeo: Curve * parameter: float * ?segmentIndex: int = -1 -> Vector3d` | Returns a 3D vector that is the tangent to a Curve at a parameter. |
 | `CurveWeights` | `curveId: Guid * ?segmentIndex: int = -1 -> ResizeArray<float>` | Returns list of weights that are assigned to the control points of a Curve. |
+| `CurveWeights` | `curveGeo: Curve * ?segmentIndex: int = -1 -> ResizeArray<float>` | Returns list of weights that are assigned to the control points of a Curve. |
 | `DivideCurve` | `curve: Curve * segments: int -> float array` | Divides a Curve Geometry into a specified number of segments. |
 | `DivideCurve` | `curveId: Guid * segments: int -> float array` | Divides a Curve object into a specified number of segments. |
 | `DivideCurveEquidistant` | `curve: Curve * distance: float -> Point3d array` | Divides a Curve Geometry such that the linear distance between the points is equal. |
@@ -366,52 +429,92 @@ From [Src/Scripting_Curve.fs](../Src/Scripting_Curve.fs).
 | `DivideCurveLengthIntoPoints` | `curve: Curve * length: float -> ResizeArray<Point3d>` | Divides a Curve Geometry into segments of a specified length. |
 | `DivideCurveLengthIntoPoints` | `curveId: Guid * length: float -> ResizeArray<Point3d>` | Divides a Curve object into segments of a specified length. |
 | `EllipseCenterPoint` | `curveId: Guid -> Point3d` | Returns the center point of an elliptical-shaped Curve object. |
+| `EllipseCenterPoint` | `curveGeo: Curve -> Point3d` | Returns the center point of an elliptical-shaped Curve object. |
 | `EllipseQuadPoints` | `curveId: Guid -> Point3d * Point3d * Point3d * Point3d` | Returns the quadrant points of an elliptical-shaped Curve object. |
+| `EllipseQuadPoints` | `curveGeo: Curve -> Point3d * Point3d * Point3d * Point3d` | Returns the quadrant points of an elliptical-shaped Curve object. |
 | `EvaluateCurve` | `curveId: Guid * t: float * ?segmentIndex: int = -1 -> Point3d` | Evaluates a Curve at a parameter and returns a 3D point. |
+| `EvaluateCurve` | `curveGeo: Curve * t: float * ?segmentIndex: int = -1 -> Point3d` | Evaluates a Curve at a parameter and returns a 3D point. |
 | `ExplodeCurve` | `curveId: Guid * ?deleteInput: bool = false -> ResizeArray<Guid>` | Explodes, or un-joins, one Curve. |
+| `ExplodeCurve` | `curveGeo: Curve -> ResizeArray<Curve>` | Computes ExplodeCurve from geometry without modifying the document. |
 | `ExplodeCurves` | `curveIds: Guid seq * ?deleteInput: bool = false -> ResizeArray<Guid>` | Explodes, or un-joins, several curves Curve. |
+| `ExplodeCurves` | `curveInputs: Curve seq -> ResizeArray<Curve>` | Computes ExplodeCurves from geometry without modifying the document. |
 | `ExtendCurve` | `curveId: Guid * extensionType: int * side: int * boundaryCurveIds: Guid seq * ?replaceInput: bool = false -> Guid` | Extends a non-closed Curve object by a line, arc, or smooth extension until it intersects a collection of objects. |
+| `ExtendCurve` | `curveGeo: Curve * extensionType: int * side: int * boundaryCurves: GeometryBase seq -> Curve` | Computes ExtendCurve from geometry without modifying the document. |
 | `ExtendCurveLength` | `curveId: Guid * extensionType: int * side: int * length: float -> Guid` | Extends a non-closed Curve by a line, arc, or smooth extension for a specified distance. |
+| `ExtendCurveLength` | `curveGeo: Curve * extensionType: int * side: int * length: float -> Curve` | Computes ExtendCurveLength from geometry without modifying the document. |
 | `ExtendCurvePoint` | `curveId: Guid * side: int * point: Point3d * ?extensionType: int = -1 -> Guid` | Extends a non-closed Curve by smooth extension to a point. |
+| `ExtendCurvePoint` | `curveGeo: Curve * side: int * point: Point3d * ?extensionType: int = -1 -> Curve` | Computes ExtendCurvePoint from geometry without modifying the document. |
 | `FairCurve` | `curveId: Guid * tolerance: float -> bool` | Fairs a Curve. |
 | `FitCurve` | `curveId: Guid * ?degree: int = 3 * ?distanceTolerance: float = 0.0 * ?angleTolerance: float = -1.0 -> Guid` | Reduces number of Curve control points while maintaining the Curve's same general shape. |
+| `FitCurve` | `curveGeo: Curve * ?degree: int = 3 * ?distanceTolerance: float = 0.0 * ?angleTolerance: float = -1.0 -> Curve` | Computes FitCurve from geometry without modifying the document. |
 | `InsertCurveKnot` | `curveId: Guid * parameter: float * ?symmetrical: bool = false -> bool` | Inserts a knot into a Curve object. |
 | `IsArc` | `curveId: Guid * ?tolerance: float = 0.0 * ?segmentIndex: int = -1 -> bool` | Checks if an object is an open arc Curve. |
+| `IsArc` | `curveGeo: GeometryBase * ?tolerance: float = 0.0 * ?segmentIndex: int = -1 -> bool` | Checks if an object is an open arc Curve. |
 | `IsCircle` | `curveId: Guid * ?tolerance: float = 0.0 -> bool` | Checks if an object is a circle Curve. |
+| `IsCircle` | `curveGeo: GeometryBase * ?tolerance: float = 0.0 -> bool` | Checks if an object is a circle Curve. |
 | `IsCurve` | `curveId: Guid -> bool` | Checks if an object is a Curve. |
+| `IsCurve` | `curveGeo: GeometryBase -> bool` | Checks if an object is a Curve. |
 | `IsCurveClosable` | `curveId: Guid * ?tolerance: float = 0.0 -> bool` | Decide if it makes sense to close off the Curve by moving the end point to the start point based on start-end gap size and length of Curve as approximated by chord defined by 6 points. |
+| `IsCurveClosable` | `curveGeo: GeometryBase * ?tolerance: float = 0.0 -> bool` | Decide if it makes sense to close off the Curve by moving the end point to the start point based on start-end gap size and length of Curve as approximated by chord defined by 6 points. |
 | `IsCurveClosed` | `curveId: Guid -> bool` | Checks if an object is a closed Curve object. |
+| `IsCurveClosed` | `curveGeo: GeometryBase -> bool` | Checks if an object is a closed Curve object. |
 | `IsCurveInPlane` | `curveId: Guid * plane: Plane * ?tolerance: float = 0.0 -> bool` | Test a Curve to see if it lies in a specific Plane. |
+| `IsCurveInPlane` | `curveGeo: GeometryBase * plane: Plane * ?tolerance: float = 0.0 -> bool` | Test a Curve to see if it lies in a specific Plane. |
 | `IsCurveLinear` | `curveId: Guid * ?tolerance: float = 0.0 * ?segmentIndex: int = -1 -> bool` | Checks if an object is a linear Curve. |
+| `IsCurveLinear` | `curveGeo: GeometryBase * ?tolerance: float = 0.0 * ?segmentIndex: int = -1 -> bool` | Checks if an object is a linear Curve. |
 | `IsCurvePeriodic` | `curveId: Guid * ?segmentIndex: int = -1 -> bool` | Checks if an object is a periodic Curve object. |
+| `IsCurvePeriodic` | `curveGeo: GeometryBase * ?segmentIndex: int = -1 -> bool` | Checks if an object is a periodic Curve object. |
 | `IsCurvePlanar` | `curveId: Guid * ?tolerance: float = 0.0 * ?segmentIndex: int = -1 -> bool` | Checks if an object is a planar Curve. |
+| `IsCurvePlanar` | `curveGeo: GeometryBase * ?tolerance: float = 0.0 * ?segmentIndex: int = -1 -> bool` | Checks if an object is a planar Curve. |
 | `IsCurveRational` | `curveId: Guid * ?segmentIndex: int = -1 -> bool` | Checks if an object is a rational NURBS Curve. |
+| `IsCurveRational` | `curveGeo: GeometryBase * ?segmentIndex: int = -1 -> bool` | Checks if an object is a rational NURBS Curve. |
 | `IsEllipse` | `curveId: Guid * ?tolerance: float = 0.0 * ?segmentIndex: int = -1 -> bool` | Checks if an object is an elliptical-shaped Curve. |
+| `IsEllipse` | `curveGeo: GeometryBase * ?tolerance: float = 0.0 * ?segmentIndex: int = -1 -> bool` | Checks if an object is an elliptical-shaped Curve. |
 | `IsLine` | `curveId: Guid * ?tolerance: float = 0.0 * ?segmentIndex: int = -1 -> bool` | Checks if an object is a line Curve. |
+| `IsLine` | `curveGeo: GeometryBase * ?tolerance: float = 0.0 * ?segmentIndex: int = -1 -> bool` | Checks if an object is a line Curve. |
 | `IsPointOnCurve` | `curveId: Guid * point: Point3d * ?tolerance: float = 0.0 * ?segmentIndex: int = -1 -> bool` | Checks if a point is on a Curve. |
+| `IsPointOnCurve` | `curveGeo: Curve * point: Point3d * ?tolerance: float = 0.0 * ?segmentIndex: int = -1 -> bool` | Checks if a point is on a Curve. |
 | `IsPolyCurve` | `curveId: Guid * ?segmentIndex: int = -1 -> bool` | Checks if an object is a PolyCurve Curve. |
+| `IsPolyCurve` | `curveGeo: GeometryBase * ?segmentIndex: int = -1 -> bool` | Checks if an object is a PolyCurve Curve. |
 | `IsPolyline` | `curveId: Guid * ?segmentIndex: int = -1 -> bool` | Checks if an object is a Polyline Curve object or a nurbs cure with degree 1 and moer than 2 points Lines return false. |
+| `IsPolyline` | `curveGeo: GeometryBase * ?segmentIndex: int = -1 -> bool` | Checks if an object is a Polyline Curve object or a nurbs cure with degree 1 and moer than 2 points Lines return false. |
 | `JoinCurves` | `curveIds: Guid seq * ?deleteInput: bool = false * ?tolerance: float = 0.0 -> ResizeArray<Guid>` | Joins multiple Curves together to form one or more Curves or polycurves. |
+| `JoinCurves` | `curveInputs: Curve seq * ?tolerance: float = 0.0 -> ResizeArray<Curve>` | Computes JoinCurves from geometry without modifying the document. |
 | `LineFitFromPoints` | `points: Point3d seq -> Line` | Returns a line that was fit through an array of 3D points. |
 | `MakeCurveNonPeriodic` | `curveId: Guid * ?deleteInput: bool = false -> Guid` | Makes a periodic Curve non-periodic. |
+| `MakeCurveNonPeriodic` | `curveGeo: Curve -> NurbsCurve` | Computes MakeCurveNonPeriodic from geometry without modifying the document. |
 | `MeanCurve` | `curve0: Guid * curve1: Guid * ?tolerance: float = 0.0 -> Guid` | Creates an average Curve from two Curves. |
+| `MeanCurve` | `curve0: Curve * curve1: Curve * ?tolerance: float = 0.0 -> Curve` | Computes MeanCurve from geometry without modifying the document. |
 | `MeshPolyline` | `polylineId: Guid -> Guid` | Creates a polygon Mesh object based on a closed Polyline Curve object. |
+| `MeshPolyline` | `polylineInput: Curve -> Mesh` | Computes MeshPolyline from geometry without modifying the document. |
 | `OffsetCurve` | `curveId: Guid * direction: Point3d * distance: float * ?normal: Vector3d = Vector3d() * ?style: int = 1 -> ResizeArray<Guid>` | Offsets a Curve by a distance. |
+| `OffsetCurve` | `curveGeo: Curve * direction: Point3d * distance: float * ?normal: Vector3d = Vector3d() * ?style: int = 1 -> ResizeArray<Curve>` | Computes OffsetCurve from geometry without modifying the document. |
 | `OffsetCurveOnSurface` | `curveId: Guid * surfaceId: Guid * distance: float -> ResizeArray<Guid>` | Offset a Curve on a Surface. |
+| `OffsetCurveOnSurface` | `curveGeo: Curve * surfaceGeo: Surface * distance: float -> ResizeArray<Curve>` | Computes OffsetCurveOnSurface from geometry without modifying the document. |
 | `OffsetCurveOnSurfaceUV` | `curveId: Guid * surfaceId: Guid * parameter: Point2d -> ResizeArray<Guid>` | Offset a Curve on a Surface. |
+| `OffsetCurveOnSurfaceUV` | `curveGeo: Curve * surfaceGeo: Surface * parameter: Point2d -> ResizeArray<Curve>` | Computes OffsetCurveOnSurfaceUV from geometry without modifying the document. |
 | `PlanarClosedCurveContainment` | `curveA: Guid * curveB: Guid * ?plane: Plane = Plane() * ?tolerance: float = 0.0 -> int` | Determines the relationship between the regions bounded by two coplanar simple closed Curves. |
+| `PlanarClosedCurveContainment` | `curveA: Curve * curveB: Curve * ?plane: Plane = Plane() * ?tolerance: float = 0.0 -> int` | Determines the relationship between the regions bounded by two coplanar simple closed Curves. |
 | `PlanarCurveCollision` | `curveA: Guid * curveB: Guid * ?plane: Plane = Plane() * ?tolerance: float = 0.0 -> bool` | Determines if two coplanar Curves intersect. |
+| `PlanarCurveCollision` | `curveA: Curve * curveB: Curve * ?plane: Plane = Plane() * ?tolerance: float = 0.0 -> bool` | Determines if two coplanar Curves intersect. |
 | `PointInPlanarClosedCurve` | `point: Point3d * curve: Guid * ?plane: Plane = Plane() * ?tolerance: float = 0.0 -> int` | Determines if a point is inside of a closed Curve, on a closed Curve, or outside of a closed Curve. |
+| `PointInPlanarClosedCurve` | `point: Point3d * curve: Curve * ?plane: Plane = Plane() * ?tolerance: float = 0.0 -> int` | Determines if a point is inside of a closed Curve, on a closed Curve, or outside of a closed Curve. |
 | `PolyCurveCount` | `curveId: Guid * ?segmentIndex: int = -1 -> int` | Returns the number of Curve segments that make up a PolyCurve. |
+| `PolyCurveCount` | `curveGeo: Curve * ?segmentIndex: int = -1 -> int` | Returns the number of Curve segments that make up a PolyCurve. |
 | `PolylineVertices` | `curveId: Guid * ?segmentIndex: int = -1 -> ResizeArray<Point3d>` | Returns the vertices of a Polyline Curve. |
+| `PolylineVertices` | `curveGeo: Curve * ?segmentIndex: int = -1 -> ResizeArray<Point3d>` | Returns the vertices of a Polyline Curve. |
 | `ProjectCurveToMesh` | `curveIds: Guid seq * meshIds: Guid seq * direction: Vector3d -> ResizeArray<Guid>` | Projects one or more Curves onto one or more Surfaces or Meshes. |
+| `ProjectCurveToMesh` | `curveInputs: Curve seq * meshInputs: Mesh seq * direction: Vector3d -> ResizeArray<Curve>` | Computes ProjectCurveToMesh from geometry without modifying the document. |
 | `ProjectCurveToSurface` | `curveIds: Guid seq * surfaceIds: Guid seq * direction: Vector3d -> ResizeArray<Guid>` | Projects one or more Curves onto one or more Surfaces or Polysurfaces. |
+| `ProjectCurveToSurface` | `curveInputs: Curve seq * surfaceInputs: Brep seq * direction: Vector3d -> ResizeArray<Curve>` | Computes ProjectCurveToSurface from geometry without modifying the document. |
 | `RebuildCurve` | `curveId: Guid * degree: int * pointCount: int -> bool` | Rebuilds a Curve to a given degree and control point count. |
 | `RemoveCurveKnot` | `curve: Guid * parameter: float -> bool` | Deletes a knot from a Curve object. |
 | `ReverseCurve` | `curveId: Guid -> bool` | Reverses the direction of a Curve object. |
 | `SimplifyCurve` | `curveId: Guid * ?flags: int = 0 -> bool` | Replace a Curve with a geometrically equivalent PolyCurve. |
 | `SplitCurve` | `curveId: Guid * parameter: float seq * ?deleteInput: bool = true -> ResizeArray<Guid>` | Splits, or divides, a Curve at a specified parameter. |
+| `SplitCurve` | `curveGeo: Curve * parameter: float seq -> ResizeArray<Curve>` | Computes SplitCurve from geometry without modifying the document. |
 | `TrimCurve` | `curveId: Guid * interval: (float * float) * ?deleteInput: bool = true -> Guid` | Trims a Curve by removing portions of the Curve outside a specified interval. |
+| `TrimCurve` | `curveGeo: Curve * interval: (float * float) -> Curve` | Computes TrimCurve from geometry without modifying the document. |
 
 ## Dimension
 
@@ -468,15 +571,23 @@ From [Src/Scripting_Dimension.fs](../Src/Scripting_Dimension.fs).
 | `DimStyleTextHeight` | `dimStyle: string -> float` | Returns the text height used by a dimension style. |
 | `DimStyleTextHeight` | `dimStyle: string * height: float -> unit` | Changes the text height used by a dimension style. |
 | `IsAlignedDimension` | `objectId: Guid -> bool` | Checks if an object is an aligned dimension object. |
+| `IsAlignedDimension` | `geometryObject: GeometryBase -> bool` | Checks if an object is an aligned dimension object. |
 | `IsAngularDimension` | `objectId: Guid -> bool` | Checks if an object is an angular dimension object. |
+| `IsAngularDimension` | `geometryObject: GeometryBase -> bool` | Checks if an object is an angular dimension object. |
 | `IsDiameterDimension` | `objectId: Guid -> bool` | Checks if an object is a diameter dimension object. |
+| `IsDiameterDimension` | `geometryObject: GeometryBase -> bool` | Checks if an object is a diameter dimension object. |
 | `IsDimension` | `objectId: Guid -> bool` | Checks if an object is a dimension object. |
+| `IsDimension` | `geometryObject: GeometryBase -> bool` | Checks if an object is a dimension object. |
 | `IsDimStyle` | `dimStyle: string -> bool` | Checks if the existence of a dimension style in the document. |
 | `IsDimStyleReference` | `dimStyle: string -> bool` | Checks if that an existing dimension style is from a reference file. |
 | `IsLeader` | `objectId: Guid -> bool` | Checks if an object is a dimension leader object. |
+| `IsLeader` | `geometryObject: GeometryBase -> bool` | Checks if an object is a dimension leader object. |
 | `IsLinearDimension` | `objectId: Guid -> bool` | Checks if an object is a linear dimension object. |
+| `IsLinearDimension` | `geometryObject: GeometryBase -> bool` | Checks if an object is a linear dimension object. |
 | `IsOrdinateDimension` | `objectId: Guid -> bool` | Checks if an object is an ordinate dimension object. |
+| `IsOrdinateDimension` | `geometryObject: GeometryBase -> bool` | Checks if an object is an ordinate dimension object. |
 | `IsRadialDimension` | `objectId: Guid -> bool` | Checks if an object is a radial dimension object. |
+| `IsRadialDimension` | `geometryObject: GeometryBase -> bool` | Checks if an object is a radial dimension object. |
 | `LeaderText` | `objectId: Guid -> string` | Returns the text string of a dimension leader object. |
 | `LeaderText` | `objectId: Guid * text: string -> unit` | Modifies the text string of a dimension leader object. |
 | `LeaderText` | `objectIds: Guid seq * text: string -> unit` | Modifies the text string of multiple dimension leader objects. |
@@ -558,65 +669,95 @@ From [Src/Scripting_Geometry.fs](../Src/Scripting_Geometry.fs).
 | `AddTextDot` | `text: string * x: float * y: float * z: float -> Guid` | Add a text dot to the document. |
 | `Area` | `geometry: GeometryBase -> float` | Compute the area of a closed Curve, Hatch, Surface, Polysurface, or Mesh. |
 | `Area` | `objectId: Guid -> float` | Compute the area of a closed Curve, Hatch, Surface, Polysurface, or Mesh. |
-| `BoundingBox` | `objects: Guid seq -> BoundingBox` | Returns a world axis-aligned bounding box of several objects. |
 | `BoundingBox` | `geos: 'a seq -> BoundingBox` | Returns a world axis-aligned bounding box of several geometry objects. |
+| `BoundingBox` | `objects: Guid seq -> BoundingBox` | Returns a world axis-aligned bounding box of several objects. |
 | `BoundingBox` | `object: Guid -> BoundingBox` | Returns a world axis-aligned bounding box of one object. |
 | `BoundingBox` | `objects: Guid seq * plane: Plane * ?inWorldCoords: bool = true -> Box` | Returns a custom Plane axis-aligned bounding box of several objects. |
 | `BoundingBox` | `object: Guid * plane: Plane * ?inWorldCoords: bool = true -> Box` | Returns a custom Plane axis-aligned bounding box of one object. |
+| `BoundingBox` | `object: GeometryBase -> BoundingBox` | Returns a world axis-aligned bounding box of one object. |
+| `BoundingBox` | `objects: GeometryBase seq * plane: Plane * ?inWorldCoords: bool = true -> Box` | Returns a custom Plane axis-aligned bounding box of several objects. |
+| `BoundingBox` | `object: GeometryBase * plane: Plane * ?inWorldCoords: bool = true -> Box` | Returns a custom Plane axis-aligned bounding box of one object. |
 | `BoundingBoxEstimate` | `geometries: 'a seq -> BoundingBox` | Returns a world axis-aligned bounding box of several objects. |
 | `BoundingBoxEstimate` | `objects: Guid seq -> BoundingBox` | Returns a world axis-aligned bounding box of several objects. |
 | `BoundingBoxEstimate` | `object: Guid -> BoundingBox` | Returns a world axis-aligned bounding box of one object. |
+| `BoundingBoxEstimate` | `object: GeometryBase -> BoundingBox` | Returns a world axis-aligned bounding box of one object. |
 | `BoundingBoxInflate` | `bbox: BoundingBox * amount: float -> BoundingBox` | Returns a new inflated the box with equal amounts in all directions. |
 | `BoundingBoxInflate` | `bbox: BoundingBox * amountX: float * amountY: float * amountZ: float -> BoundingBox` | Returns a new inflated box with custom x, y and z amounts in their directions. |
 | `CompareGeometry` | `first: Guid * second: Guid -> bool` | Compares two objects to determine if they are geometrically identical. |
+| `CompareGeometry` | `first: GeometryBase * second: GeometryBase -> bool` | Compares two objects to determine if they are geometrically identical. |
 | `ExplodeText` | `textId: Guid * ?delete: bool = false -> ResizeArray<Guid>` | Creates outline Curves for a given text entity. |
+| `ExplodeText` | `text: TextEntity -> ResizeArray<Curve>` | Creates outline curves from text geometry without adding them to the document. |
 | `IsClippingPlane` | `objectId: Guid -> bool` | Checks if that an object is a clipping Plane object. |
+| `IsClippingPlane` | `geometryObject: GeometryBase -> bool` | Checks if that an object is a clipping Plane object. |
 | `IsPoint` | `objectId: Guid -> bool` | Checks if an object is a point object. |
+| `IsPoint` | `geometryObject: GeometryBase -> bool` | Checks if an object is a point object. |
 | `IsPointCloud` | `objectId: Guid -> bool` | Checks if an object is a point cloud object. |
+| `IsPointCloud` | `geometryObject: GeometryBase -> bool` | Checks if an object is a point cloud object. |
 | `IsText` | `objectId: Guid -> bool` | Checks if an object is a text object. |
+| `IsText` | `geometryObject: GeometryBase -> bool` | Checks if an object is a text object. |
 | `IsTextDot` | `objectId: Guid -> bool` | Checks if an object is a text dot object. |
+| `IsTextDot` | `geometryObject: GeometryBase -> bool` | Checks if an object is a text dot object. |
 | `PointCloudClosestPoints` | `ptCloud: Point3d seq * needlePoints: Point3d seq * distance: float -> int array seq` | Returns a list of lists of point indices in a point cloud that are closest to needlePoints. |
 | `PointCloudCount` | `objectId: Guid -> int` | Returns the point count of a point cloud object. |
+| `PointCloudCount` | `geometryObject: PointCloud -> int` | Returns the point count of a point cloud object. |
 | `PointCloudHasHiddenPoints` | `objectId: Guid -> bool` | Checks if a point cloud has hidden points. |
+| `PointCloudHasHiddenPoints` | `geometryObject: PointCloud -> bool` | Checks if a point cloud has hidden points. |
 | `PointCloudHasPointColors` | `objectId: Guid -> bool` | Checks if a point cloud has point colors. |
+| `PointCloudHasPointColors` | `geometryObject: PointCloud -> bool` | Checks if a point cloud has point colors. |
 | `PointCloudHidePoints` | `objectId: Guid -> ResizeArray<bool>` | Returns the hidden state of points in a point cloud object. |
 | `PointCloudHidePoints` | `objectId: Guid * hidden: bool seq -> unit` | Modifies the hidden points of a point cloud object. |
+| `PointCloudHidePoints` | `geometryObject: PointCloud -> ResizeArray<bool>` | Returns the hidden state of points in a point cloud object. |
 | `PointCloudKNeighbors` | `ptCloud: Point3d seq * needlePoints: Point3d seq * ?amount: int = 1 -> int array seq` | Returns amount indices of points in a point cloud that are near needlePoints. |
 | `PointCloudPointColors` | `objectId: Guid -> ResizeArray<Color>` | Returns the point colors of a point cloud object. |
 | `PointCloudPointColors` | `objectId: Guid * colors: Color seq -> unit` | Modifies the point colors of a point cloud object. |
+| `PointCloudPointColors` | `geometryObject: PointCloud -> ResizeArray<Color>` | Returns the point colors of a point cloud object. |
 | `PointCloudPoints` | `objectId: Guid -> Point3d array` | Returns the points of a point cloud object. |
+| `PointCloudPoints` | `geometryObject: PointCloud -> Point3d array` | Returns the points of a point cloud object. |
 | `PointCoordinates` | `objectId: Guid -> Point3d` | Returns the X, Y, and Z coordinates of a point object. |
 | `PointCoordinates` | `objectId: Guid * point: Point3d -> unit` | Modifies the X, Y, and Z coordinates of a point object. |
+| `PointCoordinates` | `point: Point3d -> Point3d` | Returns the X, Y, and Z coordinates of a point object. |
+| `PointCoordinates` | `point: Point -> Point3d` | Returns the X, Y, and Z coordinates of a point geometry object. |
 | `TextDotFont` | `objectId: Guid -> string` | Returns the font of a text dot. |
 | `TextDotFont` | `objectId: Guid * fontFace: string -> unit` | Modifies the font of a text dot. |
 | `TextDotFont` | `objectIds: Guid seq * fontFace: string -> unit` | Modifies the font of multiple text dots. |
+| `TextDotFont` | `geometryObject: TextDot -> string` | Returns the font of a text dot. |
 | `TextDotHeight` | `objectId: Guid -> int` | Returns the font height of a text dot. |
 | `TextDotHeight` | `objectId: Guid * height: int -> unit` | Modifies the font height of a text dot. |
 | `TextDotHeight` | `objectIds: Guid seq * height: int -> unit` | Modifies the font height of multiple text dots. |
+| `TextDotHeight` | `geometryObject: TextDot -> int` | Returns the font height of a text dot. |
 | `TextDotPoint` | `objectId: Guid -> Point3d` | Returns the location, or insertion point, on a text dot object. |
 | `TextDotPoint` | `objectId: Guid * point: Point3d -> unit` | Modifies the location, or insertion point, on a text dot object. |
+| `TextDotPoint` | `geometryObject: TextDot -> Point3d` | Returns the location, or insertion point, on a text dot object. |
 | `TextDotText` | `objectId: Guid -> string` | Returns the text on a text dot object. |
 | `TextDotText` | `objectId: Guid * text: string -> unit` | Modifies the text on a text dot object. |
 | `TextDotText` | `objectIds: Guid seq * text: string -> unit` | Modifies the text on multiple text dot objects. |
+| `TextDotText` | `geometryObject: TextDot -> string` | Returns the text on a text dot object. |
 | `TextObjectFont` | `objectId: Guid -> string` | Returns the font used by a text object. |
 | `TextObjectFont` | `objectId: Guid * font: string -> unit` | Modifies the font used by a text object. |
 | `TextObjectFont` | `objectIds: Guid seq * font: string -> unit` | Modifies the font used by multiple text objects. |
+| `TextObjectFont` | `geometryObject: TextEntity -> string` | Returns the font used by a text object. |
 | `TextObjectHeight` | `objectId: Guid -> float` | Returns the height of a text object. |
 | `TextObjectHeight` | `objectId: Guid * height: float -> unit` | Modifies the height of a text object. |
 | `TextObjectHeight` | `objectIds: Guid seq * height: float -> unit` | Modifies the height of multiple text objects. |
+| `TextObjectHeight` | `geometryObject: TextEntity -> float` | Returns the height of a text object. |
 | `TextObjectPlane` | `objectId: Guid -> Plane` | Returns the Plane used by a text object. |
 | `TextObjectPlane` | `objectId: Guid * plane: Plane -> unit` | Modifies the Plane used by a text object. |
+| `TextObjectPlane` | `geometryObject: TextEntity -> Plane` | Returns the Plane used by a text object. |
 | `TextObjectPoint` | `objectId: Guid -> Point3d` | Returns the location of a text object. |
 | `TextObjectPoint` | `objectId: Guid * point: Point3d -> unit` | Modifies the location of a text object. |
+| `TextObjectPoint` | `geometryObject: TextEntity -> Point3d` | Returns the location of a text object. |
 | `TextObjectRichText` | `objectId: Guid -> string` | Returns the RichText formatting string of a text object. |
 | `TextObjectRichText` | `objectId: Guid * rtfString: string * ?style: string = "" -> unit` | Modifies the RichText formatting string of a text object. |
 | `TextObjectRichText` | `objectIds: Guid seq * rtfString: string * ?style: string = "" -> unit` | Modifies the RichText formatting string of multiple text objects. |
+| `TextObjectRichText` | `geometryObject: TextEntity -> string` | Returns the RichText formatting string of a text object. |
 | `TextObjectStyle` | `objectId: Guid -> int` | Returns the font style of a text object. |
 | `TextObjectStyle` | `objectId: Guid * style: int -> unit` | Modifies the font style of a text object. |
 | `TextObjectStyle` | `objectIds: Guid seq * style: int -> unit` | Modifies the font style of multiple text objects. |
+| `TextObjectStyle` | `geometryObject: TextEntity -> int` | Returns the font style of a text object. |
 | `TextObjectText` | `objectId: Guid -> string` | Returns the plain text string of a text object. |
 | `TextObjectText` | `objectId: Guid * text: string -> unit` | Modifies the plain text string of a text object. |
 | `TextObjectText` | `objectIds: Guid seq * text: string -> unit` | Modifies the plain text string of multiple text objects. |
+| `TextObjectText` | `geometryObject: TextEntity -> string` | Returns the plain text string of a text object. |
 
 ## Grips
 
@@ -675,17 +816,19 @@ From [Src/Scripting_Hatch.fs](../Src/Scripting_Hatch.fs).
 
 | Name | Signature | Summary |
 |:--|:--|:--|
-| `AddHatch` | `curve: Curve * ?hatchPattern: string = null * ?scale: float = 1.0 * ?rotation: float = 0.0 * ?tolerance: float = 0.0 -> Guid` | Creates one Hatch object from one closed planar Curve. |
 | `AddHatch` | `curveId: Guid * ?hatchPattern: string = null * ?scale: float = 1.0 * ?rotation: float = 0.0 * ?tolerance: float = 0.0 -> Guid` | Creates a new Hatch object from a closed planar Curve object. |
-| `AddHatches` | `curves: Curve seq * ?hatchPattern: string = null * ?scale: float = 1.0 * ?rotation: float = 0.0 * ?tolerance: float = 0.0 -> ResizeArray<Guid>` | Creates one or more new Hatch objects from a list of closed planar Curves. |
+| `MakeHatch` | `curve: Curve * ?hatchPattern: string = null * ?scale: float = 1.0 * ?rotation: float = 0.0 * ?tolerance: float = 0.0 -> Hatch` | Creates one Hatch object from one closed planar Curve. |
 | `AddHatches` | `curveIds: Guid seq * ?hatchPattern: string = null * ?scale: float = 1.0 * ?rotation: float = 0.0 * ?tolerance: float = 0.0 -> ResizeArray<Guid>` | Creates one or more new Hatch objects from a list of closed planar Curves. |
+| `MakeHatches` | `curves: Curve seq * ?hatchPattern: string = null * ?scale: float = 1.0 * ?rotation: float = 0.0 * ?tolerance: float = 0.0 -> ResizeArray<Hatch>` | Creates one or more new Hatch objects from a list of closed planar Curves. |
 | `AddHatchPatterns` | `filename: string * ?replace: bool = false -> ResizeArray<string>` | Adds Hatch patterns to the document by importing Hatch pattern definitions from a pattern file. |
 | `CurrentHatchPattern` | `unit -> string` | Returns the current Hatch pattern file. |
 | `CurrentHatchPattern` | `hatchPattern: string -> unit` | Sets the current Hatch pattern file. |
 | `ExplodeHatch` | `hatchId: Guid * ?delete: bool = false -> ResizeArray<Guid>` | Explodes a Hatch object into its component objects. |
+| `ExplodeHatch` | `hatch: Hatch -> ResizeArray<GeometryBase>` | Explodes hatch geometry into curves or planar breps without adding them to the document. |
 | `HatchPattern` | `hatchId: Guid -> string` | Returns a Hatch object's Hatch pattern. |
 | `HatchPattern` | `hatchId: Guid * hatchPattern: string -> unit` | Changes a Hatch object's Hatch pattern. |
 | `HatchPattern` | `hatchIds: Guid seq * hatchPattern: string -> unit` | Changes multiple Hatch objects' Hatch pattern. |
+| `HatchPattern` | `hatchGeo: Hatch -> string` | Returns a Hatch object's Hatch pattern. |
 | `HatchPatternCount` | `unit -> int` | Returns the number of Hatch patterns in the document. |
 | `HatchPatternDescription` | `hatchPattern: string -> string` | Returns the description of a Hatch pattern. |
 | `HatchPatternFillType` | `hatchPattern: string -> int` | Returns the fill type of a Hatch pattern. |
@@ -693,10 +836,13 @@ From [Src/Scripting_Hatch.fs](../Src/Scripting_Hatch.fs).
 | `HatchRotation` | `hatchId: Guid -> float` | Returns the rotation applied to the Hatch pattern when it is mapped to the Hatch's Plane. |
 | `HatchRotation` | `hatchId: Guid * rotation: float -> unit` | Modifies the rotation applied to the Hatch pattern when it is mapped to the Hatch's Plane. |
 | `HatchRotation` | `hatchIds: Guid seq * rotation: float -> unit` | Modifies the rotation applied to the Hatch pattern when it is mapped to the Hatch's Plane. |
+| `HatchRotation` | `hatchGeo: Hatch -> float` | Returns the rotation applied to the Hatch pattern when it is mapped to the Hatch's Plane. |
 | `HatchScale` | `hatchId: Guid -> float` | Returns the scale applied to the Hatch pattern when it is mapped to the Hatch's Plane. |
 | `HatchScale` | `hatchId: Guid * scale: float -> unit` | Modifies the scale applied to the Hatch pattern when it is mapped to the Hatch's Plane. |
 | `HatchScale` | `hatchIds: Guid seq * scale: float -> unit` | Modifies the scale applied to the Hatch pattern when it is mapped to the Hatch's Plane. |
+| `HatchScale` | `hatchGeo: Hatch -> float` | Returns the scale applied to the Hatch pattern when it is mapped to the Hatch's Plane. |
 | `IsHatch` | `objectId: Guid -> bool` | Verifies the existence of a Hatch object in the document. |
+| `IsHatch` | `geometry: GeometryBase -> bool` | Tests whether the supplied geometry is a Hatch. |
 | `IsHatchPattern` | `name: string -> bool` | Verifies the existence of a Hatch pattern in the document. |
 | `IsHatchPatternCurrent` | `hatchPattern: string -> bool` | Checks if a Hatch pattern is the current Hatch pattern. |
 | `IsHatchPatternReference` | `hatchPattern: string -> bool` | Checks if a Hatch pattern is from a reference file. |
@@ -782,38 +928,54 @@ From [Src/Scripting_Light.fs](../Src/Scripting_Light.fs).
 | `EnableLight` | `objectId: Guid -> bool` | Get On / Off status of a light object. |
 | `EnableLight` | `objectId: Guid * enable: bool -> unit` | Enables or disables a light object. |
 | `EnableLight` | `objectIds: Guid seq * enable: bool -> unit` | Enables or disables multiple light objects. |
+| `EnableLight` | `geometryObject: Light -> bool` | Get On / Off status of a light object. |
 | `IsDirectionalLight` | `objectId: Guid -> bool` | Verifies a light object is a directional light. |
+| `IsDirectionalLight` | `geometryObject: GeometryBase -> bool` | Verifies a light object is a directional light. |
 | `IsLight` | `objectId: Guid -> bool` | Verifies an object is a light object. |
+| `IsLight` | `geometryObject: GeometryBase -> bool` | Verifies an object is a light object. |
 | `IsLightEnabled` | `objectId: Guid -> bool` | Verifies a light object is enabled. |
+| `IsLightEnabled` | `geometryObject: Light -> bool` | Verifies a light object is enabled. |
 | `IsLightReference` | `objectId: Guid -> bool` | Verifies a light object is referenced from another file. |
 | `IsLinearLight` | `objectId: Guid -> bool` | Verifies a light object is a linear light. |
+| `IsLinearLight` | `geometryObject: GeometryBase -> bool` | Verifies a light object is a linear light. |
 | `IsPointLight` | `objectId: Guid -> bool` | Verifies a light object is a point light. |
+| `IsPointLight` | `geometryObject: GeometryBase -> bool` | Verifies a light object is a point light. |
 | `IsRectangularLight` | `objectId: Guid -> bool` | Verifies a light object is a rectangular light. |
+| `IsRectangularLight` | `geometryObject: GeometryBase -> bool` | Verifies a light object is a rectangular light. |
 | `IsSpotLight` | `objectId: Guid -> bool` | Verifies a light object is a spot light. |
+| `IsSpotLight` | `geometryObject: GeometryBase -> bool` | Verifies a light object is a spot light. |
 | `LightColor` | `objectId: Guid -> Color` | Returns the color of a light. |
 | `LightColor` | `objectId: Guid * color: Color -> unit` | Changes the color of a light. |
 | `LightColor` | `objectIds: Guid seq * color: Color -> unit` | Changes the color of multiple lights. |
+| `LightColor` | `geometryObject: Light -> Color` | Returns the color of a light. |
 | `LightCount` | `unit -> int` | Returns the number of light objects in the document. |
 | `LightDirection` | `objectId: Guid -> Vector3d` | Returns the direction of a light object. |
 | `LightDirection` | `objectId: Guid * direction: Vector3d -> unit` | Changes the direction of a light object. |
 | `LightDirection` | `objectIds: Guid seq * direction: Vector3d -> unit` | Changes the direction of multiple light objects. |
+| `LightDirection` | `geometryObject: Light -> Vector3d` | Returns the direction of a light object. |
 | `LightLocation` | `objectId: Guid -> Point3d` | Returns the location of a light object. |
 | `LightLocation` | `objectId: Guid * location: Point3d -> unit` | Changes the location of a light object. |
 | `LightLocation` | `objectIds: Guid seq * location: Point3d -> unit` | Changes the location of multiple light objects. |
+| `LightLocation` | `geometryObject: Light -> Point3d` | Returns the location of a light object. |
 | `LightName` | `objectId: Guid -> string` | Returns the name of a light object. |
 | `LightName` | `objectId: Guid * name: string -> unit` | Changes the name of a light object. |
 | `LightName` | `objectIds: Guid seq * name: string -> unit` | Changes the name of multiple light objects. |
+| `LightName` | `geometryObject: Light -> string` | Returns the name of a light object. |
 | `LightObjects` | `unit -> ResizeArray<Guid>` | Returns list of identifiers of light objects in the document. |
 | `RectangularLightPlane` | `objectId: Guid -> Plane * float * float` | Returns the Plane of a rectangular light object. |
+| `RectangularLightPlane` | `geometryObject: Light -> Plane * float * float` | Returns the Plane of a rectangular light object. |
 | `SpotLightHardness` | `objectId: Guid -> float` | Returns the hardness of a spot light. |
 | `SpotLightHardness` | `objectId: Guid * hardness: float -> unit` | Changes the hardness of a spot light. |
 | `SpotLightHardness` | `objectIds: Guid seq * hardness: float -> unit` | Changes the hardness of multiple spot lights. |
+| `SpotLightHardness` | `geometryObject: Light -> float` | Returns the hardness of a spot light. |
 | `SpotLightRadius` | `objectId: Guid -> float` | Returns the radius of a spot light. |
 | `SpotLightRadius` | `objectId: Guid * radius: float -> unit` | Changes the radius of a spot light. |
 | `SpotLightRadius` | `objectIds: Guid seq * radius: float -> unit` | Changes the radius of multiple spot lights. |
+| `SpotLightRadius` | `geometryObject: Light -> float` | Returns the radius of a spot light. |
 | `SpotLightShadowIntensity` | `objectId: Guid -> float` | Returns the shadow intensity of a spot light. |
 | `SpotLightShadowIntensity` | `objectId: Guid * intensity: float -> unit` | Changes the shadow intensity of a spot light. |
 | `SpotLightShadowIntensity` | `objectIds: Guid seq * intensity: float -> unit` | Changes the shadow intensity of multiple spot lights. |
+| `SpotLightShadowIntensity` | `geometryObject: Light -> float` | Returns the shadow intensity of a spot light. |
 
 ## Line
 
@@ -835,6 +997,7 @@ From [Src/Scripting_Line.fs](../Src/Scripting_Line.fs).
 | `LinePlaneIntersection` | `line: Line * plane: Plane -> Point3d` | Calculates the intersection of a line and a Plane. |
 | `LineSphereIntersection` | `line: Line * sphereCenter: Point3d * sphereRadius: float -> Point3d array` | Calculates the intersection of a line and a sphere. |
 | `LineTransform` | `lineId: Guid * xForm: Transform * ?copy: bool = false -> Guid` | Transforms a line. |
+| `LineTransform` | `line: Line * xForm: Transform -> Line` | Transforms a line geometry and returns the transformed line. |
 
 ## Linetype
 
@@ -890,55 +1053,97 @@ From [Src/Scripting_Mesh.fs](../Src/Scripting_Mesh.fs).
 | `AddMeshQuad` | `pointA: Point3d * pointB: Point3d * pointC: Point3d * pointD: Point3d -> Guid` | Creates a new Mesh with just one quad face . |
 | `AddMeshTriangle` | `pointA: Point3d * pointB: Point3d * pointC: Point3d -> Guid` | Creates a new Mesh with just one triangle face . |
 | `AddPlanarMesh` | `objectId: Guid * ?deleteInput: bool = false -> Guid` | Creates a planar Mesh from a closed, planar Curve. |
+| `MakePlanarMesh` | `curve: Curve -> Mesh` | Creates a planar Mesh from a closed, planar Curve. |
 | `CurveMeshIntersection` | `curveId: Guid * meshId: Guid -> Point3d array * int array` | Calculates the intersection of a Curve object and a Mesh object. |
+| `CurveMeshIntersection` | `curve: Curve * mesh: Mesh -> Point3d array * int array` | Calculates the intersection of a Curve object and a Mesh object. |
 | `DisjointMeshCount` | `objectId: Guid -> int` | Returns number of Meshes that could be created by calling SplitDisjointMesh. |
+| `DisjointMeshCount` | `mesh: Mesh -> int` | Returns number of Meshes that could be created by calling SplitDisjointMesh. |
 | `DuplicateMeshBorder` | `meshId: Guid -> ResizeArray<Guid>` | Creates Curves that duplicates a Mesh border. |
+| `DuplicateMeshBorder` | `mesh: Mesh -> ResizeArray<PolylineCurve>` | Duplicates the naked borders of a Mesh as Polyline Curves. |
 | `ExplodeMeshes` | `meshIds: Guid seq * ?delete: bool = false -> ResizeArray<Guid>` | Explodes a Mesh object, or Mesh objects int subMeshes. |
+| `ExplodeMeshes` | `meshes: Mesh seq -> ResizeArray<Mesh>` | Splits Meshes into submeshes along unwelded edges. |
 | `IsMesh` | `objectId: Guid -> bool` | Verifies if an object is a Mesh. |
+| `IsMesh` | `geometry: GeometryBase -> bool` | Verifies if an object is a Mesh. |
 | `IsMeshClosed` | `objectId: Guid -> bool` | Verifies a Mesh object is closed. |
+| `IsMeshClosed` | `mesh: Mesh -> bool` | Verifies a Mesh object is closed. |
 | `IsMeshManifold` | `objectId: Guid -> bool` | Verifies a Mesh object is manifold. |
+| `IsMeshManifold` | `mesh: Mesh -> bool` | Verifies a Mesh object is manifold. |
 | `IsPointOnMesh` | `objectId: Guid * point: Point3d * ?tolerance: float = 0.0 -> bool` | Verifies a point is on a Mesh. |
+| `IsPointOnMesh` | `mesh: Mesh * point: Point3d * ?tolerance: float = 0.0 -> bool` | Verifies a point is on a Mesh. |
 | `JoinMeshes` | `meshes: Mesh seq -> Mesh` | Joins two or or more Mesh objects together. |
 | `JoinMeshes` | `objectIds: Guid seq * ?deleteInput: bool = false -> Guid` | Joins two or or more Mesh objects together. |
 | `MeshArea` | `objectId: Guid -> float` | Returns approximate area of one mesh object. |
+| `MeshArea` | `mesh: Mesh -> float` | Returns approximate area of one mesh object. |
 | `MeshAreaCentroid` | `objectId: Guid -> Point3d` | Calculates the area centroid of a Mesh object. |
+| `MeshAreaCentroid` | `mesh: Mesh -> Point3d` | Calculates the area centroid of a Mesh object. |
 | `MeshBooleanDifference` | `input0: Guid seq * input1: Guid seq * ?deleteInput: bool = true -> ResizeArray<Guid>` | Performs boolean difference operation on two sets of input Meshes. |
+| `MeshBooleanDifference` | `input0: Mesh seq * input1: Mesh seq -> ResizeArray<Mesh>` | Performs a boolean difference on two sets of Meshes. |
 | `MeshBooleanIntersection` | `input0: Guid seq * input1: Guid seq * ?deleteInput: bool = true -> ResizeArray<Guid>` | Performs boolean intersection operation on two sets of input Meshes. |
+| `MeshBooleanIntersection` | `input0: Mesh seq * input1: Mesh seq -> ResizeArray<Mesh>` | Performs a boolean intersection on two sets of Meshes. |
 | `MeshBooleanSplit` | `input0: Guid seq * input1: Guid seq * ?deleteInput: bool = true -> ResizeArray<Guid>` | Performs boolean split operation on two sets of input Meshes. |
+| `MeshBooleanSplit` | `input0: Mesh seq * input1: Mesh seq -> ResizeArray<Mesh>` | Performs a boolean split on two sets of Meshes. |
 | `MeshBooleanUnion` | `meshIds: Guid seq * ?deleteInput: bool = true -> ResizeArray<Guid>` | Performs boolean union operation on a set of input Meshes. |
+| `MeshBooleanUnion` | `meshes: Mesh seq -> ResizeArray<Mesh>` | Performs a boolean union on a set of Meshes. |
 | `MeshClosestPoint` | `objectId: Guid * point: Point3d * ?maximumDistance: float = 0.0 -> Point3d * int` | Returns the point on a Mesh that is closest to a test point. |
+| `MeshClosestPoint` | `mesh: Mesh * point: Point3d * ?maximumDistance: float = 0.0 -> Point3d * int` | Returns the point on a Mesh that is closest to a test point. |
 | `MeshFaceCenters` | `meshId: Guid -> ResizeArray<Point3d>` | Returns the center of each face of the Mesh object. |
+| `MeshFaceCenters` | `mesh: Mesh -> ResizeArray<Point3d>` | Returns the center of each face of the Mesh object. |
 | `MeshFaceCount` | `objectId: Guid -> int` | Returns total face count of a Mesh object. |
+| `MeshFaceCount` | `mesh: Mesh -> int` | Returns total face count of a Mesh object. |
 | `MeshFaceNormals` | `meshId: Guid -> ResizeArray<Vector3d>` | Returns the face unit normal for each face of a Mesh object. |
+| `MeshFaceNormals` | `mesh: Mesh -> ResizeArray<Vector3d>` | Returns the face unit normal for each face of a Mesh object. |
 | `MeshFacePoints` | `objectId: Guid -> ResizeArray<Point3d * Point3d * Point3d * Point3d>` | Returns vertices of each face in a Mesh as tuple of 4 points. |
+| `MeshFacePoints` | `mesh: Mesh -> ResizeArray<Point3d * Point3d * Point3d * Point3d>` | Returns vertices of each face in a Mesh as tuple of 4 points. |
 | `MeshFaces` | `objectId: Guid * ?faceType: bool = true -> ResizeArray<Point3d>` | Returns face vertices of a Mesh. |
+| `MeshFaces` | `mesh: Mesh * ?faceType: bool = true -> ResizeArray<Point3d>` | Returns face vertices of a Mesh. |
 | `MeshFaceVertices` | `objectId: Guid -> ResizeArray<int * int * int * int>` | Returns the vertex indices of all faces of a Mesh object, Does not suport Ngons yet. |
+| `MeshFaceVertices` | `mesh: Mesh -> ResizeArray<int * int * int * int>` | Returns the vertex indices of all faces of a Mesh object, Does not suport Ngons yet. |
 | `MeshHasFaceNormals` | `objectId: Guid -> bool` | Verifies a Mesh object has face normals. |
+| `MeshHasFaceNormals` | `mesh: Mesh -> bool` | Verifies a Mesh object has face normals. |
 | `MeshHasTextureCoordinates` | `objectId: Guid -> bool` | Verifies a Mesh object has texture coordinates. |
+| `MeshHasTextureCoordinates` | `mesh: Mesh -> bool` | Verifies a Mesh object has texture coordinates. |
 | `MeshHasVertexColors` | `objectId: Guid -> bool` | Verifies a Mesh object has vertex colors. |
+| `MeshHasVertexColors` | `mesh: Mesh -> bool` | Verifies a Mesh object has vertex colors. |
 | `MeshHasVertexNormals` | `objectId: Guid -> bool` | Verifies a Mesh object has vertex normals. |
+| `MeshHasVertexNormals` | `mesh: Mesh -> bool` | Verifies a Mesh object has vertex normals. |
 | `MeshMeshIntersection` | `mesh1: Guid * mesh2: Guid * ?tolerance: float = 0.0 -> Polyline array` | Calculates the intersections of a Mesh object with another Mesh object. |
+| `MeshMeshIntersection` | `mesh1: Mesh * mesh2: Mesh * ?tolerance: float = 0.0 -> Polyline array` | Calculates the intersections of a Mesh object with another Mesh object. |
 | `MeshNakedEdgePoints` | `objectId: Guid -> bool array` | Identifies the naked edge points of a Mesh object. |
+| `MeshNakedEdgePoints` | `mesh: Mesh -> bool array` | Identifies the naked edge points of a Mesh object. |
 | `MeshNgonFaceVertices` | `objectId: Guid -> ResizeArray<ResizeArray<int>>` | Returns the vertex indices of all faces of a Ngon Mesh object. |
+| `MeshNgonFaceVertices` | `mesh: Mesh -> ResizeArray<ResizeArray<int>>` | Returns the vertex indices of all faces of a Ngon Mesh object. |
 | `MeshOffset` | `meshId: Guid * distance: float -> Guid` | Makes a new Mesh with vertices offset at a distance in the opposite direction of the existing vertex normals. |
+| `MeshOffset` | `mesh: Mesh * distance: float -> Mesh` | Creates an offset copy of a Mesh. |
 | `MeshOutline` | `objectIds: Guid seq * ?view: string = null -> ResizeArray<Guid>` | Creates Polyline Curve outlines of Mesh objects. |
+| `MeshOutline` | `meshes: Mesh seq * ?view: RhinoViewport = null -> ResizeArray<PolylineCurve>` | Creates Polyline Curve outlines of Meshes. |
 | `MeshQuadCount` | `objectId: Guid -> int` | Returns the number of quad faces of a Mesh object. |
+| `MeshQuadCount` | `mesh: Mesh -> int` | Returns the number of quad faces of a Mesh object. |
 | `MeshQuadsToTriangles` | `objectId: Guid -> bool` | Converts a Mesh object's quad faces to triangles. |
 | `MeshTextureCoordinates` | `objectId: Guid -> ResizeArray<Point2f>` | Returns the texture coordinates of a Mesh. |
+| `MeshTextureCoordinates` | `mesh: Mesh -> ResizeArray<Point2f>` | Returns the texture coordinates of a Mesh. |
 | `MeshToNurb` | `objectId: Guid * ?trimmedTriangles: bool = true * ?deleteInput: bool = false -> ResizeArray<Guid>` | Duplicates each polygon in a Mesh with a NURBS Surface. |
+| `MeshToNurb` | `mesh: Mesh * ?trimmedTriangles: bool = true -> ResizeArray<Brep>` | Duplicates each Mesh polygon with a NURBS Surface and joins the Surfaces for each connected piece. |
 | `MeshTriangleCount` | `objectId: Guid -> int` | Returns number of triangular faces of a Mesh. |
+| `MeshTriangleCount` | `mesh: Mesh -> int` | Returns number of triangular faces of a Mesh. |
 | `MeshVertexColors` | `meshId: Guid -> ResizeArray<Color>` | Returns vertex colors of a Mesh. |
+| `MeshVertexColors` | `mesh: Mesh -> ResizeArray<Color>` | Returns vertex colors of a Mesh. |
 | `MeshVertexColors` | `meshId: Guid * colors: Color seq -> unit` | Modifies vertex colors of a Mesh. |
 | `MeshVertexCount` | `objectId: Guid -> int` | Returns the vertex count of a Mesh. |
+| `MeshVertexCount` | `mesh: Mesh -> int` | Returns the vertex count of a Mesh. |
 | `MeshVertexFaces` | `meshId: Guid * vertexIndex: int -> int array` | Returns the Mesh faces that share a specified Mesh vertex. |
+| `MeshVertexFaces` | `mesh: Mesh * vertexIndex: int -> int array` | Returns the Mesh faces that share a specified Mesh vertex. |
 | `MeshVertexNormals` | `meshId: Guid -> ResizeArray<Vector3d>` | Returns the vertex unit normal for each vertex of a Mesh. |
+| `MeshVertexNormals` | `mesh: Mesh -> ResizeArray<Vector3d>` | Returns the vertex unit normal for each vertex of a Mesh. |
 | `MeshVertices` | `objectId: Guid -> ResizeArray<Point3d>` | Returns the vertices of a Mesh. |
+| `MeshVertices` | `mesh: Mesh -> ResizeArray<Point3d>` | Returns the vertices of a Mesh. |
 | `MeshVolume` | `objectIds: Guid seq -> float` | Returns the approximate volume of one or more closed Meshes. |
 | `MeshVolume` | `meshes: Mesh seq -> float` | Returns the approximate volume of one or more closed Meshes. |
 | `MeshVolumeCentroid` | `objectId: Guid -> Point3d` | Calculates the volume centroid of a Mesh. |
 | `MeshVolumeCentroid` | `mesh: Mesh -> Point3d` | Calculates the volume centroid of a Mesh. |
 | `PullCurveToMesh` | `meshId: Guid * curveId: Guid -> Guid` | Pulls a Curve to a Mesh. |
+| `PullCurveToMesh` | `mesh: Mesh * curve: Curve -> PolylineCurve` | Pulls a polyline approximation of a Curve onto a Mesh. |
 | `SplitDisjointMesh` | `objectId: Guid * ?deleteInput: bool = false -> ResizeArray<Guid>` | Splits up a Mesh into its unconnected pieces. |
+| `SplitDisjointMesh` | `mesh: Mesh -> ResizeArray<Mesh>` | Splits a Mesh into its unconnected pieces. |
 | `UnifyMeshNormals` | `objectId: Guid -> int` | Fixes inconsistencies in the directions of faces of a Mesh. |
 
 ## Object
@@ -948,7 +1153,9 @@ From [Src/Scripting_Object.fs](../Src/Scripting_Object.fs).
 | Name | Signature | Summary |
 |:--|:--|:--|
 | `CopyObject` | `objectId: Guid * ?translation: Vector3d = Vector3d() -> Guid` | Copies an object from one location to another, or in-place. |
+| `CopyObject` | `geometry: GeometryBase * ?translation: Vector3d = Vector3d() -> GeometryBase` | Returns a transformed duplicate of the input geometry. |
 | `CopyObjects` | `objectIds: Guid seq * ?translation: Vector3d = Vector3d() -> ResizeArray<Guid>` | Copies one or more objects from one location to another, or in-place. |
+| `CopyObjects` | `geometries: GeometryBase seq * ?translation: Vector3d = Vector3d() -> ResizeArray<GeometryBase>` | Returns transformed duplicates of the input geometries. |
 | `DeleteObject` | `objectId: Guid -> unit` | Deletes a single object from the document. |
 | `DeleteObjects` | `objectIds: Guid seq -> unit` | Deletes one or more objects from the document, Fails if not all objects can be deleted. |
 | `FlashObject` | `objectIds: Guid seq * ?style: bool = true -> unit` | Causes the selection state of one or more objects to change momentarily so the object appears to flash on the screen. |
@@ -959,6 +1166,7 @@ From [Src/Scripting_Object.fs](../Src/Scripting_Object.fs).
 | `IsObject` | `objectId: Guid -> bool` | Verifies the existence of an object in the State.Doc.Objects table. |
 | `IsObjectHidden` | `objectId: Guid -> bool` | Checks if an object is hidden. |
 | `IsObjectInBox` | `objectId: Guid * box: BoundingBox * ?testMode: bool = true -> bool` | Verifies an object's bounding box is inside of another bounding box. |
+| `IsObjectInBox` | `geometryObject: GeometryBase * box: BoundingBox * ?testMode: bool = true -> bool` | Verifies an object's bounding box is inside of another bounding box. |
 | `IsObjectInGroup` | `objectId: Guid * ?groupName: string = null -> bool` | Checks if an object is a member of a group. |
 | `IsObjectLocked` | `objectId: Guid -> bool` | Checks if an object is locked. |
 | `IsObjectNormal` | `objectId: Guid -> bool` | Checks if an object is normal. |
@@ -966,13 +1174,16 @@ From [Src/Scripting_Object.fs](../Src/Scripting_Object.fs).
 | `IsObjectSelectable` | `objectId: Guid -> bool` | Checks if an object can be selected. |
 | `IsObjectSelected` | `objectId: Guid -> int` | Checks if an object is currently selected. |
 | `IsObjectSolid` | `objectId: Guid -> bool` | Determines if an object is closed or solid. |
+| `IsObjectSolid` | `geometryObject: GeometryBase -> bool` | Determines if an object is closed or solid. |
 | `IsObjectValid` | `objectId: Guid -> bool` | Verifies an object's geometry is valid and without error. |
 | `IsVisibleInView` | `objectId: Guid * ?view: string = null -> bool` | Verifies an object is visible in a view. |
 | `LockObject` | `objectId: Guid -> bool` | Locks a single object. |
 | `LockObjects` | `objectIds: Guid seq -> int` | Locks multiple objects. |
 | `MatchObjectAttributes` | `targetIds: Guid seq * ?sourceId: Guid = Guid() -> int` | Matches, or copies the attributes of a source object to a target object. |
 | `MirrorObject` | `objectId: Guid * startPoint: Point3d * endPoint: Point3d * ?copy: bool = false -> Guid` | Mirrors a single object on World XY Plane. |
+| `MirrorObject` | `geometry: GeometryBase * startPoint: Point3d * endPoint: Point3d -> GeometryBase` | Returns a transformed duplicate of the input geometry. |
 | `MirrorObjects` | `objectIds: Guid seq * startPoint: Point3d * endPoint: Point3d * ?copy: bool = false -> ResizeArray<Guid>` | Mirrors a list of objects on World XY Plane. |
+| `MirrorObjects` | `geometries: GeometryBase seq * startPoint: Point3d * endPoint: Point3d -> ResizeArray<GeometryBase>` | Returns transformed duplicates of the input geometries. |
 | `MoveObject` | `objectId: Guid * translation: Vector3d -> unit` | Moves a single object. |
 | `MoveObjects` | `objectIds: Guid seq * translation: Vector3d -> unit` | Moves one or more objects. |
 | `ObjectColor` | `objectId: Guid -> Color` | Returns the color of an object. |
@@ -1016,20 +1227,31 @@ From [Src/Scripting_Object.fs](../Src/Scripting_Object.fs).
 | `ObjectPrintWidthSource` | `objectIds: Guid seq * source: int -> unit` | Modifies the print width source of multiple objects. |
 | `ObjectType` | `objectId: Guid -> int` | Returns the object type. |
 | `OrientObject` | `objectId: Guid * referencePts: IList<Point3d> * targetPts: IList<Point3d> * ?flags: int = 0 -> Guid` | Orients a single object based on input points. |
+| `OrientObject` | `geometry: GeometryBase * referencePts: IList<Point3d> * targetPts: IList<Point3d> * ?scale: bool = false -> GeometryBase` | Returns a transformed duplicate of the input geometry. |
 | `RotateObject` | `objectId: Guid * centerPoint: Point3d * rotationAngle: float * ?axis: Vector3d = Vector3d() * ?copy: bool = false -> Guid` | Rotates a single object. |
+| `RotateObject` | `geometry: GeometryBase * centerPoint: Point3d * rotationAngle: float * ?axis: Vector3d = Vector3d() -> GeometryBase` | Returns a transformed duplicate of the input geometry. |
 | `RotateObjects` | `objectIds: Guid seq * centerPoint: Point3d * rotationAngle: float * ?axis: Vector3d = Vector3d() * ?copy: bool = false -> ResizeArray<Guid>` | Rotates multiple objects. |
+| `RotateObjects` | `geometries: GeometryBase seq * centerPoint: Point3d * rotationAngle: float * ?axis: Vector3d = Vector3d() -> ResizeArray<GeometryBase>` | Returns transformed duplicates of the input geometries. |
 | `ScaleObject` | `objectId: Guid * origin: Point3d * scale: (float * float * float) * ?copy: bool = false -> Guid` | Scales a single object. |
+| `ScaleObject` | `geometry: GeometryBase * origin: Point3d * scale: (float * float * float) -> GeometryBase` | Returns a transformed duplicate of the input geometry. |
 | `ScaleObject` | `objectId: Guid * origin: Point3d * scale: float * ?copy: bool = false -> Guid` | Scales a single object. |
+| `ScaleObject` | `geometry: GeometryBase * origin: Point3d * scale: float -> GeometryBase` | Returns a transformed duplicate of the input geometry. |
 | `ScaleObjects` | `objectIds: Guid seq * origin: Point3d * scale: (float * float * float) * ?copy: bool = false -> ResizeArray<Guid>` | Scales one or more objects. |
+| `ScaleObjects` | `geometries: GeometryBase seq * origin: Point3d * scale: (float * float * float) -> ResizeArray<GeometryBase>` | Returns transformed duplicates of the input geometries. |
 | `ScaleObjects` | `objectIds: Guid seq * origin: Point3d * scale: float * ?copy: bool = false -> ResizeArray<Guid>` | Scales one or more objects. |
+| `ScaleObjects` | `geometries: GeometryBase seq * origin: Point3d * scale: float -> ResizeArray<GeometryBase>` | Returns transformed duplicates of the input geometries. |
 | `SelectObject` | `objectId: Guid * ?forceVisible: bool = false * ?ignoreErrors: bool = false -> unit` | Selects a single object. |
 | `SelectObjects` | `objectIds: Guid seq * ?forceVisible: bool = false * ?ignoreErrors: bool = false -> unit` | Selects one or more objects Throws an exception if object can't be selected for some reason e.g. when locked , hidden, or on invisible layer . |
 | `ShearObject` | `objectId: Guid * origin: Point3d * referencePoint: Point3d * angleDegrees: float * ?copy: bool = false -> Guid` | Perform a shear transformation on a single object. |
+| `ShearObject` | `geometry: GeometryBase * origin: Point3d * referencePoint: Point3d * angleDegrees: float -> GeometryBase` | Returns a transformed duplicate of the input geometry. |
 | `ShearObjects` | `objectIds: Guid seq * origin: Point3d * referencePoint: Point3d * angleDegrees: float * ?copy: bool = false -> ResizeArray<Guid>` | Shears one or more objects. |
+| `ShearObjects` | `geometries: GeometryBase seq * origin: Point3d * referencePoint: Point3d * angleDegrees: float -> ResizeArray<GeometryBase>` | Returns transformed duplicates of the input geometries. |
 | `ShowObject` | `objectId: Guid -> unit` | Shows a previously hidden object. |
 | `ShowObjects` | `objectIds: Guid seq -> unit` | Shows one or more objects. |
 | `TransformObject` | `objectId: Guid * matrix: Transform * ?copy: bool = false -> Guid` | Moves, scales, or rotates an object given a 4x4 transformation matrix. |
+| `TransformObject` | `geometry: GeometryBase * matrix: Transform -> GeometryBase` | Returns a transformed duplicate of the input geometry. |
 | `TransformObjects` | `objectIds: Guid seq * matrix: Transform * ?copy: bool = false -> ResizeArray<Guid>` | Moves, scales, or rotates a list of objects given a 4x4 transformation matrix. |
+| `TransformObjects` | `geometries: GeometryBase seq * matrix: Transform -> ResizeArray<GeometryBase>` | Returns transformed duplicates of the input geometries. |
 | `UnlockObject` | `objectId: Guid -> unit` | Unlocks an object. |
 | `UnlockObjects` | `objectIds: Guid seq -> unit` | Unlocks one or more objects. |
 | `UnselectObject` | `objectId: Guid -> unit` | Unselects a single selected object. |
@@ -1049,6 +1271,7 @@ From [Src/Scripting_Plane.fs](../Src/Scripting_Plane.fs).
 | `PlaneClosestParameter` | `plane: Plane * point: Point3d -> float * float` | Returns the point on a Plane that is closest to a test point. |
 | `PlaneClosestPoint` | `plane: Plane * point: Point3d -> Point3d` | Returns the point on a Plane that is closest to a test point. |
 | `PlaneCurveIntersection` | `plane: Plane * curve: Guid * ?tolerance: float = 0.0 -> ResizeArray<int * Point3d * Point3d * Point3d * Point3d * float * float * float * float * float * float>` | Intersect an infinite Plane and a Curve object. |
+| `PlaneCurveIntersection` | `plane: Plane * curve: Curve * ?tolerance: float = 0.0 -> ResizeArray<int * Point3d * Point3d * Point3d * Point3d * float * float * float * float * float * float>` | Intersect an infinite Plane and a Curve object. |
 | `PlaneEquation` | `plane: Plane -> float * float * float * float` | Returns the equation of a Plane as a tuple of four numbers. |
 | `PlaneFitFromPoints` | `points: Point3d seq -> Plane` | Returns a Plane that was fit through an array of 3D points. |
 | `PlaneFromFrame` | `origin: Point3d * xAxis: Vector3d * yAxis: Vector3d -> Plane` | Construct a Plane from a point, and two vectors in the Plane. |
@@ -1077,6 +1300,7 @@ From [Src/Scripting_PointVector.fs](../Src/Scripting_PointVector.fs).
 | `PointArrayClosestPoint` | `points: IList<Point3d> * testPoint: Point3d -> int` | Finds the point in a list of 3D points that is closest to a test point. |
 | `PointArrayTransform` | `points: IList<Point3d> * xForm: Transform -> ResizeArray<Point3d>` | Transforms a list of 3D points. |
 | `PointClosestObject` | `point: Point3d * objectIds: Guid seq -> Guid * Point3d * float` | Finds the object that is closest to a test point. |
+| `PointClosestObject` | `point: Point3d * geometries: GeometryBase seq -> GeometryBase * Point3d * float` | Finds the object that is closest to a test point. |
 | `PointCompare` | `point1: Point3d * point2: Point3d * ?tolerance: float = 0.0 -> bool` | Compares two 3D points. |
 | `PointDivide` | `point: Point3d * divide: float -> Point3d` | Divides a 3D point by a value. |
 | `PointsAreCoplanar` | `points: Point3d seq * ?tolerance: float = 0.0 -> bool` | Checks if a list of 3D points are coplanar. |
@@ -1084,8 +1308,11 @@ From [Src/Scripting_PointVector.fs](../Src/Scripting_PointVector.fs).
 | `PointSubtract` | `point1: Point3d * point2: Point3d -> Point3d` | Subtracts a 3D point or a 3D vector from a 3D point. |
 | `PointTransform` | `point: Point3d * xForm: Transform -> Point3d` | Transforms a 3D point. |
 | `ProjectPointToMesh` | `points: Point3d seq * meshIds: Guid seq * direction: Vector3d -> Point3d array` | Projects one or more points onto one or more Meshes. |
+| `ProjectPointToMesh` | `points: Point3d seq * meshGeos: Mesh seq * direction: Vector3d -> Point3d array` | Projects one or more points onto one or more Meshes. |
 | `ProjectPointToSurface` | `points: Point3d seq * surfaceIds: Guid seq * direction: Vector3d -> Point3d array` | Projects one or more points onto one or more Surfaces or Polysurfaces. |
+| `ProjectPointToSurface` | `points: Point3d seq * surfaceGeos: Brep seq * direction: Vector3d -> Point3d array` | Projects one or more points onto one or more Surfaces or Polysurfaces. |
 | `PullPoints` | `objectId: Guid * points: Point3d seq -> Point3d array` | Pulls an array of points to a Surface or Mesh object. |
+| `PullPoints` | `geometryObject: GeometryBase * points: Point3d seq -> Point3d array` | Pulls an array of points to a Surface or Mesh object. |
 | `VectorAdd` | `vector1: Vector3d * vector2: Vector3d -> Vector3d` | Adds two 3D vectors. |
 | `VectorAngle` | `vector1: Vector3d * vector2: Vector3d -> float` | Returns the angle, in degrees, between two 3-D vectors. |
 | `VectorCompare` | `vector1: Vector3d * vector2: Vector3d -> int` | Compares two 3D vectors. |
@@ -1144,122 +1371,212 @@ From [Src/Scripting_Surface.fs](../Src/Scripting_Surface.fs).
 | `AddCone` | `basis: Plane * height: float * radius: float * ?cap: bool = true -> Guid` | Adds a cone shaped Polysurface to the document. |
 | `AddCone` | `baseCenter: Point3d * tip: Point3d * radius: float * ?cap: bool = true -> Guid` | Adds a cone shaped Polysurface to the document. |
 | `AddCutPlane` | `objectIds: Guid seq * startPoint: Point3d * endPoint: Point3d * ?normal: Vector3d = Vector3d() -> Guid` | Adds a planar Surface through objects at a designated location. |
+| `MakeCutPlane` | `geometryObjects: GeometryBase seq * startPoint: Point3d * endPoint: Point3d * ?normal: Vector3d = Vector3d() -> PlaneSurface` | Creates a planar Surface through objects at a designated location. |
 | `AddCylinder` | `basis: Plane * height: float * radius: float * ?cap: bool = true -> Guid` | Adds a cylinder-shaped Polysurface to the document. |
 | `AddEdgeSrf` | `curveIds: Guid seq -> Guid` | Creates a Surface from 2, 3, or 4 edge Curves. |
+| `MakeEdgeSrf` | `curveGeos: Curve seq -> Brep` | Creates a Surface from 2, 3, or 4 edge Curves. |
 | `AddLoftSrf` | `objectIds: Guid seq * ?start: Point3d = Point3d() * ?ende: Point3d = Point3d() * ?loftType: int = 0 * ?rebuild: int = 0 * ?refit: float = 0.0 * ?closed: bool = false -> ResizeArray<Guid>` | Adds a Surface created by lofting Curves to the document. - no Curve sorting performed. pass in Curves in the order you want them sorted - directions of open Curves not adjusted. |
+| `MakeLoftSrf` | `geometryObjects: Curve seq * ?start: Point3d = Point3d() * ?ende: Point3d = Point3d() * ?loftType: int = 0 * ?rebuild: int = 0 * ?refit: float = 0.0 * ?closed: bool = false -> ResizeArray<Brep>` | Creates a Surface created by lofting Curves. - no Curve sorting performed. pass in Curves in the order you want them sorted - directions of open Curves not adjusted. |
 | `AddNetworkSrf` | `curves: Guid seq * ?continuity: int = 1 * ?edgeTolerance: float = 0.0 * ?interiorTolerance: float = 0.0 * ?angleTolerance: float = 0.0 -> Guid` | Creates a Surface from a network of crossing Curves. |
+| `MakeNetworkSrf` | `curves: Curve seq * ?continuity: int = 1 * ?edgeTolerance: float = 0.0 * ?interiorTolerance: float = 0.0 * ?angleTolerance: float = 0.0 -> NurbsSurface` | Creates a Surface from a network of crossing Curves. |
 | `AddNurbsSurface` | `pointCount: (int * int) * points: IList<Point3d> * knotsU: float seq * knotsV: float seq * degree: (int * int) * ?weights: IList<float> = null -> Guid` | Adds a NURBS Surface object to the document. |
 | `AddPatch` | `objectIds: Guid seq * startSurfaceId: Guid * ?tolerance: float = 0.0 * ?trim: bool = true * ?pointSpacing: float = 0.1 * ?flexibility: float = 1.0 * ?surfacePull: float = 1.0 * ?fixEdges: bool = false -> Guid` | Fits a Surface through Curve, point, point cloud, and Mesh objects. |
 | `AddPatch` | `objectIds: Guid seq * uvSpans: (int * int) * ?tolerance: float = 0.0 * ?trim: bool = true * ?pointSpacing: float = 0.1 * ?flexibility: float = 1.0 * ?surfacePull: float = 1.0 * ?fixEdges: bool = false -> Guid` | Fits a Surface through Curve, point, point cloud, and Mesh objects. |
+| `MakePatch` | `geometryObjects: GeometryBase seq * startSurfaceGeo: Surface * ?tolerance: float = 0.0 * ?trim: bool = true * ?pointSpacing: float = 0.1 * ?flexibility: float = 1.0 * ?surfacePull: float = 1.0 * ?fixEdges: bool = false -> Brep` | Fits a Surface through Curve, point, point cloud, and Mesh objects. |
+| `MakePatch` | `geometryObjects: GeometryBase seq * uvSpans: (int * int) * ?tolerance: float = 0.0 * ?trim: bool = true * ?pointSpacing: float = 0.1 * ?flexibility: float = 1.0 * ?surfacePull: float = 1.0 * ?fixEdges: bool = false -> Brep` | Fits a Surface through Curve, point, point cloud, and Mesh objects. |
 | `AddPipe` | `curveId: Guid * parameters: float seq * radii: float seq * ?blendType: int = 0 * ?cap: int = 0 * ?fit: bool = false -> ResizeArray<Guid>` | Creates a single walled Surface with a circular profile around a Curve. |
-| `AddPlanarSrf` | `polyline: Polyline -> Guid` | Creates one Surface from one Polyline Geometry. |
-| `AddPlanarSrf` | `curve: Curve -> Guid` | Creates one Surface from one planar Curve. |
-| `AddPlanarSrf` | `curves: Curve seq -> ResizeArray<Guid>` | Creates one or more Surfaces from planar Curves. |
+| `MakePipe` | `curveGeo: Curve * parameters: float seq * radii: float seq * ?blendType: int = 0 * ?cap: int = 0 * ?fit: bool = false -> ResizeArray<Brep>` | Creates a single walled Surface with a circular profile around a Curve. |
 | `AddPlanarSrf` | `objectIds: Guid seq -> ResizeArray<Guid>` | Creates one or more Surfaces from planar Curves. |
+| `MakePlanarSrf` | `polyline: Polyline -> Brep` | Creates one Surface from one Polyline Geometry. |
+| `MakePlanarSrf` | `curve: Curve -> Brep` | Creates one Surface from one planar Curve. |
+| `MakePlanarSrf` | `curves: Curve seq -> ResizeArray<Brep>` | Creates one or more Surfaces from planar Curves. |
 | `AddPlaneSurface` | `plane: Plane * uDir: float * vDir: float -> Guid` | Create a Plane Surface and add it to the document. |
 | `AddRailRevSrf` | `profile: Guid * rail: Guid * axis: Line * ?scaleHeight: bool = false -> Guid` | Adds a Surface created through profile Curves that define the Surface shape and two Curves that defines a Surface edge. |
+| `MakeRailRevSrf` | `profile: Curve * rail: Curve * axis: Line * ?scaleHeight: bool = false -> NurbsSurface` | Creates a Surface created through profile Curves that define the Surface shape and two Curves that defines a Surface edge. |
 | `AddRevSrf` | `curveId: Guid * axis: Line * ?startAngle: float = 0.0 * ?endAngle: float = 360.0 -> Guid` | Create a Surface by revolving a Curve around an axis. |
+| `MakeRevSrf` | `curveGeo: Curve * axis: Line * ?startAngle: float = 0.0 * ?endAngle: float = 360.0 -> NurbsSurface` | Create a Surface by revolving a Curve around an axis. |
 | `AddSphere` | `center: Point3d * radius: float -> Guid` | Add a spherical Surface to the document. |
 | `AddSrfContourCrvs` | `objectId: Guid * plane: Plane -> ResizeArray<Guid>` | Adds a spaced series of planar Curves resulting from the intersection of defined cutting Planes through a Surface or Polysurface. |
 | `AddSrfContourCrvs` | `objectId: Guid * startPoint: Point3d * endPoint: Point3d * interval: float -> ResizeArray<Guid>` | Adds a spaced series of planar Curves resulting from the intersection of defined cutting Planes through a Surface or Polysurface. |
+| `MakeSrfContourCrvs` | `geometryObject: Brep * plane: Plane -> ResizeArray<Curve>` | Creates a spaced series of planar Curves resulting from the intersection of defined cutting Planes through a Surface or Polysurface. |
+| `MakeSrfContourCrvs` | `geometryObject: Brep * startPoint: Point3d * endPoint: Point3d * interval: float -> ResizeArray<Curve>` | Creates a spaced series of planar Curves resulting from the intersection of defined cutting Planes through a Surface or Polysurface. |
 | `AddSrfControlPtGrid` | `count: (int * int) * points: Point3d seq * ?degreeU: int = 3 * ?degreeV: int = 3 -> Guid` | Creates a Surface from a grid of points. |
 | `AddSrfPt` | `pointA: Point3d * pointB: Point3d * pointC: Point3d * pointD: Point3d -> Guid` | Creates a new Surface from four corner points. |
 | `AddSrfPt` | `pointA: Point3d * pointB: Point3d * pointC: Point3d -> Guid` | Creates a new Surface from three corner points. |
 | `AddSrfPtGrid` | `count: (int * int) * points: Point3d seq * ?degreeU: int = 3 * ?degreeV: int = 3 * ?closedU: bool = false * ?closedV: bool = false -> Guid` | Creates a Surface from a grid of points. |
 | `AddSweep1` | `rail: Guid * shapes: Guid seq * ?closed: bool = false -> ResizeArray<Guid>` | Adds a Surface created through profile Curves that define the Surface shape and one Curve that defines a Surface edge. |
+| `MakeSweep1` | `rail: Curve * shapes: Curve seq * ?closed: bool = false -> ResizeArray<Brep>` | Creates a Surface created through profile Curves that define the Surface shape and one Curve that defines a Surface edge. |
 | `AddSweep2` | `rails: (Guid * Guid) * shapes: Guid seq * ?closed: bool = false -> ResizeArray<Guid>` | Adds a Surface created through profile Curves that define the Surface shape and two Curves that defines a Surface edge. |
+| `MakeSweep2` | `rails: (Curve * Curve) * shapes: Curve seq * ?closed: bool = false -> ResizeArray<Brep>` | Creates a Surface created through profile Curves that define the Surface shape and two Curves that defines a Surface edge. |
 | `AddTorus` | `basis: Plane * majorRadius: float * minorRadius: float -> Guid` | Adds a torus shaped revolved Surface to the document. |
 | `BooleanDifference` | `input0: Guid seq * input1: Guid seq * ?deleteInput: bool = true -> ResizeArray<Guid>` | Performs a boolean difference operation on two sets of input Surfaces and Polysurfaces. |
+| `BooleanDifference` | `input0: Brep seq * input1: Brep seq -> ResizeArray<Brep>` | Performs a boolean difference operation on two sets of input Surfaces and Polysurfaces. |
 | `BooleanIntersection` | `input0: Guid seq * input1: Guid seq * ?deleteInput: bool = true -> ResizeArray<Guid>` | Performs a boolean intersection operation on two sets of input Surfaces and Polysurfaces. |
+| `BooleanIntersection` | `input0: Brep seq * input1: Brep seq -> ResizeArray<Brep>` | Performs a boolean intersection operation on two sets of input Surfaces and Polysurfaces. |
 | `BooleanUnion` | `input: Guid seq * ?deleteInput: bool = true -> ResizeArray<Guid>` | Performs a boolean union operation on a set of input Surfaces and Polysurfaces. |
+| `BooleanUnion` | `input: Brep seq -> ResizeArray<Brep>` | Performs a boolean union operation on a set of input Surfaces and Polysurfaces. |
 | `BrepClosestPoint` | `objectId: Guid * point: Point3d -> Point3d * float * float * ComponentIndexType * int * Vector3d` | Returns the point on a Surface or Polysurface that is closest to a test point. |
+| `BrepClosestPoint` | `geometryObject: Brep * point: Point3d -> Point3d * float * float * ComponentIndexType * int * Vector3d` | Returns the point on a Surface or Polysurface that is closest to a test point. |
 | `CapPlanarHoles` | `surfaceId: Guid -> bool` | Caps planar holes in a Surface or Polysurface. |
 | `ChangeSurfaceDegree` | `objectId: Guid * degree: (int * int) -> bool` | Changes the degree of a Surface object. |
 | `DuplicateEdgeCurves` | `objectId: Guid * ?select: bool = false -> ResizeArray<Guid>` | Duplicates the edge Curves of a Surface or Polysurface. |
+| `DuplicateEdgeCurves` | `geometryObject: Brep -> ResizeArray<Curve>` | Duplicates the edge Curves of a Surface or Polysurface. |
 | `DuplicateSurfaceBorder` | `surfaceId: Guid * ?typ: int = 0 -> ResizeArray<Guid>` | Create Curves that duplicate a Surface or Polysurface border. |
+| `DuplicateSurfaceBorder` | `surfaceGeo: Brep * ?typ: int = 0 -> ResizeArray<Curve>` | Create Curves that duplicate a Surface or Polysurface border. |
 | `EvaluateSurface` | `surfaceId: Guid * u: float * v: float -> Point3d` | Evaluates a Surface at a U, V parameter. |
+| `EvaluateSurface` | `surfaceGeo: Surface * u: float * v: float -> Point3d` | Evaluates a Surface at a U, V parameter. |
 | `ExplodePolysurfaces` | `objectIds: Guid seq * ?deleteInput: bool = false -> ResizeArray<Guid>` | Explodes, or un-joins, one or more Polysurface objects. |
+| `ExplodePolysurfaces` | `geometryObjects: Brep seq -> ResizeArray<Brep>` | Explodes, or un-joins, one or more Polysurface objects. |
 | `ExtendSurface` | `surfaceId: Guid * parameter: (float * float) * length: float * ?smooth: bool = true -> bool` | Lengthens an untrimmed Surface object. |
 | `ExtractIsoCurve` | `surfaceId: Guid * parameter: (float * float) * direction: int -> ResizeArray<Guid>` | Extracts iso-parametric Curves from a Surface. |
+| `ExtractIsoCurve` | `surfaceGeo: Surface * parameter: (float * float) * direction: int -> ResizeArray<Curve>` | Extracts iso-parametric Curves from a Surface. |
 | `ExtractSurface` | `objectId: Guid * faceIndices: int seq * ?copy: bool = false -> ResizeArray<Guid>` | Separates or copies a Surface or a copy of a Surface from a Polysurface. |
+| `ExtractSurface` | `geometryObject: Brep * faceIndices: int seq -> ResizeArray<Brep>` | Duplicates the selected faces of a Polysurface as independent Breps. |
 | `ExtrudeCurve` | `curveId: Guid * pathId: Guid -> Guid` | Creates a Surface by extruding a Curve along a path. |
+| `ExtrudeCurve` | `curveGeo: Curve * pathGeo: Curve -> SumSurface` | Creates a Surface by extruding a Curve along a path. |
 | `ExtrudeCurvePoint` | `curveId: Guid * point: Point3d -> Guid` | Creates a Surface by extruding a Curve to a point. |
+| `ExtrudeCurvePoint` | `curveGeo: Curve * point: Point3d -> Surface` | Creates a Surface by extruding a Curve to a point. |
 | `ExtrudeCurveStraight` | `curveId: Guid * startPoint: Point3d * endPoint: Point3d -> Guid` | Create Surface by extruding a Curve along two points that define a line. |
+| `ExtrudeCurveStraight` | `curveGeo: Curve * startPoint: Point3d * endPoint: Point3d -> Surface` | Create Surface by extruding a Curve along two points that define a line. |
 | `ExtrudeSurface` | `surfaceId: Guid * curveId: Guid * ?cap: bool = true -> Guid` | Create Surface by extruding along a path Curve. |
+| `ExtrudeSurface` | `surfaceGeo: Brep * curveGeo: Curve * ?cap: bool = true -> Brep` | Create Surface by extruding along a path Curve. |
 | `FilletSurfaces` | `surface0: Guid * surface1: Guid * radius: float * ?uvparam0: Point2d = Point2d() * ?uvparam1: Point2d = Point2d() -> ResizeArray<Guid>` | Create constant radius rolling ball fillets between two Surfaces. |
+| `FilletSurfaces` | `surface0: Surface * surface1: Surface * radius: float * ?uvparam0: Point2d = Point2d() * ?uvparam1: Point2d = Point2d() -> ResizeArray<Surface>` | Create constant radius rolling ball fillets between two Surfaces. |
 | `FlipSurface` | `surfaceId: Guid * flip: bool -> unit` | Changes the normal direction of a Surface. |
 | `FlipSurface` | `surfaceIds: Guid seq * flip: bool -> unit` | Changes the normal direction of multiple Surface. |
 | `IntersectBreps` | `brep1: Guid * brep2: Guid * ?tolerance: float = 0.0 -> ResizeArray<Guid>` | Intersects a brep object with another brep object. |
+| `IntersectBreps` | `brep1: Brep * brep2: Brep * ?tolerance: float = 0.0 -> ResizeArray<GeometryBase>` | Intersects a brep object with another brep object. |
 | `IntersectSpheres` | `spherePlane0: Plane * sphereRadius0: float * spherePlane1: Plane * sphereRadius1: float -> int * Circle * float` | Calculates intersections of two spheres. |
 | `IsBrep` | `objectId: Guid -> bool` | Verifies an object is a Brep. |
+| `IsBrep` | `geometryObject: GeometryBase -> bool` | Verifies an object is a Brep. |
 | `IsCone` | `objectId: Guid -> bool` | Determines if a Surface is a portion of a cone. |
+| `IsCone` | `geometryObject: Surface -> bool` | Determines if a Surface is a portion of a cone. |
 | `IsCylinder` | `objectId: Guid -> bool` | Determines if a Surface is a portion of a cylinder. |
+| `IsCylinder` | `geometryObject: Surface -> bool` | Determines if a Surface is a portion of a cylinder. |
 | `IsExtrusion` | `objectId: Guid -> bool` | Verifies an object is a or Extrusion. |
+| `IsExtrusion` | `geometryObject: GeometryBase -> bool` | Verifies an object is a or Extrusion. |
 | `IsPlaneSurface` | `objectId: Guid -> bool` | Verifies an object is a Plane Surface. |
+| `IsPlaneSurface` | `geometryObject: Surface -> bool` | Verifies an object is a Plane Surface. |
 | `IsPointInSurface` | `objectId: Guid * point: Point3d * ?strictlyIn: bool = false * ?tolerance: float = 0.0 -> bool` | Checks if a point is inside a closed Mesh , Surface or Polysurface. |
+| `IsPointInSurface` | `geometryObject: GeometryBase * point: Point3d * ?strictlyIn: bool = false * ?tolerance: float = 0.0 -> bool` | Checks if a point is inside a closed Mesh , Surface or Polysurface. |
 | `IsPointOnSurface` | `objectId: Guid * point: Point3d -> bool` | Checks if a point lies on a Surface. |
+| `IsPointOnSurface` | `geometryObject: GeometryBase * point: Point3d -> bool` | Checks if a point lies on a Surface. |
 | `IsPolysurface` | `objectId: Guid -> bool` | Verifies an object is a Polysurface or Extrusion. |
+| `IsPolysurface` | `geometryObject: GeometryBase -> bool` | Verifies an object is a Polysurface or Extrusion. |
 | `IsPolysurfaceClosed` | `objectId: Guid -> bool` | Verifies a Guid refers to a closed Polysurface or closed Extrusion. |
+| `IsPolysurfaceClosed` | `geometryObject: GeometryBase -> bool` | Verifies a Guid refers to a closed Polysurface or closed Extrusion. |
 | `IsSphere` | `objectId: Guid -> bool` | Determines if a Surface is a portion of a Sphere. |
+| `IsSphere` | `geometryObject: Surface -> bool` | Determines if a Surface is a portion of a Sphere. |
 | `IsSurface` | `objectId: Guid -> bool` | Verifies an object is a Surface, Extrusion or Brep objects with only one face. |
+| `IsSurface` | `geometryObject: Surface -> bool` | Verifies an object is a Surface, Extrusion or Brep objects with only one face. |
 | `IsSurfaceClosed` | `surfaceId: Guid * direction: int -> bool` | Verifies a Surface object is closed in the specified direction. |
+| `IsSurfaceClosed` | `surfaceGeo: Surface * direction: int -> bool` | Verifies a Surface object is closed in the specified direction. |
 | `IsSurfaceFliped` | `surfaceId: Guid -> bool` | Returns the normal direction of a Surface. |
+| `IsSurfaceFliped` | `surfaceGeo: Brep -> bool` | Returns the normal direction of a Surface. |
 | `IsSurfacePeriodic` | `surfaceId: Guid * direction: int -> bool` | Verifies a Surface object is periodic in the specified direction. |
+| `IsSurfacePeriodic` | `surfaceGeo: Surface * direction: int -> bool` | Verifies a Surface object is periodic in the specified direction. |
 | `IsSurfacePlanar` | `surfaceId: Guid * ?tolerance: float = 0.0 -> bool` | Verifies a Surface object is planar. |
+| `IsSurfacePlanar` | `surfaceGeo: Surface * ?tolerance: float = 0.0 -> bool` | Verifies a Surface object is planar. |
 | `IsSurfaceRational` | `surfaceId: Guid -> bool` | Verifies a Surface object is rational. |
+| `IsSurfaceRational` | `surfaceGeo: Surface -> bool` | Verifies a Surface object is rational. |
 | `IsSurfaceSingular` | `surfaceId: Guid * direction: int -> bool` | Verifies a Surface object is singular in the specified direction. |
+| `IsSurfaceSingular` | `surfaceGeo: Surface * direction: int -> bool` | Verifies a Surface object is singular in the specified direction. |
 | `IsSurfaceTrimmed` | `surfaceId: Guid -> bool` | Verifies a Surface object has been trimmed. |
+| `IsSurfaceTrimmed` | `surfaceGeo: Brep -> bool` | Verifies a Surface object has been trimmed. |
 | `IsTorus` | `surfaceId: Guid -> bool` | Determines if a Surface is a portion of a torus. |
+| `IsTorus` | `surfaceGeo: Surface -> bool` | Determines if a Surface is a portion of a torus. |
 | `JoinSurfaces` | `objectIds: Guid seq * ?deleteInput: bool = false -> Guid` | Joins two or more Surface or Polysurface objects together to form one Polysurface object. |
+| `JoinSurfaces` | `geometryObjects: Brep seq -> Brep` | Joins two or more Surface or Polysurface objects together to form one Polysurface object. |
 | `MakeSurfacePeriodic` | `surfaceId: Guid * direction: int * ?deleteInput: bool = false -> Guid` | Makes an existing Surface a periodic NURBS Surface. |
+| `MakeSurfacePeriodic` | `surfaceGeo: Surface * direction: int -> Surface` | Makes an existing Surface a periodic NURBS Surface. |
 | `OffsetSurface` | `surfaceId: Guid * distance: float * ?tolerance: float = 0.0 * ?bothSides: bool = false * ?createSolid: bool = false -> Guid` | Offsets a trimmed or untrimmed Surface by a distance. |
+| `OffsetSurface` | `surfaceGeo: Brep * distance: float * ?tolerance: float = 0.0 * ?bothSides: bool = false * ?createSolid: bool = false -> Brep` | Offsets a trimmed or untrimmed Surface by a distance. |
 | `PullCurve` | `surface: Guid * curve: Guid * ?deleteInput: bool = false -> ResizeArray<Guid>` | Pulls a Curve object to a Surface object. |
+| `PullCurve` | `surface: Brep * curve: Curve -> ResizeArray<Curve>` | Pulls a Curve object to a Surface object. |
 | `RebuildSurface` | `objectId: Guid * ?degreeU: int = 3 * ?degreeV: int = 3 * ?pointcountU: int = 10 * ?pointcountV: int = 10 -> bool` | Rebuilds a Surface to a given degree and control point count. |
 | `RemoveSurfaceKnot` | `surface: Guid * uvParameter: (float * float) * vDirection: bool -> bool` | Deletes a knot from a Surface object. |
 | `ReverseSurface` | `surfaceId: Guid * direction: int -> unit` | Reverses U or V directions of a Surface, or swaps (transposes) U and V directions. |
 | `ShootRay` | `surfaceIds: Guid seq * startPoint: Point3d * direction: Vector3d * ?reflections: int = 10 -> Point3d array` | Shoots a ray at a collection of Surfaces or Polysurfaces. |
+| `ShootRay` | `surfaceGeos: Brep seq * startPoint: Point3d * direction: Vector3d * ?reflections: int = 10 -> Point3d array` | Shoots a ray at a collection of Surfaces or Polysurfaces. |
 | `ShortPath` | `surfaceId: Guid * startPoint: Point3d * endPoint: Point3d -> Guid` | Creates the shortest possible Curve(geodesic) between two points on a Surface. |
+| `ShortPath` | `surfaceGeo: Surface * startPoint: Point3d * endPoint: Point3d -> Curve` | Creates the shortest possible Curve(geodesic) between two points on a Surface. |
 | `ShrinkTrimmedSurface` | `objectId: Guid * ?createCopy: bool = false -> Guid` | Shrinks the underlying untrimmed Surfaces near to the trimming boundaries. |
+| `ShrinkTrimmedSurface` | `geometryObject: Brep -> Brep` | Shrinks the underlying untrimmed Surfaces near to the trimming boundaries. |
 | `SplitBrep` | `brepId: Guid * cutterId: Guid * ?deleteInput: bool = false -> ResizeArray<Guid>` | Splits a brep. |
+| `SplitBrep` | `brepGeo: Brep * cutterGeo: Brep -> ResizeArray<Brep>` | Splits a brep. |
 | `SurfaceArea` | `srf: Surface -> float` | Calculate the area of a Surface Geometry. |
 | `SurfaceArea` | `brep: Brep -> float` | Calculate the area of a Brep / Polysurface Geometry. |
 | `SurfaceArea` | `objectId: Guid -> float` | Calculate the area of a Surface or Polysurface object. |
+| `SurfaceArea` | `geometryObject: GeometryBase -> float` | Calculate the area of a Surface or Polysurface object. |
 | `SurfaceAreaCentroid` | `objectId: Guid -> Point3d` | Calculates the area centroid of a Surface or Polysurface. |
+| `SurfaceAreaCentroid` | `geometryObject: GeometryBase -> Point3d` | Calculates the area centroid of a Surface or Polysurface. |
 | `SurfaceAreaMoments` | `surfaceId: Guid -> ResizeArray<float * float * float>` | Calculates area moments of inertia of a Surface or Polysurface object. |
+| `SurfaceAreaMoments` | `surfaceGeo: GeometryBase -> ResizeArray<float * float * float>` | Calculates area moments of inertia of a Surface or Polysurface object. |
 | `SurfaceClosestParameter` | `surfaceId: Guid * testPoint: Point3d -> float * float` | Returns U, V parameters of point on a Surface that is closest to a test point. |
+| `SurfaceClosestParameter` | `surfaceGeo: Surface * testPoint: Point3d -> float * float` | Returns U, V parameters of point on a Surface that is closest to a test point. |
 | `SurfaceClosestPoint` | `surfaceId: Guid * testPoint: Point3d -> Point3d` | Returns the point on a Surface that is closest to a test point. |
+| `SurfaceClosestPoint` | `surfaceGeo: Surface * testPoint: Point3d -> Point3d` | Returns the point on a Surface that is closest to a test point. |
 | `SurfaceCone` | `surfaceId: Guid -> Plane * float * float` | Returns the definition of a Surface cone. |
+| `SurfaceCone` | `surfaceGeo: Surface -> Plane * float * float` | Returns the definition of a Surface cone. |
 | `SurfaceCurvature` | `surfaceId: Guid * parameter: (float * float) -> Point3d * Vector3d * float * Vector3d * float * Vector3d * float * float` | Returns the curvature of a Surface at a U, V parameter. |
+| `SurfaceCurvature` | `surfaceGeo: Surface * parameter: (float * float) -> Point3d * Vector3d * float * Vector3d * float * Vector3d * float * float` | Returns the curvature of a Surface at a U, V parameter. |
 | `SurfaceCylinder` | `surfaceId: Guid -> Plane * float * float` | Returns the definition of a cylinder Surface. |
+| `SurfaceCylinder` | `surfaceGeo: Surface -> Plane * float * float` | Returns the definition of a cylinder Surface. |
 | `SurfaceDegree` | `surfaceId: Guid -> int * int` | Returns the U and V degrees of a Surface. |
+| `SurfaceDegree` | `surfaceGeo: Surface -> int * int` | Returns the U and V degrees of a Surface. |
 | `SurfaceDomain` | `surfaceId: Guid * direction: int -> float * float` | Returns the domain of a Surface object in the specified direction. |
+| `SurfaceDomain` | `surfaceGeo: Surface * direction: int -> float * float` | Returns the domain of a Surface object in the specified direction. |
 | `SurfaceEditPointParameters` | `surfaceId: Guid * ?returnAll: bool = true -> ResizeArray<float * float>` | Returns the parameters at edit, or Greville points of a Surface object. |
+| `SurfaceEditPointParameters` | `surfaceGeo: Surface * ?returnAll: bool = true -> ResizeArray<float * float>` | Returns the parameters at edit, or Greville points of a Surface object. |
 | `SurfaceEditPoints` | `surfaceId: Guid * ?returnAll: bool = true -> ResizeArray<Point3d>` | Returns the edit, or Greville points of a Surface object. |
+| `SurfaceEditPoints` | `surfaceGeo: Surface * ?returnAll: bool = true -> ResizeArray<Point3d>` | Returns the edit, or Greville points of a Surface object. |
 | `SurfaceEvaluate` | `surfaceId: Guid * parameter: (float * float) * derivative: int -> Point3d * ResizeArray<Vector3d>` | A general purpose Surface evaluator. |
+| `SurfaceEvaluate` | `surfaceGeo: Surface * parameter: (float * float) * derivative: int -> Point3d * ResizeArray<Vector3d>` | A general purpose Surface evaluator. |
 | `SurfaceFrame` | `surfaceId: Guid * uvParameter: (float * float) -> Plane` | Returns a Plane based on the normal, u, and v directions at a Surface U, V parameter. |
+| `SurfaceFrame` | `surfaceGeo: Surface * uvParameter: (float * float) -> Plane` | Returns a Plane based on the normal, u, and v directions at a Surface U, V parameter. |
 | `SurfaceIsocurveDensity` | `surfaceId: Guid -> int` | Returns the isocurve density of a Surface or Polysurface object. |
 | `SurfaceIsocurveDensity` | `surfaceId: Guid * density: int -> unit` | Sets the isocurve density of a Surface or Polysurface object. |
 | `SurfaceIsocurveDensity` | `surfaceIds: Guid seq * density: int -> unit` | Sets the isocurve density of multiple Surface or Polysurface objects. |
 | `SurfaceKnotCount` | `surfaceId: Guid -> int * int` | Returns the control point count of a Surface SurfaceId = the Surface's identifier. |
+| `SurfaceKnotCount` | `surfaceGeo: Surface -> int * int` | Returns the control point count of a Surface SurfaceId = the Surface's identifier. |
 | `SurfaceKnots` | `surfaceId: Guid -> NurbsSurfaceKnotList * NurbsSurfaceKnotList` | Returns the knots, or knot vector, of a Surface object. |
+| `SurfaceKnots` | `surfaceGeo: Surface -> NurbsSurfaceKnotList * NurbsSurfaceKnotList` | Returns the knots, or knot vector, of a Surface object. |
 | `SurfaceNormal` | `surfaceId: Guid * uvParameter: (float * float) -> Vector3d` | Returns 3D vector that is the normal to a Surface at a parameter. |
 | `SurfaceNormal` | `surfaceId: Guid -> Vector3d` | Returns 3D vector that is the normal to a Surface at mid parameter. |
+| `SurfaceNormal` | `surfaceGeo: Surface * uvParameter: (float * float) -> Vector3d` | Returns 3D vector that is the normal to a Surface at a parameter. |
+| `SurfaceNormal` | `surfaceGeo: Surface -> Vector3d` | Returns 3D vector that is the normal to a Surface at mid parameter. |
 | `SurfaceNormalizedParameter` | `surfaceId: Guid * parameter: (float * float) -> float * float` | Converts Surface parameter to a normalized Surface parameter; one that ranges between 0.0 and 1.0 in both the U and V directions. |
+| `SurfaceNormalizedParameter` | `surfaceGeo: Surface * parameter: (float * float) -> float * float` | Converts Surface parameter to a normalized Surface parameter; one that ranges between 0.0 and 1.0 in both the U and V directions. |
 | `SurfaceParameter` | `surfaceId: Guid * parameter: (float * float) -> float * float` | Converts normalized Surface parameter to a Surface domain specific (regular) parameter. or a parameter within the Surface's domain. |
+| `SurfaceParameter` | `surfaceGeo: Surface * parameter: (float * float) -> float * float` | Converts normalized Surface parameter to a Surface domain specific (regular) parameter. or a parameter within the Surface's domain. |
 | `SurfacePointCount` | `surfaceId: Guid -> int * int` | Returns the control point count of a Surface SurfaceId = the Surface's identifier. |
+| `SurfacePointCount` | `surfaceGeo: Surface -> int * int` | Returns the control point count of a Surface SurfaceId = the Surface's identifier. |
 | `SurfacePoints` | `surfaceId: Guid * ?returnAll: bool = true -> ResizeArray<Point3d>` | Returns the control points, or control vertices, of a Surface object. |
+| `SurfacePoints` | `surfaceGeo: Surface * ?returnAll: bool = true -> ResizeArray<Point3d>` | Returns the control points, or control vertices, of a Surface object. |
 | `SurfaceSphere` | `surfaceId: Guid -> Plane * float` | Gets the sphere definition from a Surface, if possible. |
+| `SurfaceSphere` | `surfaceGeo: Surface -> Plane * float` | Gets the sphere definition from a Surface, if possible. |
 | `SurfaceTorus` | `surfaceId: Guid -> Plane * float * float` | Returns the definition of a Surface torus. |
+| `SurfaceTorus` | `surfaceGeo: Surface -> Plane * float * float` | Returns the definition of a Surface torus. |
 | `SurfaceVolume` | `objectId: Guid -> float` | Calculates volume of a closed Surface or Polysurface. |
+| `SurfaceVolume` | `geometryObject: GeometryBase -> float` | Calculates volume of a closed Surface or Polysurface. |
 | `SurfaceVolumeCentroid` | `objectId: Guid -> Point3d` | Calculates volume centroid of a closed Surface or Polysurface. |
+| `SurfaceVolumeCentroid` | `geometryObject: GeometryBase -> Point3d` | Calculates volume centroid of a closed Surface or Polysurface. |
 | `SurfaceVolumeMoments` | `objectId: Guid -> ResizeArray<float * float * float>` | Calculates volume moments of inertia of a Surface or Polysurface object. |
+| `SurfaceVolumeMoments` | `geometryObject: GeometryBase -> ResizeArray<float * float * float>` | Calculates volume moments of inertia of a Surface or Polysurface object. |
 | `SurfaceWeights` | `objectId: Guid -> ResizeArray<float>` | Returns list of weight values assigned to the control points of a Surface. |
+| `SurfaceWeights` | `geometryObject: Surface -> ResizeArray<float>` | Returns list of weight values assigned to the control points of a Surface. |
 | `TrimBrep` | `objectId: Guid * cutter: Guid * ?tolerance: float = 0.0 -> ResizeArray<Guid>` | Trims a Surface or Polysurface using an oriented cutter brep or Surface. |
 | `TrimBrep` | `objectId: Guid * cutter: Plane * ?tolerance: float = 0.0 -> ResizeArray<Guid>` | Trims a Surface using an oriented cutter Plane. |
+| `TrimBrep` | `geometryObject: Brep * cutter: Brep * ?tolerance: float = 0.0 -> ResizeArray<Brep>` | Trims a Surface or Polysurface using an oriented cutter brep or Surface. |
+| `TrimBrep` | `geometryObject: Brep * cutter: Plane * ?tolerance: float = 0.0 -> ResizeArray<Brep>` | Trims a Surface using an oriented cutter Plane. |
 | `TrimSurfaceU` | `surfaceId: Guid * interval: (float * float) * ?deleteInput: bool = false -> Guid` | Remove portions of the Surface outside of the specified interval in U direction. |
+| `TrimSurfaceU` | `surfaceGeo: Surface * interval: (float * float) -> Surface` | Remove portions of the Surface outside of the specified interval in U direction. |
 | `TrimSurfaceUV` | `surfaceId: Guid * intervalU: (float * float) * intervalV: (float * float) * ?deleteInput: bool = false -> Guid` | Remove portions of the Surface outside of the specified interval ain U and V direction. |
+| `TrimSurfaceUV` | `surfaceGeo: Surface * intervalU: (float * float) * intervalV: (float * float) -> Surface` | Remove portions of the Surface outside of the specified interval ain U and V direction. |
 | `TrimSurfaceV` | `surfaceId: Guid * interval: (float * float) * ?deleteInput: bool = false -> Guid` | Remove portions of the Surface outside of the specified interval in V direction. |
+| `TrimSurfaceV` | `surfaceGeo: Surface * interval: (float * float) -> Surface` | Remove portions of the Surface outside of the specified interval in V direction. |
 | `UnrollSurface` | `surfaceId: Guid * ?explode: bool = false * ?followingGeometry: Guid seq = null * ?absoluteTolerance: float = 0.0 * ?relativeTolerance: float = 0.0 -> ResizeArray<Guid> * ResizeArray<Guid>` | Flattens a develop-able Surface or Polysurface. |
+| `UnrollSurface` | `surfaceGeo: Brep * ?explode: bool = false * ?followingGeometry: GeometryBase seq = null * ?absoluteTolerance: float = 0.0 * ?relativeTolerance: float = 0.0 -> ResizeArray<Brep> * ResizeArray<GeometryBase>` | Flattens a develop-able Surface or Polysurface. |
 
 ## Toolbar
 
@@ -1373,8 +1690,10 @@ From [Src/Scripting_UserInterface.fs](../Src/Scripting_UserInterface.fs).
 | `GetMeshVertices` | `objectId: Guid * ?message: string = "Select Mesh Vertices" * ?minCount: int = 1 * ?maxCount: int = 0 -> ResizeArray<int>` | Prompts the user to pick one or more Mesh vertices. |
 | `GetPoint` | `?message: string = null * ?basePoint: Point3d = Point3d() * ?distance: float = 0.0 * ?inPlane: bool = false -> Point3d` | Pauses for user input of a point. |
 | `GetPointOnCurve` | `curveId: Guid * ?message: string = "Pick Point On Curve" -> Point3d` | Pauses for user input of a point constrained to a Curve object. |
+| `GetPointOnCurve` | `curveGeo: Curve * ?message: string = "Pick Point On Curve" -> Point3d` | Pauses for user input of a point constrained to a Curve object. |
 | `GetPointOnMesh` | `meshId: Guid * ?message: string = "Pick Point On Mesh" -> Point3d` | Pauses for user input of a point constrained to a Mesh object. |
 | `GetPointOnSurface` | `surfaceId: Guid * ?message: string = "Pick Point on Surface or Polysurface" -> Point3d` | Pauses for user input of a point constrained to a Surface or Polysurface object. |
+| `GetPointOnSurface` | `surfaceGeo: GeometryBase * ?message: string = "Pick Point on Surface or Polysurface" -> Point3d` | Pauses for user input of a point constrained to a Surface or Polysurface object. |
 | `GetPoints` | `?drawLines: bool = false * ?inPlane: bool = false * ?message1: string = null * ?message2: string = null * ?maxPoints: int = 0 -> ResizeArray<Point3d>` | Pauses for user input of one or more points. |
 | `GetPolyline` | `?message1: string = null * ?message2: string = null * ?message3: string = null * ?message4: string = null * ?min: int = 2147482999 * ?max: int = 0 -> Polyline` | Prompts the user to pick points that define a polyline. |
 | `GetReal` | `?message: string = "Number" * ?number: float = 7e89 * ?minimum: float = 7e89 * ?maximum: float = 7e89 -> float` | Pauses for user input of a number. |
@@ -1450,8 +1769,10 @@ From [Src/Scripting_Views.fs](../Src/Scripting_Views.fs).
 | `DeleteNamedView` | `name: string -> bool` | Removes a named view from the document. |
 | `DetailLock` | `detailId: Guid -> bool` | Returns the projection locked state of a detail view-port rectangle. |
 | `DetailLock` | `detailId: Guid * lock: bool -> unit` | Modifies the projection locked state of a detail. |
+| `DetailLock` | `detailGeo: DetailView -> bool` | Returns the projection locked state of a detail view-port rectangle. |
 | `DetailScale` | `detailId: Guid -> float` | Returns the scale of a detail object. |
 | `DetailScale` | `detailId: Guid * modelLength: float * pageLength: float -> unit` | Modifies the scale of a detail object. |
+| `DetailScale` | `detailGeo: DetailView -> float` | Returns the scale of a detail geometry object. |
 | `IsDetail` | `layout: string * detail: string -> bool` | Checks if a detail view exists on a page layout view. |
 | `IsLayout` | `layout: string -> bool` | Checks if a view is a page layout view. |
 | `IsView` | `view: string -> bool` | Checks if the specified view exists. |

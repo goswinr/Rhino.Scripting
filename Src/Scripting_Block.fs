@@ -243,11 +243,47 @@ module AutoOpenBlock =
     ///    By default nested blocks are not exploded</param>
     /// <returns>(Guid array) identifiers for the newly exploded objects.</returns>
     static member ExplodeBlockInstance(objectId:Guid, [<OPT;DEF(false)>]explodeNestedInstances:bool) : array<Guid> =
-        let  instance = RhinoScriptSyntax.CoerceBlockInstanceObject(objectId)
-        let  guids = State.Doc.Objects.AddExplodedInstancePieces(instance, explodeNestedInstances, deleteInstance = true)
+        let instance = RhinoScriptSyntax.CoerceBlockInstanceObject(objectId)
+        // Rhino's document operation also resolves inherited instance attributes.
+        let guids = State.Doc.Objects.AddExplodedInstancePieces(instance, explodeNestedInstances, deleteInstance = true)
         if guids.Length > 0 then State.Doc.Views.Redraw()
         guids
 
+    /// <summary>Explodes block reference geometry into transformed copies of its component geometry.</summary>
+    /// <param name="geometryObject">(InstanceReferenceGeometry) The block reference geometry to explode.</param>
+    /// <param name="explodeNestedInstances">(bool) Optional, default value: <c>false</c>.
+    ///    If true, recursively explodes nested references. Otherwise, nested references remain instance reference geometry.</param>
+    /// <returns>(GeometryBase array) Independent geometry copies with the block reference transforms applied.</returns>
+    /// <remarks>Resolves block definitions in the active document without adding, deleting or changing document objects.
+    ///    Object attributes are not part of the returned geometry.</remarks>
+    static member ExplodeBlockInstance(geometryObject:InstanceReferenceGeometry, [<OPT;DEF(false)>]explodeNestedInstances:bool) : array<GeometryBase> =
+        if isNull geometryObject then RhinoScriptingException.Raise "ExplodeBlockInstance: block reference geometry is null."
+        let pieces = ResizeArray<GeometryBase>()
+        let rec explode (reference:InstanceReferenceGeometry) (parentTransform:Transform) (ancestors:Set<Guid>) =
+            let definitionId = reference.ParentIdefId
+            if ancestors.Contains definitionId then
+                RhinoScriptingException.Raise "ExplodeBlockInstance: cyclic block definition %O." definitionId
+            let definition = State.Doc.InstanceDefinitions.Find(definitionId, true)
+            if isNull definition then
+                RhinoScriptingException.Raise "ExplodeBlockInstance: block definition %O was not found in the active document." definitionId
+            let transform = parentTransform * reference.Xform
+            let path = ancestors.Add definitionId
+            for piece in definition.GetObjects() do
+                match piece.Geometry with
+                | :? InstanceReferenceGeometry as nested when explodeNestedInstances ->
+                    explode nested transform path
+                | geometry ->
+                    let copy = geometry.Duplicate()
+                    if isNull copy then RhinoScriptingException.Raise "ExplodeBlockInstance: unable to duplicate block component geometry."
+                    pieces.Add(copy)
+                    if not (copy.Transform(transform)) then
+                        RhinoScriptingException.Raise "ExplodeBlockInstance: unable to transform block component geometry."
+        try
+            explode geometryObject Transform.Identity Set.empty
+            pieces.ToArray()
+        with _ ->
+            for piece in pieces do piece.Dispose()
+            reraise()
 
 
     /// <summary>Inserts a block whose definition already exists in the document.</summary>

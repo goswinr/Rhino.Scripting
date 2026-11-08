@@ -28,10 +28,10 @@ module AutoOpenCoerce =
 
 
     /// <summary>Attempt to get a Guid from input.</summary>
-    /// <param name="objectId">Object, Guid, or string.</param>
+    /// <param name="input">Object, Guid, or string.</param>
     /// <returns>A Guid option.</returns>
-    static member TryCoerceGuid (objectId:'T) : Guid option=
-        match box objectId with
+    static member TryCoerceGuid (input:'T) : Guid option=
+        match box input with
         | :? Guid  as g -> if Guid.Empty = g then None else Some g
         | :? DocObjects.RhinoObject as o -> Some o.Id
         | :? DocObjects.ObjRef      as o -> Some o.ObjectId
@@ -406,10 +406,10 @@ module AutoOpenCoerce =
 
 
     /// <summary>Attempt to get Rhino View Object from the name of the view, can be a standard or page view.</summary>
-    /// <param name="nameOrId">(string or Guid) Name or Guid the view, empty string will return the Active view</param>
+    /// <param name="input">(string or Guid) Name or Guid the view, empty string will return the Active view</param>
     /// <returns>A State.Doc.View Option.</returns>
-    static member TryCoerceView (nameOrId:'T) : Option<Display.RhinoView> =
-        match box nameOrId with
+    static member TryCoerceView (input:'T) : Option<Display.RhinoView> =
+        match box input with
         | :? Guid as g ->
             let viewObj = State.Doc.Views.Find(g)
             if isNull viewObj then
@@ -433,10 +433,10 @@ module AutoOpenCoerce =
 
 
     /// <summary>Attempt to get Rhino View Object from the name of the view, can be a standard or page view.</summary>
-    /// <param name="nameOrId">(string or Guid) Name or Guid the view, empty string will return the Active view</param>
+    /// <param name="input">(string or Guid) Name or Guid the view, empty string will return the Active view</param>
     /// <returns>A State.Doc.View object. Raises a RhinoScriptingException if coerce failed.</returns>
-    static member CoerceView (nameOrId:'T) : Display.RhinoView =
-        match box nameOrId with
+    static member CoerceView (input:'T) : Display.RhinoView =
+        match box input with
         | :? Guid as g ->
             let viewObj = State.Doc.Views.Find(g)
             if isNull viewObj then
@@ -461,16 +461,16 @@ module AutoOpenCoerce =
 
 
         | _ ->
-            RhinoScriptingException.Raise "CoerceView: Cannot get view from %A" nameOrId
+            RhinoScriptingException.Raise "CoerceView: Cannot get view from %A" input
 
 
 
 
     /// <summary>Attempt to get Rhino Page (or Layout) View Object from the name of the Layout.</summary>
-    /// <param name="nameOrId">(string) Name of the Layout</param>
+    /// <param name="input">(string) Name of the Layout</param>
     /// <returns>A State.Doc.View object. Raises a RhinoScriptingException if coerce failed.</returns>
-    static member CoercePageView (nameOrId:'T) : Display.RhinoPageView =
-        match box nameOrId with
+    static member CoercePageView (input:'T) : Display.RhinoPageView =
+        match box input with
         | :? Guid as g ->
             let view = State.Doc.Views.Find(g)
             if isNull view then RhinoScriptingException.Raise "CoercePageView: could not CoerceView  from '%O'" g
@@ -486,7 +486,7 @@ module AutoOpenCoerce =
                 elif allViews.Length > 1 then RhinoScriptingException.Raise "CoercePageView: more than one page called '%s'" view
                 else  RhinoScriptingException.Raise "CoercePageView: Layout called '%s' not found" view
 
-        | _ -> RhinoScriptingException.Raise "CoercePageView: Cannot get view from %O" nameOrId
+        | _ -> RhinoScriptingException.Raise "CoercePageView: Cannot get view from %O" input
 
     /// <summary>Attempt to get Detail view rectangle Geometry.</summary>
     /// <param name="objectId">(Guid) objectId of Detail object</param>

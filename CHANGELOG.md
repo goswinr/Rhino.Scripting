@@ -7,10 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- Direct geometry overloads for methods that previously required object identifiers, including collection inputs; geometry-producing operations take and return raw geometry, while document-object operations retain their Guid APIs.
 - ContextIsGrasshopper, it checks if the call stack of the current thread goes through the Grasshopper assembly
 - MeshTextureCoordinates, like in RhinoPython
 - XformScale overloads with a Plane, to scale about the Plane's origin along the Plane's axes, like in RhinoPython
 ### Changed
+- Breaking: Parameter names ending in Id or Ids are reserved for Guid inputs; direct geometry parameters use names such as curveGeo, surfaceGeo and geometryObject, and generic coercion parameters use input.
+- The API table lists each Make factory immediately after its matching Add methods.
+- Breaking: Geometry-only Add-prefixed overloads are now named Make (for example MakeHatch and MakePlanarSrf) and return geometry without adding it to the document; Add-prefixed methods retain document insertion and identifier results.
+- Guid overloads share geometry calculations with the direct overloads and handle document insertion, replacement, deletion, attributes and redraws.
 - Hide AutoOpen modules from editor completion lists with EditorBrowsable(EditorBrowsableState.Never).
 - DimStyleTextAlignment sets the text orientation and location for radial dimensions too, like in RhinoPython
 - ShowGrid, ShowGridAxes and ShowWorldAxes get and set the grid settings of the view's display mode if it overrides the document grid settings, like in RhinoPython
@@ -18,6 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - IsDimension, IsLeader and the other dimension checks return false for objects that don't exist, instead of raising an exception, like in RhinoPython
 - IsCone, IsCylinder, IsPlaneSurface and IsPointLight, IsSpotLight and the other light type checks return false for objects of another type or that don't exist, instead of raising an exception, like in RhinoPython
 ### Fixed
+- ShrinkTrimmedSurface checks ShrinkFaces correctly, raising on failure instead of success.
+- PointClosestObject uses the initialized result in the shared object implementation, avoiding a null-reference exception when comparing distances.
 - DimStyleTextAlignment returns the documented values 1, 2 or 3, instead of the index of the text location
 - IsLinetype returned true for any name in Rhino 8, and IsLinetypeReference used the Continuous linetype for unknown names
 - ObjectPrintColorSource accepts 2 (print color by display)

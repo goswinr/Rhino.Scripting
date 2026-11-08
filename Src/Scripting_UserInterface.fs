@@ -594,8 +594,18 @@ module AutoOpenUserInterface =
     /// <returns>(Point3d) 3d point.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetPointOnCurve(curveId:Guid, [<OPT;DEF("Pick Point On Curve")>]message:string) : Point3d =
+        RhinoSync.DoSync (fun () ->
+            RhinoScriptSyntax.GetPointOnCurve(RhinoScriptSyntax.CoerceCurve(curveId), message))
+
+    /// <summary>Pauses for user input of a point constrained to a Curve object.</summary>
+    /// <param name="curveGeo">(Curve) Curve geometry to get a point on</param>
+    /// <param name="message">(string) Optional, default value: <c>"Pick Point On Curve"</c>
+    ///    A prompt of message</param>
+    /// <returns>(Point3d) 3d point.
+    /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
+    static member GetPointOnCurve(curveGeo:Curve, [<OPT;DEF("Pick Point On Curve")>]message:string) : Point3d =
         let get () =
-            let curve = RhinoScriptSyntax.CoerceCurve(curveId)
+            let curve = curveGeo
             use gp = new Input.Custom.GetPoint()
             gp.SetCommandPrompt(message)
             gp.Constrain(curve, allowPickingPointOffObject=false) |> ignore<bool>
@@ -638,10 +648,21 @@ module AutoOpenUserInterface =
     /// <returns>(Point3d) 3d point.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetPointOnSurface(surfaceId:Guid, [<OPT;DEF("Pick Point on Surface or Polysurface")>]message:string) : Point3d =
+        RhinoSync.DoSync (fun () ->
+            RhinoScriptSyntax.GetPointOnSurface(RhinoScriptSyntax.CoerceGeometry(surfaceId), message))
+
+    /// <summary>Pauses for user input of a point constrained to a Surface or Polysurface
+    ///    object.</summary>
+    /// <param name="surfaceGeo">(GeometryBase) Surface or Brep geometry to get a point on</param>
+    /// <param name="message">(string) Optional, default value: <c>"Pick Point on Surface or Polysurface"</c>
+    ///    A prompt or message</param>
+    /// <returns>(Point3d) 3d point.
+    /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
+    static member GetPointOnSurface(surfaceGeo:GeometryBase, [<OPT;DEF("Pick Point on Surface or Polysurface")>]message:string) : Point3d =
         let get () =
             use gp = new Input.Custom.GetPoint()
             gp.SetCommandPrompt(message)
-            match RhinoScriptSyntax.CoerceGeometry surfaceId with
+            match surfaceGeo with
             | :? Surface as srf ->
                 gp.Constrain(srf, allowPickingPointOffObject=false) |> ignore<bool>
 
@@ -649,7 +670,7 @@ module AutoOpenUserInterface =
                 gp.Constrain(brep, -1, -1, allowPickingPointOffObject=false) |> ignore<bool>
 
             | _ ->
-                RhinoScriptingException.Raise "GetPointOnSurface failed input is not surface or Polysurface.  surfaceId:'%s' message:'%A'" (Pretty.str surfaceId) message
+                RhinoScriptingException.Raise "GetPointOnSurface failed input is not surface or Polysurface.  surfaceGeo:'%s' message:'%A'" (Pretty.str surfaceGeo) message
 
             gp.Get() |> ignore<Input.GetResult>
             if gp.CommandResult() <> Commands.Result.Success then

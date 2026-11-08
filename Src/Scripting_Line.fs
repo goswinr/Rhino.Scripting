@@ -166,17 +166,18 @@ module AutoOpenLine =
                                     xForm:Transform,
                                     [<OPT;DEF(false)>]copy:bool)  : Guid =
 
-        // the original python  implementation has a bug, does not return Guid: https://github.com/mcneel/rhinoscriptsyntax/pull/204
-        let line = RhinoScriptSyntax.CoerceLine lineId
-        if copy then
-            let ln = Line(line.From,line.To)
-            let success = ln.Transform(xForm)
-            if not <| success then  RhinoScriptingException.Raise "LineTransform unable to transform line %A with  %A" line xForm
-            State.Ot.AddLine(ln)
-        else
-            // if not <| State.Ot.Replace(lineId,ln) then  RhinoScriptingException.Raise "LineTransform unable to replace geometry: line %A with  %A" line xForm
-            let success =line.Transform(xForm)
-            if not <| success then  RhinoScriptingException.Raise "LineTransform unable to transform line %A with  %A" line xForm
-            lineId
+        let line = RhinoScriptSyntax.CoerceLine(lineId)
+        let transformed = RhinoScriptSyntax.LineTransform(line, xForm)
+        if copy then State.Ot.AddLine(transformed)
+        else lineId
 
 
+    /// <summary>Transforms a line geometry and returns the transformed line.</summary>
+    /// <param name="line">(Line) The line geometry to transform.</param>
+    /// <param name="xForm">(Transform) The transformation to apply.</param>
+    /// <returns>(Line) The transformed line.</returns>
+    static member LineTransform(line:Line, xForm:Transform) : Line =
+        let mutable transformed = line
+        if not (transformed.Transform(xForm)) then
+            RhinoScriptingException.Raise "LineTransform unable to transform line %A with  %A" line xForm
+        transformed

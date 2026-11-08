@@ -52,57 +52,28 @@ module AutoOpenHatch =
     /// <param name="scale">(float) Optional, default value: <c>1.0</c>. Hatch pattern scale factor.</param>
     /// <param name="rotation">(float) Optional, default value: <c>0.0</c>. Hatch pattern rotation angle in degrees.</param>
     /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>. Tolerance for Hatch fills.</param>
-    /// <returns>(Guid ResizeArray) Identifiers of the newly created Hatches.</returns>
-    static member AddHatches( curves:Curve seq,
+    /// <returns>(Hatch ResizeArray) Hatch geometry, without adding it to the document.</returns>
+    static member MakeHatches( curves:Curve seq,
                               [<OPT;DEF(null:string)>]hatchPattern:string,
                               [<OPT;DEF(1.0)>]scale:float,
                               [<OPT;DEF(0.0)>]rotation:float,
-                              [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray =
-        RhinoScriptSyntax.InitHatchPatterns()
+                              [<OPT;DEF(0.0)>]tolerance:float) : Hatch ResizeArray =
         let mutable index = State.Doc.HatchPatterns.CurrentHatchPatternIndex
         if notNull hatchPattern then
             let patternInstance = State.Doc.HatchPatterns.FindName(hatchPattern)
             index <-  if patternInstance|> isNull then RhinoMath.UnsetIntIndex else patternInstance.Index
-            if index<0 then RhinoScriptingException.Raise "AddHatches failed to find hatchPattern:'%s'"  hatchPattern
+            if index<0 then RhinoScriptingException.Raise "MakeHatches failed to find hatchPattern:'%s'"  hatchPattern
         let rotation = RhinoMath.ToRadians(rotation)
 
         let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance
         let hatches = Hatch.Create(curves, index, rotation, scale, tolerance)
         if isNull hatches then
-            RhinoScriptingException.Raise "AddHatches failed to create hatch from %d curves, not closed: %d, not planar %d, tolerance:'%g' "
+            RhinoScriptingException.Raise "MakeHatches failed to create hatch from %d curves, not closed: %d, not planar %d, tolerance:'%g' "
                 (Seq.length curves)
                 (curves |> Seq.countIf ( fun c -> c.IsClosed   |> not ))
                 (curves |> Seq.countIf ( fun c -> c.IsPlanar() |> not ))
                 tolerance
-        let ids = ResizeArray()
-        for hatch in hatches do
-            let objectId = State.Doc.Objects.AddHatch(hatch)
-            if objectId <> Guid.Empty then
-                ids.Add(objectId)
-        if ids.Count = 0 then
-            RhinoScriptingException.Raise "AddHatches failed to add any hatches from %d curves, not closed: %d, not planar %d, tolerance:'%g' "
-                (Seq.length curves)
-                (curves |> Seq.countIf ( fun c -> c.IsClosed   |> not ))
-                (curves |> Seq.countIf ( fun c -> c.IsPlanar() |> not ))
-                tolerance
-        State.Doc.Views.Redraw()
-        ids
-
-    /// <summary>Creates one Hatch object from one closed planar Curve.</summary>
-    /// <param name="curve">(Curve) Geometry of the closed planar Curve that defines the boundary of the Hatch object</param>
-    /// <param name="hatchPattern">(string) Optional. Name of the Hatch pattern to be used by the Hatch object. If omitted, the current Hatch pattern will be used.</param>
-    /// <param name="scale">(float) Optional, default value: <c>1.0</c>. Hatch pattern scale factor.</param>
-    /// <param name="rotation">(float) Optional, default value: <c>0.0</c>. Hatch pattern rotation angle in degrees.</param>
-    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>. Tolerance for Hatch fills.</param>
-    /// <returns>(Guid) Identifier of the newly created Hatch.</returns>
-    static member AddHatch(   curve:Curve,
-                              [<OPT;DEF(null:string)>]hatchPattern:string,
-                              [<OPT;DEF(1.0)>]scale:float,
-                              [<OPT;DEF(0.0)>]rotation:float,
-                              [<OPT;DEF(0.0)>]tolerance:float) : Guid  =
-        let rc = RhinoScriptSyntax.AddHatches([curve], hatchPattern, scale, rotation,tolerance) // gives a good error message already
-        if rc.Count = 1 then rc.[0]
-        else RhinoScriptingException.Raise "AddHatch failed to create exactly one hatch from curve. It created %d Hatches"  rc.Count
+        ResizeArray(hatches)
 
 
     /// <summary>Creates one or more new Hatch objects from a list of closed planar Curves.</summary>
@@ -118,9 +89,41 @@ module AutoOpenHatch =
                               [<OPT;DEF(0.0)>]rotation:float,
                               [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray =
         let curves  = curveIds |> RArr.mapSeq RhinoScriptSyntax.CoerceCurve
-        try RhinoScriptSyntax.AddHatches(curves, hatchPattern, scale, rotation, tolerance)
+        try
+            RhinoScriptSyntax.InitHatchPatterns()
+            let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance
+            let hatches = RhinoScriptSyntax.MakeHatches(curves, hatchPattern, scale, rotation, tolerance)
+            let ids = ResizeArray()
+            for hatch in hatches do
+                let objectId = State.Doc.Objects.AddHatch(hatch)
+                if objectId <> Guid.Empty then
+                    ids.Add(objectId)
+            if ids.Count = 0 then
+                RhinoScriptingException.Raise "AddHatches failed to add any hatches from %d curves, not closed: %d, not planar %d, tolerance:'%g' "
+                    (Seq.length curves)
+                    (curves |> Seq.countIf ( fun c -> c.IsClosed   |> not ))
+                    (curves |> Seq.countIf ( fun c -> c.IsPlanar() |> not ))
+                    tolerance
+            State.Doc.Views.Redraw()
+            ids
         with e->
             RhinoScriptingException.RaiseWith e "AddHatches failed on curveIds %s%s%s" (Pretty.str curveIds) Environment.NewLine e.Message
+
+    /// <summary>Creates one Hatch object from one closed planar Curve.</summary>
+    /// <param name="curve">(Curve) Geometry of the closed planar Curve that defines the boundary of the Hatch object</param>
+    /// <param name="hatchPattern">(string) Optional. Name of the Hatch pattern to be used by the Hatch object. If omitted, the current Hatch pattern will be used.</param>
+    /// <param name="scale">(float) Optional, default value: <c>1.0</c>. Hatch pattern scale factor.</param>
+    /// <param name="rotation">(float) Optional, default value: <c>0.0</c>. Hatch pattern rotation angle in degrees.</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>. Tolerance for Hatch fills.</param>
+    /// <returns>(Hatch) Hatch geometry, without adding it to the document.</returns>
+    static member MakeHatch(   curve:Curve,
+                              [<OPT;DEF(null:string)>]hatchPattern:string,
+                              [<OPT;DEF(1.0)>]scale:float,
+                              [<OPT;DEF(0.0)>]rotation:float,
+                              [<OPT;DEF(0.0)>]tolerance:float) : Hatch =
+        let rc = RhinoScriptSyntax.MakeHatches([curve], hatchPattern, scale, rotation,tolerance) // gives a good error message already
+        if rc.Count = 1 then rc.[0]
+        else RhinoScriptingException.Raise "MakeHatch failed to create exactly one hatch from curve. It created %d Hatches"  rc.Count
 
     /// <summary>Creates a new Hatch object from a closed planar Curve object.</summary>
     /// <param name="curveId">(Guid) Identifier of the closed planar Curve that defines the boundary of the Hatch object</param>
@@ -134,8 +137,10 @@ module AutoOpenHatch =
                             [<OPT;DEF(1.0)>]scale:float,
                             [<OPT;DEF(0.0)>]rotation:float,
                             [<OPT;DEF(0.0)>]tolerance:float) : Guid =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
-        try RhinoScriptSyntax.AddHatch(curve, hatchPattern, scale, rotation, tolerance)
+        try
+            let ids = RhinoScriptSyntax.AddHatches([curveId], hatchPattern, scale, rotation, tolerance)
+            if ids.Count = 1 then ids.[0]
+            else RhinoScriptingException.Raise "AddHatch failed to create exactly one hatch from curve. It created %d Hatches" ids.Count
         with e->
             RhinoScriptingException.RaiseWith e "AddHatch failed on curveId %s%s%s" (Pretty.str curveId) Environment.NewLine e.Message
 
@@ -191,10 +196,8 @@ module AutoOpenHatch =
     ///    Delete the Hatch object</param>
     /// <returns>(Guid ResizeArray) list of identifiers for the newly created objects.</returns>
     static member ExplodeHatch(hatchId:Guid, [<OPT;DEF(false)>]delete:bool) : Guid ResizeArray =
-        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(hatchId)
-        let geo =  RhinoScriptSyntax.CoerceHatch(hatchId)
-        let pieces = geo.Explode()
-        if isNull pieces then RhinoScriptingException.Raise "ExplodeHatch failed.  hatchId:'%s' delete:'%A'" (Pretty.str hatchId) delete
+        let rhobj = RhinoScriptSyntax.CoerceHatchObject(hatchId)
+        let pieces = RhinoScriptSyntax.ExplodeHatch(rhobj.HatchGeometry)
         let attr = rhobj.Attributes
         let rc = ResizeArray()
         for piece in pieces do
@@ -208,6 +211,19 @@ module AutoOpenHatch =
             | _ -> RhinoScriptingException.Raise "ExplodeHatch: drawing of %A objects after exploding not implemented" piece.ObjectType //TODO test with hatch patterns that have points
         if delete then State.Doc.Objects.Delete(rhobj)|> ignore<bool>
         rc
+
+
+
+
+
+
+    /// <summary>Explodes hatch geometry into curves or planar breps without adding them to the document.</summary>
+    /// <param name="hatch">(Hatch) The hatch geometry to explode.</param>
+    /// <returns>(GeometryBase ResizeArray) The exploded geometry.</returns>
+    static member ExplodeHatch(hatch:Hatch) : GeometryBase ResizeArray =
+        let pieces = hatch.Explode()
+        if isNull pieces then RhinoScriptingException.Raise "ExplodeHatch: Unable to explode hatch geometry."
+        ResizeArray(pieces)
 
 
     /// <summary>Returns a Hatch object's Hatch pattern.</summary>
@@ -246,6 +262,14 @@ module AutoOpenHatch =
             hatchObj.HatchGeometry.PatternIndex <- newPattern.Index
             hatchObj.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
+
+
+    /// <summary>Returns a Hatch object's Hatch pattern.</summary>
+    /// <param name="hatchGeo">(Hatch) The Hatch geometry</param>
+    /// <returns>(string) The current Hatch pattern.</returns>
+    static member HatchPattern(hatchGeo:Hatch) : string = //GET
+        let oldIndex = hatchGeo.PatternIndex
+        State.Doc.HatchPatterns.[oldIndex].Name
 
 
     /// <summary>Returns the number of Hatch patterns in the document.</summary>
@@ -333,6 +357,15 @@ module AutoOpenHatch =
         State.Doc.Views.Redraw()
 
 
+    /// <summary>Returns the rotation applied to the Hatch pattern when
+    /// it is mapped to the Hatch's Plane.</summary>
+    /// <param name="hatchGeo">(Hatch) The Hatch geometry</param>
+    /// <returns>(float) if rotation is not defined, the current rotation angle.</returns>
+    static member HatchRotation(hatchGeo:Hatch) : float = //GET
+        let rc = hatchGeo.PatternRotation
+        RhinoMath.ToDegrees(rc)
+
+
     /// <summary>Returns the scale applied to the Hatch pattern when it is
     /// mapped to the Hatch's Plane.</summary>
     /// <param name="hatchId">(Guid) Identifier of a Hatch object</param>
@@ -370,12 +403,27 @@ module AutoOpenHatch =
         State.Doc.Views.Redraw()
 
 
+    /// <summary>Returns the scale applied to the Hatch pattern when it is
+    /// mapped to the Hatch's Plane.</summary>
+    /// <param name="hatchGeo">(Hatch) The Hatch geometry</param>
+    /// <returns>(float) if scale is not defined, the current scale factor.</returns>
+    static member HatchScale(hatchGeo:Hatch) : float = //GET
+        hatchGeo.PatternScale
+
+
     /// <summary>Verifies the existence of a Hatch object in the document.</summary>
     /// <param name="objectId">(Guid) Identifier of an object</param>
     /// <returns>(bool) True or False.</returns>
     static member IsHatch(objectId:Guid) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         match rhobj with :? DocObjects.HatchObject  -> true |_ -> false
+
+
+    /// <summary>Tests whether the supplied geometry is a Hatch.</summary>
+    /// <param name="geometry">(GeometryBase) The geometry to test.</param>
+    /// <returns>(bool) True if the geometry is a Hatch, otherwise false.</returns>
+    static member IsHatch(geometry:GeometryBase) : bool =
+        geometry :? Hatch
 
 
     /// <summary>Verifies the existence of a Hatch pattern in the document.</summary>
@@ -404,6 +452,3 @@ module AutoOpenHatch =
         let patternInstance = State.Doc.HatchPatterns.FindName(hatchPattern)
         if patternInstance|> isNull  then RhinoScriptingException.Raise "IsHatchPatternReference failed.  hatchPattern:'%A'" hatchPattern
         patternInstance.IsReference
-
-
-

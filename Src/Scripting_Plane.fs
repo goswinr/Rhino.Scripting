@@ -123,6 +123,45 @@ module AutoOpenPlane =
                                           curve:Guid,
                                           [<OPT;DEF(0.0)>]tolerance:float) : ResizeArray<int * Point3d * Point3d * Point3d * Point3d * float * float * float * float* float * float > =
         let curve = RhinoScriptSyntax.CoerceCurve(curve)
+        RhinoScriptSyntax.PlaneCurveIntersection(plane, curve, tolerance)
+
+
+
+
+
+
+    /// <summary>Intersect an infinite Plane and a Curve object.</summary>
+    /// <param name="plane">(Plane) The Plane to intersect</param>
+    /// <param name="curve">(Curve) The Curve geometry to intersect</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
+    ///    The intersection tolerance.</param>
+    /// <returns>(ResizeArray of int * Point3d * Point3d * Point3d * Point3d * float * float * float * float* float * float)
+    /// A list of intersection information tuple . The list will contain one or more of the following tuple:
+    ///    Element Type        Description
+    ///    [0]       Number      The intersection event type, either Point (1) or Overlap (2).
+    ///    [1]       Point3d     If the event type is Point (1), then the intersection point on the Curve.
+    ///      If the event type is Overlap (2), then intersection start point on the Curve.
+    ///    [2]       Point3d     If the event type is Point (1), then the intersection point on the Curve.
+    ///      If the event type is Overlap (2), then intersection end point on the Curve.
+    ///    [3]       Point3d     If the event type is Point (1), then the intersection point on the Plane.
+    ///      If the event type is Overlap (2), then intersection start point on the Plane.
+    ///    [4]       Point3d     If the event type is Point (1), then the intersection point on the Plane.
+    ///      If the event type is Overlap (2), then intersection end point on the Plane.
+    ///    [5]       Number      If the event type is Point (1), then the Curve parameter.
+    ///      If the event type is Overlap (2), then the start value of the Curve parameter range.
+    ///    [6]       Number      If the event type is Point (1), then the Curve parameter.
+    ///      If the event type is Overlap (2), then the end value of the Curve parameter range.
+    ///    [7]       Number      If the event type is Point (1), then the U Plane parameter.
+    ///      If the event type is Overlap (2), then the U Plane parameter for Curve at (n, 5).
+    ///    [8]       Number      If the event type is Point (1), then the V Plane parameter.
+    ///      If the event type is Overlap (2), then the V Plane parameter for Curve at (n, 5).
+    ///    [9]       Number      If the event type is Point (1), then the U Plane parameter.
+    ///      If the event type is Overlap (2), then the U Plane parameter for Curve at (n, 6).
+    ///    [10]      Number      If the event type is Point (1), then the V Plane parameter.
+    ///      If the event type is Overlap (2), then the V Plane parameter for Curve at (n, 6).</returns>
+    static member PlaneCurveIntersection( plane:Plane,
+                                          curve:Curve,
+                                          [<OPT;DEF(0.0)>]tolerance:float) : ResizeArray<int * Point3d * Point3d * Point3d * Point3d * float * float * float * float* float * float > =
         let  tolerance = if tolerance = 0.0 then  State.Doc.ModelAbsoluteTolerance else tolerance
         let intersections = Intersect.Intersection.CurvePlane(curve, plane, tolerance)
         if notNull intersections then
@@ -301,8 +340,3 @@ module AutoOpenPlane =
     /// <returns>(Plane) Rhino's world ZX Plane.</returns>
     static member WorldZXPlane() : Plane =
         Plane.WorldZX
-
-
-
-
-

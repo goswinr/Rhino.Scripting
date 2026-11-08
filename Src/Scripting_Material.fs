@@ -339,6 +339,3 @@ module AutoOpenMaterial =
             let rc = State.Doc.Materials.ResetMaterial(materialIndex)
             State.Doc.Views.Redraw()
             rc
-
-
-

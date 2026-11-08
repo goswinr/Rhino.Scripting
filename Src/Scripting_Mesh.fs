@@ -171,16 +171,24 @@ module AutoOpenMesh =
     /// <returns>(Guid) id of the new Mesh.</returns>
     static member AddPlanarMesh(objectId:Guid, [<OPT;DEF(false)>]deleteInput:bool) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve(objectId)
-        let tolerance = State.Doc.ModelAbsoluteTolerance
-        let mesh = Mesh.CreateFromPlanarBoundary(curve, MeshingParameters.Default, tolerance)
-        if isNull mesh then RhinoScriptingException.Raise "AddPlanarMesh failed.  objectId:'%s' deleteInput:'%A'" (Pretty.str objectId) deleteInput
+        let mesh = RhinoScriptSyntax.MakePlanarMesh(curve)
         if deleteInput then
-            let ob = RhinoScriptSyntax.CoerceGuid(objectId)
-            if not<| State.Doc.Objects.Delete(ob, true) then RhinoScriptingException.Raise "AddPlanarMesh failed to delete input.  objectId:'%s' deleteInput:'%A'" (Pretty.str objectId) deleteInput
+            if not <| State.Doc.Objects.Delete(objectId, true) then RhinoScriptingException.Raise "AddPlanarMesh failed to delete input. objectId:'%s'" (Pretty.str objectId)
         let rc = State.Doc.Objects.AddMesh(mesh)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "AddPlanarMesh: Unable to add mesh to document.  objectId:'%s' deleteInput:'%A'" (Pretty.str objectId) deleteInput
+        if rc = Guid.Empty then RhinoScriptingException.Raise "AddPlanarMesh: Unable to add mesh to document. objectId:'%s'" (Pretty.str objectId)
         State.Doc.Views.Redraw()
         rc
+
+
+    /// <summary>Creates a planar Mesh from a closed, planar Curve.</summary>
+    /// <param name="curve">(Curve) Closed, planar input Curve.</param>
+    /// <returns>(Mesh) The new planar Mesh.</returns>
+    /// <remarks>Returns new geometry without adding it to a document.</remarks>
+    static member MakePlanarMesh(curve:Curve) : Mesh =
+        let tolerance = State.Doc.ModelAbsoluteTolerance
+        let mesh = Mesh.CreateFromPlanarBoundary(curve, MeshingParameters.Default, tolerance)
+        if isNull mesh then RhinoScriptingException.Raise "MakePlanarMesh: Unable to create a planar Mesh from the Curve."
+        mesh
 
 
     /// <summary>Calculates the intersection of a Curve object and a Mesh object.</summary>
@@ -193,10 +201,21 @@ module AutoOpenMesh =
                                          meshId:Guid) : array<Point3d>*array<int> =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
+        RhinoScriptSyntax.CurveMeshIntersection(curve, mesh)
+
+
+    /// <summary>Calculates the intersection of a Curve object and a Mesh object.</summary>
+    /// <param name="curve">(Curve) Input geometry.</param>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(Point3d array * int array) two arrays as tuple:
+    ///        [0] = point of intersection
+    ///        [1] = Mesh face index where intersection lies.</returns>
+    static member CurveMeshIntersection( curve:Curve,
+                                         mesh:Mesh) : array<Point3d>*array<int> =
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let polylinecurve = curve.ToPolyline(0 , 0 , 0.0 , 0.0 , 0.0, tolerance , 0.0 , 0.0 , true)
         let pts, faceids = Intersect.Intersection.MeshPolyline(mesh, polylinecurve)
-        if isNull pts then RhinoScriptingException.Raise "CurveMeshIntersection failed. curveId:'%s' meshId:'%s'" (Pretty.str curveId) (Pretty.str meshId)
+        if isNull pts then RhinoScriptingException.Raise "CurveMeshIntersection failed. curve:'%s' mesh:'%s'" (Pretty.str curve) (Pretty.str mesh)
         pts, faceids
 
 
@@ -205,6 +224,13 @@ module AutoOpenMesh =
     /// <returns>(int) The number of Meshes that could be created.</returns>
     static member DisjointMeshCount(objectId:Guid) : int =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        RhinoScriptSyntax.DisjointMeshCount(mesh)
+
+
+    /// <summary>Returns number of Meshes that could be created by calling SplitDisjointMesh.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(int) The number of Meshes that could be created.</returns>
+    static member DisjointMeshCount(mesh:Mesh) : int =
         mesh.DisjointMeshCount
 
 
@@ -213,14 +239,25 @@ module AutoOpenMesh =
     /// <returns>(Guid ResizeArray) list of Curve ids.</returns>
     static member DuplicateMeshBorder(meshId:Guid) : Guid ResizeArray =
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
-        let polylines = mesh.GetNakedEdges()
+        let curves = RhinoScriptSyntax.DuplicateMeshBorder(mesh)
         let rc = ResizeArray()
-        if notNull polylines then
-            for polyline in polylines do
-                let objectId = State.Doc.Objects.AddPolyline(polyline)
-                if objectId <> Guid.Empty then rc.Add(objectId)
+        for curve in curves do
+            let objectId = State.Doc.Objects.AddCurve(curve)
+            if objectId <> Guid.Empty then rc.Add(objectId)
         if rc.Count <> 0 then State.Doc.Views.Redraw()
         rc
+
+
+    /// <summary>Duplicates the naked borders of a Mesh as Polyline Curves.</summary>
+    /// <param name="mesh">(Mesh) Input Mesh.</param>
+    /// <returns>(PolylineCurve ResizeArray) New border Curves.</returns>
+    /// <remarks>Returns new geometry without adding it to a document.</remarks>
+    static member DuplicateMeshBorder(mesh:Mesh) : PolylineCurve ResizeArray =
+        let polylines = mesh.GetNakedEdges()
+        let curves = ResizeArray()
+        if notNull polylines then
+            for polyline in polylines do curves.Add(new PolylineCurve(polyline))
+        curves
 
 
     /// <summary>Explodes a Mesh object, or Mesh objects int subMeshes. A subMesh is a
@@ -235,17 +272,26 @@ module AutoOpenMesh =
     static member ExplodeMeshes(meshIds:Guid seq, [<OPT;DEF(false)>]delete:bool) : Guid ResizeArray =
         //id = RhinoScriptSyntax.CoerceGuid(meshIds)
         let rc = ResizeArray()
-        for meshid in meshIds do
-            let mesh = RhinoScriptSyntax.CoerceMesh(meshid)
-            if notNull mesh then
-                let submeshes = mesh.ExplodeAtUnweldedEdges()
-                if notNull submeshes then
-                    for submesh in submeshes do
-                        let objectId = State.Doc.Objects.AddMesh(submesh)
-                        if objectId <> Guid.Empty then rc.Add(objectId)
-                if delete then
-                    State.Doc.Objects.Delete(meshid, true)|> ignore<bool>
-        if rc.Count>0 then State.Doc.Views.Redraw()
+        for meshId in meshIds do
+            let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
+            let submeshes = RhinoScriptSyntax.ExplodeMeshes([mesh])
+            for submesh in submeshes do
+                let objectId = State.Doc.Objects.AddMesh(submesh)
+                if objectId <> Guid.Empty then rc.Add(objectId)
+            if delete then State.Doc.Objects.Delete(meshId, true) |> ignore<bool>
+        if rc.Count > 0 then State.Doc.Views.Redraw()
+        rc
+
+
+    /// <summary>Splits Meshes into submeshes along unwelded edges.</summary>
+    /// <param name="meshes">(Mesh seq) Input Meshes.</param>
+    /// <returns>(Mesh ResizeArray) New submeshes.</returns>
+    /// <remarks>Returns new geometry without adding it to a document.</remarks>
+    static member ExplodeMeshes(meshes:Mesh seq) : Mesh ResizeArray =
+        let rc = ResizeArray()
+        for mesh in meshes do
+            let submeshes = mesh.ExplodeAtUnweldedEdges()
+            if notNull submeshes then rc.AddRange(submeshes)
         rc
 
 
@@ -253,8 +299,16 @@ module AutoOpenMesh =
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True , otherwise False.</returns>
     static member IsMesh(objectId:Guid) : bool =
-        RhinoScriptSyntax.TryCoerceMesh(objectId)
-        |> Option.isSome
+        match RhinoScriptSyntax.TryCoerceMesh(objectId) with
+        | Some mesh -> RhinoScriptSyntax.IsMesh(mesh :> GeometryBase)
+        | None -> false
+
+
+    /// <summary>Verifies if an object is a Mesh.</summary>
+    /// <param name="geometry">(GeometryBase) Input geometry.</param>
+    /// <returns>(bool) True , otherwise False.</returns>
+    static member IsMesh(geometry:GeometryBase) : bool =
+        geometry :? Mesh
 
 
     /// <summary>Verifies a Mesh object is closed.</summary>
@@ -262,8 +316,15 @@ module AutoOpenMesh =
     /// <returns>(bool) True , otherwise False.</returns>
     static member IsMeshClosed(objectId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceMesh(objectId) with
-        | Some mesh -> mesh.IsClosed
+        | Some mesh -> RhinoScriptSyntax.IsMeshClosed(mesh)
         | None -> false
+
+
+    /// <summary>Verifies a Mesh object is closed.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(bool) True , otherwise False.</returns>
+    static member IsMeshClosed(mesh:Mesh) : bool =
+        notNull mesh && mesh.IsClosed
 
 
     /// <summary>Verifies a Mesh object is manifold. A Mesh for which every edge is shared
@@ -273,8 +334,18 @@ module AutoOpenMesh =
     /// <returns>(bool) True, otherwise False.</returns>
     static member IsMeshManifold(objectId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceMesh(objectId) with
-        | Some mesh -> mesh.IsManifold(true)  |> t1
+        | Some mesh -> RhinoScriptSyntax.IsMeshManifold(mesh)
         | None -> false
+
+
+
+    /// <summary>Verifies a Mesh object is manifold. A Mesh for which every edge is shared
+    ///    by at most two faces is called manifold. If a Mesh has at least one edge
+    ///    that is shared by more than two faces, then that Mesh is called non-manifold.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(bool) True, otherwise False.</returns>
+    static member IsMeshManifold(mesh:Mesh) : bool =
+        notNull mesh && (mesh.IsManifold(true) |> t1)
 
 
 
@@ -288,7 +359,19 @@ module AutoOpenMesh =
                                     point:Point3d,
                                     [<OPT;DEF(0.0)>]tolerance:float) : bool =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
-        //point = RhinoScriptSyntax.Coerce3dPoint(point)
+        RhinoScriptSyntax.IsPointOnMesh(mesh, point, tolerance)
+
+
+    /// <summary>Verifies a point is on a Mesh.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <param name="point">(Point3d) Test point</param>
+    /// <param name="tolerance">(float) Optional, Default Value <c>RhinoMath.SqrtEpsilon</c>
+    ///    The testing tolerance</param>
+    /// <returns>(bool) True , otherwise False.</returns>
+    static member IsPointOnMesh(    mesh:Mesh,
+                                    point:Point3d,
+                                    [<OPT;DEF(0.0)>]tolerance:float) : bool =
+
         let maxDistance = Util.ifZero1 tolerance RhinoMath.SqrtEpsilon
         let pt = ref Point3d.Origin
         let face = mesh.ClosestPoint(point, pt, maxDistance)
@@ -309,15 +392,13 @@ module AutoOpenMesh =
     ///    Delete input after joining</param>
     /// <returns>(Guid) identifier of newly created Mesh.</returns>
     static member JoinMeshes(objectIds:Guid seq, [<OPT;DEF(false)>]deleteInput:bool) : Guid =
-        let meshes  = objectIds |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
-        let joinedMesh = new Mesh()
-        joinedMesh.Append(meshes)
+        let objectIds = ResizeArray(objectIds)
+        let meshes = objectIds |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
+        let joinedMesh = RhinoScriptSyntax.JoinMeshes(meshes)
         let rc = State.Doc.Objects.AddMesh(joinedMesh)
         if rc = Guid.Empty then RhinoScriptingException.Raise "JoinMeshes: Failed to join Meshes %A" (Pretty.str objectIds)
         if deleteInput then
-            for objectId in objectIds do
-                //guid = RhinoScriptSyntax.CoerceGuid(objectId)
-                State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
+            for objectId in objectIds do State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
         State.Doc.Views.Redraw()
         rc
 
@@ -327,11 +408,19 @@ module AutoOpenMesh =
     /// <returns>(float) total area of Mesh.</returns>
     static member MeshArea(objectId:Guid ) : float =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        RhinoScriptSyntax.MeshArea(mesh)
+
+
+
+    /// <summary>Returns approximate area of one mesh object.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(float) total area of Mesh.</returns>
+    static member MeshArea(mesh:Mesh ) : float =
         let mp = AreaMassProperties.Compute(mesh)
         if notNull mp then
             mp.Area
         else
-            RhinoScriptingException.Raise "MeshArea failed.  objectId:'%s'" (Pretty.str objectId)
+            RhinoScriptingException.Raise "MeshArea failed.  mesh:'%s'" (Pretty.str mesh)
 
 
 
@@ -340,8 +429,15 @@ module AutoOpenMesh =
     /// <returns>(Point3d) representing the area centroid.</returns>
     static member MeshAreaCentroid(objectId:Guid) : Point3d =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        RhinoScriptSyntax.MeshAreaCentroid(mesh)
+
+
+    /// <summary>Calculates the area centroid of a Mesh object.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(Point3d) representing the area centroid.</returns>
+    static member MeshAreaCentroid(mesh:Mesh) : Point3d =
         let mp = AreaMassProperties.Compute(mesh)
-        if mp|> isNull  then RhinoScriptingException.Raise "MeshAreaCentroid failed.  objectId:'%s'" (Pretty.str objectId)
+        if mp|> isNull  then RhinoScriptingException.Raise "MeshAreaCentroid failed.  mesh:'%s'" (Pretty.str mesh)
         mp.Centroid
 
 
@@ -354,20 +450,33 @@ module AutoOpenMesh =
     static member MeshBooleanDifference( input0:Guid seq,
                                          input1:Guid seq,
                                          [<OPT;DEF(true)>]deleteInput:bool) : Guid ResizeArray =
-        let meshes0  = input0 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
-        let meshes1  = input1 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
-        if meshes0.Count = 0 || meshes1.Count = 0 then RhinoScriptingException.Raise "MeshBooleanDifference: No meshes to work with.  input0:'%A' input1:'%A' deleteInput:'%A'" input0 input1 deleteInput
-        let newmeshes = Mesh.CreateBooleanDifference  (meshes0, meshes1)
+        let input0 = ResizeArray(input0)
+        let input1 = ResizeArray(input1)
+        let meshes0 = input0 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
+        let meshes1 = input1 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
+        let newmeshes = RhinoScriptSyntax.MeshBooleanDifference(meshes0, meshes1)
         let rc = ResizeArray()
         for mesh in newmeshes do
             let objectId = State.Doc.Objects.AddMesh(mesh)
             if objectId <> Guid.Empty then rc.Add(objectId)
         if deleteInput then
-            for objectId in Seq.append input0 input1 do
-                //id = RhinoScriptSyntax.CoerceGuid(objectId)
-                State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
+            for objectId in Seq.append input0 input1 do State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
         State.Doc.Views.Redraw()
         rc
+
+
+    /// <summary>Performs a boolean difference on two sets of Meshes.</summary>
+    /// <param name="input0">(Mesh seq) First set of input Meshes.</param>
+    /// <param name="input1">(Mesh seq) Second set of input Meshes.</param>
+    /// <returns>(Mesh ResizeArray) New result Meshes.</returns>
+    /// <remarks>Returns new geometry without adding it to a document.</remarks>
+    static member MeshBooleanDifference(input0:Mesh seq, input1:Mesh seq) : Mesh ResizeArray =
+        let meshes0 = input0 |> RArr.mapSeq (fun mesh -> mesh.DuplicateMesh())
+        let meshes1 = input1 |> RArr.mapSeq (fun mesh -> mesh.DuplicateMesh())
+        if meshes0.Count = 0 || meshes1.Count = 0 then RhinoScriptingException.Raise "MeshBooleanDifference: No meshes to work with."
+        let meshes = Mesh.CreateBooleanDifference(meshes0, meshes1)
+        if isNull meshes then RhinoScriptingException.Raise "MeshBooleanDifference: Boolean operation failed."
+        ResizeArray(meshes)
 
 
     /// <summary>Performs boolean intersection operation on two sets of input Meshes.</summary>
@@ -379,21 +488,33 @@ module AutoOpenMesh =
     static member MeshBooleanIntersection( input0:Guid seq,
                                            input1:Guid seq,
                                            [<OPT;DEF(true)>]deleteInput:bool) : Guid ResizeArray =
-        let meshes0  = input0 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
-        let meshes1  = input1 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
-        if meshes0.Count = 0 || meshes1.Count = 0 then RhinoScriptingException.Raise "MeshBooleanIntersection: No meshes to work with.  input0:'%A' input1:'%A' deleteInput:'%A'" input0 input1 deleteInput
-        let newmeshes = Mesh.CreateBooleanIntersection  (meshes0, meshes1)
+        let input0 = ResizeArray(input0)
+        let input1 = ResizeArray(input1)
+        let meshes0 = input0 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
+        let meshes1 = input1 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
+        let newmeshes = RhinoScriptSyntax.MeshBooleanIntersection(meshes0, meshes1)
         let rc = ResizeArray()
         for mesh in newmeshes do
             let objectId = State.Doc.Objects.AddMesh(mesh)
             if objectId <> Guid.Empty then rc.Add(objectId)
         if deleteInput then
-            for objectId in Seq.append input0 input1 do
-                //id = RhinoScriptSyntax.CoerceGuid(objectId)
-                State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
+            for objectId in Seq.append input0 input1 do State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
         State.Doc.Views.Redraw()
         rc
 
+
+    /// <summary>Performs a boolean intersection on two sets of Meshes.</summary>
+    /// <param name="input0">(Mesh seq) First set of input Meshes.</param>
+    /// <param name="input1">(Mesh seq) Second set of input Meshes.</param>
+    /// <returns>(Mesh ResizeArray) New result Meshes.</returns>
+    /// <remarks>Returns new geometry without adding it to a document.</remarks>
+    static member MeshBooleanIntersection(input0:Mesh seq, input1:Mesh seq) : Mesh ResizeArray =
+        let meshes0 = input0 |> RArr.mapSeq (fun mesh -> mesh.DuplicateMesh())
+        let meshes1 = input1 |> RArr.mapSeq (fun mesh -> mesh.DuplicateMesh())
+        if meshes0.Count = 0 || meshes1.Count = 0 then RhinoScriptingException.Raise "MeshBooleanIntersection: No meshes to work with."
+        let meshes = Mesh.CreateBooleanIntersection(meshes0, meshes1)
+        if isNull meshes then RhinoScriptingException.Raise "MeshBooleanIntersection: Boolean operation failed."
+        ResizeArray(meshes)
 
 
     /// <summary>Performs boolean split operation on two sets of input Meshes.</summary>
@@ -405,20 +526,33 @@ module AutoOpenMesh =
     static member MeshBooleanSplit( input0:Guid seq,
                                     input1:Guid seq,
                                     [<OPT;DEF(true)>]deleteInput:bool) : Guid ResizeArray =
-        let meshes0  = input0 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
-        let meshes1  = input1 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
-        if meshes0.Count = 0 || meshes1.Count = 0 then RhinoScriptingException.Raise "MeshBooleanSplit: CreateBooleanSplit: No meshes to work with.  input0:'%A' input1:'%A' deleteInput:'%A'" input0 input1 deleteInput
-        let newmeshes = Mesh.CreateBooleanSplit  (meshes0, meshes1)
+        let input0 = ResizeArray(input0)
+        let input1 = ResizeArray(input1)
+        let meshes0 = input0 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
+        let meshes1 = input1 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
+        let newmeshes = RhinoScriptSyntax.MeshBooleanSplit(meshes0, meshes1)
         let rc = ResizeArray()
         for mesh in newmeshes do
             let objectId = State.Doc.Objects.AddMesh(mesh)
             if objectId <> Guid.Empty then rc.Add(objectId)
         if deleteInput then
-            for objectId in Seq.append input0 input1 do
-                State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
+            for objectId in Seq.append input0 input1 do State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
         State.Doc.Views.Redraw()
         rc
 
+
+    /// <summary>Performs a boolean split on two sets of Meshes.</summary>
+    /// <param name="input0">(Mesh seq) First set of input Meshes.</param>
+    /// <param name="input1">(Mesh seq) Second set of input Meshes.</param>
+    /// <returns>(Mesh ResizeArray) New result Meshes.</returns>
+    /// <remarks>Returns new geometry without adding it to a document.</remarks>
+    static member MeshBooleanSplit(input0:Mesh seq, input1:Mesh seq) : Mesh ResizeArray =
+        let meshes0 = input0 |> RArr.mapSeq (fun mesh -> mesh.DuplicateMesh())
+        let meshes1 = input1 |> RArr.mapSeq (fun mesh -> mesh.DuplicateMesh())
+        if meshes0.Count = 0 || meshes1.Count = 0 then RhinoScriptingException.Raise "MeshBooleanSplit: No meshes to work with."
+        let meshes = Mesh.CreateBooleanSplit(meshes0, meshes1)
+        if isNull meshes then RhinoScriptingException.Raise "MeshBooleanSplit: Boolean operation failed."
+        ResizeArray(meshes)
 
 
     /// <summary>Performs boolean union operation on a set of input Meshes.</summary>
@@ -427,18 +561,30 @@ module AutoOpenMesh =
     ///    Delete the input Meshes</param>
     /// <returns>(Guid ResizeArray) identifiers of new Meshes.</returns>
     static member MeshBooleanUnion(meshIds:Guid seq, [<OPT;DEF(true)>]deleteInput:bool) : Guid ResizeArray =
-        if Seq.length(meshIds)<2 then RhinoScriptingException.Raise "MeshBooleanUnion: MeshIds must contain at least 2 meshes.  meshIds:'%A' deleteInput:'%A'" meshIds deleteInput
-        let meshes  = meshIds |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
-        let newmeshes = Mesh.CreateBooleanUnion(meshes)
+        let meshIds = ResizeArray(meshIds)
+        if meshIds.Count < 2 then RhinoScriptingException.Raise "MeshBooleanUnion: MeshIds must contain at least 2 meshes."
+        let meshes = meshIds |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
+        let newmeshes = RhinoScriptSyntax.MeshBooleanUnion(meshes)
         let rc = ResizeArray()
         for mesh in newmeshes do
             let objectId = State.Doc.Objects.AddMesh(mesh)
             if objectId <> Guid.Empty then rc.Add(objectId)
-        if rc.Count>0 && deleteInput then
-            for objectId in meshIds do
-                State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
+        if rc.Count > 0 && deleteInput then
+            for objectId in meshIds do State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
         State.Doc.Views.Redraw()
         rc
+
+
+    /// <summary>Performs a boolean union on a set of Meshes.</summary>
+    /// <param name="meshes">(Mesh seq) At least two input Meshes.</param>
+    /// <returns>(Mesh ResizeArray) New result Meshes.</returns>
+    /// <remarks>Returns new geometry without adding it to a document.</remarks>
+    static member MeshBooleanUnion(meshes:Mesh seq) : Mesh ResizeArray =
+        let meshes = meshes |> RArr.mapSeq (fun mesh -> mesh.DuplicateMesh())
+        if meshes.Count < 2 then RhinoScriptingException.Raise "MeshBooleanUnion: At least 2 meshes are required."
+        let result = Mesh.CreateBooleanUnion(meshes)
+        if isNull result then RhinoScriptingException.Raise "MeshBooleanUnion: Boolean operation failed."
+        ResizeArray(result)
 
 
     /// <summary>Returns the point on a Mesh that is closest to a test point.</summary>
@@ -455,9 +601,25 @@ module AutoOpenMesh =
                                     point:Point3d,
                                     [<OPT;DEF(0.0)>]maximumDistance:float) : Point3d * int =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        RhinoScriptSyntax.MeshClosestPoint(mesh, point, maximumDistance)
+
+
+    /// <summary>Returns the point on a Mesh that is closest to a test point.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <param name="point">(Point3d) Point to test</param>
+    /// <param name="maximumDistance">(float) Optional, Upper bound used for closest point calculation.
+    ///    If you are only interested in finding a point Q on the Mesh when
+    ///    point.DistanceTo(Q) is smaller than maximumDistance, then set maximumDistance to
+    ///    that value</param>
+    /// <returns>(Point3d * int) containing the results of the calculation where
+    ///    [0] = the 3-D point on the Mesh
+    ///    [1] = the index of the Mesh face on which the 3-D point lies.</returns>
+    static member MeshClosestPoint( mesh:Mesh,
+                                    point:Point3d,
+                                    [<OPT;DEF(0.0)>]maximumDistance:float) : Point3d * int =
         let pt = ref Point3d.Origin
         let face = mesh.ClosestPoint(point, pt, maximumDistance)
-        if face<0 then RhinoScriptingException.Raise "MeshClosestPoint failed.  objectId:'%s' point:'%A' maximumDistance:'%A'" (Pretty.str objectId) point maximumDistance
+        if face<0 then RhinoScriptingException.Raise "MeshClosestPoint failed.  mesh:'%s' point:'%A' maximumDistance:'%A'" (Pretty.str mesh) point maximumDistance
         !pt, face
 
 
@@ -466,6 +628,13 @@ module AutoOpenMesh =
     /// <returns>(Point3d ResizeArray) points defining the center of each face.</returns>
     static member MeshFaceCenters(meshId:Guid) : Point3d ResizeArray =
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
+        RhinoScriptSyntax.MeshFaceCenters(mesh)
+
+
+    /// <summary>Returns the center of each face of the Mesh object.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(Point3d ResizeArray) points defining the center of each face.</returns>
+    static member MeshFaceCenters(mesh:Mesh) : Point3d ResizeArray =
         let r = ResizeArray(mesh.Faces.Count )
         for i = 0 to mesh.Faces.Count - 1 do
             let center = mesh.Faces.GetFaceCenter(i)
@@ -478,6 +647,13 @@ module AutoOpenMesh =
     /// <returns>(int) The number of Mesh faces.</returns>
     static member MeshFaceCount(objectId:Guid) : int =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        RhinoScriptSyntax.MeshFaceCount(mesh)
+
+
+    /// <summary>Returns total face count of a Mesh object.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(int) The number of Mesh faces.</returns>
+    static member MeshFaceCount(mesh:Mesh) : int =
         mesh.Faces.Count
 
 
@@ -486,6 +662,13 @@ module AutoOpenMesh =
     /// <returns>(Vector3d ResizeArray) 3D vectors that define the face unit normals of the Mesh.</returns>
     static member MeshFaceNormals(meshId:Guid) : Vector3d ResizeArray =
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
+        RhinoScriptSyntax.MeshFaceNormals(mesh)
+
+
+    /// <summary>Returns the face unit normal for each face of a Mesh object.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(Vector3d ResizeArray) 3D vectors that define the face unit normals of the Mesh.</returns>
+    static member MeshFaceNormals(mesh:Mesh) : Vector3d ResizeArray =
         if mesh.FaceNormals.Count <> mesh.Faces.Count then
             mesh.FaceNormals.ComputeFaceNormals() |> ignore<bool>
         let rc = ResizeArray()
@@ -508,6 +691,20 @@ module AutoOpenMesh =
     ///    (very three 3D points). Quads will be converted to triangles.</returns>
     static member MeshFaces(objectId:Guid, [<OPT;DEF(true)>]faceType:bool) : Point3d ResizeArray =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        RhinoScriptSyntax.MeshFaces(mesh, faceType)
+
+    /// <summary>Returns face vertices of a Mesh.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <param name="faceType">(bool) Optional, default value: <c>true</c>
+    ///    The face type to be returned.
+    ///    True = both triangles and quads.
+    ///    False = Quads are broken down into triangles</param>
+    /// <returns>(Point3d ResizeArray) List of 3D points that define the face vertices of the Mesh.
+    ///    If faceType is True, then faces are returned as both quads and triangles
+    ///    (every four  3D points). For triangles, the third and fourth vertex will be identical.
+    ///    If faceType is False, then faces are returned as only triangles
+    ///    (very three 3D points). Quads will be converted to triangles.</returns>
+    static member MeshFaces(mesh:Mesh, [<OPT;DEF(true)>]faceType:bool) : Point3d ResizeArray =
         let rc = ResizeArray()
         for i = 0 to mesh.Faces.Count - 1 do
             let _, p0, p1, p2, p3 = mesh.Faces.GetFaceVertices(i)
@@ -533,6 +730,15 @@ module AutoOpenMesh =
     ///    the faces are returned as both quads and triangles. For triangles, the third and fourth vertex will be identical.</returns>
     static member MeshFacePoints(objectId:Guid) : (Point3d*Point3d*Point3d*Point3d) ResizeArray = // TODO mark functions not part of rhinopython
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        RhinoScriptSyntax.MeshFacePoints(mesh)
+
+
+
+    /// <summary>Returns vertices of each face in a Mesh as tuple of 4 points.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(Point3d ResizeArray) List of 3D points that define the face vertices of the Mesh.
+    ///    the faces are returned as both quads and triangles. For triangles, the third and fourth vertex will be identical.</returns>
+    static member MeshFacePoints(mesh:Mesh) : (Point3d*Point3d*Point3d*Point3d) ResizeArray = // TODO mark functions not part of rhinopython
         let rc = ResizeArray()
         for i = 0 to mesh.Faces.Count - 1 do
             let _, p0, p1, p2, p3 = mesh.Faces.GetFaceVertices(i)
@@ -551,6 +757,14 @@ module AutoOpenMesh =
     ///    each face of the Mesh. Ngons, quad and triangle faces are returned.</returns>
     static member MeshNgonFaceVertices(objectId:Guid) : ResizeArray<ResizeArray<int>> = //TODO add more ngon support functions like this ???
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        RhinoScriptSyntax.MeshNgonFaceVertices(mesh)
+
+
+    /// <summary>Returns the vertex indices of all faces of a Ngon Mesh object.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(int ResizeArray ResizeArray) containing a nested List that define the vertex indices for
+    ///    each face of the Mesh. Ngons, quad and triangle faces are returned.</returns>
+    static member MeshNgonFaceVertices(mesh:Mesh) : ResizeArray<ResizeArray<int>> = //TODO add more ngon support functions like this ???
         let rc = ResizeArray()
         for ng in mesh.GetNgonAndFacesEnumerable() do
             let uixs = ng.BoundaryVertexIndexList()
@@ -568,6 +782,15 @@ module AutoOpenMesh =
     ///    third and fourth vertex indices are identical, the face is a triangle.</returns>
     static member MeshFaceVertices(objectId:Guid) : ResizeArray<int*int*int*int> =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        RhinoScriptSyntax.MeshFaceVertices(mesh)
+
+
+    /// <summary>Returns the vertex indices of all faces of a Mesh object, Does not suport Ngons yet.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>((int*int*int*int) ResizeArray) containing tuples of 4 numbers that define the vertex indices for
+    ///    each face of the Mesh. Both quad and triangle faces are returned. If the
+    ///    third and fourth vertex indices are identical, the face is a triangle.</returns>
+    static member MeshFaceVertices(mesh:Mesh) : ResizeArray<int*int*int*int> =
         let rc = ResizeArray()
         for i = 0 to mesh.Faces.Count - 1 do
             let face = mesh.Faces.GetFace(i)
@@ -580,6 +803,13 @@ module AutoOpenMesh =
     /// <returns>(bool) True , otherwise False.</returns>
     static member MeshHasFaceNormals(objectId:Guid) : bool =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        RhinoScriptSyntax.MeshHasFaceNormals(mesh)
+
+
+    /// <summary>Verifies a Mesh object has face normals.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(bool) True , otherwise False.</returns>
+    static member MeshHasFaceNormals(mesh:Mesh) : bool =
         mesh.FaceNormals.Count>0
 
 
@@ -588,6 +818,13 @@ module AutoOpenMesh =
     /// <returns>(bool) True , otherwise False.</returns>
     static member MeshHasTextureCoordinates(objectId:Guid) : bool =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        RhinoScriptSyntax.MeshHasTextureCoordinates(mesh)
+
+
+    /// <summary>Verifies a Mesh object has texture coordinates.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(bool) True , otherwise False.</returns>
+    static member MeshHasTextureCoordinates(mesh:Mesh) : bool =
         mesh.TextureCoordinates.Count>0
 
 
@@ -596,6 +833,13 @@ module AutoOpenMesh =
     /// <returns>(bool) True , otherwise False.</returns>
     static member MeshHasVertexColors(objectId:Guid) : bool =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        RhinoScriptSyntax.MeshHasVertexColors(mesh)
+
+
+    /// <summary>Verifies a Mesh object has vertex colors.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(bool) True , otherwise False.</returns>
+    static member MeshHasVertexColors(mesh:Mesh) : bool =
         mesh.VertexColors.Count>0
 
 
@@ -604,6 +848,13 @@ module AutoOpenMesh =
     /// <returns>(bool) True , otherwise False.</returns>
     static member MeshHasVertexNormals(objectId:Guid) : bool =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        RhinoScriptSyntax.MeshHasVertexNormals(mesh)
+
+
+    /// <summary>Verifies a Mesh object has vertex normals.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(bool) True , otherwise False.</returns>
+    static member MeshHasVertexNormals(mesh:Mesh) : bool =
         mesh.Normals.Count>0
 
 
@@ -618,6 +869,18 @@ module AutoOpenMesh =
                                         [<OPT;DEF(0.0)>]tolerance:float) : Polyline array =
         let mesh1 = RhinoScriptSyntax.CoerceMesh(mesh1)
         let mesh2 = RhinoScriptSyntax.CoerceMesh(mesh2)
+        RhinoScriptSyntax.MeshMeshIntersection(mesh1, mesh2, tolerance)
+
+
+    /// <summary>Calculates the intersections of a Mesh object with another Mesh object.</summary>
+    /// <param name="mesh1">(Mesh) Input geometry.</param>
+    /// <param name="mesh2">(Mesh) Input geometry.</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>ModelAbsoluteTolerance * MeshIntersectionsTolerancesCoefficient</c>
+    ///    The intersection tolerance</param>
+    /// <returns>(Polyline array) Array of points that define the vertices of the intersection Curves.</returns>
+    static member MeshMeshIntersection( mesh1:Mesh,
+                                        mesh2:Mesh,
+                                        [<OPT;DEF(0.0)>]tolerance:float) : Polyline array =
         let tolerance = Util.ifZero1 tolerance (State.Doc.ModelAbsoluteTolerance*Intersect.Intersection.MeshIntersectionsTolerancesCoefficient) // see https://github.com/mcneel/rhinoscriptsyntax/pull/202
         Intersect.Intersection.MeshMeshAccurate(mesh1, mesh2, tolerance)
 
@@ -633,6 +896,20 @@ module AutoOpenMesh =
     ///    identify the naked status for each vertex returned by MeshVertices.</returns>
     static member MeshNakedEdgePoints(objectId:Guid) : bool array =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        RhinoScriptSyntax.MeshNakedEdgePoints(mesh)
+
+
+
+    /// <summary>Identifies the naked edge points of a Mesh object. This function shows
+    ///    where Mesh vertices are not completely surrounded by faces. Joined
+    ///    Meshes, such as are made by MeshBox, have naked Mesh edge points where
+    ///    the sub-meshes are joined.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(bool array) Array of boolean values that represent whether or not a Mesh vertex is
+    ///    naked or not. The number of elements in the list will be equal to
+    ///    the value returned by MeshVertexCount. In which case, the list will
+    ///    identify the naked status for each vertex returned by MeshVertices.</returns>
+    static member MeshNakedEdgePoints(mesh:Mesh) : bool array =
         mesh.GetNakedEdgePointStatus()
 
 
@@ -644,12 +921,22 @@ module AutoOpenMesh =
     /// <returns>(Guid) identifier of the new Mesh object.</returns>
     static member MeshOffset(meshId:Guid, distance:float) : Guid =
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
-        let offsetmesh = mesh.Offset(distance)
-        if offsetmesh|> isNull  then RhinoScriptingException.Raise "MeshOffset failed.  meshId:'%s' distance:'%A'" (Pretty.str meshId) distance
+        let offsetmesh = RhinoScriptSyntax.MeshOffset(mesh, distance)
         let rc = State.Doc.Objects.AddMesh(offsetmesh)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "MeshOffset: Unable to add mesh to document.  meshId:'%s' distance:'%A'" (Pretty.str meshId) distance
+        if rc = Guid.Empty then RhinoScriptingException.Raise "MeshOffset: Unable to add mesh to document. meshId:'%s' distance:'%A'" (Pretty.str meshId) distance
         State.Doc.Views.Redraw()
         rc
+
+
+    /// <summary>Creates an offset copy of a Mesh.</summary>
+    /// <param name="mesh">(Mesh) Input Mesh.</param>
+    /// <param name="distance">(float) Offset distance.</param>
+    /// <returns>(Mesh) The new offset Mesh.</returns>
+    /// <remarks>Returns new geometry without adding it to a document.</remarks>
+    static member MeshOffset(mesh:Mesh, distance:float) : Mesh =
+        let offsetmesh = mesh.Offset(distance)
+        if isNull offsetmesh then RhinoScriptingException.Raise "MeshOffset: Unable to offset the Mesh by %g." distance
+        offsetmesh
 
 
     /// <summary>Creates Polyline Curve outlines of Mesh objects.</summary>
@@ -658,26 +945,30 @@ module AutoOpenMesh =
     ///    View to use for outline direction</param>
     /// <returns>(Guid ResizeArray) Polyline Curve identifiers.</returns>
     static member MeshOutline(objectIds:Guid seq, [<OPT;DEF(null:string)>]view:string) : Guid ResizeArray =
-        let  meshes  = objectIds |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
-        let rc = ResizeArray()
-        if notNull view then
-            let viewport = State.Doc.Views.Find(view, compareCase=false).MainViewport
-            if isNull viewport then RhinoScriptingException.Raise "MeshOutline: did not find view named '%A'" view
+        let meshes = objectIds |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
+        let viewport =
+            if isNull view then null
             else
-                for mesh in meshes do
-                    let polylines = mesh.GetOutlines(viewport)
-                    if notNull polylines then
-                        for polyline in polylines do
-                            let objectId = State.Doc.Objects.AddPolyline(polyline)
-                            rc.Add(objectId)
-        else
-            for mesh in meshes do
-                let polylines = mesh.GetOutlines(Plane.WorldXY)
-                if notNull polylines then
-                    for polyline in polylines do
-                        let objectId = State.Doc.Objects.AddPolyline(polyline)
-                        rc.Add(objectId)
+                let rhinoView = State.Doc.Views.Find(view, compareCase=false)
+                if isNull rhinoView then RhinoScriptingException.Raise "MeshOutline: did not find view named '%A'" view
+                rhinoView.MainViewport
+        let outlines = RhinoScriptSyntax.MeshOutline(meshes, viewport)
+        let rc = outlines |> RArr.mapSeq (fun curve -> State.Doc.Objects.AddCurve(curve))
         State.Doc.Views.Redraw()
+        rc
+
+
+    /// <summary>Creates Polyline Curve outlines of Meshes.</summary>
+    /// <param name="meshes">(Mesh seq) Input Meshes.</param>
+    /// <param name="view">(Rhino.Display.RhinoViewport) Optional, default value: <c>null</c>. Viewport for the outline direction. Null uses the world XY plane.</param>
+    /// <returns>(PolylineCurve ResizeArray) New outline Curves.</returns>
+    /// <remarks>Returns new geometry without adding it to a document.</remarks>
+    static member MeshOutline(meshes:Mesh seq, [<OPT;DEF(null:Rhino.Display.RhinoViewport)>]view:Rhino.Display.RhinoViewport) : PolylineCurve ResizeArray =
+        let rc = ResizeArray()
+        for mesh in meshes do
+            let polylines = if isNull view then mesh.GetOutlines(Plane.WorldXY) else mesh.GetOutlines(view)
+            if notNull polylines then
+                for polyline in polylines do rc.Add(new PolylineCurve(polyline))
         rc
 
 
@@ -686,6 +977,13 @@ module AutoOpenMesh =
     /// <returns>(int) The number of quad Mesh faces.</returns>
     static member MeshQuadCount(objectId:Guid) : int =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        RhinoScriptSyntax.MeshQuadCount(mesh)
+
+
+    /// <summary>Returns the number of quad faces of a Mesh object.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(int) The number of quad Mesh faces.</returns>
+    static member MeshQuadCount(mesh:Mesh) : int =
         mesh.Faces.QuadCount
 
 
@@ -710,6 +1008,14 @@ module AutoOpenMesh =
     ///    An empty list if the Mesh has no texture coordinates.</returns>
     static member MeshTextureCoordinates(objectId:Guid) : Point2f ResizeArray =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        RhinoScriptSyntax.MeshTextureCoordinates(mesh)
+
+
+    /// <summary>Returns the texture coordinates of a Mesh.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(Point2f ResizeArray) The (u, v) texture coordinates, one per Mesh vertex.
+    ///    An empty list if the Mesh has no texture coordinates.</returns>
+    static member MeshTextureCoordinates(mesh:Mesh) : Point2f ResizeArray =
         let tcs = mesh.TextureCoordinates
         let rc = ResizeArray(tcs.Count)
         for i = 0 to tcs.Count - 1 do
@@ -730,14 +1036,26 @@ module AutoOpenMesh =
                               [<OPT;DEF(true)>]trimmedTriangles:bool,
                               [<OPT;DEF(false)>]deleteInput:bool) : Guid ResizeArray =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
-        let pieces = mesh.SplitDisjointPieces()
-        let breps  = pieces |> RArr.mapArr (fun piece -> Brep.CreateFromMesh(piece, trimmedTriangles) )
+        let breps = RhinoScriptSyntax.MeshToNurb(mesh, trimmedTriangles)
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let attr = rhobj.Attributes
-        let ids  = breps |> RArr.mapSeq (fun brep -> State.Doc.Objects.AddBrep(brep, attr) )
-        if deleteInput then State.Doc.Objects.Delete(rhobj, quiet=true)|> ignore<bool>
+        let ids = breps |> RArr.mapSeq (fun brep -> State.Doc.Objects.AddBrep(brep, attr))
+        if deleteInput then State.Doc.Objects.Delete(rhobj, quiet=true) |> ignore<bool>
         State.Doc.Views.Redraw()
         ids
+
+
+    /// <summary>Duplicates each Mesh polygon with a NURBS Surface and joins the Surfaces for each connected piece.</summary>
+    /// <param name="mesh">(Mesh) Input Mesh.</param>
+    /// <param name="trimmedTriangles">(bool) Optional, default value: <c>true</c>. Represent triangles with trimmed planes.</param>
+    /// <returns>(Brep ResizeArray) New Breps for the connected pieces.</returns>
+    /// <remarks>Returns new geometry without adding it to a document.</remarks>
+    static member MeshToNurb(mesh:Mesh, [<OPT;DEF(true)>]trimmedTriangles:bool) : Brep ResizeArray =
+        mesh.SplitDisjointPieces()
+        |> RArr.mapArr (fun piece ->
+            let brep = Brep.CreateFromMesh(piece, trimmedTriangles)
+            if isNull brep then RhinoScriptingException.Raise "MeshToNurb: Unable to create a Brep from a Mesh piece."
+            brep)
 
 
     /// <summary>Returns number of triangular faces of a Mesh.</summary>
@@ -745,6 +1063,13 @@ module AutoOpenMesh =
     /// <returns>(int) The number of triangular Mesh faces.</returns>
     static member MeshTriangleCount(objectId:Guid) : int =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        RhinoScriptSyntax.MeshTriangleCount(mesh)
+
+
+    /// <summary>Returns number of triangular faces of a Mesh.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(int) The number of triangular Mesh faces.</returns>
+    static member MeshTriangleCount(mesh:Mesh) : int =
         mesh.Faces.TriangleCount
 
 
@@ -753,6 +1078,13 @@ module AutoOpenMesh =
     /// <returns>(Drawing.Color ResizeArray) The current vertex colors.</returns>
     static member MeshVertexColors(meshId:Guid) : Drawing.Color ResizeArray= //GET
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
+        RhinoScriptSyntax.MeshVertexColors(mesh)
+
+
+    /// <summary>Returns vertex colors of a Mesh.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(Drawing.Color ResizeArray) The current vertex colors.</returns>
+    static member MeshVertexColors(mesh:Mesh) : Drawing.Color ResizeArray= //GET
         let rc = ResizeArray(mesh.VertexColors.Count)
         for i = 0 to mesh.VertexColors.Count - 1 do
             rc.Add(mesh.VertexColors.[i])
@@ -785,6 +1117,13 @@ module AutoOpenMesh =
     /// <returns>(int) The number of Mesh vertices.</returns>
     static member MeshVertexCount(objectId:Guid) : int =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        RhinoScriptSyntax.MeshVertexCount(mesh)
+
+
+    /// <summary>Returns the vertex count of a Mesh.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(int) The number of Mesh vertices.</returns>
+    static member MeshVertexCount(mesh:Mesh) : int =
         mesh.Vertices.Count
 
 
@@ -794,6 +1133,14 @@ module AutoOpenMesh =
     /// <returns>(int array) face indices.</returns>
     static member MeshVertexFaces(meshId:Guid, vertexIndex:int) : int array =
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
+        RhinoScriptSyntax.MeshVertexFaces(mesh, vertexIndex)
+
+
+    /// <summary>Returns the Mesh faces that share a specified Mesh vertex.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <param name="vertexIndex">(int) Index of the Mesh vertex to find faces for</param>
+    /// <returns>(int array) face indices.</returns>
+    static member MeshVertexFaces(mesh:Mesh, vertexIndex:int) : int array =
         mesh.Vertices.GetVertexFaces(vertexIndex)
 
 
@@ -802,6 +1149,13 @@ module AutoOpenMesh =
     /// <returns>(Vector3d ResizeArray) List of vertex normals, (empty list if no normals exist).</returns>.Pretty
     static member MeshVertexNormals(meshId:Guid) : Vector3d ResizeArray =
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
+        RhinoScriptSyntax.MeshVertexNormals(mesh)
+
+
+    /// <summary>Returns the vertex unit normal for each vertex of a Mesh.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(Vector3d ResizeArray) List of vertex normals, (empty list if no normals exist).</returns>
+    static member MeshVertexNormals(mesh:Mesh) : Vector3d ResizeArray =
         let count = mesh.Normals.Count
         if count < 1 then
             ResizeArray()
@@ -817,6 +1171,13 @@ module AutoOpenMesh =
     /// <returns>(Point3d ResizeArray) vertex points in the Mesh.</returns>
     static member MeshVertices(objectId:Guid) : Point3d ResizeArray =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        RhinoScriptSyntax.MeshVertices(mesh)
+
+
+    /// <summary>Returns the vertices of a Mesh.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(Point3d ResizeArray) vertex points in the Mesh.</returns>
+    static member MeshVertices(mesh:Mesh) : Point3d ResizeArray =
         let count = mesh.Vertices.Count
         let rc = ResizeArray()
         for i = 0 to count - 1 do
@@ -829,16 +1190,8 @@ module AutoOpenMesh =
     /// <param name="objectIds">(Guid seq) Identifiers of one or more Mesh objects</param>
     /// <returns>(float) total volume of all Meshes.</returns>
     static member MeshVolume(objectIds:Guid seq) : float =
-        let mutable totalVolume  = 0.0
-        for objectId in objectIds do
-            // TODO add check for mesh being closed
-            let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
-            let mp = VolumeMassProperties.Compute(mesh)
-            if notNull mp then
-                totalVolume <- totalVolume + mp.Volume
-            else
-                RhinoScriptingException.Raise "MeshVolume failed on objectId:'%s'" (Pretty.str objectId)
-        totalVolume
+        let meshes = objectIds |> Seq.map RhinoScriptSyntax.CoerceMesh
+        RhinoScriptSyntax.MeshVolume(meshes)
 
 
     /// <summary>Returns the approximate volume of one or more closed Meshes.</summary>
@@ -861,9 +1214,7 @@ module AutoOpenMesh =
     /// <returns>(Point3d) Point3d representing the volume centroid.</returns>
     static member MeshVolumeCentroid(objectId:Guid) : Point3d =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
-        let mp = VolumeMassProperties.Compute(mesh)
-        if notNull mp then mp.Centroid
-        else RhinoScriptingException.Raise "MeshVolumeCentroid failed.  objectId:'%s'" (Pretty.str objectId)
+        RhinoScriptSyntax.MeshVolumeCentroid(mesh)
 
     /// <summary>Calculates the volume centroid of a Mesh.</summary>
     /// <param name="mesh">(Geometry.Mesh seq) Mesh Geometry</param>
@@ -883,13 +1234,23 @@ module AutoOpenMesh =
     static member PullCurveToMesh(meshId:Guid, curveId:Guid) : Guid =
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
-        let tol = State.Doc.ModelAbsoluteTolerance
-        let polyline = curve.PullToMesh(mesh, tol)
-        if isNull polyline then RhinoScriptingException.Raise "PullCurveToMesh failed.  meshId:'%s' curveId:'%s'" (Pretty.str meshId)  (Pretty.str curveId)
+        let polyline = RhinoScriptSyntax.PullCurveToMesh(mesh, curve)
         let rc = State.Doc.Objects.AddCurve(polyline)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "PullCurveToMesh: Unable to add polyline to document.  meshId:'%s' curveId:'%s'" (Pretty.str meshId) (Pretty.str curveId)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "PullCurveToMesh: Unable to add polyline to document. meshId:'%s' curveId:'%s'" (Pretty.str meshId) (Pretty.str curveId)
         State.Doc.Views.Redraw()
         rc
+
+
+    /// <summary>Pulls a polyline approximation of a Curve onto a Mesh.</summary>
+    /// <param name="mesh">(Mesh) Mesh to pull onto.</param>
+    /// <param name="curve">(Curve) Input Curve.</param>
+    /// <returns>(PolylineCurve) The new pulled Curve.</returns>
+    /// <remarks>Returns new geometry without adding it to a document.</remarks>
+    static member PullCurveToMesh(mesh:Mesh, curve:Curve) : PolylineCurve =
+        let tolerance = State.Doc.ModelAbsoluteTolerance
+        let polyline = curve.PullToMesh(mesh, tolerance)
+        if isNull polyline then RhinoScriptingException.Raise "PullCurveToMesh: Unable to pull the Curve onto the Mesh."
+        polyline
 
 
     /// <summary>Splits up a Mesh into its unconnected pieces.</summary>
@@ -899,13 +1260,19 @@ module AutoOpenMesh =
     /// <returns>(Guid ResizeArray) identifiers for the new Meshes.</returns>
     static member SplitDisjointMesh(objectId:Guid, [<OPT;DEF(false)>]deleteInput:bool) : Guid ResizeArray =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
-        let pieces = mesh.SplitDisjointPieces()
-        let rc  = pieces |> RArr.mapArr State.Doc.Objects.AddMesh
-        if rc.Count <> 0 && deleteInput then
-            //id = RhinoScriptSyntax.CoerceGuid(objectId)
-            State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
+        let pieces = RhinoScriptSyntax.SplitDisjointMesh(mesh)
+        let rc = pieces |> RArr.mapSeq (fun piece -> State.Doc.Objects.AddMesh(piece))
+        if rc.Count <> 0 && deleteInput then State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
         State.Doc.Views.Redraw()
         rc
+
+
+    /// <summary>Splits a Mesh into its unconnected pieces.</summary>
+    /// <param name="mesh">(Mesh) Input Mesh.</param>
+    /// <returns>(Mesh ResizeArray) New connected Mesh pieces.</returns>
+    /// <remarks>Returns new geometry without adding it to a document.</remarks>
+    static member SplitDisjointMesh(mesh:Mesh) : Mesh ResizeArray =
+        ResizeArray(mesh.SplitDisjointPieces())
 
 
     /// <summary>Fixes inconsistencies in the directions of faces of a Mesh.</summary>

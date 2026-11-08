@@ -14,7 +14,6 @@ module AutoOpenLight =
     //---This happens as part of the <Targets> in the *.fsproj file.
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
-
     /// <summary>Adds a new directional light object to the document.</summary>
     /// <param name="startPoint">(Point3d) Starting point of the light</param>
     /// <param name="endPoint">(Point3d) Ending point and direction of the light</param>
@@ -138,9 +137,8 @@ module AutoOpenLight =
     /// <param name="objectId">(Guid) The light object's identifier</param>
     /// <returns>(bool) The current enabled status.</returns>
     static member EnableLight(objectId:Guid) : bool = //GET
-        let light = RhinoScriptSyntax.CoerceLight(objectId)
-        let rc = light.IsEnabled
-        rc
+        RhinoScriptSyntax.EnableLight(RhinoScriptSyntax.CoerceLight(objectId))
+
 
     /// <summary>Enables or disables a light object.</summary>
     /// <param name="objectId">(Guid) The light object's identifier</param>
@@ -152,6 +150,7 @@ module AutoOpenLight =
         if not <| State.Doc.Lights.Modify(objectId, light) then
             RhinoScriptingException.Raise "EnableLight failed.  objectId:'%s' enable:'%A'" (Pretty.str objectId) enable
         State.Doc.Views.Redraw()
+
 
     /// <summary>Enables or disables multiple light objects.</summary>
     /// <param name="objectIds">(Guid seq) The light objects's identifiers</param>
@@ -166,28 +165,61 @@ module AutoOpenLight =
         State.Doc.Views.Redraw()
 
 
+    /// <summary>Get On / Off status of a light object.</summary>
+    /// <param name="geometryObject">(Light) The light geometry to use.</param>
+    /// <returns>(bool) The current enabled status.</returns>
+    static member EnableLight(geometryObject:Light) : bool = //GET
+        let light = geometryObject
+        let rc = light.IsEnabled
+        rc
+
+
     /// <summary>Verifies a light object is a directional light. Returns false for any other Rhino object or if the object does not exist.</summary>
     /// <param name="objectId">(Guid) The light object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsDirectionalLight(objectId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceLight(objectId) with
-        | Some light -> light.IsDirectionalLight
+        | Some light -> RhinoScriptSyntax.IsDirectionalLight(light)
         | None -> false
+
+
+    /// <summary>Verifies a light object is a directional light. Returns false for any other Rhino object or if the geometry is null.</summary>
+    /// <param name="geometryObject">(GeometryBase) The geometry to test.</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsDirectionalLight(geometryObject:GeometryBase) : bool =
+        match geometryObject with
+        | :? Light as light -> light.IsDirectionalLight
+        | _ -> false
 
 
     /// <summary>Verifies an object is a light object.</summary>
     /// <param name="objectId">(Guid) The light object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsLight(objectId:Guid) : bool =
-        RhinoScriptSyntax.TryCoerceLight(objectId)
-        |> Option.isSome
+        match RhinoScriptSyntax.TryCoerceLight(objectId) with
+        | Some light -> RhinoScriptSyntax.IsLight(light)
+        | None -> false
+
+
+    /// <summary>Verifies an object is a light object.</summary>
+    /// <param name="geometryObject">(GeometryBase) The geometry to test.</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsLight(geometryObject:GeometryBase) : bool =
+        geometryObject :? Light
 
 
     /// <summary>Verifies a light object is enabled.</summary>
     /// <param name="objectId">(Guid) The light object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsLightEnabled(objectId:Guid) : bool =
-        let light = RhinoScriptSyntax.CoerceLight(objectId)
+        RhinoScriptSyntax.IsLightEnabled(RhinoScriptSyntax.CoerceLight(objectId))
+
+
+    /// <summary>Verifies a light object is enabled.</summary>
+    /// <param name="geometryObject">(Light) The light geometry to use.</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsLightEnabled(geometryObject:Light) : bool =
+        let light = geometryObject
         light.IsEnabled
 
 
@@ -205,8 +237,17 @@ module AutoOpenLight =
     /// <returns>(bool) True or False.</returns>
     static member IsLinearLight(objectId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceLight(objectId) with
-        | Some light -> light.IsLinearLight
+        | Some light -> RhinoScriptSyntax.IsLinearLight(light)
         | None -> false
+
+
+    /// <summary>Verifies a light object is a linear light. Returns false for any other Rhino object or if the geometry is null.</summary>
+    /// <param name="geometryObject">(GeometryBase) The geometry to test.</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsLinearLight(geometryObject:GeometryBase) : bool =
+        match geometryObject with
+        | :? Light as light -> light.IsLinearLight
+        | _ -> false
 
 
     /// <summary>Verifies a light object is a point light. Returns false for any other Rhino object or if the object does not exist.</summary>
@@ -214,8 +255,17 @@ module AutoOpenLight =
     /// <returns>(bool) True or False.</returns>
     static member IsPointLight(objectId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceLight(objectId) with
-        | Some light -> light.IsPointLight
+        | Some light -> RhinoScriptSyntax.IsPointLight(light)
         | None -> false
+
+
+    /// <summary>Verifies a light object is a point light. Returns false for any other Rhino object or if the geometry is null.</summary>
+    /// <param name="geometryObject">(GeometryBase) The geometry to test.</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsPointLight(geometryObject:GeometryBase) : bool =
+        match geometryObject with
+        | :? Light as light -> light.IsPointLight
+        | _ -> false
 
 
     /// <summary>Verifies a light object is a rectangular light. Returns false for any other Rhino object or if the object does not exist.</summary>
@@ -223,8 +273,17 @@ module AutoOpenLight =
     /// <returns>(bool) True or False.</returns>
     static member IsRectangularLight(objectId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceLight(objectId) with
-        | Some light -> light.IsRectangularLight
+        | Some light -> RhinoScriptSyntax.IsRectangularLight(light)
         | None -> false
+
+
+    /// <summary>Verifies a light object is a rectangular light. Returns false for any other Rhino object or if the geometry is null.</summary>
+    /// <param name="geometryObject">(GeometryBase) The geometry to test.</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsRectangularLight(geometryObject:GeometryBase) : bool =
+        match geometryObject with
+        | :? Light as light -> light.IsRectangularLight
+        | _ -> false
 
 
     /// <summary>Verifies a light object is a spot light. Returns false for any other Rhino object or if the object does not exist.</summary>
@@ -232,17 +291,25 @@ module AutoOpenLight =
     /// <returns>(bool) True or False.</returns>
     static member IsSpotLight(objectId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceLight(objectId) with
-        | Some light -> light.IsSpotLight
+        | Some light -> RhinoScriptSyntax.IsSpotLight(light)
         | None -> false
+
+
+    /// <summary>Verifies a light object is a spot light. Returns false for any other Rhino object or if the geometry is null.</summary>
+    /// <param name="geometryObject">(GeometryBase) The geometry to test.</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsSpotLight(geometryObject:GeometryBase) : bool =
+        match geometryObject with
+        | :? Light as light -> light.IsSpotLight
+        | _ -> false
 
 
     /// <summary>Returns the color of a light.</summary>
     /// <param name="objectId">(Guid) The light object's identifier</param>
     /// <returns>(Drawing.Color) The current color.</returns>
     static member LightColor(objectId:Guid) : Drawing.Color = //GET
-        let light = RhinoScriptSyntax.CoerceLight(objectId)
-        let rc = light.Diffuse
-        rc
+        RhinoScriptSyntax.LightColor(RhinoScriptSyntax.CoerceLight(objectId))
+
 
     /// <summary>Changes the color of a light.</summary>
     /// <param name="objectId">(Guid) The light object's identifier</param>
@@ -254,6 +321,7 @@ module AutoOpenLight =
         if not <|  State.Doc.Lights.Modify(objectId, light) then
             RhinoScriptingException.Raise "LightColor failed.  objectId:'%s' color:'%A'" (Pretty.str objectId) color
         State.Doc.Views.Redraw()
+
 
     /// <summary>Changes the color of multiple lights.</summary>
     /// <param name="objectIds">(Guid seq) The light objects's identifiers</param>
@@ -268,6 +336,15 @@ module AutoOpenLight =
         State.Doc.Views.Redraw()
 
 
+    /// <summary>Returns the color of a light.</summary>
+    /// <param name="geometryObject">(Light) The light geometry to use.</param>
+    /// <returns>(Drawing.Color) The current color.</returns>
+    static member LightColor(geometryObject:Light) : Drawing.Color = //GET
+        let light = geometryObject
+        let rc = light.Diffuse
+        rc
+
+
     /// <summary>Returns the number of light objects in the document.</summary>
     /// <returns>(int) The number of light objects in the document.</returns>
     static member LightCount() : int =
@@ -278,9 +355,8 @@ module AutoOpenLight =
     /// <param name="objectId">(Guid) The light object's identifier</param>
     /// <returns>(Vector3d) The current direction.</returns>
     static member LightDirection(objectId:Guid) : Vector3d = //GET
-        let light = RhinoScriptSyntax.CoerceLight(objectId)
-        let rc = light.Direction
-        rc
+        RhinoScriptSyntax.LightDirection(RhinoScriptSyntax.CoerceLight(objectId))
+
 
     /// <summary>Changes the direction of a light object.</summary>
     /// <param name="objectId">(Guid) The light object's identifier</param>
@@ -292,6 +368,7 @@ module AutoOpenLight =
         if not<|  State.Doc.Lights.Modify(objectId, light) then
             RhinoScriptingException.Raise "LightDirection failed.  objectId:'%s' direction:'%A'" (Pretty.str objectId) direction
         State.Doc.Views.Redraw()
+
 
     /// <summary>Changes the direction of multiple light objects.</summary>
     /// <param name="objectIds">(Guid seq) The light objects's identifiers</param>
@@ -306,13 +383,21 @@ module AutoOpenLight =
         State.Doc.Views.Redraw()
 
 
+    /// <summary>Returns the direction of a light object.</summary>
+    /// <param name="geometryObject">(Light) The light geometry to use.</param>
+    /// <returns>(Vector3d) The current direction.</returns>
+    static member LightDirection(geometryObject:Light) : Vector3d = //GET
+        let light = geometryObject
+        let rc = light.Direction
+        rc
+
+
     /// <summary>Returns the location of a light object.</summary>
     /// <param name="objectId">(Guid) The light object's identifier</param>
     /// <returns>(Point3d) The current location.</returns>
     static member LightLocation(objectId:Guid) : Point3d = //GET
-        let light = RhinoScriptSyntax.CoerceLight(objectId)
-        let rc = light.Location
-        rc
+        RhinoScriptSyntax.LightLocation(RhinoScriptSyntax.CoerceLight(objectId))
+
 
     /// <summary>Changes the location of a light object.</summary>
     /// <param name="objectId">(Guid) The light object's identifier</param>
@@ -324,6 +409,7 @@ module AutoOpenLight =
         if not<|  State.Doc.Lights.Modify(objectId, light) then
             RhinoScriptingException.Raise "LightLocation failed.  objectId:'%s' location:'%A'" (Pretty.str objectId) location
         State.Doc.Views.Redraw()
+
 
     /// <summary>Changes the location of multiple light objects.</summary>
     /// <param name="objectIds">(Guid seq) The light objects's identifiers</param>
@@ -338,13 +424,21 @@ module AutoOpenLight =
         State.Doc.Views.Redraw()
 
 
+    /// <summary>Returns the location of a light object.</summary>
+    /// <param name="geometryObject">(Light) The light geometry to use.</param>
+    /// <returns>(Point3d) The current location.</returns>
+    static member LightLocation(geometryObject:Light) : Point3d = //GET
+        let light = geometryObject
+        let rc = light.Location
+        rc
+
+
     /// <summary>Returns the name of a light object.</summary>
     /// <param name="objectId">(Guid) The light object's identifier</param>
     /// <returns>(string) The current name.</returns>
     static member LightName(objectId:Guid) : string = //GET
-        let light = RhinoScriptSyntax.CoerceLight(objectId)
-        let rc = light.Name
-        rc
+        RhinoScriptSyntax.LightName(RhinoScriptSyntax.CoerceLight(objectId))
+
 
     /// <summary>Changes the name of a light object.</summary>
     /// <param name="objectId">(Guid) The light object's identifier</param>
@@ -356,6 +450,8 @@ module AutoOpenLight =
         if not <|  State.Doc.Lights.Modify(objectId, light) then
             RhinoScriptingException.Raise "LightName failed.  objectId:'%s' name:'%A'" (Pretty.str objectId) name
         State.Doc.Views.Redraw()
+
+
     /// <summary>Changes the name of multiple light objects.</summary>
     /// <param name="objectIds">(Guid seq) The light objects's identifiers</param>
     /// <param name="name">(string) The light's new name</param>
@@ -367,6 +463,15 @@ module AutoOpenLight =
             if not <|  State.Doc.Lights.Modify(objectId, light) then
                 RhinoScriptingException.Raise "LightName failed.  objectId:'%s' name:'%A'" (Pretty.str objectId) name
         State.Doc.Views.Redraw()
+
+
+    /// <summary>Returns the name of a light object.</summary>
+    /// <param name="geometryObject">(Light) The light geometry to use.</param>
+    /// <returns>(string) The current name.</returns>
+    static member LightName(geometryObject:Light) : string = //GET
+        let light = geometryObject
+        let rc = light.Name
+        rc
 
 
     /// <summary>Returns list of identifiers of light objects in the document.</summary>
@@ -384,9 +489,16 @@ module AutoOpenLight =
     /// <param name="objectId">(Guid) The light object's identifier</param>
     /// <returns>(Plane*float*float) The Plane, X and Y length.</returns>
     static member RectangularLightPlane(objectId:Guid) : Plane*float*float =
-        let light = RhinoScriptSyntax.CoerceLight(objectId)
+        RhinoScriptSyntax.RectangularLightPlane(RhinoScriptSyntax.CoerceLight(objectId))
+
+
+    /// <summary>Returns the Plane of a rectangular light object.</summary>
+    /// <param name="geometryObject">(Light) The light geometry to use.</param>
+    /// <returns>(Plane*float*float) The Plane, X and Y length.</returns>
+    static member RectangularLightPlane(geometryObject:Light) : Plane*float*float =
+        let light = geometryObject
         if light.LightStyle <> LightStyle.WorldRectangular then
-            RhinoScriptingException.Raise "RectangularLightPlane failed.  objectId:'%s'" (Pretty.str objectId)
+            RhinoScriptingException.Raise "RectangularLightPlane failed.  geometryObject:'%s'" (Pretty.str geometryObject)
         let location = light.Location
         let length = light.Length
         let width = light.Width
@@ -399,11 +511,8 @@ module AutoOpenLight =
     /// <param name="objectId">(Guid) The light object's identifier</param>
     /// <returns>(float) The current hardness.</returns>
     static member SpotLightHardness(objectId:Guid) : float = //GET
-        let light = RhinoScriptSyntax.CoerceLight(objectId)
-        if light.LightStyle <> LightStyle.WorldSpot then
-            RhinoScriptingException.Raise "SpotLightHardness failed.  objectId:'%s'" (Pretty.str objectId)
-        let rc = light.HotSpot
-        rc
+        RhinoScriptSyntax.SpotLightHardness(RhinoScriptSyntax.CoerceLight(objectId))
+
 
     /// <summary>Changes the hardness of a spot light. Spotlight hardness
     /// controls the fully illuminated region.</summary>
@@ -418,6 +527,7 @@ module AutoOpenLight =
         if not <|  State.Doc.Lights.Modify(objectId, light) then
             RhinoScriptingException.Raise "SpotLightHardness failed.  objectId:'%s' hardness:'%A'" (Pretty.str objectId) hardness
         State.Doc.Views.Redraw()
+
 
     /// <summary>Changes the hardness of multiple spot lights. Spotlight hardness
     /// controls the fully illuminated region.</summary>
@@ -435,16 +545,24 @@ module AutoOpenLight =
         State.Doc.Views.Redraw()
 
 
+    /// <summary>Returns the hardness of a spot light. Spotlight hardness
+    /// controls the fully illuminated region.</summary>
+    /// <param name="geometryObject">(Light) The light geometry to use.</param>
+    /// <returns>(float) The current hardness.</returns>
+    static member SpotLightHardness(geometryObject:Light) : float = //GET
+        let light = geometryObject
+        if light.LightStyle <> LightStyle.WorldSpot then
+            RhinoScriptingException.Raise "SpotLightHardness failed.  geometryObject:'%s'" (Pretty.str geometryObject)
+        let rc = light.HotSpot
+        rc
+
+
     /// <summary>Returns the radius of a spot light.</summary>
     /// <param name="objectId">(Guid) The light object's identifier</param>
     /// <returns>(float) The current radius.</returns>
     static member SpotLightRadius(objectId:Guid) : float = //GET
-        let light = RhinoScriptSyntax.CoerceLight(objectId)
-        if light.LightStyle <> LightStyle.WorldSpot then
-            RhinoScriptingException.Raise "SpotLightRadius failed.  objectId:'%s'" (Pretty.str objectId)
-        let radians = light.SpotAngleRadians
-        let rc = light.Direction.Length * tan(radians)
-        rc
+        RhinoScriptSyntax.SpotLightRadius(RhinoScriptSyntax.CoerceLight(objectId))
+
 
     /// <summary>Changes the radius of a spot light.</summary>
     /// <param name="objectId">(Guid) The light object's identifier</param>
@@ -459,6 +577,7 @@ module AutoOpenLight =
         if not <|  State.Doc.Lights.Modify(objectId, light) then
             RhinoScriptingException.Raise "SpotLightRadius failed.  objectId:'%s' radius:'%A'" (Pretty.str objectId) radius
         State.Doc.Views.Redraw()
+
 
     /// <summary>Changes the radius of multiple spot lights.</summary>
     /// <param name="objectIds">(Guid seq) The light objects's identifiers</param>
@@ -476,15 +595,24 @@ module AutoOpenLight =
         State.Doc.Views.Redraw()
 
 
+    /// <summary>Returns the radius of a spot light.</summary>
+    /// <param name="geometryObject">(Light) The light geometry to use.</param>
+    /// <returns>(float) The current radius.</returns>
+    static member SpotLightRadius(geometryObject:Light) : float = //GET
+        let light = geometryObject
+        if light.LightStyle <> LightStyle.WorldSpot then
+            RhinoScriptingException.Raise "SpotLightRadius failed.  geometryObject:'%s'" (Pretty.str geometryObject)
+        let radians = light.SpotAngleRadians
+        let rc = light.Direction.Length * tan(radians)
+        rc
+
+
     /// <summary>Returns the shadow intensity of a spot light.</summary>
     /// <param name="objectId">(Guid) The light object's identifier</param>
     /// <returns>(float) The current intensity.</returns>
     static member SpotLightShadowIntensity(objectId:Guid) : float = //GET
-        let light = RhinoScriptSyntax.CoerceLight(objectId)
-        if light.LightStyle <> LightStyle.WorldSpot then
-            RhinoScriptingException.Raise "SpotLightShadowIntensity failed.  objectId:'%s'" (Pretty.str objectId)
-        let rc = light.ShadowIntensity
-        rc
+        RhinoScriptSyntax.SpotLightShadowIntensity(RhinoScriptSyntax.CoerceLight(objectId))
+
 
     /// <summary>Changes the shadow intensity of a spot light.</summary>
     /// <param name="objectId">(Guid) The light object's identifier</param>
@@ -498,6 +626,7 @@ module AutoOpenLight =
         if not <|  State.Doc.Lights.Modify(objectId, light) then
             RhinoScriptingException.Raise "SpotLightShadowIntensity failed.  objectId:'%s' intensity:'%A'" (Pretty.str objectId) intensity
         State.Doc.Views.Redraw()
+
 
     /// <summary>Changes the shadow intensity of multiple spot lights.</summary>
     /// <param name="objectIds">(Guid seq) The light objects's identifiers</param>
@@ -514,5 +643,14 @@ module AutoOpenLight =
         State.Doc.Views.Redraw()
 
 
+    /// <summary>Returns the shadow intensity of a spot light.</summary>
+    /// <param name="geometryObject">(Light) The light geometry to use.</param>
+    /// <returns>(float) The current intensity.</returns>
+    static member SpotLightShadowIntensity(geometryObject:Light) : float = //GET
+        let light = geometryObject
+        if light.LightStyle <> LightStyle.WorldSpot then
+            RhinoScriptingException.Raise "SpotLightShadowIntensity failed.  geometryObject:'%s'" (Pretty.str geometryObject)
+        let rc = light.ShadowIntensity
+        rc
 
 

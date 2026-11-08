@@ -1,4 +1,4 @@
-﻿namespace Rhino.Scripting
+namespace Rhino.Scripting
 
 open Rhino
 open System.ComponentModel
@@ -275,10 +275,7 @@ module AutoOpenGeometry =
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(float) area.</returns>
     static member Area(objectId:Guid) : float =
-        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        let mp = AreaMassProperties.Compute([rhobj.Geometry])
-        if mp |> isNull then RhinoScriptingException.Raise "Area: Unable to compute area mass properties from objectId:'%s'" (Pretty.str objectId)
-        mp.Area
+        RhinoScriptSyntax.Area(RhinoScriptSyntax.CoerceGeometry(objectId))
 
     /// <summary>Returns a world axis-aligned bounding box of several objects.
     ///   Estimated bounding boxes can be computed much (much) faster than accurate (or "tight") bounding boxes.
@@ -301,11 +298,7 @@ module AutoOpenGeometry =
     ///    To get the eight 3D points that define the bounding box call box.GetCorners()
     ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
     static member BoundingBoxEstimate(objects:Guid seq) : BoundingBox =
-        let mutable bbox = BoundingBox.Empty
-        for o in objects do
-            let g =  RhinoScriptSyntax.CoerceGeometry o
-            bbox <- BoundingBox.Union(bbox, g.GetBoundingBox(false)) //https://discourse.mcneel.com/t/questions-about-getboundingbox-bool/32092/5
-        bbox
+        RhinoScriptSyntax.BoundingBoxEstimate(objects |> Seq.map RhinoScriptSyntax.CoerceGeometry)
 
     /// <summary>Returns a world axis-aligned bounding box of one object.
     ///   Estimated bounding boxes can be computed much (much) faster than accurate (or "tight") bounding boxes.
@@ -315,21 +308,22 @@ module AutoOpenGeometry =
     ///    To get the eight 3D points that define the bounding box call box.GetCorners()
     ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
     static member BoundingBoxEstimate(object:Guid) : BoundingBox =
-        let g =  RhinoScriptSyntax.CoerceGeometry object
-        g.GetBoundingBox(false) //https://discourse.mcneel.com/t/questions-about-getboundingbox-bool/32092/5
+        RhinoScriptSyntax.BoundingBoxEstimate(RhinoScriptSyntax.CoerceGeometry(object))
 
 
-    /// <summary>Returns a world axis-aligned bounding box of several objects.</summary>
-    /// <param name="objects">(Guid seq) The identifiers of the objects</param>
+
+
+    /// <summary>Returns a world axis-aligned bounding box of one object.
+    ///   Estimated bounding boxes can be computed much (much) faster than accurate (or "tight") bounding boxes.
+    ///   Estimated bounding boxes are always similar to or larger than accurate bounding boxes.</summary>
+    /// <param name="object">(GeometryBase) Geometry to use directly.</param>
     /// <returns>(Geometry.BoundingBox) The BoundingBox (oriented to the World XY Plane).
     ///    To get the eight 3D points that define the bounding box call box.GetCorners()
     ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
-    static member BoundingBox(objects:Guid seq) : BoundingBox =
-        let mutable bbox = BoundingBox.Empty
-        for o in objects do
-            let g =  RhinoScriptSyntax.CoerceGeometry o
-            bbox <- BoundingBox.Union(bbox, g.GetBoundingBox(true))
-        bbox
+    static member BoundingBoxEstimate(object:GeometryBase) : BoundingBox =
+        let g =  object
+        g.GetBoundingBox(false) //https://discourse.mcneel.com/t/questions-about-getboundingbox-bool/32092/5
+
 
     /// <summary>Returns a world axis-aligned bounding box of several geometry objects.</summary>
     /// <param name="geos">(GeometryBase seq) The geometries</param>
@@ -343,14 +337,21 @@ module AutoOpenGeometry =
         bbox
 
 
+    /// <summary>Returns a world axis-aligned bounding box of several objects.</summary>
+    /// <param name="objects">(Guid seq) The identifiers of the objects</param>
+    /// <returns>(Geometry.BoundingBox) The BoundingBox (oriented to the World XY Plane).
+    ///    To get the eight 3D points that define the bounding box call box.GetCorners()
+    ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
+    static member BoundingBox(objects:Guid seq) : BoundingBox =
+        RhinoScriptSyntax.BoundingBox(objects |> Seq.map RhinoScriptSyntax.CoerceGeometry)
+
     /// <summary>Returns a world axis-aligned bounding box of one object.</summary>
     /// <param name="object">(Guid) The identifier of the object</param>
     /// <returns>(Geometry.BoundingBox) The BoundingBox (oriented to the World XY Plane).
     ///    To get the eight 3D points that define the bounding box call box.GetCorners()
     ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
     static member BoundingBox(object:Guid) : BoundingBox =
-        let g =  RhinoScriptSyntax.CoerceGeometry object
-        g.GetBoundingBox(true) //https://discourse.mcneel.com/t/questions-about-getboundingbox-bool/32092/5
+        RhinoScriptSyntax.BoundingBox(RhinoScriptSyntax.CoerceGeometry(object))
 
     /// <summary>Returns a custom Plane axis-aligned bounding box of several objects.</summary>
     /// <param name="objects">(Guid seq) The identifiers of the objects</param>
@@ -362,20 +363,7 @@ module AutoOpenGeometry =
     ///    To get the eight 3D points that define the bounding box call box.GetCorners()
     ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
     static member BoundingBox(objects:Guid seq, plane:Plane, [<OPT;DEF(true)>]inWorldCoords:bool) : Box =
-        let mutable bbox = BoundingBox.Empty
-        if not plane.IsValid then RhinoScriptingException.Raise "Invalid Geometry.Plane:%s in RhinoScriptSyntax.BoundingBox of %s" plane.Pretty (Pretty.str objects)
-        let worldtoplane = Transform.ChangeBasis(Plane.WorldXY, plane)
-        objects
-        |> Seq.map RhinoScriptSyntax.CoerceGeometry
-        |> Seq.iter (fun g -> bbox <- BoundingBox.Union(bbox, g.GetBoundingBox(worldtoplane)))
-
-        if  inWorldCoords then
-            let planetoworld = Transform.ChangeBasis(plane, Plane.WorldXY)
-            let box = Box(bbox)
-            box.Transform(planetoworld) |> RhinoScriptingException.FailIfFalse "plane Transform in rs.BoundingBox()"
-            box
-        else
-            Box(bbox) // return in Plane coordinates not worldxy
+        RhinoScriptSyntax.BoundingBox(objects |> Seq.map RhinoScriptSyntax.CoerceGeometry, plane, inWorldCoords)
 
     /// <summary>Returns a custom Plane axis-aligned bounding box of one object.</summary>
     /// <param name="object">(Guid) The identifier of the object</param>
@@ -387,6 +375,54 @@ module AutoOpenGeometry =
     ///    To get the eight 3D points that define the bounding box call box.GetCorners()
     ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
     static member BoundingBox(object:Guid, plane:Plane, [<OPT;DEF(true)>]inWorldCoords:bool) : Box =
+        RhinoScriptSyntax.BoundingBox(RhinoScriptSyntax.CoerceGeometry(object), plane, inWorldCoords)
+
+
+    /// <summary>Returns a world axis-aligned bounding box of one object.</summary>
+    /// <param name="object">(GeometryBase) Geometry to use directly.</param>
+    /// <returns>(Geometry.BoundingBox) The BoundingBox (oriented to the World XY Plane).
+    ///    To get the eight 3D points that define the bounding box call box.GetCorners()
+    ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
+    static member BoundingBox(object:GeometryBase) : BoundingBox =
+        let g =  object
+        g.GetBoundingBox(true) //https://discourse.mcneel.com/t/questions-about-getboundingbox-bool/32092/5
+
+
+    /// <summary>Returns a custom Plane axis-aligned bounding box of several objects.</summary>
+    /// <param name="objects">(GeometryBase seq) Geometry to use directly.</param>
+    /// <param name="plane">(Plane) Plane to which the bounding box should be aligned</param>
+    /// <param name="inWorldCoords">(bool) Optional, default value: <c>true</c>
+    ///    Returns the box as world coordinates or custom Plane coordinates.</param>
+    /// <returns>(Geometry.Box) The Box ,oriented to the Plane or in Plane coordinates.
+    ///    It cannot be a Geometry.BoundingBox since it is not in World XY
+    ///    To get the eight 3D points that define the bounding box call box.GetCorners()
+    ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
+    static member BoundingBox(objects:GeometryBase seq, plane:Plane, [<OPT;DEF(true)>]inWorldCoords:bool) : Box =
+        let mutable bbox = BoundingBox.Empty
+        if not plane.IsValid then RhinoScriptingException.Raise "Invalid Geometry.Plane:%s in RhinoScriptSyntax.BoundingBox of %s" plane.Pretty (Pretty.str objects)
+        let worldtoplane = Transform.ChangeBasis(Plane.WorldXY, plane)
+        objects
+        |> Seq.iter (fun g -> bbox <- BoundingBox.Union(bbox, g.GetBoundingBox(worldtoplane)))
+
+        if  inWorldCoords then
+            let planetoworld = Transform.ChangeBasis(plane, Plane.WorldXY)
+            let box = Box(bbox)
+            box.Transform(planetoworld) |> RhinoScriptingException.FailIfFalse "plane Transform in rs.BoundingBox()"
+            box
+        else
+            Box(bbox) // return in Plane coordinates not worldxy
+
+
+    /// <summary>Returns a custom Plane axis-aligned bounding box of one object.</summary>
+    /// <param name="object">(GeometryBase) Geometry to use directly.</param>
+    /// <param name="plane">(Plane) Plane to which the bounding box should be aligned</param>
+    /// <param name="inWorldCoords">(bool) Optional, default value: <c>true</c>
+    ///    Returns the box as world coordinates or custom Plane coordinates.</param>
+    /// <returns>(Geometry.Box) The Box ,oriented to the Plane or in Plane coordinates.
+    ///    It cannot be a Geometry.BoundingBox since it is not in World XY
+    ///    To get the eight 3D points that define the bounding box call box.GetCorners()
+    ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
+    static member BoundingBox(object:GeometryBase, plane:Plane, [<OPT;DEF(true)>]inWorldCoords:bool) : Box =
         RhinoScriptSyntax.BoundingBox([object],plane,inWorldCoords)
 
     /// <summary>Returns a new inflated the box with equal amounts in all directions.
@@ -423,8 +459,16 @@ module AutoOpenGeometry =
     /// <param name="second">(Guid) The identifier of the second object to compare</param>
     /// <returns>(bool) True if the objects are geometrically identical, otherwise False.</returns>
     static member CompareGeometry(first:Guid, second:Guid) : bool =
-        let firstG = RhinoScriptSyntax.CoerceGeometry(first)
-        let secondG = RhinoScriptSyntax.CoerceGeometry(second)
+        RhinoScriptSyntax.CompareGeometry(RhinoScriptSyntax.CoerceGeometry(first), RhinoScriptSyntax.CoerceGeometry(second))
+
+
+    /// <summary>Compares two objects to determine if they are geometrically identical.</summary>
+    /// <param name="first">(GeometryBase) Geometry to use directly.</param>
+    /// <param name="second">(GeometryBase) Geometry to use directly.</param>
+    /// <returns>(bool) True if the objects are geometrically identical, otherwise False.</returns>
+    static member CompareGeometry(first:GeometryBase, second:GeometryBase) : bool =
+        let firstG = first
+        let secondG = second
         GeometryBase.GeometryEquals(firstG, secondG)
 
 
@@ -434,55 +478,105 @@ module AutoOpenGeometry =
     ///    Delete the text object after the Curves have been created</param>
     /// <returns>(Guid array) Array of outline Curves.</returns>
     static member ExplodeText(textId:Guid, [<OPT;DEF(false)>]delete:bool) : ResizeArray<Guid> =
-        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(textId)
-        let curves = (rhobj.Geometry:?>TextEntity).Explode()
-        let attr = rhobj.Attributes
-        let rc = curves  |> RArr.mapArr ( fun curve -> State.Doc.Objects.AddCurve(curve, attr) )
-        if delete then State.Doc.Objects.Delete(rhobj, quiet=true) |> ignore<bool>
+        let textObject = RhinoScriptSyntax.CoerceRhinoObject(textId)
+        let curves = RhinoScriptSyntax.ExplodeText(textObject.Geometry :?> TextEntity)
+        let ids = curves |> RArr.mapSeq (fun curve -> State.Doc.Objects.AddCurve(curve, textObject.Attributes))
+        if delete then State.Doc.Objects.Delete(textObject, quiet=true) |> ignore<bool>
         State.Doc.Views.Redraw()
-        rc
+        ids
+
+
+    /// <summary>Creates outline curves from text geometry without adding them to the document.</summary>
+    /// <param name="text">(TextEntity) The text geometry to explode.</param>
+    /// <returns>(Curve ResizeArray) The outline curves.</returns>
+    static member ExplodeText(text:TextEntity) : ResizeArray<Curve> =
+        let curves = text.Explode()
+        if isNull curves then RhinoScriptingException.Raise "ExplodeText: Unable to create text outlines."
+        ResizeArray(curves)
 
 
     /// <summary>Checks if that an object is a clipping Plane object. Returns false for any other Rhino object.</summary>
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True if the object with a given objectId is a clipping Plane.</returns>
     static member IsClippingPlane(objectId:Guid) : bool =
-        RhinoScriptSyntax.CoerceGeometry objectId :? ClippingPlaneSurface
+        RhinoScriptSyntax.IsClippingPlane(RhinoScriptSyntax.CoerceGeometry(objectId))
+
+
+    /// <summary>Checks if that an object is a clipping Plane object. Returns false for any other Rhino object.</summary>
+    /// <param name="geometryObject">(GeometryBase) Geometry to use directly.</param>
+    /// <returns>(bool) True if the object with a given geometryObject is a clipping Plane.</returns>
+    static member IsClippingPlane(geometryObject:GeometryBase) : bool =
+        geometryObject :? ClippingPlaneSurface
 
 
     /// <summary>Checks if an object is a point object. Returns false for any other Rhino object.</summary>
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True if the object with a given objectId is a point.</returns>
     static member IsPoint(objectId:Guid) : bool =
-        RhinoScriptSyntax.CoerceGeometry objectId :? Point
+        RhinoScriptSyntax.IsPoint(RhinoScriptSyntax.CoerceGeometry(objectId))
+
+
+    /// <summary>Checks if an object is a point object. Returns false for any other Rhino object.</summary>
+    /// <param name="geometryObject">(GeometryBase) Geometry to use directly.</param>
+    /// <returns>(bool) True if the object with a given geometryObject is a point.</returns>
+    static member IsPoint(geometryObject:GeometryBase) : bool =
+        geometryObject :? Point
 
 
     /// <summary>Checks if an object is a point cloud object. Returns false for any other Rhino object.</summary>
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True if the object with a given objectId is a point cloud.</returns>
     static member IsPointCloud(objectId:Guid) : bool =
-        RhinoScriptSyntax.CoerceGeometry objectId :? PointCloud
+        RhinoScriptSyntax.IsPointCloud(RhinoScriptSyntax.CoerceGeometry(objectId))
+
+
+    /// <summary>Checks if an object is a point cloud object. Returns false for any other Rhino object.</summary>
+    /// <param name="geometryObject">(GeometryBase) Geometry to use directly.</param>
+    /// <returns>(bool) True if the object with a given geometryObject is a point cloud.</returns>
+    static member IsPointCloud(geometryObject:GeometryBase) : bool =
+        geometryObject :? PointCloud
 
 
     /// <summary>Checks if an object is a text object. Returns false for any other Rhino object.</summary>
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True if the object with a given objectId is a text object.</returns>
     static member IsText(objectId:Guid) : bool =
-        RhinoScriptSyntax.CoerceGeometry objectId :? TextEntity
+        RhinoScriptSyntax.IsText(RhinoScriptSyntax.CoerceGeometry(objectId))
+
+
+    /// <summary>Checks if an object is a text object. Returns false for any other Rhino object.</summary>
+    /// <param name="geometryObject">(GeometryBase) Geometry to use directly.</param>
+    /// <returns>(bool) True if the object with a given geometryObject is a text object.</returns>
+    static member IsText(geometryObject:GeometryBase) : bool =
+        geometryObject :? TextEntity
 
 
     /// <summary>Checks if an object is a text dot object. Returns false for any other Rhino object.</summary>
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True if the object with a given objectId is a text dot object.</returns>
     static member IsTextDot(objectId:Guid) : bool =
-        RhinoScriptSyntax.CoerceGeometry objectId :? TextDot
+        RhinoScriptSyntax.IsTextDot(RhinoScriptSyntax.CoerceGeometry(objectId))
+
+
+    /// <summary>Checks if an object is a text dot object. Returns false for any other Rhino object.</summary>
+    /// <param name="geometryObject">(GeometryBase) Geometry to use directly.</param>
+    /// <returns>(bool) True if the object with a given geometryObject is a text dot object.</returns>
+    static member IsTextDot(geometryObject:GeometryBase) : bool =
+        geometryObject :? TextDot
 
 
     /// <summary>Returns the point count of a point cloud object.</summary>
     /// <param name="objectId">(Guid) The point cloud object's identifier</param>
     /// <returns>(int) number of points.</returns>
     static member PointCloudCount(objectId:Guid) : int =
-        let pc = RhinoScriptSyntax.CoercePointCloud(objectId)
+        RhinoScriptSyntax.PointCloudCount(RhinoScriptSyntax.CoercePointCloud(objectId))
+
+
+    /// <summary>Returns the point count of a point cloud object.</summary>
+    /// <param name="geometryObject">(PointCloud) Geometry to use directly.</param>
+    /// <returns>(int) number of points.</returns>
+    static member PointCloudCount(geometryObject:PointCloud) : int =
+        let pc = geometryObject
         pc.Count
 
 
@@ -490,7 +584,14 @@ module AutoOpenGeometry =
     /// <param name="objectId">(Guid) The point cloud object's identifier</param>
     /// <returns>(bool) True if cloud has hidden points, otherwise False.</returns>
     static member PointCloudHasHiddenPoints(objectId:Guid) : bool =
-        let pc = RhinoScriptSyntax.CoercePointCloud(objectId)
+        RhinoScriptSyntax.PointCloudHasHiddenPoints(RhinoScriptSyntax.CoercePointCloud(objectId))
+
+
+    /// <summary>Checks if a point cloud has hidden points.</summary>
+    /// <param name="geometryObject">(PointCloud) Geometry to use directly.</param>
+    /// <returns>(bool) True if cloud has hidden points, otherwise False.</returns>
+    static member PointCloudHasHiddenPoints(geometryObject:PointCloud) : bool =
+        let pc = geometryObject
         pc.HiddenPointCount>0
 
 
@@ -498,7 +599,14 @@ module AutoOpenGeometry =
     /// <param name="objectId">(Guid) The point cloud object's identifier</param>
     /// <returns>(bool) True if cloud has point colors, otherwise False.</returns>
     static member PointCloudHasPointColors(objectId:Guid) : bool =
-        let pc = RhinoScriptSyntax.CoercePointCloud(objectId)
+        RhinoScriptSyntax.PointCloudHasPointColors(RhinoScriptSyntax.CoercePointCloud(objectId))
+
+
+    /// <summary>Checks if a point cloud has point colors.</summary>
+    /// <param name="geometryObject">(PointCloud) Geometry to use directly.</param>
+    /// <returns>(bool) True if cloud has point colors, otherwise False.</returns>
+    static member PointCloudHasPointColors(geometryObject:PointCloud) : bool =
+        let pc = geometryObject
         pc.ContainsColors
 
 
@@ -506,11 +614,7 @@ module AutoOpenGeometry =
     /// <param name="objectId">(Guid) The point cloud object's identifier</param>
     /// <returns>(bool ResizeArray) List of point cloud hidden states.</returns>
     static member PointCloudHidePoints(objectId:Guid) : ResizeArray<bool> = //GET
-        let pc = RhinoScriptSyntax.CoercePointCloud(objectId)
-        let r = ResizeArray(pc.Count)
-        for i = 0 to pc.Count - 1 do
-            r.Add(pc.[i].Hidden)
-        r
+        RhinoScriptSyntax.PointCloudHidePoints(RhinoScriptSyntax.CoercePointCloud(objectId))
 
     /// <summary>Modifies the hidden points of a point cloud object.</summary>
     /// <param name="objectId">(Guid) The point cloud object's identifier</param>
@@ -531,16 +635,23 @@ module AutoOpenGeometry =
         State.Doc.Views.Redraw()
 
 
+    /// <summary>Returns the hidden state of points in a point cloud object.</summary>
+    /// <param name="geometryObject">(PointCloud) Geometry to use directly.</param>
+    /// <returns>(bool ResizeArray) List of point cloud hidden states.</returns>
+    static member PointCloudHidePoints(geometryObject:PointCloud) : ResizeArray<bool> = //GET
+        let pc = geometryObject
+        let r = ResizeArray(pc.Count)
+        for i = 0 to pc.Count - 1 do
+            r.Add(pc.[i].Hidden)
+        r
+
+
 
     /// <summary>Returns the point colors of a point cloud object.</summary>
     /// <param name="objectId">(Guid) The point cloud object's identifier</param>
     /// <returns>(Drawing.Color ResizeArray) List of point cloud colors.</returns>
     static member PointCloudPointColors(objectId:Guid) : Drawing.Color ResizeArray = //GET
-        let pc = RhinoScriptSyntax.CoercePointCloud objectId
-        let r = ResizeArray(pc.Count)
-        for i = 0 to pc.Count - 1 do
-            r.Add(pc.[i].Color)
-        r
+        RhinoScriptSyntax.PointCloudPointColors(RhinoScriptSyntax.CoercePointCloud(objectId))
 
     /// <summary>Modifies the point colors of a point cloud object.</summary>
     /// <param name="objectId">(Guid) The point cloud object's identifier</param>
@@ -558,12 +669,30 @@ module AutoOpenGeometry =
         State.Doc.Views.Redraw()
 
 
+    /// <summary>Returns the point colors of a point cloud object.</summary>
+    /// <param name="geometryObject">(PointCloud) Geometry to use directly.</param>
+    /// <returns>(Drawing.Color ResizeArray) List of point cloud colors.</returns>
+    static member PointCloudPointColors(geometryObject:PointCloud) : Drawing.Color ResizeArray = //GET
+        let pc = geometryObject
+        let r = ResizeArray(pc.Count)
+        for i = 0 to pc.Count - 1 do
+            r.Add(pc.[i].Color)
+        r
+
+
 
     /// <summary>Returns the points of a point cloud object.</summary>
     /// <param name="objectId">(Guid) The point cloud object's identifier</param>
     /// <returns>(Point3d array) list of points.</returns>
     static member PointCloudPoints(objectId:Guid) : array<Point3d> =
-        let pc = RhinoScriptSyntax.CoercePointCloud(objectId)
+        RhinoScriptSyntax.PointCloudPoints(RhinoScriptSyntax.CoercePointCloud(objectId))
+
+
+    /// <summary>Returns the points of a point cloud object.</summary>
+    /// <param name="geometryObject">(PointCloud) Geometry to use directly.</param>
+    /// <returns>(Point3d array) list of points.</returns>
+    static member PointCloudPoints(geometryObject:PointCloud) : array<Point3d> =
+        let pc = geometryObject
         pc.GetPoints()
 
 
@@ -596,7 +725,7 @@ module AutoOpenGeometry =
     /// <param name="objectId">(Guid) The identifier of a point object</param>
     /// <returns>(Point3d) The current 3-D point location.</returns>
     static member PointCoordinates(objectId:Guid) : Point3d = //GET
-        RhinoScriptSyntax.Coerce3dPoint(objectId)
+        RhinoScriptSyntax.PointCoordinates(RhinoScriptSyntax.Coerce3dPoint(objectId))
 
 
     /// <summary>Modifies the X, Y, and Z coordinates of a point object.</summary>
@@ -609,12 +738,27 @@ module AutoOpenGeometry =
         State.Doc.Views.Redraw()
 
 
+    /// <summary>Returns the X, Y, and Z coordinates of a point object.</summary>
+    /// <param name="point">(Point3d) Geometry to use directly.</param>
+    /// <returns>(Point3d) The current 3-D point location.</returns>
+    static member PointCoordinates(point:Point3d) : Point3d = //GET
+        point
+
+
+
+    /// <summary>Returns the X, Y, and Z coordinates of a point geometry object.</summary>
+    /// <param name="point">(Point) The point geometry.</param>
+    /// <returns>(Point3d) The current 3-D point location.</returns>
+    static member PointCoordinates(point:Point) : Point3d = //GET
+        point.Location
+
+
 
     /// <summary>Returns the font of a text dot.</summary>
     /// <param name="objectId">(Guid) Identifier of a text dot object</param>
     /// <returns>(string) The current text dot font.</returns>
     static member TextDotFont(objectId:Guid) : string = //GET
-        (RhinoScriptSyntax.CoerceTextDot(objectId)).FontFace
+        RhinoScriptSyntax.TextDotFont(RhinoScriptSyntax.CoerceTextDot(objectId))
 
     /// <summary>Modifies the font of a text dot.</summary>
     /// <param name="objectId">(Guid) Identifier of a text dot object</param>
@@ -625,6 +769,7 @@ module AutoOpenGeometry =
         textdot.FontFace <-  fontFace
         if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "TextDotFont failed to change object %s to '%s'" (Pretty.str objectId) fontFace
         State.Doc.Views.Redraw()
+
 
     /// <summary>Modifies the font of multiple text dots.</summary>
     /// <param name="objectIds">(Guid seq) Identifiers of multiple text dot objects</param>
@@ -638,11 +783,20 @@ module AutoOpenGeometry =
         State.Doc.Views.Redraw()
 
 
+    /// <summary>Returns the font of a text dot.</summary>
+    /// <param name="geometryObject">(TextDot) Geometry to use directly.</param>
+    /// <returns>(string) The current text dot font.</returns>
+    static member TextDotFont(geometryObject:TextDot) : string = //GET
+        (geometryObject).FontFace
+
+
+
+
     /// <summary>Returns the font height of a text dot.</summary>
     /// <param name="objectId">(Guid) Identifier of a text dot object</param>
     /// <returns>(int) The current text dot height.</returns>
     static member TextDotHeight(objectId:Guid) : int = //GET
-        (RhinoScriptSyntax.CoerceTextDot(objectId)).FontHeight
+        RhinoScriptSyntax.TextDotHeight(RhinoScriptSyntax.CoerceTextDot(objectId))
 
     /// <summary>Modifies the font height of a text dot.</summary>
     /// <param name="objectId">(Guid) Identifier of a text dot object</param>
@@ -653,6 +807,7 @@ module AutoOpenGeometry =
         textdot.FontHeight <- height
         if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "TextDotHeight failed to change object %s to %d" (Pretty.str objectId) height
         State.Doc.Views.Redraw()
+
 
     /// <summary>Modifies the font height of multiple text dots.</summary>
     /// <param name="objectIds">(Guid seq) Identifiers of multiple text dot objects</param>
@@ -666,11 +821,20 @@ module AutoOpenGeometry =
         State.Doc.Views.Redraw()
 
 
+    /// <summary>Returns the font height of a text dot.</summary>
+    /// <param name="geometryObject">(TextDot) Geometry to use directly.</param>
+    /// <returns>(int) The current text dot height.</returns>
+    static member TextDotHeight(geometryObject:TextDot) : int = //GET
+        (geometryObject).FontHeight
+
+
+
+
     /// <summary>Returns the location, or insertion point, on a text dot object.</summary>
     /// <param name="objectId">(Guid) Identifier of a text dot object</param>
     /// <returns>(Point3d) The current 3-D text dot location.</returns>
     static member TextDotPoint(objectId:Guid) : Point3d = //GET
-        (RhinoScriptSyntax.CoerceTextDot(objectId)).Point
+        RhinoScriptSyntax.TextDotPoint(RhinoScriptSyntax.CoerceTextDot(objectId))
 
 
     /// <summary>Modifies the location, or insertion point, on a text dot object.</summary>
@@ -684,13 +848,19 @@ module AutoOpenGeometry =
         State.Doc.Views.Redraw()
 
 
+    /// <summary>Returns the location, or insertion point, on a text dot object.</summary>
+    /// <param name="geometryObject">(TextDot) Geometry to use directly.</param>
+    /// <returns>(Point3d) The current 3-D text dot location.</returns>
+    static member TextDotPoint(geometryObject:TextDot) : Point3d = //GET
+        (geometryObject).Point
+
 
 
     /// <summary>Returns the text on a text dot object.</summary>
     /// <param name="objectId">(Guid) The identifier of a text dot object</param>
     /// <returns>(string) The current text dot text.</returns>
     static member TextDotText(objectId:Guid) : string = //GET
-        (RhinoScriptSyntax.CoerceTextDot(objectId)).Text
+        RhinoScriptSyntax.TextDotText(RhinoScriptSyntax.CoerceTextDot(objectId))
 
 
 
@@ -704,6 +874,7 @@ module AutoOpenGeometry =
         if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "TextDotText failed to change object %s to '%s'" (Pretty.str objectId) text
         State.Doc.Views.Redraw()
 
+
     /// <summary>Modifies the text on multiple text dot objects.</summary>
     /// <param name="objectIds">(Guid seq) The identifiers of multiple text dot objects</param>
     /// <param name="text">(string) A new string for the dot</param>
@@ -716,11 +887,59 @@ module AutoOpenGeometry =
         State.Doc.Views.Redraw()
 
 
+    /// <summary>Returns the text on a text dot object.</summary>
+    /// <param name="geometryObject">(TextDot) Geometry to use directly.</param>
+    /// <returns>(string) The current text dot text.</returns>
+    static member TextDotText(geometryObject:TextDot) : string = //GET
+        (geometryObject).Text
+
+
+
+
     /// <summary>Returns the font used by a text object.</summary>
     /// <param name="objectId">(Guid) The identifier of a text object</param>
     /// <returns>(string) The current font face name.</returns>
     static member TextObjectFont(objectId:Guid) : string = //GET
-        (RhinoScriptSyntax.CoerceTextEntity(objectId)).Font.QuartetName
+        RhinoScriptSyntax.TextObjectFont(RhinoScriptSyntax.CoerceTextEntity(objectId))
+
+
+    /// <summary>Modifies the font used by a text object. Keeps the current state of bold and italic when possible.</summary>
+    /// <param name="objectId">(Guid) The identifier of a text object</param>
+    /// <param name="font">(string) The new Font Name</param>
+    /// <returns>(unit) void, nothing.</returns>
+    static member TextObjectFont(objectId:Guid, font:string) : unit = //SET
+        let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
+        let fontdata = annotation.Font
+        let f =
+            DocObjects.Font.FromQuartetProperties(font, fontdata.Bold, fontdata.Italic)
+            // normally calls will not  go further than FromQuartetProperties(font, false, false)
+            // but there are a few rare fonts that don"t have a regular font
+            |? DocObjects.Font.FromQuartetProperties(font, bold=false, italic=false)
+            |? DocObjects.Font.FromQuartetProperties(font, bold=true , italic=false)
+            |? DocObjects.Font.FromQuartetProperties(font, bold=false, italic=true )
+            |? DocObjects.Font.FromQuartetProperties(font, bold=true , italic=true )
+            |? (RhinoScriptingException.Raise "TextObjectFont failed.  objectId:'%s' font:''%s''" (Pretty.str objectId) font)
+        annotation.Font <- f
+        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "TextObjectFont failed.  objectId:'%s' font:''%s''" (Pretty.str objectId) font
+        State.Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
+
+
+    /// <summary>Modifies the font used by multiple text objects. Keeps the current state of bold and italic when possible.</summary>
+    /// <param name="objectIds">(Guid seq) The identifiers of multiple text objects</param>
+    /// <param name="font">(string) The new Font Name</param>
+    /// <returns>(unit) void, nothing.</returns>
+    static member TextObjectFont(objectIds:Guid seq, font:string) : unit = //MULTISET
+        for objectId in objectIds do  RhinoScriptSyntax.TextObjectFont(objectId, font)
+        State.Doc.Views.Redraw()
+
+
+    /// <summary>Returns the font used by a text object.</summary>
+    /// <param name="geometryObject">(TextEntity) Geometry to use directly.</param>
+    /// <returns>(string) The current font face name.</returns>
+    static member TextObjectFont(geometryObject:TextEntity) : string = //GET
+        (geometryObject).Font.QuartetName
+
 
 
 
@@ -728,7 +947,7 @@ module AutoOpenGeometry =
     /// <param name="objectId">(Guid) The identifier of a text object</param>
     /// <returns>(float) The current text height.</returns>
     static member TextObjectHeight(objectId:Guid) : float = //GET
-        (RhinoScriptSyntax.CoerceTextEntity(objectId)).TextHeight
+        RhinoScriptSyntax.TextObjectHeight(RhinoScriptSyntax.CoerceTextEntity(objectId))
 
     /// <summary>Modifies the height of a text object.</summary>
     /// <param name="objectId">(Guid) The identifier of a text object</param>
@@ -739,6 +958,7 @@ module AutoOpenGeometry =
         annotation.TextHeight <-  height
         if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "TextObjectHeight failed.  objectId:'%s' height:'%s'" (Pretty.str objectId) (PrettyFormat.float height)
         State.Doc.Views.Redraw()
+
 
     /// <summary>Modifies the height of multiple text objects.</summary>
     /// <param name="objectIds">(Guid seq) The identifiers of multiple text objects</param>
@@ -752,11 +972,21 @@ module AutoOpenGeometry =
         State.Doc.Views.Redraw()
         State.Doc.Views.Redraw()
 
+
+    /// <summary>Returns the height of a text object.</summary>
+    /// <param name="geometryObject">(TextEntity) Geometry to use directly.</param>
+    /// <returns>(float) The current text height.</returns>
+    static member TextObjectHeight(geometryObject:TextEntity) : float = //GET
+        (geometryObject).TextHeight
+
+
+
+
     /// <summary>Returns the Plane used by a text object.</summary>
     /// <param name="objectId">(Guid) The identifier of a text object</param>
     /// <returns>(Plane) The current Plane.</returns>
     static member TextObjectPlane(objectId:Guid) : Plane = //GET
-        (RhinoScriptSyntax.CoerceTextEntity(objectId)).Plane
+        RhinoScriptSyntax.TextObjectPlane(RhinoScriptSyntax.CoerceTextEntity(objectId))
 
     /// <summary>Modifies the Plane used by a text object.</summary>
     /// <param name="objectId">(Guid) The identifier of a text object</param>
@@ -769,11 +999,19 @@ module AutoOpenGeometry =
         State.Doc.Views.Redraw()
 
 
+    /// <summary>Returns the Plane used by a text object.</summary>
+    /// <param name="geometryObject">(TextEntity) Geometry to use directly.</param>
+    /// <returns>(Plane) The current Plane.</returns>
+    static member TextObjectPlane(geometryObject:TextEntity) : Plane = //GET
+        (geometryObject).Plane
+
+
+
     /// <summary>Returns the location of a text object.</summary>
     /// <param name="objectId">(Guid) The identifier of a text object</param>
     /// <returns>(Point3d) The 3D point identifying the current location.</returns>
     static member TextObjectPoint(objectId:Guid) : Point3d = //GET
-        (RhinoScriptSyntax.CoerceTextEntity(objectId)).Plane.Origin
+        RhinoScriptSyntax.TextObjectPoint(RhinoScriptSyntax.CoerceTextEntity(objectId))
 
     /// <summary>Modifies the location of a text object.</summary>
     /// <param name="objectId">(Guid) The identifier of a text object</param>
@@ -788,6 +1026,15 @@ module AutoOpenGeometry =
         if not <| State.Doc.Objects.Replace(objectId, text) then RhinoScriptingException.Raise "TextObjectPoint failed.  objectId:'%s' point:'%s'" (Pretty.str objectId) point.Pretty
         State.Doc.Views.Redraw()
 
+
+    /// <summary>Returns the location of a text object.</summary>
+    /// <param name="geometryObject">(TextEntity) Geometry to use directly.</param>
+    /// <returns>(Point3d) The 3D point identifying the current location.</returns>
+    static member TextObjectPoint(geometryObject:TextEntity) : Point3d = //GET
+        (geometryObject).Plane.Origin
+
+
+
     /// <summary>Returns the font style of a text object.</summary>
     /// <param name="objectId">(Guid) The identifier of a text object</param>
     /// <returns>(int) The current font style
@@ -796,89 +1043,7 @@ module AutoOpenGeometry =
     ///    2 = Italic
     ///    3 = Bold and Italic.</returns>
     static member TextObjectStyle(objectId:Guid) : int = //GET
-        let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
-        let fontdata = annotation.Font
-        let mutable rc = 0
-        if fontdata.Bold   then rc <- 1 + rc
-        if fontdata.Italic then rc <- 2 + rc
-        rc
-
-    /// <summary>Returns the plain text string of a text object.</summary>
-    /// <param name="objectId">(Guid) The identifier of a text object</param>
-    /// <returns>(string) The current string value.</returns>
-    static member TextObjectText(objectId:Guid) : string = //GET
-        let text = RhinoScriptSyntax.CoerceTextEntity(objectId)
-        text.PlainText
-
-    /// <summary>Modifies the plain text string of a text object.</summary>
-    /// <param name="objectId">(Guid) The identifier of a text object</param>
-    /// <param name="text">(string) A new text string</param>
-    /// <returns>(unit) void, nothing.</returns>
-    static member TextObjectText(objectId:Guid, text:string) : unit = //SET
-        let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
-        annotation.PlainText <-  text
-        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "TextObjectText failed.  objectId:'%s' text:'%s'" (Pretty.str objectId) text
-        State.Doc.Views.Redraw()
-
-
-
-    /// <summary>Modifies the plain text string of multiple text objects.</summary>
-    /// <param name="objectIds">(Guid seq) The identifiers of multiple text objects</param>
-    /// <param name="text">(string) A new text string</param>
-    /// <returns>(unit) void, nothing.</returns>
-    static member TextObjectText(objectIds:Guid seq, text:string) : unit = //MULTISET
-        for objectId in objectIds do
-            let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
-            annotation.PlainText <-  text
-            if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "TextObjectText failed.  objectId:'%s' text:'%s'" (Pretty.str objectId) text
-        State.Doc.Views.Redraw()
-
-
-     /// <summary>Returns the RichText formatting string of a text object.</summary>
-    /// <param name="objectId">(Guid) The identifier of a text object</param>
-    /// <returns>(string) The current RichText formatting string.</returns>
-    static member TextObjectRichText(objectId:Guid) : string = //GET
-        let text = RhinoScriptSyntax.CoerceTextEntity(objectId)
-        text.RichText
-
-
-    /// <summary>Modifies the RichText formatting string of a text object.</summary>
-    /// <param name="objectId">(Guid) The identifier of a text object</param>
-    /// <param name="rtfString">(string) A new text RichText formatting string</param>
-    /// <param name="style">(string) Optional, default value: <c>""</c> Name of dimension style</param>
-    /// <returns>(unit) void, nothing.</returns>
-    static member TextObjectRichText(objectId:Guid, rtfString:string,[<OPT;DEF("")>]style:string ) : unit = //SET
-        let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
-        if style <> "" then
-            let ds = State.Doc.DimStyles.FindName(style)
-            if isNull ds then  RhinoScriptingException.Raise "TextObjectRichText, style not found:'%s'"  style
-            annotation.SetRichText(rtfString, ds)
-        else
-            annotation.RichText <-  rtfString
-        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "TextObjectRichText failed.  objectId:'%s' text:'%s'" (Pretty.str objectId) rtfString
-        State.Doc.Views.Redraw()
-
-
-
-    /// <summary>Modifies the RichText formatting string of multiple text objects.</summary>
-    /// <param name="objectIds">(Guid seq) The identifiers of multiple text objects</param>
-    /// <param name="rtfString">(string) A new text RichText formatting string</param>
-    /// <param name="style">(string) Optional, default value: <c>""</c> Name of dimension style</param>
-    /// <returns>(unit) void, nothing.</returns>
-    static member TextObjectRichText(objectIds:Guid seq,  rtfString:string, [<OPT;DEF("")>]style:string ) : unit = //MULTISET
-        if style <> "" then
-            let ds = State.Doc.DimStyles.FindName(style)
-            if isNull ds then  RhinoScriptingException.Raise "TextObjectRichText, style not found:'%s'"  style
-            for objectId in objectIds do
-                let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
-                if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "TextObjectRichText failed.  objectId:'%s' text:'%s' style:'%s'" (Pretty.str objectId) rtfString style
-                annotation.SetRichText(rtfString, ds)
-        else
-            for objectId in objectIds do
-                let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
-                annotation.RichText <-  rtfString
-                if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "TextObjectRichText failed.  objectId:'%s' text:'%s'" (Pretty.str objectId) rtfString
-        State.Doc.Views.Redraw()
+        RhinoScriptSyntax.TextObjectStyle(RhinoScriptSyntax.CoerceTextEntity(objectId))
 
 
 
@@ -905,6 +1070,7 @@ module AutoOpenGeometry =
             RhinoScriptingException.Raise "TextObjectStyle failed.  objectId:'%s' bad style:%d" (Pretty.str objectId) style
         State.Doc.Views.Redraw()
 
+
     /// <summary>Modifies the font style of multiple text objects. Keeps the font face</summary>
     /// <param name="objectIds">(Guid seq) The identifiers of multiple text objects</param>
     /// <param name="style">(int) The font style. Can be any of the following flags
@@ -917,32 +1083,111 @@ module AutoOpenGeometry =
         for objectId in objectIds do RhinoScriptSyntax.TextObjectStyle(objectId, style)
 
 
-    /// <summary>Modifies the font used by a text object. Keeps the current state of bold and italic when possible.</summary>
-    /// <param name="objectId">(Guid) The identifier of a text object</param>
-    /// <param name="font">(string) The new Font Name</param>
-    /// <returns>(unit) void, nothing.</returns>
-    static member TextObjectFont(objectId:Guid, font:string) : unit = //SET
-        let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
+    /// <summary>Returns the font style of a text object.</summary>
+    /// <param name="geometryObject">(TextEntity) Geometry to use directly.</param>
+    /// <returns>(int) The current font style
+    ///    0 = Normal
+    ///    1 = Bold
+    ///    2 = Italic
+    ///    3 = Bold and Italic.</returns>
+    static member TextObjectStyle(geometryObject:TextEntity) : int = //GET
+        let annotation = geometryObject
         let fontdata = annotation.Font
-        let f =
-            DocObjects.Font.FromQuartetProperties(font, fontdata.Bold, fontdata.Italic)
-            // normally calls will not  go further than FromQuartetProperties(font, false, false)
-            // but there are a few rare fonts that don"t have a regular font
-            |? DocObjects.Font.FromQuartetProperties(font, bold=false, italic=false)
-            |? DocObjects.Font.FromQuartetProperties(font, bold=true , italic=false)
-            |? DocObjects.Font.FromQuartetProperties(font, bold=false, italic=true )
-            |? DocObjects.Font.FromQuartetProperties(font, bold=true , italic=true )
-            |? (RhinoScriptingException.Raise "TextObjectFont failed.  objectId:'%s' font:''%s''" (Pretty.str objectId) font)
-        annotation.Font <- f
-        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "TextObjectFont failed.  objectId:'%s' font:''%s''" (Pretty.str objectId) font
-        State.Doc.Views.Redraw()
-        State.Doc.Views.Redraw()
+        let mutable rc = 0
+        if fontdata.Bold   then rc <- 1 + rc
+        if fontdata.Italic then rc <- 2 + rc
+        rc
 
-    /// <summary>Modifies the font used by multiple text objects. Keeps the current state of bold and italic when possible.</summary>
-    /// <param name="objectIds">(Guid seq) The identifiers of multiple text objects</param>
-    /// <param name="font">(string) The new Font Name</param>
+
+
+
+    /// <summary>Returns the plain text string of a text object.</summary>
+    /// <param name="objectId">(Guid) The identifier of a text object</param>
+    /// <returns>(string) The current string value.</returns>
+    static member TextObjectText(objectId:Guid) : string = //GET
+        RhinoScriptSyntax.TextObjectText(RhinoScriptSyntax.CoerceTextEntity(objectId))
+
+    /// <summary>Modifies the plain text string of a text object.</summary>
+    /// <param name="objectId">(Guid) The identifier of a text object</param>
+    /// <param name="text">(string) A new text string</param>
     /// <returns>(unit) void, nothing.</returns>
-    static member TextObjectFont(objectIds:Guid seq, font:string) : unit = //MULTISET
-        for objectId in objectIds do  RhinoScriptSyntax.TextObjectFont(objectId, font)
+    static member TextObjectText(objectId:Guid, text:string) : unit = //SET
+        let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
+        annotation.PlainText <-  text
+        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "TextObjectText failed.  objectId:'%s' text:'%s'" (Pretty.str objectId) text
         State.Doc.Views.Redraw()
 
+
+    /// <summary>Modifies the plain text string of multiple text objects.</summary>
+    /// <param name="objectIds">(Guid seq) The identifiers of multiple text objects</param>
+    /// <param name="text">(string) A new text string</param>
+    /// <returns>(unit) void, nothing.</returns>
+    static member TextObjectText(objectIds:Guid seq, text:string) : unit = //MULTISET
+        for objectId in objectIds do
+            let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
+            annotation.PlainText <-  text
+            if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "TextObjectText failed.  objectId:'%s' text:'%s'" (Pretty.str objectId) text
+        State.Doc.Views.Redraw()
+
+
+    /// <summary>Returns the plain text string of a text object.</summary>
+    /// <param name="geometryObject">(TextEntity) Geometry to use directly.</param>
+    /// <returns>(string) The current string value.</returns>
+    static member TextObjectText(geometryObject:TextEntity) : string = //GET
+        let text = geometryObject
+        text.PlainText
+
+
+
+
+     /// <summary>Returns the RichText formatting string of a text object.</summary>
+    /// <param name="objectId">(Guid) The identifier of a text object</param>
+    /// <returns>(string) The current RichText formatting string.</returns>
+    static member TextObjectRichText(objectId:Guid) : string = //GET
+        RhinoScriptSyntax.TextObjectRichText(RhinoScriptSyntax.CoerceTextEntity(objectId))
+
+
+    /// <summary>Modifies the RichText formatting string of a text object.</summary>
+    /// <param name="objectId">(Guid) The identifier of a text object</param>
+    /// <param name="rtfString">(string) A new text RichText formatting string</param>
+    /// <param name="style">(string) Optional, default value: <c>""</c> Name of dimension style</param>
+    /// <returns>(unit) void, nothing.</returns>
+    static member TextObjectRichText(objectId:Guid, rtfString:string,[<OPT;DEF("")>]style:string ) : unit = //SET
+        let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
+        if style <> "" then
+            let ds = State.Doc.DimStyles.FindName(style)
+            if isNull ds then  RhinoScriptingException.Raise "TextObjectRichText, style not found:'%s'"  style
+            annotation.SetRichText(rtfString, ds)
+        else
+            annotation.RichText <-  rtfString
+        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "TextObjectRichText failed.  objectId:'%s' text:'%s'" (Pretty.str objectId) rtfString
+        State.Doc.Views.Redraw()
+
+
+    /// <summary>Modifies the RichText formatting string of multiple text objects.</summary>
+    /// <param name="objectIds">(Guid seq) The identifiers of multiple text objects</param>
+    /// <param name="rtfString">(string) A new text RichText formatting string</param>
+    /// <param name="style">(string) Optional, default value: <c>""</c> Name of dimension style</param>
+    /// <returns>(unit) void, nothing.</returns>
+    static member TextObjectRichText(objectIds:Guid seq,  rtfString:string, [<OPT;DEF("")>]style:string ) : unit = //MULTISET
+        if style <> "" then
+            let ds = State.Doc.DimStyles.FindName(style)
+            if isNull ds then  RhinoScriptingException.Raise "TextObjectRichText, style not found:'%s'"  style
+            for objectId in objectIds do
+                let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
+                if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "TextObjectRichText failed.  objectId:'%s' text:'%s' style:'%s'" (Pretty.str objectId) rtfString style
+                annotation.SetRichText(rtfString, ds)
+        else
+            for objectId in objectIds do
+                let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
+                annotation.RichText <-  rtfString
+                if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "TextObjectRichText failed.  objectId:'%s' text:'%s'" (Pretty.str objectId) rtfString
+        State.Doc.Views.Redraw()
+
+
+    /// <summary>Returns the RichText formatting string of a text object.</summary>
+    /// <param name="geometryObject">(TextEntity) Geometry to use directly.</param>
+    /// <returns>(string) The current RichText formatting string.</returns>
+    static member TextObjectRichText(geometryObject:TextEntity) : string = //GET
+        let text = geometryObject
+        text.RichText

@@ -101,34 +101,50 @@ module AutoOpenPointVector =
     ///      [1] the point on object
     ///      [2] the distance.</returns>
     static member PointClosestObject(point:Point3d, objectIds:Guid seq) : Guid * Point3d * float =
-        let mutable closest = Unchecked.defaultof<Guid*Point3d*float>
+        let objects = objectIds |> Seq.map (fun id -> id, RhinoScriptSyntax.CoerceGeometry(id)) |> Seq.toArray
+        let geometry, closest, distance = RhinoScriptSyntax.PointClosestObject(point, objects |> Seq.map snd)
+        let id, _ = objects |> Array.find (fun (_, input) -> obj.ReferenceEquals(input, geometry))
+        id, closest, distance
+
+
+
+
+
+    /// <summary>Finds the object that is closest to a test point.</summary>
+    /// <param name="point">(Point3d) Point to test</param>
+    /// <param name="geometries">(GeometryBase seq) Geometry to compare directly</param>
+    /// <returns>(GeometryBase * Point3d * float) Tuple of 3 values
+    ///      [0] The closest input geometry
+    ///      [1] the point on object
+    ///      [2] the distance.</returns>
+    static member PointClosestObject(point:Point3d, geometries:GeometryBase seq) : GeometryBase * Point3d * float =
+        let mutable closest = ((null:GeometryBase), Point3d.Unset, Double.MaxValue)
         let mutable distance = Double.MaxValue
-        for objectId in objectIds do
-            let geom = RhinoScriptSyntax.CoerceGeometry(objectId)
-            match geom with
+        for geometry in geometries do
+            match geometry with
             | :?  Point as pointgeometry ->
                 distance <- point.DistanceTo( pointgeometry.Location )
                 if distance < t3 closest then
-                    closest  <-  objectId, pointgeometry.Location, distance
+                    closest  <-  geometry, pointgeometry.Location, distance
 
             | :?  TextDot as dot ->
                 distance <- point.DistanceTo(dot.Point)
                 if distance < t3 closest then
-                    closest  <-  objectId, dot.Point, distance
+                    closest  <-  geometry, dot.Point, distance
 
             | :?  PointCloud as pointcloud ->
                 let index = pointcloud.ClosestPoint(point)
                 if index>=0 then
                     distance <- point.DistanceTo( pointcloud.[index].Location )
                     if distance < t3 closest then
-                        closest  <-  objectId, pointcloud.[index].Location, distance
+                        closest  <-  geometry, pointcloud.[index].Location, distance
 
             | :?  Curve as curve ->
                 let rc, t = curve.ClosestPoint(point)
                 if rc then
                     distance <- point.DistanceTo( curve.PointAt(t))
                     if distance < t3 closest then
-                        closest  <-  objectId, curve.PointAt(t), distance
+                        closest  <-  geometry, curve.PointAt(t), distance
 
             | :?  Surface as srf ->
                 let ok, u, v = srf.ClosestPoint(point)
@@ -136,24 +152,24 @@ module AutoOpenPointVector =
                     let srfclosest = srf.PointAt(u, v)
                     distance <- point.DistanceTo( srfclosest )
                     if distance < t3 closest then
-                        closest  <-  objectId, srfclosest, distance
+                        closest  <-  geometry, srfclosest, distance
 
             | :?  Brep as brep ->
                 let brepclosest = brep.ClosestPoint(point)
                 distance <- point.DistanceTo( brepclosest )
                 if distance < t3 closest then
-                    closest  <-  objectId, brepclosest, distance
+                    closest  <-  geometry, brepclosest, distance
 
             | :?  Mesh as mesh ->
                 let meshclosest = mesh.ClosestPoint(point)
                 distance <- point.DistanceTo( meshclosest )
                 if distance < t3 closest then
-                    closest  <-  objectId, meshclosest, distance
+                    closest  <-  geometry, meshclosest, distance
 
-            | _ -> RhinoScriptingException.Raise "PointClosestObject: non supported object type %A %A  Point, PointCloud, Curve, Brep or Mesh" (RhinoScriptSyntax.ObjectDescription(objectId)) objectId
+            | _ -> RhinoScriptingException.Raise "PointClosestObject: non supported object type %A %A  Point, PointCloud, Curve, Brep or Mesh" (geometry.GetType().Name) geometry
 
-        if t1 closest <> Guid.Empty then closest
-        else RhinoScriptingException.Raise "PointClosestObject failed on %A and %A" point objectIds
+        if notNull (t1 closest) then closest
+        else RhinoScriptingException.Raise "PointClosestObject failed on %A and %A" point geometries
 
 
     /// <summary>Compares two 3D points.</summary>
@@ -228,10 +244,20 @@ module AutoOpenPointVector =
     static member ProjectPointToMesh( points:Point3d seq,
                                       meshIds:Guid seq,
                                       direction:Vector3d) : Point3d array =
-        let meshes  = meshIds |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
+        let meshes = meshIds |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
+        RhinoScriptSyntax.ProjectPointToMesh(points, meshes, direction)
+
+    /// <summary>Projects one or more points onto one or more Meshes.</summary>
+    /// <param name="points">(Point3d seq) One or more 3D points</param>
+    /// <param name="meshGeos">(Mesh seq) Meshes to use directly</param>
+    /// <param name="direction">(Vector3d) Direction vector to project the points</param>
+    /// <returns>(Point3d array) projected points.</returns>
+    static member ProjectPointToMesh( points:Point3d seq,
+                                      meshGeos:Mesh seq,
+                                      direction:Vector3d) : Point3d array =
+        let meshes  = meshGeos
         let tolerance = State.Doc.ModelAbsoluteTolerance
         Intersect.Intersection.ProjectPointsToMeshes(meshes, points, direction, tolerance)
-
 
 
     /// <summary>Projects one or more points onto one or more Surfaces or Polysurfaces.</summary>
@@ -242,7 +268,18 @@ module AutoOpenPointVector =
     static member ProjectPointToSurface( points:Point3d seq,
                                          surfaceIds:Guid seq,
                                          direction:Vector3d) : Point3d array =
-        let breps  = surfaceIds |> RArr.mapSeq RhinoScriptSyntax.CoerceBrep
+        let breps = surfaceIds |> RArr.mapSeq RhinoScriptSyntax.CoerceBrep
+        RhinoScriptSyntax.ProjectPointToSurface(points, breps, direction)
+
+    /// <summary>Projects one or more points onto one or more Surfaces or Polysurfaces.</summary>
+    /// <param name="points">(Point3d seq) One or more 3D points</param>
+    /// <param name="surfaceGeos">(Brep seq) Surface or polysurface Breps to use directly</param>
+    /// <param name="direction">(Vector3d) Direction vector to project the points</param>
+    /// <returns>(Point3d array) projected points.</returns>
+    static member ProjectPointToSurface( points:Point3d seq,
+                                         surfaceGeos:Brep seq,
+                                         direction:Vector3d) : Point3d array =
+        let breps  = surfaceGeos
         let tolerance = State.Doc.ModelAbsoluteTolerance
         Intersect.Intersection.ProjectPointsToBreps(breps, points, direction, tolerance)
 
@@ -253,7 +290,15 @@ module AutoOpenPointVector =
     /// <param name="points">(Point3d seq) List of 3D points</param>
     /// <returns>(Point3d array) 3D points pulled onto Surface or Mesh.</returns>
     static member PullPoints(objectId:Guid, points:Point3d seq) : Point3d array =
-        match RhinoScriptSyntax.CoerceGeometry(objectId) with
+        RhinoScriptSyntax.PullPoints(RhinoScriptSyntax.CoerceGeometry(objectId), points)
+
+    /// <summary>Pulls an array of points to a Surface or Mesh object. For more
+    ///    information, see the Rhino help file Pull command.</summary>
+    /// <param name="geometryObject">(GeometryBase) The Surface or Mesh geometry that pulls</param>
+    /// <param name="points">(Point3d seq) List of 3D points</param>
+    /// <returns>(Point3d array) 3D points pulled onto Surface or Mesh.</returns>
+    static member PullPoints(geometryObject:GeometryBase, points:Point3d seq) : Point3d array =
+        match geometryObject with
         | :? Mesh as mesh->
             let points = mesh.PullPointsToMesh(points)
             points
@@ -263,7 +308,7 @@ module AutoOpenPointVector =
                 brep.Faces.[0].PullPointsToFace(points, tolerance)
             else
                 RhinoScriptingException.Raise "PullPoints only works on surface and single sided breps not %d sided ones" brep.Faces.Count
-        | _ -> RhinoScriptingException.Raise "PullPoints does not support %A" (RhinoScriptSyntax.ObjectDescription(objectId))
+        | _ -> RhinoScriptingException.Raise "PullPoints does not support %A" geometryObject.ObjectType
 
 
     /// <summary>Adds two 3D vectors.</summary>
@@ -422,6 +467,3 @@ module AutoOpenPointVector =
             Box(plane, points)
         else
             Box(BoundingBox(points))
-
-
-

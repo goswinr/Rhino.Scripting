@@ -687,8 +687,15 @@ module AutoOpenDimension =
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsAlignedDimension(objectId:Guid) : bool =
-        match RhinoScriptSyntax.TryCoerceGeometry objectId with
-        | Some (:? LinearDimension as g) -> g.Aligned
+        RhinoScriptSyntax.TryCoerceGeometry objectId
+        |> Option.exists (fun geometry -> RhinoScriptSyntax.IsAlignedDimension(geometry))
+
+    /// <summary>Checks if  an object is an aligned dimension object. Returns false for any other Rhino object or if the geometry is null.</summary>
+    /// <param name="geometryObject">(GeometryBase) The geometry to test</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsAlignedDimension(geometryObject:GeometryBase) : bool =
+        match geometryObject with
+        | :? LinearDimension as g -> g.Aligned
         | _ -> false
 
 
@@ -696,8 +703,15 @@ module AutoOpenDimension =
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsAngularDimension(objectId:Guid) : bool =
-        match RhinoScriptSyntax.TryCoerceGeometry objectId with
-        | Some (:? AngularDimension) -> true
+        RhinoScriptSyntax.TryCoerceGeometry objectId
+        |> Option.exists (fun geometry -> RhinoScriptSyntax.IsAngularDimension(geometry))
+
+    /// <summary>Checks if  an object is an angular dimension object. Returns false for any other Rhino object or if the geometry is null.</summary>
+    /// <param name="geometryObject">(GeometryBase) The geometry to test</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsAngularDimension(geometryObject:GeometryBase) : bool =
+        match geometryObject with
+        | :? AngularDimension -> true
         | _ -> false
 
 
@@ -705,8 +719,15 @@ module AutoOpenDimension =
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsDiameterDimension(objectId:Guid) : bool =
-        match RhinoScriptSyntax.TryCoerceGeometry objectId with
-        | Some (:? RadialDimension as g) -> g.IsDiameterDimension
+        RhinoScriptSyntax.TryCoerceGeometry objectId
+        |> Option.exists (fun geometry -> RhinoScriptSyntax.IsDiameterDimension(geometry))
+
+    /// <summary>Checks if  an object is a diameter dimension object. Returns false for any other Rhino object or if the geometry is null.</summary>
+    /// <param name="geometryObject">(GeometryBase) The geometry to test</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsDiameterDimension(geometryObject:GeometryBase) : bool =
+        match geometryObject with
+        | :? RadialDimension as g -> g.IsDiameterDimension
         | _ -> false
 
 
@@ -714,8 +735,15 @@ module AutoOpenDimension =
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsDimension(objectId:Guid) : bool =
-        match RhinoScriptSyntax.TryCoerceGeometry objectId with
-        | Some (:? AnnotationBase) -> true
+        RhinoScriptSyntax.TryCoerceGeometry objectId
+        |> Option.exists (fun geometry -> RhinoScriptSyntax.IsDimension(geometry))
+
+    /// <summary>Checks if  an object is a dimension object. Returns false for any other Rhino object or if the geometry is null.</summary>
+    /// <param name="geometryObject">(GeometryBase) The geometry to test</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsDimension(geometryObject:GeometryBase) : bool =
+        match geometryObject with
+        | :? AnnotationBase -> true
         | _ -> false
 
 
@@ -740,8 +768,15 @@ module AutoOpenDimension =
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsLeader(objectId:Guid) : bool =
-            match RhinoScriptSyntax.TryCoerceGeometry objectId with
-            | Some (:? Leader) -> true
+        RhinoScriptSyntax.TryCoerceGeometry objectId
+        |> Option.exists (fun geometry -> RhinoScriptSyntax.IsLeader(geometry))
+
+    /// <summary>Checks if  an object is a dimension leader object. Returns false for any other Rhino object or if the geometry is null.</summary>
+    /// <param name="geometryObject">(GeometryBase) The geometry to test</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsLeader(geometryObject:GeometryBase) : bool =
+            match geometryObject with
+            | :? Leader -> true
             | _ -> false
 
 
@@ -749,8 +784,15 @@ module AutoOpenDimension =
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsLinearDimension(objectId:Guid) : bool =
-            match RhinoScriptSyntax.TryCoerceGeometry objectId with
-            | Some (:? LinearDimension) -> true
+        RhinoScriptSyntax.TryCoerceGeometry objectId
+        |> Option.exists (fun geometry -> RhinoScriptSyntax.IsLinearDimension(geometry))
+
+    /// <summary>Checks if  an object is a linear dimension object. Returns false for any other Rhino object or if the geometry is null.</summary>
+    /// <param name="geometryObject">(GeometryBase) The geometry to test</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsLinearDimension(geometryObject:GeometryBase) : bool =
+            match geometryObject with
+            | :? LinearDimension -> true
             | _ -> false
 
 
@@ -758,8 +800,15 @@ module AutoOpenDimension =
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsOrdinateDimension(objectId:Guid) : bool =
-            match RhinoScriptSyntax.TryCoerceGeometry objectId with
-            | Some (:? OrdinateDimension) -> true
+        RhinoScriptSyntax.TryCoerceGeometry objectId
+        |> Option.exists (fun geometry -> RhinoScriptSyntax.IsOrdinateDimension(geometry))
+
+    /// <summary>Checks if  an object is an ordinate dimension object. Returns false for any other Rhino object or if the geometry is null.</summary>
+    /// <param name="geometryObject">(GeometryBase) The geometry to test</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsOrdinateDimension(geometryObject:GeometryBase) : bool =
+            match geometryObject with
+            | :? OrdinateDimension -> true
             | _ -> false
 
 
@@ -767,8 +816,15 @@ module AutoOpenDimension =
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsRadialDimension(objectId:Guid) : bool =
-            match RhinoScriptSyntax.TryCoerceGeometry objectId with
-            | Some (:? RadialDimension) -> true
+        RhinoScriptSyntax.TryCoerceGeometry objectId
+        |> Option.exists (fun geometry -> RhinoScriptSyntax.IsRadialDimension(geometry))
+
+    /// <summary>Checks if  an object is a radial dimension object. Returns false for any other Rhino object or if the geometry is null.</summary>
+    /// <param name="geometryObject">(GeometryBase) The geometry to test</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsRadialDimension(geometryObject:GeometryBase) : bool =
+            match geometryObject with
+            | :? RadialDimension -> true
             | _ -> false
 
 
@@ -814,6 +870,3 @@ module AutoOpenDimension =
         ds.Name <- newStyle
         if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=false) then
             RhinoScriptingException.Raise "RenameDimStyle failed.  oldStyle:'%s' newStyle:'%s'" oldStyle newStyle
-
-
-

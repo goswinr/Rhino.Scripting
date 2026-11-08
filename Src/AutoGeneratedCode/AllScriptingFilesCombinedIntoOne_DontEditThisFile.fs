@@ -228,10 +228,10 @@ type RhinoScriptSyntax private () =
 
 
     /// <summary>Attempt to get a Guid from input.</summary>
-    /// <param name="objectId">Object, Guid, or string.</param>
+    /// <param name="input">Object, Guid, or string.</param>
     /// <returns>A Guid option.</returns>
-    static member TryCoerceGuid (objectId:'T) : Guid option=
-        match box objectId with
+    static member TryCoerceGuid (input:'T) : Guid option=
+        match box input with
         | :? Guid  as g -> if Guid.Empty = g then None else Some g
         | :? DocObjects.RhinoObject as o -> Some o.Id
         | :? DocObjects.ObjRef      as o -> Some o.ObjectId
@@ -606,10 +606,10 @@ type RhinoScriptSyntax private () =
 
 
     /// <summary>Attempt to get Rhino View Object from the name of the view, can be a standard or page view.</summary>
-    /// <param name="nameOrId">(string or Guid) Name or Guid the view, empty string will return the Active view</param>
+    /// <param name="input">(string or Guid) Name or Guid the view, empty string will return the Active view</param>
     /// <returns>A State.Doc.View Option.</returns>
-    static member TryCoerceView (nameOrId:'T) : Option<Display.RhinoView> =
-        match box nameOrId with
+    static member TryCoerceView (input:'T) : Option<Display.RhinoView> =
+        match box input with
         | :? Guid as g ->
             let viewObj = State.Doc.Views.Find(g)
             if isNull viewObj then
@@ -633,10 +633,10 @@ type RhinoScriptSyntax private () =
 
 
     /// <summary>Attempt to get Rhino View Object from the name of the view, can be a standard or page view.</summary>
-    /// <param name="nameOrId">(string or Guid) Name or Guid the view, empty string will return the Active view</param>
+    /// <param name="input">(string or Guid) Name or Guid the view, empty string will return the Active view</param>
     /// <returns>A State.Doc.View object. Raises a RhinoScriptingException if coerce failed.</returns>
-    static member CoerceView (nameOrId:'T) : Display.RhinoView =
-        match box nameOrId with
+    static member CoerceView (input:'T) : Display.RhinoView =
+        match box input with
         | :? Guid as g ->
             let viewObj = State.Doc.Views.Find(g)
             if isNull viewObj then
@@ -661,16 +661,16 @@ type RhinoScriptSyntax private () =
 
 
         | _ ->
-            RhinoScriptingException.Raise "CoerceView: Cannot get view from %A" nameOrId
+            RhinoScriptingException.Raise "CoerceView: Cannot get view from %A" input
 
 
 
 
     /// <summary>Attempt to get Rhino Page (or Layout) View Object from the name of the Layout.</summary>
-    /// <param name="nameOrId">(string) Name of the Layout</param>
+    /// <param name="input">(string) Name of the Layout</param>
     /// <returns>A State.Doc.View object. Raises a RhinoScriptingException if coerce failed.</returns>
-    static member CoercePageView (nameOrId:'T) : Display.RhinoPageView =
-        match box nameOrId with
+    static member CoercePageView (input:'T) : Display.RhinoPageView =
+        match box input with
         | :? Guid as g ->
             let view = State.Doc.Views.Find(g)
             if isNull view then RhinoScriptingException.Raise "CoercePageView: could not CoerceView  from '%O'" g
@@ -686,7 +686,7 @@ type RhinoScriptSyntax private () =
                 elif allViews.Length > 1 then RhinoScriptingException.Raise "CoercePageView: more than one page called '%s'" view
                 else  RhinoScriptingException.Raise "CoercePageView: Layout called '%s' not found" view
 
-        | _ -> RhinoScriptingException.Raise "CoercePageView: Cannot get view from %O" nameOrId
+        | _ -> RhinoScriptingException.Raise "CoercePageView: Cannot get view from %O" input
 
     /// <summary>Attempt to get Detail view rectangle Geometry.</summary>
     /// <param name="objectId">(Guid) objectId of Detail object</param>
@@ -1774,7 +1774,6 @@ type RhinoScriptSyntax private () =
         let layer = RhinoScriptSyntax.CoerceLayer(layerName)
         if layer.ParentLayerId <> Guid.Empty then
             expand <| State.Doc.Layers.FindId(layer.ParentLayerId)
-
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
 
@@ -2830,11 +2829,47 @@ type RhinoScriptSyntax private () =
     ///    By default nested blocks are not exploded</param>
     /// <returns>(Guid array) identifiers for the newly exploded objects.</returns>
     static member ExplodeBlockInstance(objectId:Guid, [<OPT;DEF(false)>]explodeNestedInstances:bool) : array<Guid> =
-        let  instance = RhinoScriptSyntax.CoerceBlockInstanceObject(objectId)
-        let  guids = State.Doc.Objects.AddExplodedInstancePieces(instance, explodeNestedInstances, deleteInstance = true)
+        let instance = RhinoScriptSyntax.CoerceBlockInstanceObject(objectId)
+        // Rhino's document operation also resolves inherited instance attributes.
+        let guids = State.Doc.Objects.AddExplodedInstancePieces(instance, explodeNestedInstances, deleteInstance = true)
         if guids.Length > 0 then State.Doc.Views.Redraw()
         guids
 
+    /// <summary>Explodes block reference geometry into transformed copies of its component geometry.</summary>
+    /// <param name="geometryObject">(InstanceReferenceGeometry) The block reference geometry to explode.</param>
+    /// <param name="explodeNestedInstances">(bool) Optional, default value: <c>false</c>.
+    ///    If true, recursively explodes nested references. Otherwise, nested references remain instance reference geometry.</param>
+    /// <returns>(GeometryBase array) Independent geometry copies with the block reference transforms applied.</returns>
+    /// <remarks>Resolves block definitions in the active document without adding, deleting or changing document objects.
+    ///    Object attributes are not part of the returned geometry.</remarks>
+    static member ExplodeBlockInstance(geometryObject:InstanceReferenceGeometry, [<OPT;DEF(false)>]explodeNestedInstances:bool) : array<GeometryBase> =
+        if isNull geometryObject then RhinoScriptingException.Raise "ExplodeBlockInstance: block reference geometry is null."
+        let pieces = ResizeArray<GeometryBase>()
+        let rec explode (reference:InstanceReferenceGeometry) (parentTransform:Transform) (ancestors:Set<Guid>) =
+            let definitionId = reference.ParentIdefId
+            if ancestors.Contains definitionId then
+                RhinoScriptingException.Raise "ExplodeBlockInstance: cyclic block definition %O." definitionId
+            let definition = State.Doc.InstanceDefinitions.Find(definitionId, true)
+            if isNull definition then
+                RhinoScriptingException.Raise "ExplodeBlockInstance: block definition %O was not found in the active document." definitionId
+            let transform = parentTransform * reference.Xform
+            let path = ancestors.Add definitionId
+            for piece in definition.GetObjects() do
+                match piece.Geometry with
+                | :? InstanceReferenceGeometry as nested when explodeNestedInstances ->
+                    explode nested transform path
+                | geometry ->
+                    let copy = geometry.Duplicate()
+                    if isNull copy then RhinoScriptingException.Raise "ExplodeBlockInstance: unable to duplicate block component geometry."
+                    pieces.Add(copy)
+                    if not (copy.Transform(transform)) then
+                        RhinoScriptingException.Raise "ExplodeBlockInstance: unable to transform block component geometry."
+        try
+            explode geometryObject Transform.Identity Set.empty
+            pieces.ToArray()
+        with _ ->
+            for piece in pieces do piece.Dispose()
+            reraise()
 
 
     /// <summary>Inserts a block whose definition already exists in the document.</summary>
@@ -2954,6 +2989,18 @@ type RhinoScriptSyntax private () =
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
 
+    static member private TryDirectCurveInput(geometry:GeometryBase, segmentIndex:int) : Curve option =
+        match geometry with
+        | :? PolyCurve as curve when segmentIndex >= 0 ->
+            let segment = curve.SegmentCurve(segmentIndex)
+            if isNull segment then None else Some segment
+        | :? Curve as curve -> Some curve
+        | _ -> None
+
+    static member private DirectCurveInput(curve:Curve, segmentIndex:int) : Curve =
+        match RhinoScriptSyntax.TryDirectCurveInput(curve, segmentIndex) with
+        | Some result -> result
+        | None -> RhinoScriptingException.Raise "Curve: Null curve or invalid segment index %d" segmentIndex
 
     /// <summary>Adds an arc curve to the document.</summary>
     /// <param name="plane">(Plane) Plane on which the arc will lie. The origin of the plane will be the center point of the arc. The x-axis of the plane defines the 0 angle direction.</param>
@@ -3002,16 +3049,26 @@ type RhinoScriptSyntax private () =
     /// <param name="continuities">(int * int) Tuple of two numbers specifying continuity at end points: 0 = position, 1 = tangency, 2 = curvature.</param>
     /// <returns>(Guid) Identifier of new curve.</returns>
     static member AddBlendCurve(curves:Guid * Guid, parameters:float * float, reverses:bool * bool, continuities:int * int) : Guid =
-        let crv0 = RhinoScriptSyntax.CoerceCurve (fst curves)
-        let crv1 = RhinoScriptSyntax.CoerceCurve (snd curves)
-        let c0:BlendContinuity = EnumOfValue(fst continuities)
-        let c1:BlendContinuity = EnumOfValue(snd continuities)
-        let curve = Curve.CreateBlendCurve(crv0, fst parameters, fst reverses, c0, crv1, snd parameters, snd reverses, c1)
-        let rc = State.Doc.Objects.AddCurve(curve)
-        if rc = Guid.Empty then  RhinoScriptingException.Raise "AddBlendCurve: Unable to add curve to document.  curves:'%A' parameters:'%A' reverses:'%A' continuities:'%A'" curves parameters reverses continuities
+        let geometry = RhinoScriptSyntax.MakeBlendCurve((RhinoScriptSyntax.CoerceCurve(fst curves), RhinoScriptSyntax.CoerceCurve(snd curves)), parameters, reverses, continuities)
+        let rc = State.Doc.Objects.AddCurve(geometry)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "AddBlendCurve: Unable to add geometry to document"
         State.Doc.Views.Redraw()
         rc
 
+    /// <summary>Computes MakeBlendCurve from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="curves">(Curve * Curve) The pair of input curves.</param>
+    /// <param name="parameters">(float * float) Tuple of two curve parameters defining the blend end points.</param>
+    /// <param name="reverses">(bool * bool) Tuple of two boolean values specifying to use the natural or opposite direction of the curve.</param>
+    /// <param name="continuities">(int * int) Tuple of two numbers specifying continuity at end points: 0 = position, 1 = tangency, 2 = curvature.</param>
+    /// <returns>(Curve) The resulting geometry; it is not added to a document.</returns>
+    static member MakeBlendCurve(curves:Curve * Curve, parameters:float * float, reverses:bool * bool, continuities:int * int) : Curve =
+        let crv0 = RhinoScriptSyntax.DirectCurveInput(fst curves, -1)
+        let crv1 = RhinoScriptSyntax.DirectCurveInput(snd curves, -1)
+        let c0:BlendContinuity = EnumOfValue(fst continuities)
+        let c1:BlendContinuity = EnumOfValue(snd continuities)
+        let curve = Curve.CreateBlendCurve(crv0, fst parameters, fst reverses, c0, crv1, snd parameters, snd reverses, c1)
+        if isNull curve then RhinoScriptingException.Raise "MakeBlendCurve: Unable to create blend curve"
+        curve
 
     /// <summary>Adds a circle curve to the document.</summary>
     /// <param name="plane">(Plane) Plane on which the circle will lie.</param>
@@ -3095,61 +3152,85 @@ type RhinoScriptSyntax private () =
     /// <param name="basePointB">(Point3d) Optional. Base point of the second curve. If omitted, starting point of the curve is used.</param>
     /// <returns>(Guid) ObjectId of the new curve object.</returns>
     static member AddFilletCurve(curveA:Guid, curveB:Guid, [<OPT;DEF(1.0)>]radius:float, [<OPT;DEF(Point3d())>]basePointA:Point3d, [<OPT;DEF(Point3d())>]basePointB:Point3d) : Guid =
+        let geometry = RhinoScriptSyntax.MakeFilletCurve(RhinoScriptSyntax.CoerceCurve(curveA), RhinoScriptSyntax.CoerceCurve(curveB), radius, basePointA, basePointB)
+        let rc = State.Doc.Objects.AddCurve(geometry)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "AddFilletCurve: Unable to add geometry to document"
+        State.Doc.Views.Redraw()
+        rc
+
+    /// <summary>Computes MakeFilletCurve from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="curveA">(Curve) The input geometry.</param>
+    /// <param name="curveB">(Curve) The input geometry.</param>
+    /// <param name="radius">(float) Optional, default value: <c>1.0</c>. Fillet radius.</param>
+    /// <param name="basePointA">(Point3d) Optional. Base point of the first curve. If omitted, starting point of the curve is used.</param>
+    /// <param name="basePointB">(Point3d) Optional. Base point of the second curve. If omitted, starting point of the curve is used.</param>
+    /// <returns>(ArcCurve) The resulting geometry; it is not added to a document.</returns>
+    static member MakeFilletCurve(curveA:Curve, curveB:Curve, [<OPT;DEF(1.0)>]radius:float, [<OPT;DEF(Point3d())>]basePointA:Point3d, [<OPT;DEF(Point3d())>]basePointB:Point3d) : ArcCurve =
         //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
         let basePointA = if basePointA = Point3d.Origin then Point3d.Unset else basePointA
         let basePointB = if basePointB = Point3d.Origin then Point3d.Unset else basePointB
-        let  curve0 = RhinoScriptSyntax.CoerceCurve (curveA)
-        let  curve1 = RhinoScriptSyntax.CoerceCurve (curveB)
+        let  curve0 = RhinoScriptSyntax.DirectCurveInput(curveA, -1)
+        let  curve1 = RhinoScriptSyntax.DirectCurveInput(curveB, -1)
         let mutable crv0T = 0.0
         if basePointA= Point3d.Unset then
             crv0T <- curve0.Domain.Min
         else
             let rc, t = curve0.ClosestPoint(basePointA)
-            if not <| rc then RhinoScriptingException.Raise "AddFilletCurve ClosestPoint failed.  curveA:'%A' curveB:'%A' radius:'%A' basePointA:'%A' basePointB:'%A'" curveA curveB radius basePointA basePointB
+            if not <| rc then RhinoScriptingException.Raise "MakeFilletCurve ClosestPoint failed.  curveA:'%A' curveB:'%A' radius:'%A' basePointA:'%A' basePointB:'%A'" curveA curveB radius basePointA basePointB
             crv0T <- t
         let mutable crv1T = 0.0
         if basePointB= Point3d.Unset then
             crv1T <- curve1.Domain.Min
         else
             let rc, t = curve1.ClosestPoint(basePointB)
-            if not <| rc then RhinoScriptingException.Raise "AddFilletCurve ClosestPoint failed.  curveA:'%A' curveB:'%A' radius:'%A' basePointA:'%A' basePointB:'%A'" curveA curveB radius basePointA basePointB
+            if not <| rc then RhinoScriptingException.Raise "MakeFilletCurve ClosestPoint failed.  curveA:'%A' curveB:'%A' radius:'%A' basePointA:'%A' basePointB:'%A'" curveA curveB radius basePointA basePointB
             crv1T <- t
         let mutable arc = Curve.CreateFillet(curve0, curve1, radius, crv0T, crv1T)
-        let mutable rc = State.Doc.Objects.AddArc(arc)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "AddFilletCurve: Unable to add fillet curve to document.  curveA:'%A' curveB:'%A' radius:'%A' basePointA:'%A' basePointB:'%A'" curveA curveB radius basePointA basePointB
-        State.Doc.Views.Redraw()
-        rc
-
+        new ArcCurve(arc)
 
     /// <summary>Adds an interpolated curve object that lies on a specified surface. Note, this function will not create periodic curves, but it will create closed curves.</summary>
     /// <param name="surfaceId">(Guid) Identifier of the surface to create the curve on.</param>
     /// <param name="points">(Point3d seq) List of 3D points that lie on the specified surface. The list must contain at least 2 points.</param>
     /// <returns>(Guid) ObjectId of the new curve object.</returns>
     static member AddInterpCrvOnSrf(surfaceId:Guid, points:Point3d seq) : Guid =
-        let  surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
-        let  tolerance = State.Doc.ModelAbsoluteTolerance
-        let  curve = surface.InterpolatedCurveOnSurface(points, tolerance)
-        if isNull curve then RhinoScriptingException.Raise "AddInterpCrvOnSrf: Unable to create InterpolatedCurveOnSurface.  surfaceId:'%s' points:'%A'" (Pretty.str surfaceId) points
-        let mutable rc = State.Doc.Objects.AddCurve(curve)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "AddInterpCrvOnSrf: Unable to add curve to document.  surfaceId:'%s' points:'%A'" (Pretty.str surfaceId) points
+        let geometry = RhinoScriptSyntax.MakeInterpCrvOnSrf(RhinoScriptSyntax.CoerceSurface(surfaceId), points)
+        let rc = State.Doc.Objects.AddCurve(geometry)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "AddInterpCrvOnSrf: Unable to add geometry to document"
         State.Doc.Views.Redraw()
         rc
 
+    /// <summary>Computes MakeInterpCrvOnSrf from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="surfaceGeo">(Surface) The input geometry.</param>
+    /// <param name="points">(Point3d seq) List of 3D points that lie on the specified surface. The list must contain at least 2 points.</param>
+    /// <returns>(Curve) The resulting geometry; it is not added to a document.</returns>
+    static member MakeInterpCrvOnSrf(surfaceGeo:Surface, points:Point3d seq) : Curve =
+        let  surface = (surfaceGeo)
+        let  tolerance = State.Doc.ModelAbsoluteTolerance
+        let  curve = surface.InterpolatedCurveOnSurface(points, tolerance)
+        if isNull curve then RhinoScriptingException.Raise "MakeInterpCrvOnSrf: Unable to create InterpolatedCurveOnSurface.  surfaceGeo:'%s' points:'%A'" (Pretty.str surfaceGeo) points
+        curve
 
     /// <summary>Adds an interpolated curve object based on surface parameters, that lies on a specified surface. Note, this function will not create periodic curves, but it will create closed curves.</summary>
     /// <param name="surfaceId">(Guid) Identifier of the surface to create the curve on.</param>
     /// <param name="points">(Point2d seq) A list of 2D surface parameters. The list must contain at least 2 sets of parameters.</param>
     /// <returns>(Guid) ObjectId of the new curve object.</returns>
     static member AddInterpCrvOnSrfUV(surfaceId:Guid, points:Point2d seq) : Guid =
-        let mutable surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
-        let mutable tolerance = State.Doc.ModelAbsoluteTolerance
-        let mutable curve = surface.InterpolatedCurveOnSurfaceUV(points, tolerance)
-        if isNull curve then RhinoScriptingException.Raise "AddInterpCrvOnSrfUV: Unable to create InterpolatedCurveOnSurfaceUV.  surfaceId:'%s' points:'%A'" (Pretty.str surfaceId) points
-        let mutable rc = State.Doc.Objects.AddCurve(curve)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "AddInterpCrvOnSrfUV: Unable to add curve to document.  surfaceId:'%s' points:'%A'" (Pretty.str surfaceId) points
+        let geometry = RhinoScriptSyntax.MakeInterpCrvOnSrfUV(RhinoScriptSyntax.CoerceSurface(surfaceId), points)
+        let rc = State.Doc.Objects.AddCurve(geometry)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "AddInterpCrvOnSrfUV: Unable to add geometry to document"
         State.Doc.Views.Redraw()
         rc
 
+    /// <summary>Computes MakeInterpCrvOnSrfUV from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="surfaceGeo">(Surface) The input geometry.</param>
+    /// <param name="points">(Point2d seq) A list of 2D surface parameters. The list must contain at least 2 sets of parameters.</param>
+    /// <returns>(Curve) The resulting geometry; it is not added to a document.</returns>
+    static member MakeInterpCrvOnSrfUV(surfaceGeo:Surface, points:Point2d seq) : Curve =
+        let mutable surface = (surfaceGeo)
+        let mutable tolerance = State.Doc.ModelAbsoluteTolerance
+        let mutable curve = surface.InterpolatedCurveOnSurfaceUV(points, tolerance)
+        if isNull curve then RhinoScriptingException.Raise "MakeInterpCrvOnSrfUV: Unable to create InterpolatedCurveOnSurfaceUV.  surfaceGeo:'%s' points:'%A'" (Pretty.str surfaceGeo) points
+        curve
 
     ///<summary>Adds an interpolated Curve object to the document. Options exist to make
     ///    a periodic Curve or to specify the tangent at the endpoints. The resulting
@@ -3369,14 +3450,22 @@ type RhinoScriptSyntax private () =
     /// <param name="param1">(float) Second parameters on the source Curve</param>
     /// <returns>(Guid) ObjectId of the new curve object.</returns>
     static member AddSubCrv(curveId:Guid, param0:float, param1:float) : Guid =
-        let curve = RhinoScriptSyntax.CoerceCurve (curveId)
-        let trimcurve = curve.Trim(param0, param1)
-        if isNull trimcurve then RhinoScriptingException.Raise "AddSubCrv: Unable to trim curve. curveId:'%s' param0:'%A' param1:'%A'" (Pretty.str curveId) param0 param1
-        let rc = State.Doc.Objects.AddCurve(trimcurve)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "AddSubCrv: Unable to add curve to document. curveId:'%s' param0:'%A' param1:'%A'" (Pretty.str curveId) param0 param1
+        let geometry = RhinoScriptSyntax.MakeSubCrv(RhinoScriptSyntax.CoerceCurve(curveId), param0, param1)
+        let rc = State.Doc.Objects.AddCurve(geometry)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "AddSubCrv: Unable to add geometry to document"
         State.Doc.Views.Redraw()
         rc
 
+    /// <summary>Computes MakeSubCrv from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="param0">(float) First parameters on the source Curve</param>
+    /// <param name="param1">(float) Second parameters on the source Curve</param>
+    /// <returns>(Curve) The resulting geometry; it is not added to a document.</returns>
+    static member MakeSubCrv(curveGeo:Curve, param0:float, param1:float) : Curve =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
+        let trimcurve = curve.Trim(param0, param1)
+        if isNull trimcurve then RhinoScriptingException.Raise "MakeSubCrv: Unable to trim curve. curveGeo:'%s' param0:'%A' param1:'%A'" (Pretty.str curveGeo) param0 param1
+        trimcurve
 
     /// <summary>Returns the angle of an arc Curve object.</summary>
     /// <param name="curveId">(Guid) Identifier of a Curve object</param>
@@ -3384,10 +3473,18 @@ type RhinoScriptSyntax private () =
     ///    Identifies the Curve segment if CurveId identifies a poly-curve</param>
     /// <returns>(float) The angle in degrees.</returns>
     static member ArcAngle(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : float =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.ArcAngle(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the angle of an arc Curve object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional,
+    ///    Identifies the Curve segment if CurveId identifies a poly-curve</param>
+    /// <returns>(float) The angle in degrees.</returns>
+    static member ArcAngle(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : float =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let arc = ref Arc.Unset
         let rc = curve.TryGetArc( arc, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "ArcAngle: Curve is not an arc. curveId:'%s' segmentIndex:'%A'" (Pretty.str curveId) segmentIndex
+        if not <| rc then RhinoScriptingException.Raise "ArcAngle: Curve is not an arc. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
         (arc.Value).AngleDegrees
 
 
@@ -3396,10 +3493,17 @@ type RhinoScriptSyntax private () =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a poly-curve</param>
     /// <returns>(Point3d) The 3D center point of the arc.</returns>
     static member ArcCenterPoint(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.ArcCenterPoint(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the center point of an arc Curve object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a poly-curve</param>
+    /// <returns>(Point3d) The 3D center point of the arc.</returns>
+    static member ArcCenterPoint(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let arc = ref Arc.Unset
         let rc = curve.TryGetArc( arc, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "ArcCenterPoint: Curve is not an arc. curveId:'%s' segmentIndex:'%A'" (Pretty.str curveId) segmentIndex
+        if not <| rc then RhinoScriptingException.Raise "ArcCenterPoint: Curve is not an arc. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
         (arc.Value).Center
 
 
@@ -3408,10 +3512,17 @@ type RhinoScriptSyntax private () =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a poly-curve</param>
     /// <returns>(Point3d) The 3D mid point of the arc.</returns>
     static member ArcMidPoint(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.ArcMidPoint(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the mid point of an arc Curve object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a poly-curve</param>
+    /// <returns>(Point3d) The 3D mid point of the arc.</returns>
+    static member ArcMidPoint(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let arc = ref Arc.Unset
         let rc = curve.TryGetArc( arc, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "ArcMidPoint: Curve is not an arc. curveId:'%s' segmentIndex:'%A'" (Pretty.str curveId) segmentIndex
+        if not <| rc then RhinoScriptingException.Raise "ArcMidPoint: Curve is not an arc. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
         (arc.Value).MidPoint
 
 
@@ -3420,10 +3531,17 @@ type RhinoScriptSyntax private () =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a poly-curve</param>
     /// <returns>(float) The radius of the arc.</returns>
     static member ArcRadius(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : float =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.ArcRadius(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the radius of an arc Curve object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a poly-curve</param>
+    /// <returns>(float) The radius of the arc.</returns>
+    static member ArcRadius(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : float =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let arc = ref Arc.Unset
         let rc = curve.TryGetArc( arc, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "ArcRadius: Curve is not an arc. curveId:'%s' segmentIndex:'%A'" (Pretty.str curveId) segmentIndex
+        if not <| rc then RhinoScriptingException.Raise "ArcRadius: Curve is not an arc. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
         (arc.Value).Radius
 
 
@@ -3433,10 +3551,17 @@ type RhinoScriptSyntax private () =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a poly-curve</param>
     /// <returns>(Point3d) The 3D center point of the circle.</returns>
     static member CircleCenterPoint(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.CircleCenterPoint(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the center point of a circle Curve object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a poly-curve</param>
+    /// <returns>(Point3d) The 3D center point of the circle.</returns>
+    static member CircleCenterPoint(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let circle = ref Circle.Unset
         let rc = curve.TryGetCircle(circle, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "CircleCenterPoint: Curve is not circle. curveId:'%s' segmentIndex:'%A'" (Pretty.str curveId) segmentIndex
+        if not <| rc then RhinoScriptingException.Raise "CircleCenterPoint: Curve is not circle. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
         (!circle).Center
 
 
@@ -3445,10 +3570,17 @@ type RhinoScriptSyntax private () =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a poly-curve</param>
     /// <returns>(Plane) The 3D Plane at the center point of the circle.</returns>
     static member CircleCenterPlane(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Plane =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.CircleCenterPlane(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the center Plane of a circle Curve object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a poly-curve</param>
+    /// <returns>(Plane) The 3D Plane at the center point of the circle.</returns>
+    static member CircleCenterPlane(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : Plane =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let circle = ref Circle.Unset
         let rc = curve.TryGetCircle(circle, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "CircleCenterPlane: Curve is not circle. curveId:'%s' segmentIndex:'%A'" (Pretty.str curveId) segmentIndex
+        if not <| rc then RhinoScriptingException.Raise "CircleCenterPlane: Curve is not circle. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
         (!circle).Plane
 
 
@@ -3460,10 +3592,17 @@ type RhinoScriptSyntax private () =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a poly-curve</param>
     /// <returns>(float) The circumference of the circle.</returns>
     static member CircleCircumference(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : float =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.CircleCircumference(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the circumference of a circle Curve object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a poly-curve</param>
+    /// <returns>(float) The circumference of the circle.</returns>
+    static member CircleCircumference(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : float =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let circle = ref Circle.Unset
         let rc = curve.TryGetCircle(circle, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "CircleCircumference: Curve is not circle. curveId:'%s' segmentIndex:'%A'" (Pretty.str curveId) segmentIndex
+        if not <| rc then RhinoScriptingException.Raise "CircleCircumference: Curve is not circle. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
         (!circle).Circumference
 
 
@@ -3472,10 +3611,17 @@ type RhinoScriptSyntax private () =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a poly-curve</param>
     /// <returns>(float) The radius of the circle.</returns>
     static member CircleRadius(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : float =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.CircleRadius(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the radius of a circle Curve object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a poly-curve</param>
+    /// <returns>(float) The radius of the circle.</returns>
+    static member CircleRadius(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : float =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let circle = ref Circle.Unset
         let rc = curve.TryGetCircle(circle, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "CircleRadius: Curve is not circle. curveId:'%s' segmentIndex:'%A'" (Pretty.str curveId) segmentIndex
+        if not <| rc then RhinoScriptingException.Raise "CircleRadius: Curve is not circle. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
         (!circle).Radius
 
 
@@ -3487,14 +3633,24 @@ type RhinoScriptSyntax private () =
     /// <returns>(Guid) ObjectId of the new Curve object.</returns>
     static member CloseCurve(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
-        if curve.IsClosed then  curveId
+        if curve.IsClosed then curveId
         else
-            if not <| curve.MakeClosed(Util.ifZero1 tolerance State.Doc.ModelAbsoluteTolerance) then  RhinoScriptingException.Raise "CloseCurve: Unable to add curve to document. curveId:'%s' tolerance:'%A'" (Pretty.str curveId) tolerance
-            let rc = State.Doc.Objects.AddCurve(curve)
-            if rc = Guid.Empty then RhinoScriptingException.Raise "CloseCurve: Unable to add curve to document. curveId:'%s' tolerance:'%A'" (Pretty.str curveId) tolerance
+            let closed = RhinoScriptSyntax.CloseCurve(curve, tolerance)
+            let rc = State.Doc.Objects.AddCurve(closed)
+            if rc = Guid.Empty then RhinoScriptingException.Raise "CloseCurve: Unable to add curve to document"
             State.Doc.Views.Redraw()
             rc
 
+    /// <summary>Computes CloseCurve from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="curveGeo">(Curve) The input curve geometry.</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
+    ///    Maximum allowable distance between start and end point</param>
+    /// <returns>(Curve) The resulting geometry; it is not added to a document.</returns>
+    static member CloseCurve(curveGeo:Curve, [<OPT;DEF(0.0)>]tolerance:float) : Curve =
+        let curve = (RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)).DuplicateCurve()
+        if not curve.IsClosed && not (curve.MakeClosed(Util.ifZero1 tolerance State.Doc.ModelAbsoluteTolerance)) then
+            RhinoScriptingException.Raise "CloseCurve: Unable to close curve"
+        curve
 
     /// <summary>Determine the orientation (counter-clockwise or clockwise) of a closed,
     ///    planar Curve.</summary>
@@ -3506,8 +3662,20 @@ type RhinoScriptSyntax private () =
     ///    -1 if the Curve's orientation is counter-clockwise
     ///     0 if unable to compute the Curve's orientation.</returns>
     static member ClosedCurveOrientation(curveId:Guid, [<OPT;DEF(Vector3d())>]direction:Vector3d) : int = //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
+        RhinoScriptSyntax.ClosedCurveOrientation(RhinoScriptSyntax.CoerceCurve(curveId), direction)
+
+    /// <summary>Determine the orientation (counter-clockwise or clockwise) of a closed,
+    ///    planar Curve. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="direction">(Vector3d) Optional, default value: <c>Vector3d.ZAxis</c>
+    ///    3d vector that identifies up, or Z axs, direction of
+    ///    the Plane to test against</param>
+    /// <returns>(int) 1 if the Curve's orientation is clockwise
+    ///    -1 if the Curve's orientation is counter-clockwise
+    ///     0 if unable to compute the Curve's orientation.</returns>
+    static member ClosedCurveOrientation(curveGeo:Curve, [<OPT;DEF(Vector3d())>]direction:Vector3d) : int = //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
         let direction0 =if direction.IsZero then Vector3d.Unset else direction
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
         if not <| curve.IsClosed then  0
         else
             let orientation = curve.ClosedCurveOrientation(direction0)
@@ -3531,23 +3699,35 @@ type RhinoScriptSyntax private () =
                                             [<OPT;DEF(false)>]deleteInput:bool,
                                             [<OPT;DEF(0.0)>]minEdgeLength:float,
                                             [<OPT;DEF(0.0)>]maxEdgeLength:float) : Guid =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
-        let angleTolerance0 = toRadians (Util.ifZero1 angleTolerance 0.5 )
-        let tolerance0 = Util.ifZero1 tolerance 0.01
-        let polylineCurve = curve.ToPolyline( 0, 0, angleTolerance0, 0.0, 0.0, tolerance0, minEdgeLength, maxEdgeLength, keepStartPoint=true) //TODO what happens on 0.0 input ?
-        if isNull polylineCurve then RhinoScriptingException.Raise "ConvertCurveToPolyline: Unable to convertCurveToPolyline %A , maxEdgeLength%f, minEdgeLength:%f, deleteInput%b, tolerance%f, angleTolerance %f " curveId   maxEdgeLength minEdgeLength deleteInput tolerance angleTolerance
+        let polyline = RhinoScriptSyntax.ConvertCurveToPolyline(RhinoScriptSyntax.CoerceCurve(curveId), angleTolerance, tolerance, minEdgeLength, maxEdgeLength)
         if deleteInput then
-            if State.Doc.Objects.Replace( curveId, polylineCurve) then
-                curveId
-            else
-                RhinoScriptingException.Raise "ConvertCurveToPolyline: Unable to convertCurveToPolyline %A , maxEdgeLength%f, minEdgeLength:%f, deleteInput%b, tolerance%f, angleTolerance %f " curveId   maxEdgeLength minEdgeLength deleteInput tolerance angleTolerance
+            if not (State.Doc.Objects.Replace(curveId, polyline)) then RhinoScriptingException.Raise "ConvertCurveToPolyline: Unable to replace curve %O" curveId
+            curveId
         else
-            let objectId = State.Doc.Objects.AddCurve( polylineCurve )
-            if System.Guid.Empty= objectId then
-                RhinoScriptingException.Raise "ConvertCurveToPolyline: Unable to convertCurveToPolyline %A , maxEdgeLength%f, minEdgeLength:%f, deleteInput%b, tolerance%f, angleTolerance %f " curveId   maxEdgeLength minEdgeLength deleteInput tolerance angleTolerance
-            else
-                objectId
+            let rc = State.Doc.Objects.AddCurve(polyline)
+            if rc = Guid.Empty then RhinoScriptingException.Raise "ConvertCurveToPolyline: Unable to add curve to document"
+            rc
 
+    /// <summary>Computes ConvertCurveToPolyline from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="curveGeo">(Curve) The input curve geometry.</param>
+    /// <param name="angleTolerance">(float) Optional, default value: <c>5.0</c>
+    ///    The maximum angle between Curve tangents at line endpoints.</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>0.01</c>
+    ///    The distance tolerance at segment midpoints.</param>
+    /// <param name="minEdgeLength">(float) Optional, Minimum segment length</param>
+    /// <param name="maxEdgeLength">(float) Optional, Maximum segment length</param>
+    /// <returns>(PolylineCurve) The resulting geometry; it is not added to a document.</returns>
+    static member ConvertCurveToPolyline(   curveGeo:Curve,
+                                            [<OPT;DEF(0.0)>]angleTolerance:float,
+                                            [<OPT;DEF(0.0)>]tolerance:float,
+                                            [<OPT;DEF(0.0)>]minEdgeLength:float,
+                                            [<OPT;DEF(0.0)>]maxEdgeLength:float) : PolylineCurve =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
+        let angleTolerance0 = toRadians (Util.ifZero1 angleTolerance 0.5)
+        let tolerance0 = Util.ifZero1 tolerance 0.01
+        let polyline = curve.ToPolyline(0, 0, angleTolerance0, 0.0, 0.0, tolerance0, minEdgeLength, maxEdgeLength, keepStartPoint=true)
+        if isNull polyline then RhinoScriptingException.Raise "ConvertCurveToPolyline: Unable to convert curve"
+        polyline
 
     /// <summary>Returns the point on the Curve that is a specified arc length
     ///    from the start of the Curve.</summary>
@@ -3559,7 +3739,19 @@ type RhinoScriptSyntax private () =
     ///    point is calculated from the end of the Curve</param>
     /// <returns>(Point3d) on Curve.</returns>
     static member CurveArcLengthPoint(curveId:Guid, length:float, [<OPT;DEF(true)>]fromStart:bool) : Point3d =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
+        RhinoScriptSyntax.CurveArcLengthPoint(RhinoScriptSyntax.CoerceCurve(curveId), length, fromStart)
+
+    /// <summary>Returns the point on the Curve that is a specified arc length
+    ///    from the start of the Curve. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="length">(float) The arc length from the start of the Curve to evaluate</param>
+    /// <param name="fromStart">(bool) Optional, default value: <c>true</c>
+    ///    If not specified or True, then the arc length point is
+    ///    calculated from the start of the Curve. If False, the arc length
+    ///    point is calculated from the end of the Curve</param>
+    /// <returns>(Point3d) on Curve.</returns>
+    static member CurveArcLengthPoint(curveGeo:Curve, length:float, [<OPT;DEF(true)>]fromStart:bool) : Point3d =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
         let curveLength = curve.GetLength()
         if curveLength >= length then
             let mutable s = 0.0
@@ -3574,9 +3766,9 @@ type RhinoScriptSyntax private () =
                     let pt = dupe.PointAt(t)
                     if not fromStart then dupe.Dispose()
                     pt
-                else RhinoScriptingException.Raise "CurveArcLengthPoint: Unable to curveArcLengthPoint %A, length:%f, fromStart:%b" curveId length fromStart
-            else RhinoScriptingException.Raise "CurveArcLengthPoint: Unable to curveArcLengthPoint %A, length:%f, fromStart:%b" curveId length fromStart
-        else RhinoScriptingException.Raise "CurveArcLengthPoint: Unable to curveArcLengthPoint %A, length:%f, fromStart:%b" curveId length fromStart
+                else RhinoScriptingException.Raise "CurveArcLengthPoint: Unable to curveArcLengthPoint %A, length:%f, fromStart:%b" curveGeo length fromStart
+            else RhinoScriptingException.Raise "CurveArcLengthPoint: Unable to curveArcLengthPoint %A, length:%f, fromStart:%b" curveGeo length fromStart
+        else RhinoScriptingException.Raise "CurveArcLengthPoint: Unable to curveArcLengthPoint %A, length:%f, fromStart:%b" curveGeo length fromStart
 
 
     /// <summary>Returns area of closed planar Curves. The results are based on the
@@ -3584,10 +3776,17 @@ type RhinoScriptSyntax private () =
     /// <param name="curveId">(Guid) The identifier of a closed, planar Curve object</param>
     /// <returns>(float) The area.</returns>
     static member CurveArea(curveId:Guid) : float =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
+        RhinoScriptSyntax.CurveArea(RhinoScriptSyntax.CoerceCurve(curveId))
+
+    /// <summary>Returns area of closed planar Curves. The results are based on the
+    ///    current drawing units. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <returns>(float) The area.</returns>
+    static member CurveArea(curveGeo:Curve) : float =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
         let tol = State.Doc.ModelAbsoluteTolerance
         let mp = AreaMassProperties.Compute(curve, tol)
-        if isNull mp  then RhinoScriptingException.Raise "CurveArea failed on %A" curveId
+        if isNull mp  then RhinoScriptingException.Raise "CurveArea failed on %A" curveGeo
         mp.Area
 
 
@@ -3596,10 +3795,17 @@ type RhinoScriptSyntax private () =
     /// <param name="curveId">(Guid) The identifier of a closed, planar Curve object</param>
     /// <returns>(Point3d ) The 3d centroid point.</returns>
     static member CurveAreaCentroid(curveId:Guid) : Point3d =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
+        RhinoScriptSyntax.CurveAreaCentroid(RhinoScriptSyntax.CoerceCurve(curveId))
+
+    /// <summary>Returns area centroid of closed, planar Curves. The results are based
+    ///    on the current drawing units. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <returns>(Point3d ) The 3d centroid point.</returns>
+    static member CurveAreaCentroid(curveGeo:Curve) : Point3d =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
         let tol = State.Doc.ModelAbsoluteTolerance
         let mp = AreaMassProperties.Compute(curve, tol)
-        if isNull mp  then RhinoScriptingException.Raise "CurveAreaCentroid failed on %A" curveId
+        if isNull mp  then RhinoScriptingException.Raise "CurveAreaCentroid failed on %A" curveGeo
         mp.Centroid
 
 
@@ -3683,23 +3889,34 @@ type RhinoScriptSyntax private () =
     ///    A positive tolerance value, or None for the doc default</param>
     /// <returns>(Guid ResizeArray) The identifiers of the new objects.</returns>
     static member CurveBooleanDifference(curveA:Guid, curveB:Guid, [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray =
-        let curve0 = RhinoScriptSyntax.CoerceCurve curveA
-        let curve1 = RhinoScriptSyntax.CoerceCurve curveB
+        let curves = RhinoScriptSyntax.CurveBooleanDifference(RhinoScriptSyntax.CoerceCurve(curveA), RhinoScriptSyntax.CoerceCurve(curveB), tolerance)
+        let ids = ResizeArray<Guid>()
+        for curve in curves do
+            let rc = State.Doc.Objects.AddCurve(curve)
+            curve.Dispose()
+            if rc = Guid.Empty then RhinoScriptingException.Raise "CurveBooleanDifference: Unable to add curve to document"
+            ids.Add(rc)
+        State.Doc.Views.Redraw()
+        ids
+
+    /// <summary>Computes CurveBooleanDifference from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="curveA">(Curve) The input geometry.</param>
+    /// <param name="curveB">(Curve) The input geometry.</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
+    ///    A positive tolerance value, or None for the doc default</param>
+    /// <returns>(Curve ResizeArray) The resulting geometry; it is not added to a document.</returns>
+    static member CurveBooleanDifference(curveA:Curve, curveB:Curve, [<OPT;DEF(0.0)>]tolerance:float) : Curve ResizeArray =
+        let curve0 = RhinoScriptSyntax.DirectCurveInput(curveA, -1)
+        let curve1 = RhinoScriptSyntax.DirectCurveInput(curveB, -1)
         let tolerance = Util.ifZero2 State.Doc.ModelAbsoluteTolerance tolerance
         let outCurves = Curve.CreateBooleanDifference(curve0, curve1, tolerance)
-        let curves = ResizeArray()
+
+        let curves = ResizeArray<Curve>()
         if notNull outCurves then
             for curve in outCurves do
-                if notNull curve && curve.IsValid then
-                    let rc = State.Doc.Objects.AddCurve(curve)
-                    curve.Dispose()
-                    if rc = Guid.Empty then RhinoScriptingException.Raise "CurveBooleanDifference: Unable to add curve to document.  curveA:'%A' curveB:'%A'" curveA curveB
-                    curves.Add(rc)
-            State.Doc.Views.Redraw()
-            curves
-        else
-            RhinoScriptingException.Raise "CurveBooleanDifference: Unable to add curve to document.  curveA:'%A' curveB:'%A'" curveA curveB
-
+                if notNull curve && curve.IsValid then curves.Add(curve)
+        else RhinoScriptingException.Raise "CurveBooleanDifference: Unable to compute boolean result"
+        curves
 
     /// <summary>Calculates the intersection of two closed, planar Curves and adds
     ///    the results to the document. Note, Curves must be coplanar.</summary>
@@ -3709,23 +3926,34 @@ type RhinoScriptSyntax private () =
     ///    A positive tolerance value, or None for the doc default</param>
     /// <returns>(Guid ResizeArray) The identifiers of the new objects.</returns>
     static member CurveBooleanIntersection(curveA:Guid, curveB:Guid, [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray =
-        let curve0 = RhinoScriptSyntax.CoerceCurve curveA
-        let curve1 = RhinoScriptSyntax.CoerceCurve curveB
+        let curves = RhinoScriptSyntax.CurveBooleanIntersection(RhinoScriptSyntax.CoerceCurve(curveA), RhinoScriptSyntax.CoerceCurve(curveB), tolerance)
+        let ids = ResizeArray<Guid>()
+        for curve in curves do
+            let rc = State.Doc.Objects.AddCurve(curve)
+            curve.Dispose()
+            if rc = Guid.Empty then RhinoScriptingException.Raise "CurveBooleanIntersection: Unable to add curve to document"
+            ids.Add(rc)
+        State.Doc.Views.Redraw()
+        ids
+
+    /// <summary>Computes CurveBooleanIntersection from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="curveA">(Curve) The input geometry.</param>
+    /// <param name="curveB">(Curve) The input geometry.</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
+    ///    A positive tolerance value, or None for the doc default</param>
+    /// <returns>(Curve ResizeArray) The resulting geometry; it is not added to a document.</returns>
+    static member CurveBooleanIntersection(curveA:Curve, curveB:Curve, [<OPT;DEF(0.0)>]tolerance:float) : Curve ResizeArray =
+        let curve0 = RhinoScriptSyntax.DirectCurveInput(curveA, -1)
+        let curve1 = RhinoScriptSyntax.DirectCurveInput(curveB, -1)
         let tolerance = Util.ifZero2 State.Doc.ModelAbsoluteTolerance tolerance
         let outCurves = Curve.CreateBooleanIntersection(curve0, curve1, tolerance)
-        let curves = ResizeArray()
+
+        let curves = ResizeArray<Curve>()
         if notNull outCurves then
             for curve in outCurves do
-                if notNull curve && curve.IsValid then
-                    let rc = State.Doc.Objects.AddCurve(curve)
-                    curve.Dispose()
-                    if rc = Guid.Empty then RhinoScriptingException.Raise "CurveBooleanIntersection: Unable to add curve to document.  curveA:'%A' curveB:'%A'" curveA curveB
-                    curves.Add(rc)
-            State.Doc.Views.Redraw()
-            curves
-        else
-            RhinoScriptingException.Raise "CurveBooleanIntersection: Unable to add curve to document.  curveA:'%A' curveB:'%A'" curveA curveB
-
+                if notNull curve && curve.IsValid then curves.Add(curve)
+        else RhinoScriptingException.Raise "CurveBooleanIntersection: Unable to compute boolean result"
+        curves
 
     /// <summary>Calculate the union of two or more closed, planar Curves and
     ///    add the results to the document. Note, Curves must be coplanar.</summary>
@@ -3734,25 +3962,36 @@ type RhinoScriptSyntax private () =
     ///    A positive tolerance value, or None for the doc default</param>
     /// <returns>(Guid ResizeArray) The identifiers of the new objects.</returns>
     static member CurveBooleanUnion(curveIds:Guid seq, [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray =
+        let curves = RhinoScriptSyntax.CurveBooleanUnion((curveIds |> Seq.map RhinoScriptSyntax.CoerceCurve), tolerance)
+        let ids = ResizeArray<Guid>()
+        for curve in curves do
+            let rc = State.Doc.Objects.AddCurve(curve)
+            curve.Dispose()
+            if rc = Guid.Empty then RhinoScriptingException.Raise "CurveBooleanUnion: Unable to add curve to document"
+            ids.Add(rc)
+        State.Doc.Views.Redraw()
+        ids
+
+    /// <summary>Computes CurveBooleanUnion from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="curveInputs">(Curve seq) The input objects.</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
+    ///    A positive tolerance value, or None for the doc default</param>
+    /// <returns>(Curve ResizeArray) The resulting geometry; it is not added to a document.</returns>
+    static member CurveBooleanUnion(curveInputs:Curve seq, [<OPT;DEF(0.0)>]tolerance:float) : Curve ResizeArray =
         let inCurves = ResizeArray()
-        for objectId in curveIds do
-            let curve = RhinoScriptSyntax.CoerceCurve objectId
+        for objectId in curveInputs do
+            let curve = RhinoScriptSyntax.DirectCurveInput(objectId, -1)
             inCurves.Add(curve)
 
-        if inCurves.Count < 2 then RhinoScriptingException.Raise "CurveBooleanUnion:curveIds must have at least 2 curves %A" curveIds
+        if inCurves.Count < 2 then RhinoScriptingException.Raise "CurveBooleanUnion:curveInputs must have at least 2 curves %A" curveInputs
         let tolerance = Util.ifZero2 State.Doc.ModelAbsoluteTolerance tolerance
         let outCurves = Curve.CreateBooleanUnion(inCurves, tolerance)
-        let curves = ResizeArray()
+
+        let curves = ResizeArray<Curve>()
         if notNull outCurves then
             for curve in outCurves do
-                if notNull curve && curve.IsValid then
-                    let rc = State.Doc.Objects.AddCurve(curve)
-                    curve.Dispose()
-                    if rc = Guid.Empty then RhinoScriptingException.Raise "CurveBooleanUnion: Unable to add curve to document.  curveIds:'%s'" (Pretty.str curveIds)
-                    curves.Add(rc)
-            State.Doc.Views.Redraw()
+                if notNull curve && curve.IsValid then curves.Add(curve)
         curves
-
 
     /// <summary>Intersects a Curve object with a brep object. Note, unlike the
     ///    CurveSurfaceIntersection function, this function works on trimmed Surfaces.</summary>
@@ -3762,11 +4001,21 @@ type RhinoScriptSyntax private () =
     ///    Distance tolerance at segment midpoints.</param>
     /// <returns>(Point3d ResizeArray * Curve ResizeArray) List of points and List of Curves.</returns>
     static member CurveBrepIntersect(curveId:Guid, brepId:Guid, [<OPT;DEF(0.0)>]tolerance:float) : Point3d ResizeArray * Curve ResizeArray=
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
-        let brep = RhinoScriptSyntax.CoerceBrep(brepId)
+        RhinoScriptSyntax.CurveBrepIntersect(RhinoScriptSyntax.CoerceCurve(curveId), RhinoScriptSyntax.CoerceBrep(brepId), tolerance)
+
+    /// <summary>Intersects a Curve object with a brep object. Note, unlike the
+    ///    CurveSurfaceIntersection function, this function works on trimmed Surfaces. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="brepInput">(Brep) The input geometry.</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
+    ///    Distance tolerance at segment midpoints.</param>
+    /// <returns>(Point3d ResizeArray * Curve ResizeArray) List of points and List of Curves.</returns>
+    static member CurveBrepIntersect(curveGeo:Curve, brepInput:Brep, [<OPT;DEF(0.0)>]tolerance:float) : Point3d ResizeArray * Curve ResizeArray=
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
+        let brep = (brepInput)
         let tolerance0 = Util.ifZero2 State.Doc.ModelAbsoluteTolerance tolerance
         let rc, outCurves, outPoints = Intersect.Intersection.CurveBrep(curve, brep, tolerance0)
-        if not <| rc then  RhinoScriptingException.Raise "CurveBrepIntersect: Intersection failed. curveId:'%s' brepId:'%s' tolerance:'%A'" (Pretty.str curveId) (Pretty.str brepId) tolerance
+        if not <| rc then  RhinoScriptingException.Raise "CurveBrepIntersect: Intersection failed. curveGeo:'%s' brepInput:'%s' tolerance:'%A'" (Pretty.str curveGeo) (Pretty.str brepInput) tolerance
 
         let curves = ResizeArray(0)
         let points = ResizeArray(0)
@@ -3775,7 +4024,7 @@ type RhinoScriptSyntax private () =
                 curves.Add(curve)
                 //let rc = State.Doc.Objects.AddCurve(curve)
                 //curve.Dispose()
-                //if rc = Guid.Empty then RhinoScriptingException.Raise "CurveBrepIntersect: Unable to add curve to document. curveId:'%s' brepId:'%s' tolerance:'%A'" (Pretty.str curveId) brepId tolerance
+                //if rc = Guid.Empty then RhinoScriptingException.Raise "CurveBrepIntersect: Unable to add curve to document. curveGeo:'%s' brepInput:'%s' tolerance:'%A'" (Pretty.str curveGeo) brepInput tolerance
                 //curves.Add(rc)
         for point in outPoints do
             if point.IsValid then
@@ -3799,17 +4048,25 @@ type RhinoScriptSyntax private () =
     ///      [2]    The 3-D point that is closest to the test Curve.</returns>
     static member CurveClosestObject(curveId:Guid, objectIds:Guid seq) : Guid * Point3d * Point3d =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
-        let geometry = ResizeArray()
-        for curveId in objectIds do
-            let rhobj = RhinoScriptSyntax.CoerceRhinoObject(curveId)
-            geometry.Add( rhobj.Geometry )
-        if Seq.isEmpty geometry then RhinoScriptingException.Raise "CurveClosestObject: objectIds must contain at least one item. curveId:'%s' objectIds:'%s'" (Pretty.str curveId) (Pretty.str objectIds)
+        let objects = objectIds |> Seq.map (fun id -> id, RhinoScriptSyntax.CoerceGeometry(id)) |> Seq.toArray
+        let geometry, objectPoint, curvePoint = RhinoScriptSyntax.CurveClosestObject(curve, objects |> Seq.map snd)
+        let objectId = objects |> Array.find (fun (_, candidate) -> Object.ReferenceEquals(candidate, geometry)) |> fst
+        objectId, objectPoint, curvePoint
+
+    /// <summary>Computes CurveClosestObject from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="objectInputs">(GeometryBase seq) The input objects.</param>
+    /// <returns>(GeometryBase * Point3d * Point3d) The resulting geometry; it is not added to a document.</returns>
+    static member CurveClosestObject(curveGeo:Curve, objectInputs:GeometryBase seq) : GeometryBase * Point3d * Point3d =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
+        let geometry = ResizeArray<GeometryBase>(objectInputs)
+        if geometry.Count = 0 then RhinoScriptingException.Raise "CurveClosestObject: Objects must contain at least one item"
         let curvePoint = ref Point3d.Unset
-        let geomPoint  = ref Point3d.Unset
+        let geomPoint = ref Point3d.Unset
         let whichGeom = ref 0
-        let success = curve.ClosestPoints(geometry, curvePoint, geomPoint, whichGeom)
-        if success then  objectIds|> Seq.item !whichGeom, !geomPoint, !curvePoint
-        else RhinoScriptingException.Raise "CurveClosestObject failed  curveId:'%s' objectIds:'%A'" (Pretty.str curveId) objectIds
+        if curve.ClosestPoints(geometry, curvePoint, geomPoint, whichGeom) then
+            geometry.[!whichGeom], !geomPoint, !curvePoint
+        else RhinoScriptingException.Raise "CurveClosestObject: Closest point calculation failed"
 
     /// <summary>Returns the 3D point locations on the Curve and finite line where they are closest to
     ///    each other. Note, this function provides similar functionality to that of
@@ -3818,12 +4075,21 @@ type RhinoScriptSyntax private () =
     /// <param name="line">(Line) a Line Geometry</param>
     /// <returns>(Point3d * Point3d) first point on Curve, second point on Line.</returns>
     static member CurveLineClosestPoint(curveId:Guid, line:Line) : Point3d * Point3d =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
+        RhinoScriptSyntax.CurveLineClosestPoint(RhinoScriptSyntax.CoerceCurve(curveId), line)
+
+    /// <summary>Returns the 3D point locations on the Curve and finite line where they are closest to
+    ///    each other. Note, this function provides similar functionality to that of
+    ///    Rhino's ClosestPt command. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="line">(Line) a Line Geometry</param>
+    /// <returns>(Point3d * Point3d) first point on Curve, second point on Line.</returns>
+    static member CurveLineClosestPoint(curveGeo:Curve, line:Line) : Point3d * Point3d =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
         let curvePoint = ref Point3d.Unset
         let linePoint  = ref Point3d.Unset
         let success = curve.ClosestPoints(line.ToNurbsCurve(), curvePoint, linePoint)
         if success then  !linePoint, !curvePoint
-        else RhinoScriptingException.Raise "CurveLineClosestPoint failed  curveId:'%s' Line:'%A'" (Pretty.str curveId) line
+        else RhinoScriptingException.Raise "CurveLineClosestPoint failed  curveGeo:'%s' Line:'%A'" (Pretty.str curveGeo) line
 
 
     /// <summary>Returns parameter of the point on a Curve that is closest to a test point.</summary>
@@ -3833,10 +4099,19 @@ type RhinoScriptSyntax private () =
     ///    Curve segment index if `curveId` identifies a Polycurve</param>
     /// <returns>(float) The parameter of the closest point on the Curve.</returns>
     static member CurveClosestParameter(curveId:Guid, point:Point3d, [<OPT;DEF(-1)>]segmentIndex:int) : float =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.CurveClosestParameter(RhinoScriptSyntax.CoerceCurve(curveId), point, segmentIndex)
+
+    /// <summary>Returns parameter of the point on a Curve that is closest to a test point. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="point">(Point3d) Sampling point</param>
+    /// <param name="segmentIndex">(int) Optional,
+    ///    Curve segment index if `curveId` identifies a Polycurve</param>
+    /// <returns>(float) The parameter of the closest point on the Curve.</returns>
+    static member CurveClosestParameter(curveGeo:Curve, point:Point3d, segmentIndex:int) : float =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let t = ref 0.
         let rc = curve.ClosestPoint(point, t)
-        if not <| rc then RhinoScriptingException.Raise "CurveClosestParameter failed. curveId:'%s' segmentIndex:'%d'" (Pretty.str curveId) segmentIndex
+        if not <| rc then RhinoScriptingException.Raise "CurveClosestParameter failed. curveGeo:'%s' segmentIndex:'%d'" (Pretty.str curveGeo) segmentIndex
         !t
 
     /// <summary>Returns parameter of the point on a Curve that is closest to a test point.</summary>
@@ -3857,9 +4132,18 @@ type RhinoScriptSyntax private () =
     ///    Curve segment index if `curveId` identifies a Polycurve</param>
     /// <returns>(Point3d) The closest point on the Curve.</returns>
     static member CurveClosestPoint(curveId:Guid, point:Point3d, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.CurveClosestPoint(RhinoScriptSyntax.CoerceCurve(curveId), point, segmentIndex)
+
+    /// <summary>Returns the point on a Curve that is closest to a test point. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="point">(Point3d) Sampling point</param>
+    /// <param name="segmentIndex">(int) Optional,
+    ///    Curve segment index if `curveId` identifies a Polycurve</param>
+    /// <returns>(Point3d) The closest point on the Curve.</returns>
+    static member CurveClosestPoint(curveGeo:Curve, point:Point3d, segmentIndex:int) : Point3d =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let rc, t = curve.ClosestPoint(point)
-        if not <| rc then RhinoScriptingException.Raise "CurveClosestPoint failed. curveId:'%s' segmentIndex:'%d'" (Pretty.str curveId) segmentIndex
+        if not <| rc then RhinoScriptingException.Raise "CurveClosestPoint failed. curveGeo:'%s' segmentIndex:'%d'" (Pretty.str curveGeo) segmentIndex
         curve.PointAt(t)
 
     /// <summary>Returns the point on a Curve that is closest to a test point.</summary>
@@ -3879,9 +4163,18 @@ type RhinoScriptSyntax private () =
     /// <param name="interval">(float) The distance between contour Curves</param>
     /// <returns>(Point3d array) A list of 3D points, one for each contour.</returns>
     static member CurveContourPoints(curveId:Guid, startPoint:Point3d, endPoint:Point3d, interval:float) : array<Point3d> =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
+        RhinoScriptSyntax.CurveContourPoints(RhinoScriptSyntax.CoerceCurve(curveId), startPoint, endPoint, interval)
+
+    /// <summary>Returns the 3D point locations calculated by contouring a Curve object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="startPoint">(Point3d) 3D starting point of a center line</param>
+    /// <param name="endPoint">(Point3d) 3D ending point of a center line</param>
+    /// <param name="interval">(float) The distance between contour Curves</param>
+    /// <returns>(Point3d array) A list of 3D points, one for each contour.</returns>
+    static member CurveContourPoints(curveGeo:Curve, startPoint:Point3d, endPoint:Point3d, interval:float) : array<Point3d> =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
         if startPoint.DistanceTo(endPoint)<RhinoMath.ZeroTolerance then
-            RhinoScriptingException.Raise "CurveContourPoints: Start && ende point are too close to define a line. curveId:'%s' startPoint:'%A' endPoint:'%A'" (Pretty.str curveId) startPoint endPoint
+            RhinoScriptingException.Raise "CurveContourPoints: Start && ende point are too close to define a line. curveGeo:'%s' startPoint:'%A' endPoint:'%A'" (Pretty.str curveGeo) startPoint endPoint
         curve.DivideAsContour( startPoint, endPoint, interval)
 
 
@@ -3896,13 +4189,26 @@ type RhinoScriptSyntax private () =
     ///    [3] = radius of curvature
     ///    [4] = curvature vector.</returns>
     static member CurveCurvature(curveId:Guid, parameter:float) : Point3d * Vector3d * Point3d * float * Vector3d =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
+        RhinoScriptSyntax.CurveCurvature(RhinoScriptSyntax.CoerceCurve(curveId), parameter)
+
+    /// <summary>Returns the curvature of a Curve at a parameter. See the Rhino help for
+    ///    details on Curve curvature. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="parameter">(float) Parameter to evaluate</param>
+    /// <returns>(Point3d * Vector3d * Point3d * float * Vector3d) of curvature information
+    ///    [0] = point at specified parameter
+    ///    [1] = tangent vector
+    ///    [2] = center of radius of curvature
+    ///    [3] = radius of curvature
+    ///    [4] = curvature vector.</returns>
+    static member CurveCurvature(curveGeo:Curve, parameter:float) : Point3d * Vector3d * Point3d * float * Vector3d =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
         let point = curve.PointAt(parameter)
         let tangent = curve.TangentAt(parameter)
-        if tangent.IsTiny(1e-10) then  RhinoScriptingException.Raise "CurveCurvature: failed on tangent that is too small %A" curveId
+        if tangent.IsTiny(1e-10) then  RhinoScriptingException.Raise "CurveCurvature: failed on tangent that is too small %A" curveGeo
         let cv = curve.CurvatureAt(parameter)
         let k = cv.Length
-        if k<RhinoMath.SqrtEpsilon then  RhinoScriptingException.Raise "CurveCurvature: failed on tangent that is too small %A" curveId
+        if k<RhinoMath.SqrtEpsilon then  RhinoScriptingException.Raise "CurveCurvature: failed on tangent that is too small %A" curveGeo
         let rv = cv / (k*k)
         let circle = Circle(point, tangent, point + 2.0*rv)
         let center = point + rv
@@ -3947,8 +4253,46 @@ type RhinoScriptSyntax private () =
     ///        If the event type is Overlap (2), then the end value of the
     ///        second Curve parameter range.</returns>
     static member CurveCurveIntersection(curveA:Guid, [<OPT;DEF(Guid())>]curveB:Guid, [<OPT;DEF(0.0)>]tolerance:float) : (int*Point3d*Point3d*Point3d*Point3d*float*float*float*float) ResizeArray =
-        let curve1 = RhinoScriptSyntax.CoerceCurve curveA
-        let curve2 = if curveB= Guid.Empty then curve1 else RhinoScriptSyntax.CoerceCurve curveB
+        RhinoScriptSyntax.CurveCurveIntersection(RhinoScriptSyntax.CoerceCurve(curveA), (if curveB = Guid.Empty then null else RhinoScriptSyntax.CoerceCurve(curveB)), tolerance)
+
+    /// <summary>Calculates intersection of two Curve objects. Uses the supplied geometry directly.</summary>
+    /// <param name="curveA">(Curve) The input geometry.</param>
+    /// <param name="curveB">(Curve) Optional, default value: <c>null</c>. The second curve; null intersects the first curve with itself.</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
+    ///    Absolute tolerance in drawing units. If omitted,
+    ///    the document's current absolute tolerance is used</param>
+    /// <returns>( a ResizeArray of int*Point3d*Point3d*Point3d*Point3d*float*float*float*float)
+    ///    List of tuples: containing intersection information .
+    ///    The list will contain one or more of the following elements:
+    ///      Element Type     Description
+    ///      [n][0]  Number   The intersection event type, either Point (1) or Overlap (2).
+    ///      [n][1]  Point3d  If the event type is Point (1), then the intersection point
+    ///        on the first Curve. If the event type is Overlap (2), then
+    ///        intersection start point on the first Curve.
+    ///      [n][2]  Point3d  If the event type is Point (1), then the intersection point
+    ///        on the first Curve. If the event type is Overlap (2), then
+    ///        intersection end point on the first Curve.
+    ///      [n][3]  Point3d  If the event type is Point (1), then the intersection point
+    ///        on the second Curve. If the event type is Overlap (2), then
+    ///        intersection start point on the second Curve.
+    ///      [n][4]  Point3d  If the event type is Point (1), then the intersection point
+    ///        on the second Curve. If the event type is Overlap (2), then
+    ///        intersection end point on the second Curve.
+    ///      [n][5]  Number   If the event type is Point (1), then the first Curve parameter.
+    ///        If the event type is Overlap (2), then the start value of the
+    ///        first Curve parameter range.
+    ///      [n][6]  Number   If the event type is Point (1), then the first Curve parameter.
+    ///        If the event type is Overlap (2), then the end value of the
+    ///        first Curve parameter range.
+    ///      [n][7]  Number   If the event type is Point (1), then the second Curve parameter.
+    ///        If the event type is Overlap (2), then the start value of the
+    ///        second Curve parameter range.
+    ///      [n][8]  Number   If the event type is Point (1), then the second Curve parameter.
+    ///        If the event type is Overlap (2), then the end value of the
+    ///        second Curve parameter range.</returns>
+    static member CurveCurveIntersection(curveA:Curve, [<OPT;DEF(null:Curve)>]curveB:Curve, [<OPT;DEF(0.0)>]tolerance:float) : (int*Point3d*Point3d*Point3d*Point3d*float*float*float*float) ResizeArray =
+        let curve1 = RhinoScriptSyntax.DirectCurveInput(curveA, -1)
+        let curve2 = if isNull curveB then curve1 else RhinoScriptSyntax.DirectCurveInput(curveB, -1)
         let tolerance0 = Util.ifZero1 tolerance State.Doc.ModelAbsoluteTolerance
         let mutable rc = null
         if curveB<>curveA then
@@ -3973,7 +4317,14 @@ type RhinoScriptSyntax private () =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(int) The degree of the Curve.</returns>
     static member CurveDegree(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : int =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.CurveDegree(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the degree of a Curve object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(int) The degree of the Curve.</returns>
+    static member CurveDegree(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : int =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         curve.Degree
 
 
@@ -3988,8 +4339,21 @@ type RhinoScriptSyntax private () =
     ///    [4] = CurveB parameter at minimum overlap distance point
     ///    [5] = minimum distance between Curves.</returns>
     static member CurveDeviation(curveA:Guid, curveB:Guid) : float * float * float * float * float * float =
-        let curveA = RhinoScriptSyntax.CoerceCurve curveA
-        let curveB = RhinoScriptSyntax.CoerceCurve curveB
+        RhinoScriptSyntax.CurveDeviation(RhinoScriptSyntax.CoerceCurve(curveA), RhinoScriptSyntax.CoerceCurve(curveB))
+
+    /// <summary>Returns the minimum and maximum deviation between two Curve objects. Uses the supplied geometry directly.</summary>
+    /// <param name="curveA">(Curve) The input geometry.</param>
+    /// <param name="curveB">(Curve) The input geometry.</param>
+    /// <returns>(float * float * float * float * float * float) of deviation information
+    ///    [0] = CurveA parameter at maximum overlap distance point
+    ///    [1] = CurveB parameter at maximum overlap distance point
+    ///    [2] = maximum overlap distance
+    ///    [3] = CurveA parameter at minimum overlap distance point
+    ///    [4] = CurveB parameter at minimum overlap distance point
+    ///    [5] = minimum distance between Curves.</returns>
+    static member CurveDeviation(curveA:Curve, curveB:Curve) : float * float * float * float * float * float =
+        let curveA = RhinoScriptSyntax.DirectCurveInput(curveA, -1)
+        let curveB = RhinoScriptSyntax.DirectCurveInput(curveB, -1)
         let tol = State.Doc.ModelAbsoluteTolerance
         let ok, maxa, maxb, maxd, mina, minb, mind = Curve.GetDistancesBetweenCurves(curveA, curveB, tol)
         if not ok then  RhinoScriptingException.Raise "CurveDeviation failed for %A; %A" curveB curveA
@@ -4003,7 +4367,15 @@ type RhinoScriptSyntax private () =
     ///    The Curve segment if CurveId identifies a PolyCurve</param>
     /// <returns>(int) The dimension of the Curve .</returns>
     static member CurveDim(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : int =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.CurveDim(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the dimension of a Curve object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional,
+    ///    The Curve segment if CurveId identifies a PolyCurve</param>
+    /// <returns>(int) The dimension of the Curve .</returns>
+    static member CurveDim(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : int =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         curve.Dimension
 
 
@@ -4015,8 +4387,18 @@ type RhinoScriptSyntax private () =
     /// <param name="curveB">(Guid) Identifier of second Curve object</param>
     /// <returns>(bool) True if the Curve directions match, otherwise False.</returns>
     static member CurveDirectionsMatch(curveA:Guid, curveB:Guid) : bool =
-        let curve0 = RhinoScriptSyntax.CoerceCurve curveA
-        let curve1 = RhinoScriptSyntax.CoerceCurve curveB
+        RhinoScriptSyntax.CurveDirectionsMatch(RhinoScriptSyntax.CoerceCurve(curveA), RhinoScriptSyntax.CoerceCurve(curveB))
+
+    /// <summary>Tests if two Curve objects are generally in the same direction or if they
+    ///    would be more in the same direction if one of them were flipped. When testing
+    ///    Curve directions, both Curves must be either open or closed - you cannot test
+    ///    one open Curve and one closed Curve. Uses the supplied geometry directly.</summary>
+    /// <param name="curveA">(Curve) The input geometry.</param>
+    /// <param name="curveB">(Curve) The input geometry.</param>
+    /// <returns>(bool) True if the Curve directions match, otherwise False.</returns>
+    static member CurveDirectionsMatch(curveA:Curve, curveB:Curve) : bool =
+        let curve0 = RhinoScriptSyntax.DirectCurveInput(curveA, -1)
+        let curve1 = RhinoScriptSyntax.DirectCurveInput(curveB, -1)
         Curve.DoDirectionsMatch(curve0, curve1)
 
 
@@ -4033,7 +4415,22 @@ type RhinoScriptSyntax private () =
     ///    5        G2 - Continuous unit tangent and curvature</param>
     /// <returns>(Point3d ResizeArray) 3D points where the Curve is discontinuous.</returns>
     static member CurveDiscontinuity(curveId:Guid, style:int) : Point3d ResizeArray =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
+        RhinoScriptSyntax.CurveDiscontinuity(RhinoScriptSyntax.CoerceCurve(curveId), style)
+
+    /// <summary>Search for a derivative, tangent, or curvature discontinuity in
+    ///    a Curve object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="style">(int) The type of continuity to test for. The types of
+    ///    continuity are as follows:
+    ///    Value    Description
+    ///    1        C0 - Continuous function
+    ///    2        C1 - Continuous first derivative
+    ///    3        C2 - Continuous first and second derivative
+    ///    4        G1 - Continuous unit tangent
+    ///    5        G2 - Continuous unit tangent and curvature</param>
+    /// <returns>(Point3d ResizeArray) 3D points where the Curve is discontinuous.</returns>
+    static member CurveDiscontinuity(curveGeo:Curve, style:int) : Point3d ResizeArray =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
         let dom = curve.Domain
         let mutable t0 = dom.Min
         let t1 = dom.Max
@@ -4055,7 +4452,15 @@ type RhinoScriptSyntax private () =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(Interval) The domain of the Curve.</returns>
     static member CurveDomain(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Interval =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.CurveDomain(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the domain of a Curve object
+    ///    as an indexable object with two elements. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(Interval) The domain of the Curve.</returns>
+    static member CurveDomain(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : Interval =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         curve.Domain
 
 
@@ -4066,9 +4471,18 @@ type RhinoScriptSyntax private () =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index is `curveId` identifies a PolyCurve</param>
     /// <returns>(Collections.Point3dList) Curve edit points.</returns>
     static member CurveEditPoints(curveId:Guid,[<OPT;DEF(-1)>]segmentIndex:int) : Collections.Point3dList =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.CurveEditPoints(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the Edit-, or Greville-Points of a Curve object.
+    ///    For each Curve control point, there is a corresponding edit point.
+    /// see rs.CurveEditParameters for parameters, not points Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index is `curveId` identifies a PolyCurve</param>
+    /// <returns>(Collections.Point3dList) Curve edit points.</returns>
+    static member CurveEditPoints(curveGeo:Curve,[<OPT;DEF(-1)>]segmentIndex:int) : Collections.Point3dList =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let nc = curve.ToNurbsCurve()
-        if isNull nc then  RhinoScriptingException.Raise "CurveEditPoints failed for %A" curveId
+        if isNull nc then  RhinoScriptingException.Raise "CurveEditPoints failed for %A" curveGeo
         nc.GrevillePoints()
 
 
@@ -4078,9 +4492,17 @@ type RhinoScriptSyntax private () =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index is `curveId` identifies a PolyCurve</param>
     /// <returns>(Collections.Point3dList)  A list of Curve parameters</returns>
     static member CurveEditParameters(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : float[] =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.CurveEditParameters(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the Edit-, or Greville-Parameters of a Curve object.
+    ///    For each Curve control point, there is a corresponding edit point parameter. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index is `curveId` identifies a PolyCurve</param>
+    /// <returns>(Collections.Point3dList)  A list of Curve parameters</returns>
+    static member CurveEditParameters(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : float[] =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let nc = curve.ToNurbsCurve()
-        if isNull nc then  RhinoScriptingException.Raise "CurveEditParameters failed for %A" curveId
+        if isNull nc then  RhinoScriptingException.Raise "CurveEditParameters failed for %A" curveGeo
         nc.GrevilleParameters()
 
     /// <summary>Returns the end point of a Curve object.</summary>
@@ -4088,7 +4510,14 @@ type RhinoScriptSyntax private () =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(Point3d) The 3d endpoint of the Curve.</returns>
     static member CurveEndPoint(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.CurveEndPoint(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the end point of a Curve object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(Point3d) The 3d endpoint of the Curve.</returns>
+    static member CurveEndPoint(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         curve.PointAtEnd
 
     /// <summary>Returns the tangent at end point of a Curve object
@@ -4097,7 +4526,15 @@ type RhinoScriptSyntax private () =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(Vector3d) The tangent, same as Curve.TangentAtEnd property .</returns>
     static member CurveEndTangent(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Vector3d =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.CurveEndTangent(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the tangent at end point of a Curve object
+    /// pointing away from the Curve . Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(Vector3d) The tangent, same as Curve.TangentAtEnd property .</returns>
+    static member CurveEndTangent(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : Vector3d =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         curve.TangentAtEnd
 
     /// <summary>Returns the tangent at start point of a Curve object
@@ -4106,7 +4543,15 @@ type RhinoScriptSyntax private () =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(Vector3d) The tangent, same as Curve.TangentAtStart property .</returns>
     static member CurveStartTangent(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Vector3d =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.CurveStartTangent(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the tangent at start point of a Curve object
+    /// pointing in direction of  the Curve . Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(Vector3d) The tangent, same as Curve.TangentAtStart property .</returns>
+    static member CurveStartTangent(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : Vector3d =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         curve.TangentAtStart
 
     /// <summary>Find points at which to cut a pair of Curves so that a fillet of a
@@ -4133,13 +4578,39 @@ type RhinoScriptSyntax private () =
                                     radius:float,
                                     [<OPT;DEF(Point3d())>]basePointA:Point3d,
                                     [<OPT;DEF(Point3d())>]basePointB:Point3d) : Point3d * Point3d * Plane = //TODO make overload instead, this may leak  see draw vector and transform point!
+        RhinoScriptSyntax.CurveFilletPoints(RhinoScriptSyntax.CoerceCurve(curveA), RhinoScriptSyntax.CoerceCurve(curveB), radius, basePointA, basePointB)
+
+    /// <summary>Find points at which to cut a pair of Curves so that a fillet of a
+    ///    specified radius fits. A fillet point is a pair of points (point0, point1)
+    ///    such that there is a circle of radius tangent to Curve Curve0 at point0 and
+    ///    tangent to Curve Curve1 at point1. Of all possible fillet points, this
+    ///    function returns the one which is the closest to the base point basePointA,
+    ///    basePointB. Distance from the base point is measured by the sum of arc
+    ///    lengths along the two Curves. Uses the supplied geometry directly.</summary>
+    /// <param name="curveA">(Curve) The input geometry.</param>
+    /// <param name="curveB">(Curve) The input geometry.</param>
+    /// <param name="radius">(float) The fillet radius</param>
+    /// <param name="basePointA">(Point3d) Optional. The base point on the first Curve.
+    ///    If omitted, the starting point of the Curve is used</param>
+    /// <param name="basePointB">(Point3d) Optional. The base point on the second Curve. If omitted,
+    ///    the starting point of the Curve is used</param>
+    /// <returns>(Point3d * Point3d * Plane)
+    ///    . The list elements are as follows:
+    ///      [0]    A point on the first Curve at which to cut (point).
+    ///      [1]    A point on the second Curve at which to cut (point).
+    ///      [2]    The fillet Plane.</returns>
+    static member CurveFilletPoints(curveA:Curve,
+                                    curveB:Curve,
+                                    radius:float,
+                                    [<OPT;DEF(Point3d())>]basePointA:Point3d,
+                                    [<OPT;DEF(Point3d())>]basePointB:Point3d) : Point3d * Point3d * Plane = //TODO make overload instead, this may leak  see draw vector and transform point!
         //  [<OPT;DEF(true)>]returnPoints:bool)
         //<param name="returnPoints">(bool) Optional, default value: <c>true</c>
         //If True (Default), then fillet points are
         //  returned. Otherwise, a fillet curve is created and                       // TODO not Implemented
         //  it's identifier is returned</param>
-        let curve0 = RhinoScriptSyntax.CoerceCurve curveA
-        let curve1 = RhinoScriptSyntax.CoerceCurve curveB
+        let curve0 = RhinoScriptSyntax.DirectCurveInput(curveA, -1)
+        let curve1 = RhinoScriptSyntax.DirectCurveInput(curveB, -1)
         let basePointA = if basePointA = Point3d.Origin then Point3d.Unset else basePointA
         let basePointB = if basePointB = Point3d.Origin then Point3d.Unset else basePointB
 
@@ -4177,8 +4648,17 @@ type RhinoScriptSyntax private () =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(Plane) The Plane at the specified parameter.</returns>
     static member CurveFrame(curveId:Guid, parameter:float, [<OPT;DEF(-1)>]segmentIndex:int) : Plane =
+        RhinoScriptSyntax.CurveFrame(RhinoScriptSyntax.CoerceCurve(curveId), parameter, segmentIndex)
+
+    /// <summary>Returns the Plane at a parameter of a Curve. The Plane is based on the
+    ///    tangent and curvature vectors at a parameter. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="parameter">(float) Parameter to evaluate</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(Plane) The Plane at the specified parameter.</returns>
+    static member CurveFrame(curveGeo:Curve, parameter:float, [<OPT;DEF(-1)>]segmentIndex:int) : Plane =
         let mutable para = parameter
-        let  curve = RhinoScriptSyntax.CoerceCurve curveId
+        let  curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
         let  domain = curve.Domain
         if not <| domain.IncludesParameter(parameter) then
             let  tol = State.Doc.ModelAbsoluteTolerance
@@ -4187,10 +4667,10 @@ type RhinoScriptSyntax private () =
             elif parameter<domain.Min && (domain.Min-para)<=tol then
                 para <- domain.Min
             else
-                RhinoScriptingException.Raise "CurveFrame failed. curveId:'%s' parameter:'%A' segmentIndex:'%A'" (Pretty.str curveId) parameter segmentIndex
+                RhinoScriptingException.Raise "CurveFrame failed. curveGeo:'%s' parameter:'%A' segmentIndex:'%A'" (Pretty.str curveGeo) parameter segmentIndex
         let  rc, frame = curve.FrameAt(para)
         if rc && frame.IsValid then  frame
-        else RhinoScriptingException.Raise "CurveFrame failed. curveId:'%s' parameter:'%A' segmentIndex:'%A'" (Pretty.str curveId) parameter segmentIndex
+        else RhinoScriptingException.Raise "CurveFrame failed. curveGeo:'%s' parameter:'%A' segmentIndex:'%A'" (Pretty.str curveGeo) parameter segmentIndex
 
 
     /// <summary>Returns the knot count of a Curve object.</summary>
@@ -4198,9 +4678,16 @@ type RhinoScriptSyntax private () =
     /// <param name="segmentIndex">(int) Optional, The Curve segment if `curveId` identifies a PolyCurve</param>
     /// <returns>(int) The number of knots.</returns>
     static member CurveKnotCount(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : int =
-        let  curve = RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex)
+        RhinoScriptSyntax.CurveKnotCount(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the knot count of a Curve object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment if `curveId` identifies a PolyCurve</param>
+    /// <returns>(int) The number of knots.</returns>
+    static member CurveKnotCount(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : int =
+        let  curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let  nc = curve.ToNurbsCurve()
-        if isNull nc then  RhinoScriptingException.Raise "CurveKnotCount failed. curveId:'%s' segmentIndex:'%A'" (Pretty.str curveId) segmentIndex
+        if isNull nc then  RhinoScriptingException.Raise "CurveKnotCount failed. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
         nc.Knots.Count
 
 
@@ -4209,9 +4696,16 @@ type RhinoScriptSyntax private () =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(float ResizeArray) knot values.</returns>
     static member CurveKnots(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : ResizeArray<float> =
-        let  curve = RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex)
+        RhinoScriptSyntax.CurveKnots(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the knots, or knot vector, of a Curve object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(float ResizeArray) knot values.</returns>
+    static member CurveKnots(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : ResizeArray<float> =
+        let  curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let  nc = curve.ToNurbsCurve()
-        if isNull nc then  RhinoScriptingException.Raise "CurveKnots failed. curveId:'%s' segmentIndex:'%A'" (Pretty.str curveId) segmentIndex
+        if isNull nc then  RhinoScriptingException.Raise "CurveKnots failed. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
         let knots = ResizeArray(nc.Knots.Count)
         for i = 0 to nc.Knots.Count - 1 do
             knots.Add(nc.Knots.[i])
@@ -4226,7 +4720,18 @@ type RhinoScriptSyntax private () =
     ///    entire Curve is returned</param>
     /// <returns>(float) The length of the Curve.</returns>
     static member CurveLength(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int, [<OPT;DEF(Interval())>]subDomain:Interval) : float =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.CurveLength(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex, subDomain)
+
+    /// <summary>Returns the length of a Curve object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <param name="subDomain">(Interval) Optional, List of two numbers identifying the sub-domain of the
+    ///    Curve on which the calculation will be performed. The two parameters
+    ///    (sub-domain) must be non-decreasing. If omitted, the length of the
+    ///    entire Curve is returned</param>
+    /// <returns>(float) The length of the Curve.</returns>
+    static member CurveLength(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int, [<OPT;DEF(Interval())>]subDomain:Interval) : float =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         if subDomain.T0 = 0.0 && subDomain.T1 = 0.0 then curve.GetLength()
         else curve.GetLength(subDomain)
 
@@ -4238,16 +4743,25 @@ type RhinoScriptSyntax private () =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(Vector3d) The direction of the Curve.</returns>
     static member CurveDirection(curveId:Guid, [<OPT;DEF(false)>]allowNonLinear:bool,[<OPT;DEF(-1)>]segmentIndex:int) : Vector3d =
-        let  curve = RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex)
+        RhinoScriptSyntax.CurveDirection(RhinoScriptSyntax.CoerceCurve(curveId), allowNonLinear, segmentIndex)
+
+    /// <summary>Returns the average unitized direction of a Curve object between start and end point,
+    ///    Optionally allows non linear Curves too. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="allowNonLinear">(bool) Optional, allow non linear Curves, Default Value <c>False</c> </param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(Vector3d) The direction of the Curve.</returns>
+    static member CurveDirection(curveGeo:Curve, [<OPT;DEF(false)>]allowNonLinear:bool,[<OPT;DEF(-1)>]segmentIndex:int) : Vector3d =
+        let  curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         if allowNonLinear || curve.IsLinear(RhinoMath.ZeroTolerance) then
-            if curve.IsClosed || curve.IsClosable(State.Doc.ModelAbsoluteTolerance) then RhinoScriptingException.Raise "CurveDirection failed on closed or closable curve. curveId:'%s' allowNonLinear '%A' segmentIndex:'%A'" (Pretty.str curveId) allowNonLinear segmentIndex
+            if curve.IsClosed || curve.IsClosable(State.Doc.ModelAbsoluteTolerance) then RhinoScriptingException.Raise "CurveDirection failed on closed or closable curve. curveGeo:'%s' allowNonLinear '%A' segmentIndex:'%A'" (Pretty.str curveGeo) allowNonLinear segmentIndex
             let v = curve.PointAtEnd - curve.PointAtStart
             if v.Unitize() then v
             else
-                RhinoScriptingException.Raise "CurveDirection failed. start and end are the same point. curveId:'%s' allowNonLinear '%A' segmentIndex:'%A'" (Pretty.str curveId) allowNonLinear segmentIndex
+                RhinoScriptingException.Raise "CurveDirection failed. start and end are the same point. curveGeo:'%s' allowNonLinear '%A' segmentIndex:'%A'" (Pretty.str curveGeo) allowNonLinear segmentIndex
 
         else
-            RhinoScriptingException.Raise "CurveDirection failed. curveId:'%s' allowNonLinear '%A' segmentIndex:'%A'" (Pretty.str curveId) allowNonLinear segmentIndex
+            RhinoScriptingException.Raise "CurveDirection failed. curveGeo:'%s' allowNonLinear '%A' segmentIndex:'%A'" (Pretty.str curveGeo) allowNonLinear segmentIndex
 
 
     /// <summary>Returns the mid point of a Curve object.</summary>
@@ -4255,10 +4769,17 @@ type RhinoScriptSyntax private () =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(Point3d) The 3D midpoint of the Curve.</returns>
     static member CurveMidPoint(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
-        let  curve = RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex)
+        RhinoScriptSyntax.CurveMidPoint(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the mid point of a Curve object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(Point3d) The 3D midpoint of the Curve.</returns>
+    static member CurveMidPoint(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
+        let  curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let  rc, t = curve.NormalizedLengthParameter(0.5)
         if rc then  curve.PointAt(t)
-        else RhinoScriptingException.Raise "CurveMidPoint failed. curveId:'%s' segmentIndex:'%A'" (Pretty.str curveId) segmentIndex
+        else RhinoScriptingException.Raise "CurveMidPoint failed. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
 
 
     /// <summary>Returns the normal direction of the Plane in which a planar Curve object lies.</summary>
@@ -4266,12 +4787,19 @@ type RhinoScriptSyntax private () =
     /// <param name="segmentIndex">(int) Optional, The Curve segment if CurveId identifies a PolyCurve</param>
     /// <returns>(Vector3d) The 3D normal vector.</returns>
     static member CurveNormal(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Vector3d =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.CurveNormal(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the normal direction of the Plane in which a planar Curve object lies. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment if CurveId identifies a PolyCurve</param>
+    /// <returns>(Vector3d) The 3D normal vector.</returns>
+    static member CurveNormal(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : Vector3d =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let tol = State.Doc.ModelAbsoluteTolerance
         let plane = ref Plane.WorldXY
         let rc = curve.TryGetPlane(plane, tol)
         if rc then  (!plane).Normal
-        else RhinoScriptingException.Raise "CurveNormal failed. curveId:'%s' segmentIndex:'%A'" (Pretty.str curveId) segmentIndex
+        else RhinoScriptingException.Raise "CurveNormal failed. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
 
 
     /// <summary>Converts a Curve parameter to a normalized Curve parameter;
@@ -4280,7 +4808,15 @@ type RhinoScriptSyntax private () =
     /// <param name="parameter">(float) The Curve parameter to convert</param>
     /// <returns>(float) normalized Curve parameter.</returns>
     static member CurveNormalizedParameter(curveId:Guid, parameter:float) : float =
-        let  curve = RhinoScriptSyntax.CoerceCurve curveId
+        RhinoScriptSyntax.CurveNormalizedParameter(RhinoScriptSyntax.CoerceCurve(curveId), parameter)
+
+    /// <summary>Converts a Curve parameter to a normalized Curve parameter;
+    ///    one that ranges between 0-1. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="parameter">(float) The Curve parameter to convert</param>
+    /// <returns>(float) normalized Curve parameter.</returns>
+    static member CurveNormalizedParameter(curveGeo:Curve, parameter:float) : float =
+        let  curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
         curve.Domain.NormalizedParameterAt(parameter)
 
 
@@ -4290,7 +4826,15 @@ type RhinoScriptSyntax private () =
     /// <param name="parameter">(float) The normalized Curve parameter to convert</param>
     /// <returns>(float) Curve parameter.</returns>
     static member CurveParameter(curveId:Guid, parameter:float) : float =
-        let curve = RhinoScriptSyntax.CoerceCurve curveId
+        RhinoScriptSyntax.CurveParameter(RhinoScriptSyntax.CoerceCurve(curveId), parameter)
+
+    /// <summary>Converts a normalized Curve parameter to a Curve parameter;
+    ///    one within the Curve's domain. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="parameter">(float) The normalized Curve parameter to convert</param>
+    /// <returns>(float) Curve parameter.</returns>
+    static member CurveParameter(curveGeo:Curve, parameter:float) : float =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
         curve.Domain.ParameterAt(parameter)
 
 
@@ -4300,9 +4844,17 @@ type RhinoScriptSyntax private () =
     /// <param name="parameter">(float) Parameter to evaluate</param>
     /// <returns>(Plane) Plane.</returns>
     static member CurvePerpFrame(curveId:Guid, parameter:float) : Plane =
-        let  curve = RhinoScriptSyntax.CoerceCurve curveId
+        RhinoScriptSyntax.CurvePerpFrame(RhinoScriptSyntax.CoerceCurve(curveId), parameter)
+
+    /// <summary>Returns the perpendicular Plane at a parameter of a Curve. The result
+    ///    is relatively parallel (zero-twisting) Plane. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="parameter">(float) Parameter to evaluate</param>
+    /// <returns>(Plane) Plane.</returns>
+    static member CurvePerpFrame(curveGeo:Curve, parameter:float) : Plane =
+        let  curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
         let  rc, plane = curve.PerpendicularFrameAt(parameter)
-        if rc then  plane else RhinoScriptingException.Raise "CurvePerpFrame failed. curveId:'%s' parameter:'%f'"  (Pretty.str curveId) parameter
+        if rc then  plane else RhinoScriptingException.Raise "CurvePerpFrame failed. curveGeo:'%s' parameter:'%f'"  (Pretty.str curveGeo) parameter
 
 
     /// <summary>Returns the Plane in which a planar Curve lies. Note, this function works
@@ -4311,12 +4863,20 @@ type RhinoScriptSyntax private () =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(Plane) The Plane in which the Curve lies.</returns>
     static member CurvePlane(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Plane =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.CurvePlane(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the Plane in which a planar Curve lies. Note, this function works
+    ///    only on planar Curves. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(Plane) The Plane in which the Curve lies.</returns>
+    static member CurvePlane(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : Plane =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let tol = State.Doc.ModelAbsoluteTolerance
         let plane = ref Plane.WorldXY
         let rc = curve.TryGetPlane(plane, tol)
         if rc then  !plane
-        else RhinoScriptingException.Raise "CurvePlane failed. curveId:'%s' segmentIndex:'%A'" (Pretty.str curveId) segmentIndex
+        else RhinoScriptingException.Raise "CurvePlane failed. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
 
 
     /// <summary>Returns the control points count of a Curve object.</summary>
@@ -4324,10 +4884,17 @@ type RhinoScriptSyntax private () =
     /// <param name="segmentIndex">(int) Optional, The Curve segment if `curveId` identifies a PolyCurve</param>
     /// <returns>(int) Number of control points.</returns>
     static member CurvePointCount(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : int =
-        let curve = RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex)
+        RhinoScriptSyntax.CurvePointCount(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the control points count of a Curve object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment if `curveId` identifies a PolyCurve</param>
+    /// <returns>(int) Number of control points.</returns>
+    static member CurvePointCount(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : int =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let mutable nc = curve.ToNurbsCurve()
         if notNull nc then  nc.Points.Count
-        else RhinoScriptingException.Raise "CurvePointCount failed. curveId:'%s' segmentIndex:'%A'" (Pretty.str curveId) segmentIndex
+        else RhinoScriptingException.Raise "CurvePointCount failed. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
 
     /// <summary>Returns the control points, or control vertices, of a Curve object.
     ///    If the Curve is a rational NURBS Curve, the euclidean control vertices
@@ -4358,7 +4925,16 @@ type RhinoScriptSyntax private () =
     /// <param name="segmentIndex">(int) Optional, The Curve segment if `curveId` identifies a PolyCurve</param>
     /// <returns>(Point3d ResizeArray) The control points, or control vertices, of a Curve object.</returns>
     static member CurvePoints(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d ResizeArray =
-        RhinoScriptSyntax.CurvePoints(RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex))
+        RhinoScriptSyntax.CurvePoints(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the control points, or control vertices, of a Curve object.
+    ///    If the Curve is a rational NURBS Curve, the euclidean control vertices
+    ///    are returned. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) The Curve segment if `curveId` identifies a PolyCurve</param>
+    /// <returns>(Point3d ResizeArray) The control points, or control vertices, of a Curve object.</returns>
+    static member CurvePoints(curveGeo:Curve, segmentIndex:int) : Point3d ResizeArray =
+        RhinoScriptSyntax.CurvePoints(RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex))
 
     /// <summary>Returns the radius of curvature at a point on a Curve.</summary>
     /// <param name="curveId">(Guid) Identifier of the Curve object</param>
@@ -4366,13 +4942,21 @@ type RhinoScriptSyntax private () =
     /// <param name="segmentIndex">(int) Optional, The Curve segment if CurveId identifies a PolyCurve</param>
     /// <returns>(float) The radius of curvature at the point on the Curve.</returns>
     static member CurveRadius(curveId:Guid, testPoint:Point3d, [<OPT;DEF(-1)>]segmentIndex:int) : float =
-        let curve = RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex)
+        RhinoScriptSyntax.CurveRadius(RhinoScriptSyntax.CoerceCurve(curveId), testPoint, segmentIndex)
+
+    /// <summary>Returns the radius of curvature at a point on a Curve. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="testPoint">(Point3d) Sampling point</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment if CurveId identifies a PolyCurve</param>
+    /// <returns>(float) The radius of curvature at the point on the Curve.</returns>
+    static member CurveRadius(curveGeo:Curve, testPoint:Point3d, [<OPT;DEF(-1)>]segmentIndex:int) : float =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let mutable rc, t = curve.ClosestPoint(testPoint)//, 0.0)
-        if not <| rc then  RhinoScriptingException.Raise "CurveRadius failed. curveId:'%s' testPoint:'%A' segmentIndex:'%A'" (Pretty.str curveId) testPoint segmentIndex
+        if not <| rc then  RhinoScriptingException.Raise "CurveRadius failed. curveGeo:'%s' testPoint:'%A' segmentIndex:'%A'" (Pretty.str curveGeo) testPoint segmentIndex
         let mutable v = curve.CurvatureAt( t )
         let mutable k = v.Length
         if k>RhinoMath.ZeroTolerance then  1.0/k
-        else RhinoScriptingException.Raise "CurveRadius failed. curveId:'%s' testPoint:'%A' segmentIndex:'%A'" (Pretty.str curveId) testPoint segmentIndex
+        else RhinoScriptingException.Raise "CurveRadius failed. curveGeo:'%s' testPoint:'%A' segmentIndex:'%A'" (Pretty.str curveGeo) testPoint segmentIndex
 
 
     /// <summary>Adjusts the seam, or start/end, point of a closed Curve.</summary>
@@ -4401,7 +4985,14 @@ type RhinoScriptSyntax private () =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(Point3d) The 3D starting point of the Curve.</returns>
     static member CurveStartPoint(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.CurveStartPoint(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the start point of a Curve object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(Point3d) The 3D starting point of the Curve.</returns>
+    static member CurveStartPoint(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         curve.PointAtStart
 
     /// <summary>Sets the start point of a Curve object.</summary>
@@ -4462,12 +5053,59 @@ type RhinoScriptSyntax private () =
     ///        If the event type is Overlap(2), then the V Surface parameter
     ///        for Curve at (n, 6).</returns>
     static member CurveSurfaceIntersection(curveId:Guid, surfaceId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(0.0)>]angleTolerance:float) : (int*Point3d*Point3d*Point3d*Point3d*float*float*float*float*float*float) ResizeArray =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
-        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        RhinoScriptSyntax.CurveSurfaceIntersection(RhinoScriptSyntax.CoerceCurve(curveId), RhinoScriptSyntax.CoerceSurface(surfaceId), tolerance, angleTolerance)
+
+    /// <summary>Calculates intersection of a Curve object with a Surface object.
+    ///    Note, this function works on the untrimmed portion of the Surface. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="surfaceGeo">(Surface) The input geometry.</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
+    ///    The absolute tolerance in drawing units.</param>
+    /// <param name="angleTolerance">(float) Optional, default value: <c>State.Doc.ModelAngleToleranceRadians</c>
+    ///    Angle tolerance in degrees. The angle
+    ///    tolerance is used to determine when the Curve is tangent to the
+    ///    Surface.</param>
+    /// <returns>(ResizeArray of int*Point3d*Point3d*Point3d*Point3d*float*float*float*float) of intersection information .
+    ///    The list will contain one or more of the following elements:
+    ///      Element Type     Description
+    ///      [n][0]  Number   The intersection event type, either Point(1) or Overlap(2).
+    ///      [n][1]  Point3d  If the event type is Point(1), then the intersection point
+    ///        on the first Curve. If the event type is Overlap(2), then
+    ///        intersection start point on the first Curve.
+    ///      [n][2]  Point3d  If the event type is Point(1), then the intersection point
+    ///        on the first Curve. If the event type is Overlap(2), then
+    ///        intersection end point on the first Curve.
+    ///      [n][3]  Point3d  If the event type is Point(1), then the intersection point
+    ///        on the second Curve. If the event type is Overlap(2), then
+    ///        intersection start point on the Surface.
+    ///      [n][4]  Point3d  If the event type is Point(1), then the intersection point
+    ///        on the second Curve. If the event type is Overlap(2), then
+    ///        intersection end point on the Surface.
+    ///      [n][5]  Number   If the event type is Point(1), then the first Curve parameter.
+    ///        If the event type is Overlap(2), then the start value of the
+    ///        first Curve parameter range.
+    ///      [n][6]  Number   If the event type is Point(1), then the first Curve parameter.
+    ///        If the event type is Overlap(2), then the end value of the
+    ///        Curve parameter range.
+    ///      [n][7]  Number   If the event type is Point(1), then the U Surface parameter.
+    ///        If the event type is Overlap(2), then the U Surface parameter
+    ///        for Curve at (n, 5).
+    ///      [n][8]  Number   If the event type is Point(1), then the V Surface parameter.
+    ///        If the event type is Overlap(2), then the V Surface parameter
+    ///        for Curve at (n, 5).
+    ///      [n][9]  Number   If the event type is Point(1), then the U Surface parameter.
+    ///        If the event type is Overlap(2), then the U Surface parameter
+    ///        for Curve at (n, 6).
+    ///      [n][10] Number   If the event type is Point(1), then the V Surface parameter.
+    ///        If the event type is Overlap(2), then the V Surface parameter
+    ///        for Curve at (n, 6).</returns>
+    static member CurveSurfaceIntersection(curveGeo:Curve, surfaceGeo:Surface, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(0.0)>]angleTolerance:float) : (int*Point3d*Point3d*Point3d*Point3d*float*float*float*float*float*float) ResizeArray =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
+        let surface = (surfaceGeo)
         let tolerance0 = Util.ifZero1 tolerance State.Doc.ModelAbsoluteTolerance
         let angleTolerance0 = Util.ifZero1 (toRadians(angleTolerance)) State.Doc.ModelAngleToleranceRadians
         let  rc = Intersect.Intersection.CurveSurface(curve, surface, tolerance0, angleTolerance0)
-        if isNull rc then RhinoScriptingException.Raise "CurveSurfaceIntersection failed. (surfaceId:%A) (curveId:%A) (angleTolerance:%f) (tolerance:%f) " surfaceId curveId angleTolerance tolerance
+        if isNull rc then RhinoScriptingException.Raise "CurveSurfaceIntersection failed. (surfaceGeo:%A) (curveGeo:%A) (angleTolerance:%f) (tolerance:%f) " surfaceGeo curveGeo angleTolerance tolerance
         let events = ResizeArray()
         for i = 0 to rc.Count - 1 do
             let eventType = if rc.[i].IsOverlap then 2 else 1
@@ -4484,11 +5122,19 @@ type RhinoScriptSyntax private () =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(Vector3d) A 3D vector.</returns>
     static member CurveTangent(curveId:Guid, parameter:float, [<OPT;DEF(-1)>]segmentIndex:int) : Vector3d =
-        let curve = RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex)
+        RhinoScriptSyntax.CurveTangent(RhinoScriptSyntax.CoerceCurve(curveId), parameter, segmentIndex)
+
+    /// <summary>Returns a 3D vector that is the tangent to a Curve at a parameter. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="parameter">(float) Parameter to evaluate</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(Vector3d) A 3D vector.</returns>
+    static member CurveTangent(curveGeo:Curve, parameter:float, [<OPT;DEF(-1)>]segmentIndex:int) : Vector3d =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         if curve.Domain.IncludesParameter(parameter) then
             curve.TangentAt(parameter)
         else
-            RhinoScriptingException.Raise "CurveTangent failed. curveId:'%s' parameter:'%A' segmentIndex:'%A'" (Pretty.str curveId) parameter segmentIndex
+            RhinoScriptingException.Raise "CurveTangent failed. curveGeo:'%s' parameter:'%A' segmentIndex:'%A'" (Pretty.str curveGeo) parameter segmentIndex
 
 
     /// <summary>Returns list of weights that are assigned to the control points of a Curve.</summary>
@@ -4496,11 +5142,18 @@ type RhinoScriptSyntax private () =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(float ResizeArray) The weight values of the Curve.</returns>
     static member CurveWeights(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) :  float ResizeArray =
+        RhinoScriptSyntax.CurveWeights(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns list of weights that are assigned to the control points of a Curve. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(float ResizeArray) The weight values of the Curve.</returns>
+    static member CurveWeights(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) :  float ResizeArray =
         let nc =
-            match RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex) with
+            match RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex) with
             | :? NurbsCurve as nc -> nc
             | c -> c.ToNurbsCurve()
-        if isNull nc then  RhinoScriptingException.Raise "CurveWeights failed. curveId:'%s' segmentIndex:'%A'" (Pretty.str curveId) segmentIndex
+        if isNull nc then  RhinoScriptingException.Raise "CurveWeights failed. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
         let weights = ResizeArray(nc.Points.Count)
         for i = 0 to nc.Points.Count-1 do weights.Add(nc.Points.[i].Weight)
         weights
@@ -4520,11 +5173,7 @@ type RhinoScriptSyntax private () =
     /// <param name="segments">(int) The number of segments</param>
     /// <returns>(Point3d array) Array containing points at divisions.</returns>
     static member DivideCurveIntoPoints(curveId:Guid, segments:int) : Point3d array =
-        let  curve = RhinoScriptSyntax.CoerceCurve curveId
-        let pts = ref (Array.zeroCreate (segments + 1))
-        let rc = curve.DivideByCount(segments, includeEnds=true, points=pts)
-        if isNull rc then  RhinoScriptingException.Raise "DivideCurveIntoPoints failed. curveId:'%s' segments:'%A'" (Pretty.str curveId) segments
-        !pts
+        RhinoScriptSyntax.DivideCurveIntoPoints(RhinoScriptSyntax.CoerceCurve(curveId), segments)
 
     /// <summary>Divides a Curve Geometry into a specified number of segments.</summary>
     /// <param name="curve">(Geometry.Curve) Curve geometry</param>
@@ -4540,11 +5189,7 @@ type RhinoScriptSyntax private () =
     /// <param name="segments">(int) The number of segments</param>
     /// <returns>( float array ) array containing 3D division parameters.</returns>
     static member DivideCurve(curveId:Guid, segments:int) :  float array =
-        let  curve = RhinoScriptSyntax.CoerceCurve curveId
-        let rc = curve.DivideByCount(segments, includeEnds=true)
-        if isNull rc then  RhinoScriptingException.Raise "DivideCurve failed. curveId:'%s' segments:'%A'" (Pretty.str curveId) segments
-        rc
-
+        RhinoScriptSyntax.DivideCurve(RhinoScriptSyntax.CoerceCurve(curveId), segments)
 
     /// <summary>Divides a Curve Geometry such that the linear distance between the points is equal.</summary>
     /// <param name="curve">(Geometry.Curve) Curve geometry</param>
@@ -4566,16 +5211,7 @@ type RhinoScriptSyntax private () =
     /// <param name="distance">(float) Linear distance between division points</param>
     /// <returns>(Point3d array) array containing 3D division points.</returns>
     static member DivideCurveEquidistant(curveId:Guid, distance:float) : array<Point3d> =
-        let  curve = RhinoScriptSyntax.CoerceCurve curveId
-        let  points = curve.DivideEquidistant(distance)
-        if isNull points then
-            let len = curve.GetLength()
-            if len < distance then
-                RhinoScriptingException.Raise "DivideCurveEquidistant failed on too short curve. curveId:'%s' distance:%f, curveLength=%f" (Pretty.str curveId) distance len
-            else
-                RhinoScriptingException.Raise "DivideCurveEquidistant failed. curveId:'%s' distance:%f, curveLength=%f" (Pretty.str curveId) distance len
-        points
-
+        RhinoScriptSyntax.DivideCurveEquidistant(RhinoScriptSyntax.CoerceCurve(curveId), distance)
 
     /// <summary>Divides a Curve Geometry into segments of a specified length.
     /// If length is more than Curve length it fails.</summary>
@@ -4600,17 +5236,7 @@ type RhinoScriptSyntax private () =
     /// <param name="length">(float) The length of each segment</param>
     /// <returns>(Point3d ResizeArray) a list containing division points.</returns>
     static member DivideCurveLengthIntoPoints(curveId:Guid, length:float) : Point3d ResizeArray =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
-        let rc = curve.DivideByLength(length, includeEnds=true)
-        if isNull rc then
-            let len = curve.GetLength()
-            if len < length then
-                RhinoScriptingException.Raise "DivideCurveLengthIntoPoints failed on too short curve. curveId:'%s' dived-length:%f, curveLength=%f" (Pretty.str curveId) length len
-            else
-                RhinoScriptingException.Raise "DivideCurveLengthIntoPoints failed. curveId:'%s' dived-length:%f, curveLength=%f" (Pretty.str curveId) length len
-        let pts = ResizeArray()
-        for r in rc do pts.Add(curve.PointAt(r))
-        pts
+        RhinoScriptSyntax.DivideCurveLengthIntoPoints(RhinoScriptSyntax.CoerceCurve(curveId), length)
 
     /// <summary>Divides a Curve Geometry into segments of a specified length.
     /// If length is more than Curve length it fails.</summary>
@@ -4633,24 +5259,21 @@ type RhinoScriptSyntax private () =
     /// <param name="length">(float) The length of each segment</param>
     /// <returns>( float array) a list containing 3D division parameters.</returns>
     static member DivideCurveLength(curveId:Guid, length:float) :  float [] =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
-        let rc = curve.DivideByLength(length, includeEnds=true)
-        if isNull rc then
-            let len = curve.GetLength()
-            if len < length then
-                RhinoScriptingException.Raise "DivideCurveLength failed on too short curve. curveId:'%s' dived-length:%f, curveLength=%f" (Pretty.str curveId) length len
-            else
-                RhinoScriptingException.Raise "DivideCurveLength failed. curveId:'%s' dived-length:%f, curveLength=%f" (Pretty.str curveId) length len
-        rc
-
+        RhinoScriptSyntax.DivideCurveLength(RhinoScriptSyntax.CoerceCurve(curveId), length)
 
     /// <summary>Returns the center point of an elliptical-shaped Curve object.</summary>
     /// <param name="curveId">(Guid) Identifier of the Curve object</param>
     /// <returns>(Point3d) The 3D center point of the ellipse.</returns>
     static member EllipseCenterPoint(curveId:Guid) : Point3d =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
+        RhinoScriptSyntax.EllipseCenterPoint(RhinoScriptSyntax.CoerceCurve(curveId))
+
+    /// <summary>Returns the center point of an elliptical-shaped Curve object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <returns>(Point3d) The 3D center point of the ellipse.</returns>
+    static member EllipseCenterPoint(curveGeo:Curve) : Point3d =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
         let rc, ellipse = curve.TryGetEllipse()
-        if not <| rc then  RhinoScriptingException.Raise "EllipseCenterPoint: Curve is not an ellipse. curveId:'%s'" (Pretty.str curveId)
+        if not <| rc then  RhinoScriptingException.Raise "EllipseCenterPoint: Curve is not an ellipse. curveGeo:'%s'" (Pretty.str curveGeo)
         ellipse.Plane.Origin
 
 
@@ -4658,9 +5281,15 @@ type RhinoScriptSyntax private () =
     /// <param name="curveId">(Guid) Identifier of the Curve object</param>
     /// <returns>(Point3d * Point3d * Point3d * Point3d) Four points identifying the quadrants of the ellipse.</returns>
     static member EllipseQuadPoints(curveId:Guid) : Point3d * Point3d * Point3d * Point3d =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
+        RhinoScriptSyntax.EllipseQuadPoints(RhinoScriptSyntax.CoerceCurve(curveId))
+
+    /// <summary>Returns the quadrant points of an elliptical-shaped Curve object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <returns>(Point3d * Point3d * Point3d * Point3d) Four points identifying the quadrants of the ellipse.</returns>
+    static member EllipseQuadPoints(curveGeo:Curve) : Point3d * Point3d * Point3d * Point3d =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
         let rc, ellipse = curve.TryGetEllipse()
-        if not <| rc then  RhinoScriptingException.Raise "EllipseQuadPoints: Curve is not an ellipse. curveId:'%s'" (Pretty.str curveId)
+        if not <| rc then  RhinoScriptingException.Raise "EllipseQuadPoints: Curve is not an ellipse. curveGeo:'%s'" (Pretty.str curveGeo)
         let origin = ellipse.Plane.Origin;
         let xAxis = ellipse.Radius1 * ellipse.Plane.XAxis;
         let yAxis = ellipse.Radius2 * ellipse.Plane.YAxis;
@@ -4673,7 +5302,15 @@ type RhinoScriptSyntax private () =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(Point3d) a 3-D point.</returns>
     static member EvaluateCurve(curveId:Guid, t:float, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.EvaluateCurve(RhinoScriptSyntax.CoerceCurve(curveId), t, segmentIndex)
+
+    /// <summary>Evaluates a Curve at a parameter and returns a 3D point. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="t">(float) The parameter to evaluate</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(Point3d) a 3-D point.</returns>
+    static member EvaluateCurve(curveGeo:Curve, t:float, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         curve.PointAt(t)
 
 
@@ -4685,16 +5322,19 @@ type RhinoScriptSyntax private () =
     ///    Delete input objects after exploding if True</param>
     /// <returns>(Guid ResizeArray) identifying the newly created Curve objects.</returns>
     static member ExplodeCurve(curveId:Guid, [<OPT;DEF(false)>]deleteInput:bool) : Guid ResizeArray =
-        let rc = ResizeArray()
-        let curve = RhinoScriptSyntax.CoerceCurve curveId
+        let pieces = RhinoScriptSyntax.ExplodeCurve(RhinoScriptSyntax.CoerceCurve(curveId))
+        let ids = pieces |> RArr.mapSeq State.Doc.Objects.AddCurve
+        if deleteInput && pieces.Count > 0 then State.Doc.Objects.Delete(curveId, quiet=true) |> ignore<bool>
+        if ids.Count > 0 then State.Doc.Views.Redraw()
+        ids
+
+    /// <summary>Computes ExplodeCurve from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="curveGeo">(Curve) The input curve geometry.</param>
+    /// <returns>(Curve ResizeArray) The resulting geometry; it is not added to a document.</returns>
+    static member ExplodeCurve(curveGeo:Curve) : Curve ResizeArray =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
         let pieces = curve.DuplicateSegments()
-        if notNull pieces then
-            for piece in pieces do
-                rc.Add(State.Doc.Objects.AddCurve(piece))
-            if deleteInput then
-                State.Doc.Objects.Delete(curveId, quiet=true) |> ignore<bool>
-        if rc.Count>0 then  State.Doc.Views.Redraw()
-        rc
+        if isNull pieces then ResizeArray<Curve>() else ResizeArray(pieces)
 
     /// <summary>Explodes, or un-joins, several curves Curve. PolyCurves will be exploded into Curve
     ///    segments. Polylines will be exploded into line segments. ExplodeCurves will
@@ -4704,18 +5344,21 @@ type RhinoScriptSyntax private () =
     ///    Delete input objects after exploding if True</param>
     /// <returns>(Guid ResizeArray) identifying the newly created Curve objects.</returns>
     static member ExplodeCurves(curveIds:Guid seq, [<OPT;DEF(false)>]deleteInput:bool) : Guid ResizeArray =
-        let rc = ResizeArray()
+        let ids = ResizeArray<Guid>()
         for curveId in curveIds do
-            let curve = RhinoScriptSyntax.CoerceCurve curveId
-            let pieces = curve.DuplicateSegments()
-            if notNull pieces then
-                for piece in pieces do
-                    rc.Add(State.Doc.Objects.AddCurve(piece))
-                if deleteInput then
-                    State.Doc.Objects.Delete(curveId, quiet=true) |> ignore<bool>
-        if rc.Count>0 then  State.Doc.Views.Redraw()
-        rc
+            let pieces = RhinoScriptSyntax.ExplodeCurve(RhinoScriptSyntax.CoerceCurve(curveId))
+            for piece in pieces do ids.Add(State.Doc.Objects.AddCurve(piece))
+            if deleteInput && pieces.Count > 0 then State.Doc.Objects.Delete(curveId, quiet=true) |> ignore<bool>
+        if ids.Count > 0 then State.Doc.Views.Redraw()
+        ids
 
+    /// <summary>Computes ExplodeCurves from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="curveInputs">(Curve seq) The input objects.</param>
+    /// <returns>(Curve ResizeArray) The resulting geometry; it is not added to a document.</returns>
+    static member ExplodeCurves(curveInputs:Curve seq) : Curve ResizeArray =
+        let pieces = ResizeArray<Curve>()
+        for curve in curveInputs do pieces.AddRange(RhinoScriptSyntax.ExplodeCurve(curve))
+        pieces
 
     /// <summary>Extends a non-closed Curve object by a line, arc, or smooth extension
     ///    until it intersects a collection of objects.</summary>
@@ -4737,39 +5380,54 @@ type RhinoScriptSyntax private () =
                                 boundaryCurveIds:Guid seq,
                                 [<OPT;DEF(false)>]replaceInput:bool) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
+        let newCurve = RhinoScriptSyntax.ExtendCurve(curve, extensionType, side, boundaryCurveIds |> Seq.map RhinoScriptSyntax.CoerceGeometry)
+        if replaceInput then
+            if not (State.Doc.Objects.Replace(curveId, newCurve)) then RhinoScriptingException.Raise "ExtendCurve: Unable to replace curve %O" curveId
+            State.Doc.Views.Redraw()
+            curveId
+        else
+            let rc = State.Doc.Objects.AddCurve(newCurve)
+            State.Doc.Views.Redraw()
+            rc
+
+    /// <summary>Computes ExtendCurve from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="curveGeo">(Curve) The input curve geometry.</param>
+    /// <param name="extensionType">(int)
+    ///    0 = line
+    ///    1 = arc
+    ///    2 = smooth</param>
+    /// <param name="side">(int)
+    ///    0 = extend from the start of the Curve
+    ///    1 = extend from the end of the Curve
+    ///    2 = extend from both the start and the end of the Curve</param>
+    /// <param name="boundaryCurves">(GeometryBase seq) The input objects.</param>
+    /// <returns>(Curve) The resulting geometry; it is not added to a document.</returns>
+    static member ExtendCurve(  curveGeo:Curve,
+                                extensionType:int,
+                                side:int,
+                                boundaryCurves:GeometryBase seq) : Curve =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
         let mutable extensionTypet = CurveExtensionStyle.Line
         if extensionType = 0   then extensionTypet <- CurveExtensionStyle.Line
         elif extensionType = 1 then extensionTypet <- CurveExtensionStyle.Arc
         elif extensionType = 2 then extensionTypet <- CurveExtensionStyle.Smooth
-        else RhinoScriptingException.Raise "ExtendCurve ExtensionType must be 0, 1, or 2. curveId:'%s' extensionType:'%A' side:'%A' boundaryCurveIds:'%s'" (Pretty.str curveId) extensionType side  (Pretty.str boundaryCurveIds)
+        else RhinoScriptingException.Raise "ExtendCurve ExtensionType must be 0, 1, or 2. curveGeo:'%s' extensionType:'%A' side:'%A' boundaryCurves:'%s'" (Pretty.str curveGeo) extensionType side  (Pretty.str boundaryCurves)
 
         let sidet =
             match side with
             |0  -> CurveEnd.Start
             |1  -> CurveEnd.End
             |2  -> CurveEnd.Both
-            |_  -> RhinoScriptingException.Raise "ExtendCurve Side must be 0, 1, or 2. curveId:'%s' extensionType:'%A' side:'%A' boundaryCurveIds:'%s'" (Pretty.str curveId) extensionType side  (Pretty.str boundaryCurveIds)
+            |_  -> RhinoScriptingException.Raise "ExtendCurve Side must be 0, 1, or 2. curveGeo:'%s' extensionType:'%A' side:'%A' boundaryCurves:'%s'" (Pretty.str curveGeo) extensionType side  (Pretty.str boundaryCurves)
 
         let rhobjs = ResizeArray()
-        for o in boundaryCurveIds do rhobjs.Add(RhinoScriptSyntax.CoerceRhinoObject o)
+        for o in boundaryCurves do rhobjs.Add(o)
 
-        if rhobjs.Count=0 then  RhinoScriptingException.Raise "ExtendCurve boundaryCurveIds failed. They must contain at least one item. curveId:'%s' extensionType:'%A' side:'%A' boundaryCurveIds:'%s'" (Pretty.str curveId) extensionType side (Pretty.str boundaryCurveIds)
-        let geometry = rhobjs|> RArr.map (fun o -> o.Geometry)
+        if rhobjs.Count=0 then  RhinoScriptingException.Raise "ExtendCurve boundaryCurves failed. They must contain at least one item. curveGeo:'%s' extensionType:'%A' side:'%A' boundaryCurves:'%s'" (Pretty.str curveGeo) extensionType side (Pretty.str boundaryCurves)
+        let geometry = rhobjs
         let newCurve = curve.Extend(sidet, extensionTypet, geometry)
-        if notNull newCurve && newCurve.IsValid then
-            if replaceInput then
-                if State.Doc.Objects.Replace(curveId, newCurve) then
-                    State.Doc.Views.Redraw()
-                    curveId
-                else
-                    RhinoScriptingException.Raise "ExtendCurve failed. curveId:'%s' extensionType:'%A' side:'%A' boundaryCurveIds:'%s'" (Pretty.str curveId) extensionType side  (Pretty.str boundaryCurveIds)
-            else
-                let g= State.Doc.Objects.AddCurve(newCurve)
-                State.Doc.Views.Redraw()
-                g
-        else
-            RhinoScriptingException.Raise "ExtendCurve failed. curveId:'%s' extensionType:'%A' side:'%A' boundaryCurveIds:'%s'" (Pretty.str curveId) extensionType side  (Pretty.str boundaryCurveIds)
-
+        if isNull newCurve || not newCurve.IsValid then RhinoScriptingException.Raise "ExtendCurve: Unable to extend curve"
+        newCurve
 
     /// <summary>Extends a non-closed Curve by a line, arc, or smooth extension for a specified distance.</summary>
     /// <param name="curveId">(Guid) Curve to extend</param>
@@ -4787,31 +5445,46 @@ type RhinoScriptSyntax private () =
                                         extensionType:int,
                                         side:int,
                                         length:float) : Guid =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
+        let newCurve = RhinoScriptSyntax.ExtendCurveLength(RhinoScriptSyntax.CoerceCurve(curveId), extensionType, side, length)
+        if not (State.Doc.Objects.Replace(curveId, newCurve)) then RhinoScriptingException.Raise "ExtendCurveLength: Unable to replace curve %O" curveId
+        State.Doc.Views.Redraw()
+        curveId
+
+    /// <summary>Computes ExtendCurveLength from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="curveGeo">(Curve) The input curve geometry.</param>
+    /// <param name="extensionType">(int)
+    ///    0 = line
+    ///    1 = arc
+    ///    2 = smooth</param>
+    /// <param name="side">(int)
+    ///    0 = extend from start of the Curve
+    ///    1 = extend from end of the Curve
+    ///    2 = Extend from both ends</param>
+    /// <param name="length">(float) Distance to extend</param>
+    /// <returns>(Curve) The resulting geometry; it is not added to a document.</returns>
+    static member ExtendCurveLength(    curveGeo:Curve,
+                                        extensionType:int,
+                                        side:int,
+                                        length:float) : Curve =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
         let mutable extensionTypet = CurveExtensionStyle.Line
         if extensionType   = 0 then extensionTypet <- CurveExtensionStyle.Line
         elif extensionType = 1 then extensionTypet <- CurveExtensionStyle.Arc
         elif extensionType = 2 then extensionTypet <- CurveExtensionStyle.Smooth
-        else RhinoScriptingException.Raise "ExtendCurveLength ExtensionType must be 0, 1, or 2. curveId:'%s' extensionType:'%A' side:'%A' length:'%A'" (Pretty.str curveId) extensionType side length
+        else RhinoScriptingException.Raise "ExtendCurveLength ExtensionType must be 0, 1, or 2. curveGeo:'%s' extensionType:'%A' side:'%A' length:'%A'" (Pretty.str curveGeo) extensionType side length
 
         let sideT =
             match side with
             |0  -> CurveEnd.Start
             |1  -> CurveEnd.End
             |2  -> CurveEnd.Both
-            |_  -> RhinoScriptingException.Raise "ExtendCurveLength Side must be 0, 1, or 2. curveId:'%s' extensionType:'%A' side:'%A' length:'%A'" (Pretty.str curveId) extensionType side length
+            |_  -> RhinoScriptingException.Raise "ExtendCurveLength Side must be 0, 1, or 2. curveGeo:'%s' extensionType:'%A' side:'%A' length:'%A'" (Pretty.str curveGeo) extensionType side length
 
         let newCurve =
             if length<0. then curve.Trim(sideT, -length)
             else curve.Extend(sideT, length, extensionTypet)
-
-        if notNull newCurve && newCurve.IsValid then
-            if State.Doc.Objects.Replace(curveId, newCurve) then
-                State.Doc.Views.Redraw()
-                curveId
-            else RhinoScriptingException.Raise "ExtendCurveLength failed. curveId:'%s' extensionType:'%A' side:'%A' length:'%A'" (Pretty.str curveId) extensionType side length
-        else RhinoScriptingException.Raise "ExtendCurveLength failed. curveId:'%s' extensionType:'%A' side:'%A' length:'%A'" (Pretty.str curveId) extensionType side length
-
+        if isNull newCurve || not newCurve.IsValid then RhinoScriptingException.Raise "ExtendCurveLength: Unable to extend curve"
+        newCurve
 
     /// <summary>Extends a non-closed Curve by smooth extension to a point.</summary>
     /// <param name="curveId">(Guid) Curve to extend</param>
@@ -4829,30 +5502,46 @@ type RhinoScriptSyntax private () =
                                     side:int,
                                     point:Point3d,
                                     [<OPT;DEF(-1)>]extensionType:int) : Guid =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
+        let newCurve = RhinoScriptSyntax.ExtendCurvePoint(RhinoScriptSyntax.CoerceCurve(curveId), side, point, extensionType)
+        if not (State.Doc.Objects.Replace(curveId, newCurve)) then RhinoScriptingException.Raise "ExtendCurvePoint: Unable to replace curve %O" curveId
+        State.Doc.Views.Redraw()
+        curveId
+
+    /// <summary>Computes ExtendCurvePoint from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="curveGeo">(Curve) The input curve geometry.</param>
+    /// <param name="side">(int)
+    ///    0 = extend from start of the Curve
+    ///    1 = extend from end of the Curve
+    ///    2 = extend from both the start and the end of the Curve</param>
+    /// <param name="point">(Point3d) Point to extend to</param>
+    /// <param name="extensionType">(int) Optional, default value: <c>2</c> ( CurveExtensionStyle.Smooth))
+    ///    0 = line
+    ///    1 = arc
+    ///    2 = smooth</param>
+    /// <returns>(Curve) The resulting geometry; it is not added to a document.</returns>
+    static member ExtendCurvePoint( curveGeo:Curve,
+                                    side:int,
+                                    point:Point3d,
+                                    [<OPT;DEF(-1)>]extensionType:int) : Curve =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
         let extensionTypet =
             match extensionType with
             | -1 ->  CurveExtensionStyle.Smooth
             |  0 ->  CurveExtensionStyle.Line
             |  1 ->  CurveExtensionStyle.Arc
             |  2 ->  CurveExtensionStyle.Smooth
-            |  _ ->  RhinoScriptingException.Raise "ExtendCurvePoint ExtensionType must be 0, 1, or 2. curveId:'%s' side:'%A' point:'%A' extensionType:'%A'" (Pretty.str curveId) side point extensionType
+            |  _ ->  RhinoScriptingException.Raise "ExtendCurvePoint ExtensionType must be 0, 1, or 2. curveGeo:'%s' side:'%A' point:'%A' extensionType:'%A'" (Pretty.str curveGeo) side point extensionType
 
         let sidet =
             match side with
             | 0  -> CurveEnd.Start
             | 1  -> CurveEnd.End
             | 2  -> CurveEnd.Both
-            | _  -> RhinoScriptingException.Raise "ExtendCurvePoint Side must be 0, 1, or 2. curveId:'%s' side:'%A' point:'%A' extensionType:'%A'" (Pretty.str curveId) side point extensionType
+            | _  -> RhinoScriptingException.Raise "ExtendCurvePoint Side must be 0, 1, or 2. curveGeo:'%s' side:'%A' point:'%A' extensionType:'%A'" (Pretty.str curveGeo) side point extensionType
 
         let newCurve = curve.Extend(sidet, extensionTypet, point)
-        if notNull newCurve && newCurve.IsValid then
-            if State.Doc.Objects.Replace( curveId, newCurve ) then
-                State.Doc.Views.Redraw()
-                curveId
-            else RhinoScriptingException.Raise "ExtendCurvePoint failed. curveId:'%s' side:'%A' point:'%A'" (Pretty.str curveId) side point
-        else RhinoScriptingException.Raise "ExtendCurvePoint failed. curveId:'%s' side:'%A' point:'%A'" (Pretty.str curveId) side point
-
+        if isNull newCurve || not newCurve.IsValid then RhinoScriptingException.Raise "ExtendCurvePoint: Unable to extend curve"
+        newCurve
 
     /// <summary>Fairs a Curve. Fair works best on degree 3 (cubic) Curves. Fair attempts
     ///    to remove large curvature variations while limiting the geometry changes to
@@ -4899,22 +5588,37 @@ type RhinoScriptSyntax private () =
                             [<OPT;DEF(0.0)>]distanceTolerance:float,
                             [<OPT;DEF(-1.0)>]angleTolerance:float) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
-        let distanceTolerance0 = Util.ifZero1 distanceTolerance State.Doc.ModelAbsoluteTolerance
-        let angleTolerance0 = if  angleTolerance < 0.0 then  State.Doc.ModelAngleToleranceRadians else toRadians angleTolerance
-        let nc = curve.Fit(degree, distanceTolerance0, angleTolerance0)
-        if notNull nc then
-            let rhobj = RhinoScriptSyntax.CoerceRhinoObject(curveId)
-            let mutable rc = Guid.Empty
-            if notNull rhobj then
-                rc <- State.Doc.Objects.AddCurve(nc, rhobj.Attributes)
-            else
-                rc <- State.Doc.Objects.AddCurve(nc)
-            if rc = Guid.Empty then  RhinoScriptingException.Raise "FitCurve: Unable to add curve to document. curveId:'%s' degree:'%A' distanceTolerance:'%A' angleTolerance:'%A'" (Pretty.str curveId) degree distanceTolerance angleTolerance
-            State.Doc.Views.Redraw()
-            rc
-        else
-            RhinoScriptingException.Raise "FitCurve failed. curveId:'%s' degree:'%A' distanceTolerance:'%A' angleTolerance:'%A'" (Pretty.str curveId) degree distanceTolerance angleTolerance
+        let fitted = RhinoScriptSyntax.FitCurve(curve, degree, distanceTolerance, angleTolerance)
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(curveId)
+        let rc = State.Doc.Objects.AddCurve(fitted, rhobj.Attributes)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "FitCurve: Unable to add curve to document"
+        State.Doc.Views.Redraw()
+        rc
 
+    /// <summary>Computes FitCurve from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="curveGeo">(Curve) The input curve geometry.</param>
+    /// <param name="degree">(int) Optional, default value: <c>3</c>
+    ///    The Curve degree, which must be greater than 1.
+    ///    The default is 3</param>
+    /// <param name="distanceTolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
+    ///    The fitting tolerance.</param>
+    /// <param name="angleTolerance">(float) Optional, default value: <c>State.Doc.ModelAngleToleranceRadians</c>
+    ///    The kink smoothing tolerance in degrees. If
+    ///    angleTolerance is 0.0, all kinks are smoothed. If angleTolerance
+    ///    is bigger than  0.0, kinks smaller than angleTolerance are smoothed. If
+    ///    angleTolerance is not specified or smaller than 0.0, the document angle
+    ///    tolerance is used for the kink smoothing</param>
+    /// <returns>(Curve) The resulting geometry; it is not added to a document.</returns>
+    static member FitCurve( curveGeo:Curve,
+                            [<OPT;DEF(3)>]degree:int,
+                            [<OPT;DEF(0.0)>]distanceTolerance:float,
+                            [<OPT;DEF(-1.0)>]angleTolerance:float) : Curve =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
+        let distanceTolerance0 = Util.ifZero1 distanceTolerance State.Doc.ModelAbsoluteTolerance
+        let angleTolerance0 = if angleTolerance < 0.0 then State.Doc.ModelAngleToleranceRadians else toRadians angleTolerance
+        let fitted = curve.Fit(degree, distanceTolerance0, angleTolerance0)
+        if isNull fitted then RhinoScriptingException.Raise "FitCurve: Unable to fit curve"
+        fitted
 
     /// <summary>Inserts a knot into a Curve object.</summary>
     /// <param name="curveId">(Guid) Identifier of the Curve object</param>
@@ -4955,8 +5659,19 @@ type RhinoScriptSyntax private () =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(bool) True or False.</returns>
     static member IsArc(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
+        RhinoScriptSyntax.IsArc((RhinoScriptSyntax.TryCoerceGeometry(curveId) |> Option.defaultValue null), tolerance, segmentIndex)
+
+    /// <summary>Checks if an object is an open arc Curve. Returns false for any other Rhino object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(GeometryBase) The input geometry.</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>RhinoMath.ZeroTolerance</c>
+    ///    If the Curve is not a circle, then the tolerance used
+    ///    to determine whether or not the NURBS form of the Curve has the
+    ///    properties of a arc.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsArc(curveGeo:GeometryBase, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
         let tol = Util.ifZero2 RhinoMath.ZeroTolerance tolerance
-        match RhinoScriptSyntax.TryCoerceCurve(curveId, segmentIndex) with
+        match RhinoScriptSyntax.TryDirectCurveInput(curveGeo, segmentIndex) with
         |None -> false
         |Some curve  -> curve.IsArc(tol) && not curve.IsClosed
 
@@ -4969,8 +5684,18 @@ type RhinoScriptSyntax private () =
     ///    properties of a circle.</param>
     /// <returns>(bool) True or False.</returns>
     static member IsCircle(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float) : bool =
+        RhinoScriptSyntax.IsCircle((RhinoScriptSyntax.TryCoerceGeometry(curveId) |> Option.defaultValue null), tolerance)
+
+    /// <summary>Checks if an object is a circle Curve.  Returns false for any other Rhino object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(GeometryBase) The input geometry.</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>RhinoMath.ZeroTolerance</c>
+    ///    If the Curve is not a circle, then the tolerance used
+    ///    to determine whether or not the NURBS form of the Curve has the
+    ///    properties of a circle.</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsCircle(curveGeo:GeometryBase, [<OPT;DEF(0.0)>]tolerance:float) : bool =
         let tol = Util.ifZero2 RhinoMath.ZeroTolerance tolerance
-        match RhinoScriptSyntax.TryCoerceCurve curveId with
+        match RhinoScriptSyntax.TryDirectCurveInput(curveGeo, -1) with
         |None -> false
         |Some curve  -> curve.IsCircle(tol)
 
@@ -4979,7 +5704,13 @@ type RhinoScriptSyntax private () =
     /// <param name="curveId">(Guid) The object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsCurve(curveId:Guid) : bool =
-        match RhinoScriptSyntax.TryCoerceCurve curveId with
+        RhinoScriptSyntax.IsCurve((RhinoScriptSyntax.TryCoerceGeometry(curveId) |> Option.defaultValue null))
+
+    /// <summary>Checks if an object is a Curve. Returns false for any other Rhino object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(GeometryBase) The input geometry.</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsCurve(curveGeo:GeometryBase) : bool =
+        match RhinoScriptSyntax.TryDirectCurveInput(curveGeo, -1) with
         |None -> false
         |Some _  -> true
 
@@ -4992,8 +5723,18 @@ type RhinoScriptSyntax private () =
     ///    Maximum allowable distance between start point and end point.</param>
     /// <returns>(bool) True or False.</returns>
     static member IsCurveClosable(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float) : bool =
+        RhinoScriptSyntax.IsCurveClosable((RhinoScriptSyntax.TryCoerceGeometry(curveId) |> Option.defaultValue null), tolerance)
+
+    /// <summary>Decide if it makes sense to close off the Curve by moving the end point
+    ///    to the start point based on start-end gap size and length of Curve as
+    ///    approximated by chord defined by 6 points. Returns false for any other Rhino object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(GeometryBase) The input geometry.</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
+    ///    Maximum allowable distance between start point and end point.</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsCurveClosable(curveGeo:GeometryBase, [<OPT;DEF(0.0)>]tolerance:float) : bool =
         let tolerance0 = Util.ifZero2 State.Doc.ModelAbsoluteTolerance tolerance
-        match RhinoScriptSyntax.TryCoerceCurve curveId with
+        match RhinoScriptSyntax.TryDirectCurveInput(curveGeo, -1) with
         |None -> false
         |Some curve  -> curve.IsClosable(tolerance0)
 
@@ -5002,7 +5743,13 @@ type RhinoScriptSyntax private () =
     /// <param name="curveId">(Guid) The object's identifier</param>
     /// <returns>(bool) If Curve is Closed True,  otherwise False.</returns>
     static member IsCurveClosed(curveId:Guid) : bool =
-        match RhinoScriptSyntax.TryCoerceCurve curveId with
+        RhinoScriptSyntax.IsCurveClosed((RhinoScriptSyntax.TryCoerceGeometry(curveId) |> Option.defaultValue null))
+
+    /// <summary>Checks if an object is a closed Curve object. Returns false for any other Rhino object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(GeometryBase) The input geometry.</param>
+    /// <returns>(bool) If Curve is Closed True,  otherwise False.</returns>
+    static member IsCurveClosed(curveGeo:GeometryBase) : bool =
+        match RhinoScriptSyntax.TryDirectCurveInput(curveGeo, -1) with
         |None -> false
         |Some curve  -> curve.IsClosed
 
@@ -5013,8 +5760,16 @@ type RhinoScriptSyntax private () =
     /// <param name="tolerance">(float) Optional, default value: <c>RhinoMath.ZeroTolerance</c></param>
     /// <returns>(bool) True or False.</returns>
     static member IsCurveInPlane(curveId:Guid, plane:Plane, [<OPT;DEF(0.0)>]tolerance:float) : bool =
+        RhinoScriptSyntax.IsCurveInPlane((RhinoScriptSyntax.TryCoerceGeometry(curveId) |> Option.defaultValue null), plane, tolerance)
+
+    /// <summary>Test a Curve to see if it lies in a specific Plane. Returns false for any other Rhino object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(GeometryBase) The input geometry.</param>
+    /// <param name="plane">(Plane) Plane to test</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>RhinoMath.ZeroTolerance</c></param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsCurveInPlane(curveGeo:GeometryBase, plane:Plane, [<OPT;DEF(0.0)>]tolerance:float) : bool =
         let tolerance0 = Util.ifZero2 RhinoMath.ZeroTolerance tolerance
-        match RhinoScriptSyntax.TryCoerceCurve curveId with
+        match RhinoScriptSyntax.TryDirectCurveInput(curveGeo, -1) with
         |None -> false
         |Some curve  -> curve.IsInPlane(plane, tolerance0)
 
@@ -5025,8 +5780,16 @@ type RhinoScriptSyntax private () =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
     static member IsCurveLinear(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
+        RhinoScriptSyntax.IsCurveLinear((RhinoScriptSyntax.TryCoerceGeometry(curveId) |> Option.defaultValue null), tolerance, segmentIndex)
+
+    /// <summary>Checks if an object is a linear Curve. Returns false for any other Rhino object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(GeometryBase) The input geometry.</param>    ///
+    /// <param name="tolerance">(float) Optional, default value: <c>RhinoMath.ZeroTolerance</c></param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(bool) True or False indicating success or failure.</returns>
+    static member IsCurveLinear(curveGeo:GeometryBase, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
         let tolerance0 = Util.ifZero2 RhinoMath.ZeroTolerance tolerance
-        match  RhinoScriptSyntax.TryCoerceCurve(curveId, segmentIndex) with
+        match  RhinoScriptSyntax.TryDirectCurveInput(curveGeo, segmentIndex) with
         |None -> false
         |Some curve  -> curve.IsLinear(tolerance0)
 
@@ -5037,7 +5800,15 @@ type RhinoScriptSyntax private () =
     ///    The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(bool) True or False.</returns>
     static member IsCurvePeriodic(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
-        match RhinoScriptSyntax.TryCoerceCurve(curveId, segmentIndex) with
+        RhinoScriptSyntax.IsCurvePeriodic((RhinoScriptSyntax.TryCoerceGeometry(curveId) |> Option.defaultValue null), segmentIndex)
+
+    /// <summary>Checks if an object is a periodic Curve object. Returns false for any other Rhino object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(GeometryBase) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional,
+    ///    The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsCurvePeriodic(curveGeo:GeometryBase, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
+        match RhinoScriptSyntax.TryDirectCurveInput(curveGeo, segmentIndex) with
         |None -> false
         |Some curve  -> curve.IsPeriodic
 
@@ -5048,8 +5819,16 @@ type RhinoScriptSyntax private () =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
     static member IsCurvePlanar(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
+        RhinoScriptSyntax.IsCurvePlanar((RhinoScriptSyntax.TryCoerceGeometry(curveId) |> Option.defaultValue null), tolerance, segmentIndex)
+
+    /// <summary>Checks if an object is a planar Curve. Returns false for any other Rhino object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(GeometryBase) The input geometry.</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>RhinoMath.ZeroTolerance</c></param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(bool) True or False indicating success or failure.</returns>
+    static member IsCurvePlanar(curveGeo:GeometryBase, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
         let tol = Util.ifZero2 RhinoMath.ZeroTolerance tolerance
-        match RhinoScriptSyntax.TryCoerceCurve(curveId, segmentIndex) with
+        match RhinoScriptSyntax.TryDirectCurveInput(curveGeo, segmentIndex) with
         |None -> false
         |Some curve  -> curve.IsPlanar(tol)
 
@@ -5059,7 +5838,14 @@ type RhinoScriptSyntax private () =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
     static member IsCurveRational(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
-        match RhinoScriptSyntax.TryCoerceCurve(curveId, segmentIndex) with
+        RhinoScriptSyntax.IsCurveRational((RhinoScriptSyntax.TryCoerceGeometry(curveId) |> Option.defaultValue null), segmentIndex)
+
+    /// <summary>Checks if an object is a rational NURBS Curve. Returns false for any other Rhino object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(GeometryBase) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(bool) True or False indicating success or failure.</returns>
+    static member IsCurveRational(curveGeo:GeometryBase, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
+        match RhinoScriptSyntax.TryDirectCurveInput(curveGeo, segmentIndex) with
         |None -> false
         |Some c  ->
             match c with
@@ -5074,8 +5860,17 @@ type RhinoScriptSyntax private () =
     ///    The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
     static member IsEllipse(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
+        RhinoScriptSyntax.IsEllipse((RhinoScriptSyntax.TryCoerceGeometry(curveId) |> Option.defaultValue null), tolerance, segmentIndex)
+
+    /// <summary>Checks if an object is an elliptical-shaped Curve. Returns false for any other Rhino object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(GeometryBase) The input geometry.</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>RhinoMath.ZeroTolerance</c></param>
+    /// <param name="segmentIndex">(int) Optional,
+    ///    The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(bool) True or False indicating success or failure.</returns>
+    static member IsEllipse(curveGeo:GeometryBase, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
         let tol = Util.ifZero2 RhinoMath.ZeroTolerance tolerance
-        match RhinoScriptSyntax.TryCoerceCurve(curveId,segmentIndex) with
+        match RhinoScriptSyntax.TryDirectCurveInput(curveGeo, segmentIndex) with
         |None -> false
         |Some curve  -> curve.IsEllipse(tol)
 
@@ -5087,8 +5882,17 @@ type RhinoScriptSyntax private () =
     ///    The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
     static member IsLine(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
+        RhinoScriptSyntax.IsLine((RhinoScriptSyntax.TryCoerceGeometry(curveId) |> Option.defaultValue null), tolerance, segmentIndex)
+
+    /// <summary>Checks if an object is a line Curve. Returns false for any other Rhino object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(GeometryBase) The input geometry.</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>RhinoMath.ZeroTolerance</c></param>
+    /// <param name="segmentIndex">(int) Optional,
+    ///    The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(bool) True or False indicating success or failure.</returns>
+    static member IsLine(curveGeo:GeometryBase, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
         let tol = Util.ifZero2 RhinoMath.ZeroTolerance tolerance
-        match RhinoScriptSyntax.TryCoerceCurve(curveId, segmentIndex) with
+        match RhinoScriptSyntax.TryDirectCurveInput(curveGeo, segmentIndex) with
         |None -> false
         |Some c  ->
             match c with
@@ -5108,8 +5912,17 @@ type RhinoScriptSyntax private () =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
     static member IsPointOnCurve(curveId:Guid, point:Point3d, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
+        RhinoScriptSyntax.IsPointOnCurve(RhinoScriptSyntax.CoerceCurve(curveId), point, tolerance, segmentIndex)
+
+    /// <summary>Checks if a point is on a Curve. Returns false for any other Rhino object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="point">(Point3d) The test point</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>RhinoMath.SqrtEpsilon</c></param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(bool) True or False indicating success or failure.</returns>
+    static member IsPointOnCurve(curveGeo:Curve, point:Point3d, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
         let tol = Util.ifZero2 RhinoMath.SqrtEpsilon tolerance
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let t = ref 0.0
         curve.ClosestPoint(point, t, tol)
 
@@ -5119,8 +5932,15 @@ type RhinoScriptSyntax private () =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(bool) True or False.</returns>
     static member IsPolyCurve(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
+        RhinoScriptSyntax.IsPolyCurve((RhinoScriptSyntax.TryCoerceGeometry(curveId) |> Option.defaultValue null), segmentIndex)
+
+    /// <summary>Checks if an object is a PolyCurve Curve. Returns false for any other Rhino object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(GeometryBase) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsPolyCurve(curveGeo:GeometryBase, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
         // TODO can a PolyCurve be nested in a PolyCurve ?
-        match RhinoScriptSyntax.TryCoerceCurve(curveId, segmentIndex) with
+        match RhinoScriptSyntax.TryDirectCurveInput(curveGeo, segmentIndex) with
         |None               -> false
         |Some c  ->
             match c with
@@ -5134,7 +5954,15 @@ type RhinoScriptSyntax private () =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(bool) True or False.</returns>
     static member IsPolyline(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
-        match RhinoScriptSyntax.TryCoerceCurve(curveId, segmentIndex) with
+        RhinoScriptSyntax.IsPolyline((RhinoScriptSyntax.TryCoerceGeometry(curveId) |> Option.defaultValue null), segmentIndex)
+
+    /// <summary>Checks if an object is a Polyline Curve object or a nurbs cure with degree 1 and moer than 2 points
+    /// Lines return false. Returns false for any other Rhino object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(GeometryBase) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsPolyline(curveGeo:GeometryBase, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
+        match RhinoScriptSyntax.TryDirectCurveInput(curveGeo, segmentIndex) with
         |None               -> false
         |Some c  ->
             match c with
@@ -5153,22 +5981,27 @@ type RhinoScriptSyntax private () =
     ///    tolerance is used</param>
     /// <returns>(Guid ResizeArray) Object objectId representing the new Curves.</returns>
     static member JoinCurves(curveIds:Guid seq, [<OPT;DEF(false)>]deleteInput:bool, [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray =
-        let curves = curveIds  |> RArr.mapSeq  RhinoScriptSyntax.CoerceCurve
-        if curves.Count = 0 then
-            RhinoScriptingException.Raise "JoinCurves: curveIds must contain at least two items.  curveIds:'%s' deleteInput:'%A' tolerance:'%A'" (Pretty.str curveIds) deleteInput tolerance
-        let tolerance0 = Util.ifZero1 tolerance (2.1 * State.Doc.ModelAbsoluteTolerance)
-        let newCurves = Curve.JoinCurves(curves, tolerance0)
-        if isNull newCurves then
-            RhinoScriptingException.Raise "JoinCurves failed on curveIds:'%s' deleteInput:'%A' tolerance:'%A'" (Pretty.str curveIds) deleteInput tolerance
-
-        let rc = newCurves  |> RArr.mapSeq  State.Doc.Objects.AddCurve
+        let curveIds = Seq.toArray curveIds
+        let curves = RhinoScriptSyntax.JoinCurves(curveIds |> Seq.map RhinoScriptSyntax.CoerceCurve, tolerance)
+        let ids = curves |> RArr.mapSeq State.Doc.Objects.AddCurve
         if deleteInput then
-            for objectId in curveIds do
-                State.Doc.Objects.Delete(objectId, quiet=false) |> ignore<bool>
+            for objectId in curveIds do State.Doc.Objects.Delete(objectId, quiet=false) |> ignore<bool>
         State.Doc.Views.Redraw()
-        rc
+        ids
 
-
+    /// <summary>Computes JoinCurves from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="curveInputs">(Curve seq) The input objects.</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>2.1 * State.Doc.ModelAbsoluteTolerance</c>
+    ///    Join tolerance. If omitted, 2.1 * document absolute
+    ///    tolerance is used</param>
+    /// <returns>(Curve ResizeArray) The resulting geometry; it is not added to a document.</returns>
+    static member JoinCurves(curveInputs:Curve seq, [<OPT;DEF(0.0)>]tolerance:float) : Curve ResizeArray =
+        let curves = curveInputs |> Seq.map (fun curve -> RhinoScriptSyntax.DirectCurveInput(curve, -1)) |> Seq.toArray
+        if curves.Length = 0 then RhinoScriptingException.Raise "JoinCurves: Curves must contain at least two items"
+        let tolerance0 = Util.ifZero1 tolerance (2.1 * State.Doc.ModelAbsoluteTolerance)
+        let joined = Curve.JoinCurves(curves, tolerance0)
+        if isNull joined then RhinoScriptingException.Raise "JoinCurves: Unable to join curves"
+        ResizeArray(joined)
 
     /// <summary>Returns a line that was fit through an array of 3D points.</summary>
     /// <param name="points">(Point3d seq) A list of at least two 3D points</param>
@@ -5186,23 +6019,29 @@ type RhinoScriptSyntax private () =
     ///    Delete the input Curve. If omitted, the input Curve will not be deleted</param>
     /// <returns>(Guid) objectId of the new or modified Curve.</returns>
     static member MakeCurveNonPeriodic(curveId:Guid, [<OPT;DEF(false)>]deleteInput:bool) : Guid =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
-        if not <| curve.IsPeriodic then  RhinoScriptingException.Raise "MakeCurveNonPeriodic failed.1  curveId:'%s' deleteInput:'%A'" (Pretty.str curveId) deleteInput
-        let nc = curve.ToNurbsCurve()
-        if isNull nc  then  RhinoScriptingException.Raise "MakeCurveNonPeriodic failed.2  curveId:'%s' deleteInput:'%A'" (Pretty.str curveId) deleteInput
-        if not <| nc.Knots.ClampEnd( CurveEnd.Both ) then RhinoScriptingException.Raise "MakeCurveNonPeriodic failed. curveId:'%s' deleteInput:'%A'" (Pretty.str curveId) deleteInput
+        let curve = RhinoScriptSyntax.MakeCurveNonPeriodic(RhinoScriptSyntax.CoerceCurve(curveId))
         if deleteInput then
-            let rc = State.Doc.Objects.Replace(curveId, nc)
-            if not <| rc then  RhinoScriptingException.Raise "MakeCurveNonPeriodic failed.3  curveId:'%s' deleteInput:'%A'" (Pretty.str curveId) deleteInput
+            if not (State.Doc.Objects.Replace(curveId, curve)) then RhinoScriptingException.Raise "MakeCurveNonPeriodic: Unable to replace curve %O" curveId
             State.Doc.Views.Redraw()
             curveId
         else
             let rhobj = RhinoScriptSyntax.CoerceRhinoObject(curveId)
-            let rc = State.Doc.Objects.AddCurve(nc, rhobj.Attributes)
-            if rc = Guid.Empty then  RhinoScriptingException.Raise "MakeCurveNonPeriodic failed.4  curveId:'%s' deleteInput:'%A'" (Pretty.str curveId) deleteInput
+            let rc = State.Doc.Objects.AddCurve(curve, rhobj.Attributes)
+            if rc = Guid.Empty then RhinoScriptingException.Raise "MakeCurveNonPeriodic: Unable to add curve to document"
             State.Doc.Views.Redraw()
             rc
 
+    /// <summary>Computes MakeCurveNonPeriodic from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="curveGeo">(Curve) The input curve geometry.</param>
+    /// <returns>(NurbsCurve) The resulting geometry; it is not added to a document.</returns>
+    static member MakeCurveNonPeriodic(curveGeo:Curve) : NurbsCurve =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
+        if not curve.IsPeriodic then RhinoScriptingException.Raise "MakeCurveNonPeriodic: Curve must be periodic"
+        use duplicate = curve.DuplicateCurve()
+        let result = duplicate.ToNurbsCurve()
+        if isNull result || not (result.Knots.ClampEnd(CurveEnd.Both)) then
+            RhinoScriptingException.Raise "MakeCurveNonPeriodic: Unable to clamp curve knots"
+        result
 
     /// <summary>Creates an average Curve from two Curves.</summary>
     /// <param name="curve0">(Guid) identifiers of first Curve</param>
@@ -5211,32 +6050,45 @@ type RhinoScriptSyntax private () =
     ///    Angle tolerance used to match kinks between Curves</param>
     /// <returns>(Guid) objectId of the new or modified Curve.</returns>
     static member MeanCurve(curve0:Guid, curve1:Guid, [<OPT;DEF(0.0)>]tolerance:float) : Guid =
-        let curve0 = RhinoScriptSyntax.CoerceCurve curve0
-        let curve1 = RhinoScriptSyntax.CoerceCurve curve1
-        let  tolerance = if tolerance = 0.0 then RhinoMath.UnsetValue else abs (tolerance)
-        let crv = Curve.CreateMeanCurve(curve0, curve1, tolerance)
-        if notNull crv then
-            let rc = State.Doc.Objects.AddCurve(crv)
-            State.Doc.Views.Redraw()
-            rc
-        else
-            RhinoScriptingException.Raise "MeanCurve failed.  curve1:'%A' curve0:'%A' tolerance:'%f'" curve1 curve0 tolerance
+        let curve = RhinoScriptSyntax.MeanCurve(RhinoScriptSyntax.CoerceCurve(curve0), RhinoScriptSyntax.CoerceCurve(curve1), tolerance)
+        let rc = State.Doc.Objects.AddCurve(curve)
+        State.Doc.Views.Redraw()
+        rc
 
+    /// <summary>Computes MeanCurve from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="curve0">(Curve) The input geometry.</param>
+    /// <param name="curve1">(Curve) The input geometry.</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
+    ///    Angle tolerance used to match kinks between Curves</param>
+    /// <returns>(Curve) The resulting geometry; it is not added to a document.</returns>
+    static member MeanCurve(curve0:Curve, curve1:Curve, [<OPT;DEF(0.0)>]tolerance:float) : Curve =
+        let curve0 = RhinoScriptSyntax.DirectCurveInput(curve0, -1)
+        let curve1 = RhinoScriptSyntax.DirectCurveInput(curve1, -1)
+        let tolerance = if tolerance = 0.0 then RhinoMath.UnsetValue else abs tolerance
+        let curve = Curve.CreateMeanCurve(curve0, curve1, tolerance)
+        if isNull curve then RhinoScriptingException.Raise "MeanCurve: Unable to create mean curve"
+        curve
 
     /// <summary>Creates a polygon Mesh object based on a closed Polyline Curve object.
     ///    The created Mesh object is added to the document.</summary>
     /// <param name="polylineId">(Guid) Identifier of the Polyline Curve object</param>
     /// <returns>(Guid) identifier of the new Mesh object.</returns>
     static member MeshPolyline(polylineId:Guid) : Guid =
-        let curve = RhinoScriptSyntax.CoerceCurve polylineId
-        let ispolyline, polyline = curve.TryGetPolyline()
-        if not <| ispolyline then  RhinoScriptingException.Raise "MeshPolyline failed.  polylineId:'%s'" (Pretty.str polylineId)
-        let mesh = Mesh.CreateFromClosedPolyline(polyline)
-        if isNull mesh then  RhinoScriptingException.Raise "MeshPolyline failed.  polylineId:'%s'" (Pretty.str polylineId)
-        let rc = State.Doc.Objects.AddMesh(mesh)
+        let geometry = RhinoScriptSyntax.MeshPolyline(RhinoScriptSyntax.CoerceCurve(polylineId))
+        let rc = State.Doc.Objects.AddMesh(geometry)
         State.Doc.Views.Redraw()
         rc
 
+    /// <summary>Computes MeshPolyline from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="polylineInput">(Curve) The input geometry.</param>
+    /// <returns>(Mesh) The resulting geometry; it is not added to a document.</returns>
+    static member MeshPolyline(polylineInput:Curve) : Mesh =
+        let curve = RhinoScriptSyntax.DirectCurveInput(polylineInput, -1)
+        let ispolyline, polyline = curve.TryGetPolyline()
+        if not <| ispolyline then  RhinoScriptingException.Raise "MeshPolyline failed.  polylineInput:'%s'" (Pretty.str polylineInput)
+        let mesh = Mesh.CreateFromClosedPolyline(polyline)
+        if isNull mesh then  RhinoScriptingException.Raise "MeshPolyline failed.  polylineInput:'%s'" (Pretty.str polylineInput)
+        mesh
 
     /// <summary>Offsets a Curve by a distance. The offset Curve will be added to Rhino.</summary>
     /// <param name="curveId">(Guid) Identifier of a Curve object</param>
@@ -5254,15 +6106,33 @@ type RhinoScriptSyntax private () =
     ///    4 = Chamfer</param>
     /// <returns>(Guid ResizeArray) list of ids for the new Curves.</returns>
     static member OffsetCurve(curveId:Guid, direction:Point3d, distance:float, [<OPT;DEF(Vector3d())>]normal:Vector3d, [<OPT;DEF(1)>]style:int) : Guid ResizeArray = //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
+        let curves = RhinoScriptSyntax.OffsetCurve(RhinoScriptSyntax.CoerceCurve(curveId), direction, distance, normal, style)
+        let ids = curves |> RArr.mapSeq State.Doc.Objects.AddCurve
+        ids
+
+    /// <summary>Computes OffsetCurve from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="direction">(Point3d) Point describing direction of the offset</param>
+    /// <param name="distance">(float) Distance of the offset</param>
+    /// <param name="normal">(Vector3d) Optional, default value: <c>Vector3d.ZAxis</c>
+    ///    Normal of the Plane in which the offset will occur.
+    ///    If omitted, the WorldXY Plane will be used</param>
+    /// <param name="style">(int) Optional, default value: <c>1</c>
+    ///    The corner style. If omitted, the style is sharp.
+    ///    0 = None
+    ///    1 = Sharp
+    ///    2 = Round
+    ///    3 = Smooth
+    ///    4 = Chamfer</param>
+    /// <returns>(Curve ResizeArray) The resulting geometry; it is not added to a document.</returns>
+    static member OffsetCurve(curveGeo:Curve, direction:Point3d, distance:float, [<OPT;DEF(Vector3d())>]normal:Vector3d, [<OPT;DEF(1)>]style:int) : Curve ResizeArray = //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
         let normal0 = if normal.IsZero then Vector3d.ZAxis else normal
-        let curve = RhinoScriptSyntax.CoerceCurve curveId
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let stylee:CurveOffsetCornerStyle = EnumOfValue style
         let curves = curve.Offset(direction, normal0, distance, tolerance, stylee)
-        if isNull curves then  RhinoScriptingException.Raise "OffsetCurve failed. curveId:'%s' direction:'%A' distance:'%A' normal:'%A' style:%d" (Pretty.str curveId) direction distance normal style
-        let rc =  curves |> RArr.mapSeq State.Doc.Objects.AddCurve
-        rc
-
+        if isNull curves then  RhinoScriptingException.Raise "OffsetCurve failed. curveGeo:'%s' direction:'%A' distance:'%A' normal:'%A' style:%d" (Pretty.str curveGeo) direction distance normal style
+        ResizeArray(curves)
 
     /// <summary>Offset a Curve on a Surface. The source Curve must lie on the Surface.
     ///    The offset Curve or Curves will be added to Rhino.</summary>
@@ -5271,13 +6141,22 @@ type RhinoScriptSyntax private () =
     /// <param name="parameter">(Point2d))  U, V parameter that the Curve will be offset through</param>
     /// <returns>(Guid ResizeArray) identifiers of the new Curves.</returns>
     static member OffsetCurveOnSurfaceUV(curveId:Guid, surfaceId:Guid, parameter:Point2d) : Guid ResizeArray =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
-        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let curves = RhinoScriptSyntax.OffsetCurveOnSurfaceUV(RhinoScriptSyntax.CoerceCurve(curveId), RhinoScriptSyntax.CoerceSurface(surfaceId), parameter)
+        let ids = curves |> RArr.mapSeq State.Doc.Objects.AddCurve
+        ids
+
+    /// <summary>Computes OffsetCurveOnSurfaceUV from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="surfaceGeo">(Surface) The input geometry.</param>
+    /// <param name="parameter">(Point2d))  U, V parameter that the Curve will be offset through</param>
+    /// <returns>(Curve ResizeArray) The resulting geometry; it is not added to a document.</returns>
+    static member OffsetCurveOnSurfaceUV(curveGeo:Curve, surfaceGeo:Surface, parameter:Point2d) : Curve ResizeArray =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
+        let surface = (surfaceGeo)
         let tol = State.Doc.ModelAbsoluteTolerance
         let curves = curve.OffsetOnSurface(surface, parameter, tol)
-        if isNull curves then  RhinoScriptingException.Raise "OffsetCurveOnSurfaceUV failed. curveId:'%s' surfaceId:'%s' parameter:'%A'" (Pretty.str curveId) (Pretty.str surfaceId) parameter
-        let rc = curves  |> RArr.mapSeq  State.Doc.Objects.AddCurve
-        rc
+        if isNull curves then  RhinoScriptingException.Raise "OffsetCurveOnSurfaceUV failed. curveGeo:'%s' surfaceGeo:'%s' parameter:'%A'" (Pretty.str curveGeo) (Pretty.str surfaceGeo) parameter
+        ResizeArray(curves)
 
     /// <summary>Offset a Curve on a Surface. The source Curve must lie on the Surface.
     ///    The offset Curve or Curves will be added to Rhino Document.</summary>
@@ -5287,17 +6166,25 @@ type RhinoScriptSyntax private () =
     ///    will offset to the left and a negative value will offset to the right</param>
     /// <returns>(Guid ResizeArray) identifiers of the new Curves.</returns>
     static member OffsetCurveOnSurface(curveId:Guid, surfaceId:Guid, distance:float) : Guid ResizeArray =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
-        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let curves = RhinoScriptSyntax.OffsetCurveOnSurface(RhinoScriptSyntax.CoerceCurve(curveId), RhinoScriptSyntax.CoerceSurface(surfaceId), distance)
+        let ids = curves |> RArr.mapSeq State.Doc.Objects.AddCurve
+        State.Doc.Views.Redraw()
+        ids
+
+    /// <summary>Computes OffsetCurveOnSurface from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="surfaceGeo">(Surface) The input geometry.</param>
+    /// <param name="distance">(float)) The distance of the offset. Based on the Curve's direction, a positive value
+    ///    will offset to the left and a negative value will offset to the right</param>
+    /// <returns>(Curve ResizeArray) The resulting geometry; it is not added to a document.</returns>
+    static member OffsetCurveOnSurface(curveGeo:Curve, surfaceGeo:Surface, distance:float) : Curve ResizeArray =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
+        let surface = (surfaceGeo)
         let tol = State.Doc.ModelAbsoluteTolerance
         let curves = curve.OffsetOnSurface(surface, distance, tol)
-        if isNull curves then  RhinoScriptingException.Raise "OffsetCurveOnSurface failed. curveId:'%s' surfaceId:'%s' distance:'%A'" (Pretty.str curveId) (Pretty.str surfaceId) distance
+        if isNull curves then  RhinoScriptingException.Raise "OffsetCurveOnSurface failed. curveGeo:'%s' surfaceGeo:'%s' distance:'%A'" (Pretty.str curveGeo) (Pretty.str surfaceGeo) distance
         let curves = curves  |> RArr.mapSeq (fun curve -> curve.ExtendOnSurface(Rhino.Geometry.CurveEnd.Both, surface) )//https://github.com/mcneel/rhinoscriptsyntax/pull/186
-        let rc = curves  |> RArr.mapSeq  State.Doc.Objects.AddCurve
-        State.Doc.Views.Redraw()
-        rc
-
-
+        curves
 
     ///<summary>Determines the relationship between the regions bounded by two coplanar simple closed Curves.</summary>
     ///<param name="curveA">(Guid) identifier of the first  planar, closed Curve</param>
@@ -5311,8 +6198,22 @@ type RhinoScriptSyntax private () =
     ///    2 = the region bounded by CurveA is inside of CurveB
     ///    3 = the region bounded by CurveB is inside of CurveA.</returns>
     static member PlanarClosedCurveContainment(curveA:Guid, curveB:Guid, [<OPT;DEF(Plane())>]plane:Plane, [<OPT;DEF(0.0)>]tolerance:float) : int =
-        let curveA = RhinoScriptSyntax.CoerceCurve curveA
-        let curveB = RhinoScriptSyntax.CoerceCurve curveB
+        RhinoScriptSyntax.PlanarClosedCurveContainment(RhinoScriptSyntax.CoerceCurve(curveA), RhinoScriptSyntax.CoerceCurve(curveB), plane, tolerance)
+
+    ///<summary>Determines the relationship between the regions bounded by two coplanar simple closed Curves. Uses the supplied geometry directly.</summary>
+    ///<param name="curveA">(Curve) The input geometry.</param>
+    ///<param name="curveB">(Curve) The input geometry.</param>
+    ///<param name="plane">(Plane) Optional, default value: <c>Plane.WorldXY</c>
+    ///    Test Plane. If omitted, the Plane.WorldXY Plane is used</param>
+    ///<param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c></param>
+    ///<returns>(int) a number identifying the relationship
+    ///    0 = the regions bounded by the Curves are disjoint
+    ///    1 = the two Curves intersect
+    ///    2 = the region bounded by CurveA is inside of CurveB
+    ///    3 = the region bounded by CurveB is inside of CurveA.</returns>
+    static member PlanarClosedCurveContainment(curveA:Curve, curveB:Curve, [<OPT;DEF(Plane())>]plane:Plane, [<OPT;DEF(0.0)>]tolerance:float) : int =
+        let curveA = RhinoScriptSyntax.DirectCurveInput(curveA, -1)
+        let curveB = RhinoScriptSyntax.DirectCurveInput(curveB, -1)
         let tolerance0 = Util.ifZero2 State.Doc.ModelAbsoluteTolerance tolerance
         let plane0 = if plane.IsValid then plane else Plane.WorldXY
         let rc = Curve.PlanarClosedCurveRelationship(curveA, curveB, plane0, tolerance0)
@@ -5327,8 +6228,18 @@ type RhinoScriptSyntax private () =
     ///<param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c></param>
     ///<returns>(bool) True if the Curves intersect; otherwise False.</returns>
     static member PlanarCurveCollision(curveA:Guid, curveB:Guid, [<OPT;DEF(Plane())>]plane:Plane, [<OPT;DEF(0.0)>]tolerance:float) : bool =
-        let curveA = RhinoScriptSyntax.CoerceCurve curveA
-        let curveB = RhinoScriptSyntax.CoerceCurve curveB
+        RhinoScriptSyntax.PlanarCurveCollision(RhinoScriptSyntax.CoerceCurve(curveA), RhinoScriptSyntax.CoerceCurve(curveB), plane, tolerance)
+
+    ///<summary>Determines if two coplanar Curves intersect. Uses the supplied geometry directly.</summary>
+    ///<param name="curveA">(Curve) The input geometry.</param>
+    ///<param name="curveB">(Curve) The input geometry.</param>
+    ///<param name="plane">(Plane) Optional, default value: <c>Plane.WorldXY</c>
+    ///    Test Plane. If omitted, the Plane.WorldXY Plane is used</param>
+    ///<param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c></param>
+    ///<returns>(bool) True if the Curves intersect; otherwise False.</returns>
+    static member PlanarCurveCollision(curveA:Curve, curveB:Curve, [<OPT;DEF(Plane())>]plane:Plane, [<OPT;DEF(0.0)>]tolerance:float) : bool =
+        let curveA = RhinoScriptSyntax.DirectCurveInput(curveA, -1)
+        let curveB = RhinoScriptSyntax.DirectCurveInput(curveB, -1)
         let tolerance0 = Util.ifZero2 State.Doc.ModelAbsoluteTolerance tolerance
         let plane0 = if plane.IsValid then plane else Plane.WorldXY
         Curve.PlanarCurveCollision(curveA, curveB, plane0, tolerance0)
@@ -5346,7 +6257,21 @@ type RhinoScriptSyntax private () =
     ///    1 = point is inside of the Curve
     ///    2 = point is on the Curve.</returns>
     static member PointInPlanarClosedCurve(point:Point3d, curve:Guid, [<OPT;DEF(Plane())>]plane:Plane, [<OPT;DEF(0.0)>]tolerance:float) : int =
-        let curve = RhinoScriptSyntax.CoerceCurve curve
+        RhinoScriptSyntax.PointInPlanarClosedCurve(point, RhinoScriptSyntax.CoerceCurve(curve), plane, tolerance)
+
+    ///<summary>Determines if a point is inside of a closed Curve, on a closed Curve, or
+    ///    outside of a closed Curve. Uses the supplied geometry directly.</summary>
+    ///<param name="point">(Point3d) Text point</param>
+    ///<param name="curve">(Curve) The input geometry.</param>
+    ///<param name="plane">(Plane) Optional, default value: <c>Plane.WorldXY</c>
+    ///    Plane containing the closed Curve and point. If omitted, Plane.WorldXY  is used</param>
+    ///<param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c></param>
+    ///<returns>(int) number identifying the result
+    ///    0 = point is outside of the Curve
+    ///    1 = point is inside of the Curve
+    ///    2 = point is on the Curve.</returns>
+    static member PointInPlanarClosedCurve(point:Point3d, curve:Curve, [<OPT;DEF(Plane())>]plane:Plane, [<OPT;DEF(0.0)>]tolerance:float) : int =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curve, -1)
         let tolerance0 = Util.ifZero2 State.Doc.ModelAbsoluteTolerance tolerance
         let plane0 = if plane.IsValid then plane else Plane.WorldXY
         let rc = curve.Contains(point, plane0, tolerance0)
@@ -5363,10 +6288,18 @@ type RhinoScriptSyntax private () =
     ///    If `curveId` identifies a PolyCurve object, then `segmentIndex` identifies the Curve segment of the PolyCurve to query</param>
     ///<returns>(int) The number of Curve segments in a PolyCurve.</returns>
     static member PolyCurveCount(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : int =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.PolyCurveCount(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    ///<summary>Returns the number of Curve segments that make up a PolyCurve. Uses the supplied geometry directly.</summary>
+    ///<param name="curveGeo">(Curve) The input geometry.</param>
+    ///<param name="segmentIndex">(int) Optional,
+    ///    If `curveId` identifies a PolyCurve object, then `segmentIndex` identifies the Curve segment of the PolyCurve to query</param>
+    ///<returns>(int) The number of Curve segments in a PolyCurve.</returns>
+    static member PolyCurveCount(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : int =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         match curve with
         | :? PolyCurve as curve ->  curve.SegmentCount
-        | _ -> RhinoScriptingException.Raise "PolyCurveCount: CurveId does not reference a PolyCurve. curveId:'%s' segmentIndex:'%A'" (Pretty.str curveId) segmentIndex
+        | _ -> RhinoScriptingException.Raise "PolyCurveCount: CurveId does not reference a PolyCurve. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
 
 
     ///<summary>Returns the vertices of a Polyline Curve.</summary>
@@ -5375,13 +6308,21 @@ type RhinoScriptSyntax private () =
     ///    If CurveId identifies a PolyCurve object, then segmentIndex identifies the Curve segment of the PolyCurve to query</param>
     ///<returns>(Point3d ResizeArray) an list of Point3d vertex points.</returns>
     static member PolylineVertices(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d ResizeArray =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.PolylineVertices(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    ///<summary>Returns the vertices of a Polyline Curve. Uses the supplied geometry directly.</summary>
+    ///<param name="curveGeo">(Curve) The input geometry.</param>
+    ///<param name="segmentIndex">(int) Optional,
+    ///    If CurveId identifies a PolyCurve object, then segmentIndex identifies the Curve segment of the PolyCurve to query</param>
+    ///<returns>(Point3d ResizeArray) an list of Point3d vertex points.</returns>
+    static member PolylineVertices(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d ResizeArray =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let rc, polyline = curve.TryGetPolyline()
         if rc then
             let pts = ResizeArray(polyline.Count)
             for pt in polyline do pts.Add(pt)
             pts
-        else RhinoScriptingException.Raise "PolylineVertices: CurveId does not <| reference a polyline. curveId:'%s' segmentIndex:'%A'" (Pretty.str curveId) segmentIndex
+        else RhinoScriptingException.Raise "PolylineVertices: CurveId does not <| reference a polyline. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
 
 
     ///<summary>Projects one or more Curves onto one or more Surfaces or Meshes.</summary>
@@ -5390,14 +6331,22 @@ type RhinoScriptSyntax private () =
     ///<param name="direction">(Vector3d) Projection direction</param>
     ///<returns>(Guid ResizeArray) list of identifiers for the resulting Curves.</returns>
     static member ProjectCurveToMesh(curveIds:Guid seq, meshIds:Guid seq, direction:Vector3d) : Guid ResizeArray =
-        let curves = curveIds |> RArr.mapSeq RhinoScriptSyntax.CoerceCurve
-        let meshes =  meshIds |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
-        let tolerance = State.Doc.ModelAbsoluteTolerance
-        let newCurves = Curve.ProjectToMesh(curves, meshes, direction, tolerance)
-        let ids =  newCurves  |> RArr.mapSeq  State.Doc.Objects.AddCurve
-        if ids.Count >0 then  State.Doc.Views.Redraw()
+        let curves = RhinoScriptSyntax.ProjectCurveToMesh((curveIds |> Seq.map RhinoScriptSyntax.CoerceCurve), (meshIds |> Seq.map RhinoScriptSyntax.CoerceMesh), direction)
+        let ids = curves |> RArr.mapSeq State.Doc.Objects.AddCurve
+        if ids.Count > 0 then State.Doc.Views.Redraw()
         ids
 
+    ///<summary>Computes ProjectCurveToMesh from geometry without modifying the document. Inputs are not modified.</summary>
+    ///<param name="curveInputs">(Curve seq) The input objects.</param>
+    ///<param name="meshInputs">(Mesh seq) The input objects.</param>
+    ///<param name="direction">(Vector3d) Projection direction</param>
+    ///<returns>(Curve ResizeArray) The resulting curves, without adding them to the document.</returns>
+    static member ProjectCurveToMesh(curveInputs:Curve seq, meshInputs:Mesh seq, direction:Vector3d) : Curve ResizeArray =
+        let curves = curveInputs |> RArr.mapSeq id
+        let meshes =  meshInputs |> RArr.mapSeq id
+        let tolerance = State.Doc.ModelAbsoluteTolerance
+        let newCurves = Curve.ProjectToMesh(curves, meshes, direction, tolerance)
+        ResizeArray(newCurves)
 
     ///<summary>Projects one or more Curves onto one or more Surfaces or Polysurfaces.</summary>
     ///<param name="curveIds">(Guid seq) Identifiers of Curves to project</param>
@@ -5405,14 +6354,22 @@ type RhinoScriptSyntax private () =
     ///<param name="direction">(Vector3d) Projection direction</param>
     ///<returns>(Guid ResizeArray) list of identifiers.</returns>
     static member ProjectCurveToSurface(curveIds:Guid seq, surfaceIds:Guid seq, direction:Vector3d) : Guid ResizeArray =
-        let curves = curveIds  |> RArr.mapSeq  RhinoScriptSyntax.CoerceCurve
-        let breps = surfaceIds  |> RArr.mapSeq  RhinoScriptSyntax.CoerceBrep
-        let tolerance = State.Doc.ModelAbsoluteTolerance
-        let newCurves = Curve.ProjectToBrep(curves, breps, direction, tolerance)
-        let ids = newCurves  |> RArr.mapSeq  State.Doc.Objects.AddCurve
-        if ids.Count > 0 then  State.Doc.Views.Redraw()
+        let curves = RhinoScriptSyntax.ProjectCurveToSurface((curveIds |> Seq.map RhinoScriptSyntax.CoerceCurve), (surfaceIds |> Seq.map RhinoScriptSyntax.CoerceBrep), direction)
+        let ids = curves |> RArr.mapSeq State.Doc.Objects.AddCurve
+        if ids.Count > 0 then State.Doc.Views.Redraw()
         ids
 
+    ///<summary>Computes ProjectCurveToSurface from geometry without modifying the document. Inputs are not modified.</summary>
+    ///<param name="curveInputs">(Curve seq) The input objects.</param>
+    ///<param name="surfaceInputs">(Brep seq) The input objects.</param>
+    ///<param name="direction">(Vector3d) Projection direction</param>
+    ///<returns>(Curve ResizeArray) The resulting curves, without adding them to the document.</returns>
+    static member ProjectCurveToSurface(curveInputs:Curve seq, surfaceInputs:Brep seq, direction:Vector3d) : Curve ResizeArray =
+        let curves = curveInputs  |> RArr.mapSeq  id
+        let breps = surfaceInputs  |> RArr.mapSeq  id
+        let tolerance = State.Doc.ModelAbsoluteTolerance
+        let newCurves = Curve.ProjectToBrep(curves, breps, direction, tolerance)
+        ResizeArray(newCurves)
 
     ///<summary>Rebuilds a Curve to a given degree and control point count. For more
     ///    information, see the Rhino help for the Rebuild command.</summary>
@@ -5516,16 +6473,22 @@ type RhinoScriptSyntax private () =
     ///    Delete the input Curve</param>
     ///<returns>(Guid ResizeArray) list of new Curves.</returns>
     static member SplitCurve(curveId:Guid, parameter:float seq, [<OPT;DEF(true)>]deleteInput:bool) : Guid ResizeArray =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
-        let newcurves = curve.Split(parameter)
-        if isNull newcurves then  RhinoScriptingException.Raise "SplitCurve failed. curveId:'%s' parameter:'%A' deleteInput:'%A'" (Pretty.str curveId) parameter deleteInput
+        let curves = RhinoScriptSyntax.SplitCurve(RhinoScriptSyntax.CoerceCurve(curveId), parameter)
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(curveId)
-        let rc =  newcurves |> RArr.mapArr (fun crv ->  State.Doc.Objects.AddCurve(crv, rhobj.Attributes) )
-        if deleteInput then
-            State.Doc.Objects.Delete(curveId, quiet=true)|> ignore<bool>
+        let ids = curves |> RArr.mapSeq (fun curve -> State.Doc.Objects.AddCurve(curve, rhobj.Attributes))
+        if deleteInput then State.Doc.Objects.Delete(curveId, quiet=true) |> ignore<bool>
         State.Doc.Views.Redraw()
-        rc
+        ids
 
+    ///<summary>Computes SplitCurve from geometry without modifying the document. Inputs are not modified.</summary>
+    ///<param name="curveGeo">(Curve) The input curve geometry.</param>
+    ///<param name="parameter">(float seq) One or more parameters to split the Curve at</param>
+    ///<returns>(Curve ResizeArray) The resulting curves, without adding them to the document.</returns>
+    static member SplitCurve(curveGeo:Curve, parameter:float seq) : Curve ResizeArray =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
+        let curves = curve.Split(parameter)
+        if isNull curves then RhinoScriptingException.Raise "SplitCurve: Unable to split curve"
+        ResizeArray(curves)
 
     ///<summary>Trims a Curve by removing portions of the Curve outside a specified interval.</summary>
     ///<param name="curveId">(Guid) The Curve to trim</param>
@@ -5538,16 +6501,26 @@ type RhinoScriptSyntax private () =
     ///    Delete the input Curve. If omitted the input Curve is deleted</param>
     ///<returns>(Guid) identifier of the new Curve.</returns>
     static member TrimCurve(curveId:Guid, interval:float * float, [<OPT;DEF(true)>]deleteInput:bool) : Guid  =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
-        let newCurve = curve.Trim(fst interval, snd interval)
-        if isNull newCurve then  RhinoScriptingException.Raise "TrimCurve failed. curveId:'%s' interval:'%A' deleteInput:'%A'" (Pretty.str curveId) interval deleteInput
+        let curve = RhinoScriptSyntax.TrimCurve(RhinoScriptSyntax.CoerceCurve(curveId), interval)
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(curveId)
-        let rc = State.Doc.Objects.AddCurve(newCurve, rhobj.Attributes)
-        if deleteInput then
-            State.Doc.Objects.Delete(curveId, quiet=true)|> ignore<bool>
+        let rc = State.Doc.Objects.AddCurve(curve, rhobj.Attributes)
+        if deleteInput then State.Doc.Objects.Delete(curveId, quiet=true) |> ignore<bool>
         State.Doc.Views.Redraw()
         rc
 
+    ///<summary>Computes TrimCurve from geometry without modifying the document. Inputs are not modified.</summary>
+    ///<param name="curveGeo">(Curve) The input curve geometry.</param>
+    ///<param name="interval">(float * float) Two numbers identifying the interval to keep. Portions of
+    ///    the Curve before domain[0] and after domain[1] will be removed. If the
+    ///    input Curve is open, the interval must be increasing. If the input
+    ///    Curve is closed and the interval is decreasing, then the portion of
+    ///    the Curve across the start and end of the Curve is returned</param>
+    ///<returns>(Curve) The trimmed curve, without adding it to the document.</returns>
+    static member TrimCurve(curveGeo:Curve, interval:float * float) : Curve =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
+        let trimmed = curve.Trim(fst interval, snd interval)
+        if isNull trimmed then RhinoScriptingException.Raise "TrimCurve: Unable to trim curve"
+        trimmed
 
     ///<summary>Changes the degree of a Curve object. For more information see the Rhino help file for the ChangeDegree command.</summary>
     ///<param name="curveId">(Guid) The object's identifier</param>
@@ -5578,8 +6551,31 @@ type RhinoScriptSyntax private () =
     ///    The number of samples points to use if method is 2. The default is 10</param>
     ///<returns>(Guid ResizeArray) The identifiers of the new tween objects.</returns>
     static member AddTweenCurves(fromCurveId:Guid, toCurveId:Guid, [<OPT;DEF(1)>]numberOfCurves:int, [<OPT;DEF(0)>]method:int, [<OPT;DEF(10)>]sampleNumber:int) : Guid ResizeArray =
-        let curve0 = RhinoScriptSyntax.CoerceCurve fromCurveId
-        let curve1 = RhinoScriptSyntax.CoerceCurve toCurveId
+        let curves = RhinoScriptSyntax.MakeTweenCurves(RhinoScriptSyntax.CoerceCurve(fromCurveId), RhinoScriptSyntax.CoerceCurve(toCurveId), numberOfCurves, method, sampleNumber)
+        let ids = ResizeArray<Guid>()
+        for curve in curves do
+            let rc = State.Doc.Objects.AddCurve(curve)
+            if rc = Guid.Empty then RhinoScriptingException.Raise "AddTweenCurves: Unable to add curve to document"
+            ids.Add(rc)
+        State.Doc.Views.Redraw()
+        ids
+
+    ///<summary>Computes MakeTweenCurves from geometry without modifying the document. Inputs are not modified.</summary>
+    ///<param name="fromCurve">(Curve) The input geometry.</param>
+    ///<param name="toCurve">(Curve) The input geometry.</param>
+    ///<param name="numberOfCurves">(int) Optional, default value: <c>1</c>
+    ///    The number of Curves to create. The default is 1</param>
+    ///<param name="method">(int) Optional, default value: <c>0</c>
+    ///    The method for refining the output Curves, where:
+    ///    0: (Default) Uses the control points of the Curves for matching. So the first control point of first Curve is matched to first control point of the second Curve.
+    ///    1: Refits the output Curves like using the FitCurve method. Both the input Curve and the output Curve will have the same structure. The resulting Curves are usually more complex than input unless input Curves are compatible.
+    ///    2: Input Curves are divided to the specified number of points on the Curve, corresponding points define new points that output Curves go through. If you are making one tween Curve, the method essentially does the following: divides the two Curves into an equal number of points, finds the midpoint between the corresponding points on the Curves, and interpolates the tween Curve through those points</param>
+    ///<param name="sampleNumber">(int) Optional, default value: <c>10</c>
+    ///    The number of samples points to use if method is 2. The default is 10</param>
+    ///<returns>(Curve ResizeArray) The resulting curves, without adding them to the document.</returns>
+    static member MakeTweenCurves(fromCurve:Curve, toCurve:Curve, [<OPT;DEF(1)>]numberOfCurves:int, [<OPT;DEF(0)>]method:int, [<OPT;DEF(10)>]sampleNumber:int) : Curve ResizeArray =
+        let curve0 = RhinoScriptSyntax.DirectCurveInput(fromCurve, -1)
+        let curve1 = RhinoScriptSyntax.DirectCurveInput(toCurve, -1)
         let mutable outCurves = Array.empty
         let tolerance = State.Doc.ModelAbsoluteTolerance
         if method = 0 then
@@ -5587,18 +6583,12 @@ type RhinoScriptSyntax private () =
             outCurves <- Curve.CreateTweenCurvesWithMatching(curve0, curve1, numberOfCurves, tolerance)
         elif method = 2 then
             outCurves <- Curve.CreateTweenCurvesWithSampling(curve0, curve1, numberOfCurves, sampleNumber, tolerance)
-        else RhinoScriptingException.Raise "AddTweenCurves Method must be 0, 1, or 2.  fromCurveId:'%s' toCurveId:'%s' numberOfCurves:'%A' method:'%A' sampleNumber:'%A'"  (Pretty.str fromCurveId) (Pretty.str toCurveId) numberOfCurves method sampleNumber
-        let curves = ResizeArray()
+        else RhinoScriptingException.Raise "MakeTweenCurves Method must be 0, 1, or 2.  fromCurve:'%s' toCurve:'%s' numberOfCurves:'%A' method:'%A' sampleNumber:'%A'"  (Pretty.str fromCurve) (Pretty.str toCurve) numberOfCurves method sampleNumber
+        let curves = ResizeArray<Curve>()
         if notNull outCurves then
             for curve in outCurves do
-                if notNull curve && curve.IsValid then
-                    let rc = State.Doc.Objects.AddCurve(curve)
-                    //curve.Dispose()
-                    if rc = Guid.Empty then  RhinoScriptingException.Raise "AddTweenCurves: Unable to add curve to document.  fromCurveId:'%s' toCurveId:'%s' numberOfCurves:'%A' method:'%A' sampleNumber:'%A'" (Pretty.str fromCurveId) (Pretty.str toCurveId) numberOfCurves method sampleNumber
-                    curves.Add(rc)
-            State.Doc.Views.Redraw()
+                if notNull curve && curve.IsValid then curves.Add(curve)
         curves
-
 
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
@@ -6274,8 +7264,15 @@ type RhinoScriptSyntax private () =
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsAlignedDimension(objectId:Guid) : bool =
-        match RhinoScriptSyntax.TryCoerceGeometry objectId with
-        | Some (:? LinearDimension as g) -> g.Aligned
+        RhinoScriptSyntax.TryCoerceGeometry objectId
+        |> Option.exists (fun geometry -> RhinoScriptSyntax.IsAlignedDimension(geometry))
+
+    /// <summary>Checks if  an object is an aligned dimension object. Returns false for any other Rhino object or if the geometry is null.</summary>
+    /// <param name="geometryObject">(GeometryBase) The geometry to test</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsAlignedDimension(geometryObject:GeometryBase) : bool =
+        match geometryObject with
+        | :? LinearDimension as g -> g.Aligned
         | _ -> false
 
 
@@ -6283,8 +7280,15 @@ type RhinoScriptSyntax private () =
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsAngularDimension(objectId:Guid) : bool =
-        match RhinoScriptSyntax.TryCoerceGeometry objectId with
-        | Some (:? AngularDimension) -> true
+        RhinoScriptSyntax.TryCoerceGeometry objectId
+        |> Option.exists (fun geometry -> RhinoScriptSyntax.IsAngularDimension(geometry))
+
+    /// <summary>Checks if  an object is an angular dimension object. Returns false for any other Rhino object or if the geometry is null.</summary>
+    /// <param name="geometryObject">(GeometryBase) The geometry to test</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsAngularDimension(geometryObject:GeometryBase) : bool =
+        match geometryObject with
+        | :? AngularDimension -> true
         | _ -> false
 
 
@@ -6292,8 +7296,15 @@ type RhinoScriptSyntax private () =
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsDiameterDimension(objectId:Guid) : bool =
-        match RhinoScriptSyntax.TryCoerceGeometry objectId with
-        | Some (:? RadialDimension as g) -> g.IsDiameterDimension
+        RhinoScriptSyntax.TryCoerceGeometry objectId
+        |> Option.exists (fun geometry -> RhinoScriptSyntax.IsDiameterDimension(geometry))
+
+    /// <summary>Checks if  an object is a diameter dimension object. Returns false for any other Rhino object or if the geometry is null.</summary>
+    /// <param name="geometryObject">(GeometryBase) The geometry to test</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsDiameterDimension(geometryObject:GeometryBase) : bool =
+        match geometryObject with
+        | :? RadialDimension as g -> g.IsDiameterDimension
         | _ -> false
 
 
@@ -6301,8 +7312,15 @@ type RhinoScriptSyntax private () =
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsDimension(objectId:Guid) : bool =
-        match RhinoScriptSyntax.TryCoerceGeometry objectId with
-        | Some (:? AnnotationBase) -> true
+        RhinoScriptSyntax.TryCoerceGeometry objectId
+        |> Option.exists (fun geometry -> RhinoScriptSyntax.IsDimension(geometry))
+
+    /// <summary>Checks if  an object is a dimension object. Returns false for any other Rhino object or if the geometry is null.</summary>
+    /// <param name="geometryObject">(GeometryBase) The geometry to test</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsDimension(geometryObject:GeometryBase) : bool =
+        match geometryObject with
+        | :? AnnotationBase -> true
         | _ -> false
 
 
@@ -6327,8 +7345,15 @@ type RhinoScriptSyntax private () =
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsLeader(objectId:Guid) : bool =
-            match RhinoScriptSyntax.TryCoerceGeometry objectId with
-            | Some (:? Leader) -> true
+        RhinoScriptSyntax.TryCoerceGeometry objectId
+        |> Option.exists (fun geometry -> RhinoScriptSyntax.IsLeader(geometry))
+
+    /// <summary>Checks if  an object is a dimension leader object. Returns false for any other Rhino object or if the geometry is null.</summary>
+    /// <param name="geometryObject">(GeometryBase) The geometry to test</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsLeader(geometryObject:GeometryBase) : bool =
+            match geometryObject with
+            | :? Leader -> true
             | _ -> false
 
 
@@ -6336,8 +7361,15 @@ type RhinoScriptSyntax private () =
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsLinearDimension(objectId:Guid) : bool =
-            match RhinoScriptSyntax.TryCoerceGeometry objectId with
-            | Some (:? LinearDimension) -> true
+        RhinoScriptSyntax.TryCoerceGeometry objectId
+        |> Option.exists (fun geometry -> RhinoScriptSyntax.IsLinearDimension(geometry))
+
+    /// <summary>Checks if  an object is a linear dimension object. Returns false for any other Rhino object or if the geometry is null.</summary>
+    /// <param name="geometryObject">(GeometryBase) The geometry to test</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsLinearDimension(geometryObject:GeometryBase) : bool =
+            match geometryObject with
+            | :? LinearDimension -> true
             | _ -> false
 
 
@@ -6345,8 +7377,15 @@ type RhinoScriptSyntax private () =
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsOrdinateDimension(objectId:Guid) : bool =
-            match RhinoScriptSyntax.TryCoerceGeometry objectId with
-            | Some (:? OrdinateDimension) -> true
+        RhinoScriptSyntax.TryCoerceGeometry objectId
+        |> Option.exists (fun geometry -> RhinoScriptSyntax.IsOrdinateDimension(geometry))
+
+    /// <summary>Checks if  an object is an ordinate dimension object. Returns false for any other Rhino object or if the geometry is null.</summary>
+    /// <param name="geometryObject">(GeometryBase) The geometry to test</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsOrdinateDimension(geometryObject:GeometryBase) : bool =
+            match geometryObject with
+            | :? OrdinateDimension -> true
             | _ -> false
 
 
@@ -6354,8 +7393,15 @@ type RhinoScriptSyntax private () =
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsRadialDimension(objectId:Guid) : bool =
-            match RhinoScriptSyntax.TryCoerceGeometry objectId with
-            | Some (:? RadialDimension) -> true
+        RhinoScriptSyntax.TryCoerceGeometry objectId
+        |> Option.exists (fun geometry -> RhinoScriptSyntax.IsRadialDimension(geometry))
+
+    /// <summary>Checks if  an object is a radial dimension object. Returns false for any other Rhino object or if the geometry is null.</summary>
+    /// <param name="geometryObject">(GeometryBase) The geometry to test</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsRadialDimension(geometryObject:GeometryBase) : bool =
+            match geometryObject with
+            | :? RadialDimension -> true
             | _ -> false
 
 
@@ -6401,9 +7447,6 @@ type RhinoScriptSyntax private () =
         ds.Name <- newStyle
         if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=false) then
             RhinoScriptingException.Raise "RenameDimStyle failed.  oldStyle:'%s' newStyle:'%s'" oldStyle newStyle
-
-
-
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
 
@@ -7311,10 +8354,7 @@ type RhinoScriptSyntax private () =
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(float) area.</returns>
     static member Area(objectId:Guid) : float =
-        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        let mp = AreaMassProperties.Compute([rhobj.Geometry])
-        if mp |> isNull then RhinoScriptingException.Raise "Area: Unable to compute area mass properties from objectId:'%s'" (Pretty.str objectId)
-        mp.Area
+        RhinoScriptSyntax.Area(RhinoScriptSyntax.CoerceGeometry(objectId))
 
     /// <summary>Returns a world axis-aligned bounding box of several objects.
     ///   Estimated bounding boxes can be computed much (much) faster than accurate (or "tight") bounding boxes.
@@ -7337,11 +8377,7 @@ type RhinoScriptSyntax private () =
     ///    To get the eight 3D points that define the bounding box call box.GetCorners()
     ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
     static member BoundingBoxEstimate(objects:Guid seq) : BoundingBox =
-        let mutable bbox = BoundingBox.Empty
-        for o in objects do
-            let g =  RhinoScriptSyntax.CoerceGeometry o
-            bbox <- BoundingBox.Union(bbox, g.GetBoundingBox(false)) //https://discourse.mcneel.com/t/questions-about-getboundingbox-bool/32092/5
-        bbox
+        RhinoScriptSyntax.BoundingBoxEstimate(objects |> Seq.map RhinoScriptSyntax.CoerceGeometry)
 
     /// <summary>Returns a world axis-aligned bounding box of one object.
     ///   Estimated bounding boxes can be computed much (much) faster than accurate (or "tight") bounding boxes.
@@ -7351,21 +8387,22 @@ type RhinoScriptSyntax private () =
     ///    To get the eight 3D points that define the bounding box call box.GetCorners()
     ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
     static member BoundingBoxEstimate(object:Guid) : BoundingBox =
-        let g =  RhinoScriptSyntax.CoerceGeometry object
-        g.GetBoundingBox(false) //https://discourse.mcneel.com/t/questions-about-getboundingbox-bool/32092/5
+        RhinoScriptSyntax.BoundingBoxEstimate(RhinoScriptSyntax.CoerceGeometry(object))
 
 
-    /// <summary>Returns a world axis-aligned bounding box of several objects.</summary>
-    /// <param name="objects">(Guid seq) The identifiers of the objects</param>
+
+
+    /// <summary>Returns a world axis-aligned bounding box of one object.
+    ///   Estimated bounding boxes can be computed much (much) faster than accurate (or "tight") bounding boxes.
+    ///   Estimated bounding boxes are always similar to or larger than accurate bounding boxes.</summary>
+    /// <param name="object">(GeometryBase) Geometry to use directly.</param>
     /// <returns>(Geometry.BoundingBox) The BoundingBox (oriented to the World XY Plane).
     ///    To get the eight 3D points that define the bounding box call box.GetCorners()
     ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
-    static member BoundingBox(objects:Guid seq) : BoundingBox =
-        let mutable bbox = BoundingBox.Empty
-        for o in objects do
-            let g =  RhinoScriptSyntax.CoerceGeometry o
-            bbox <- BoundingBox.Union(bbox, g.GetBoundingBox(true))
-        bbox
+    static member BoundingBoxEstimate(object:GeometryBase) : BoundingBox =
+        let g =  object
+        g.GetBoundingBox(false) //https://discourse.mcneel.com/t/questions-about-getboundingbox-bool/32092/5
+
 
     /// <summary>Returns a world axis-aligned bounding box of several geometry objects.</summary>
     /// <param name="geos">(GeometryBase seq) The geometries</param>
@@ -7379,14 +8416,21 @@ type RhinoScriptSyntax private () =
         bbox
 
 
+    /// <summary>Returns a world axis-aligned bounding box of several objects.</summary>
+    /// <param name="objects">(Guid seq) The identifiers of the objects</param>
+    /// <returns>(Geometry.BoundingBox) The BoundingBox (oriented to the World XY Plane).
+    ///    To get the eight 3D points that define the bounding box call box.GetCorners()
+    ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
+    static member BoundingBox(objects:Guid seq) : BoundingBox =
+        RhinoScriptSyntax.BoundingBox(objects |> Seq.map RhinoScriptSyntax.CoerceGeometry)
+
     /// <summary>Returns a world axis-aligned bounding box of one object.</summary>
     /// <param name="object">(Guid) The identifier of the object</param>
     /// <returns>(Geometry.BoundingBox) The BoundingBox (oriented to the World XY Plane).
     ///    To get the eight 3D points that define the bounding box call box.GetCorners()
     ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
     static member BoundingBox(object:Guid) : BoundingBox =
-        let g =  RhinoScriptSyntax.CoerceGeometry object
-        g.GetBoundingBox(true) //https://discourse.mcneel.com/t/questions-about-getboundingbox-bool/32092/5
+        RhinoScriptSyntax.BoundingBox(RhinoScriptSyntax.CoerceGeometry(object))
 
     /// <summary>Returns a custom Plane axis-aligned bounding box of several objects.</summary>
     /// <param name="objects">(Guid seq) The identifiers of the objects</param>
@@ -7398,20 +8442,7 @@ type RhinoScriptSyntax private () =
     ///    To get the eight 3D points that define the bounding box call box.GetCorners()
     ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
     static member BoundingBox(objects:Guid seq, plane:Plane, [<OPT;DEF(true)>]inWorldCoords:bool) : Box =
-        let mutable bbox = BoundingBox.Empty
-        if not plane.IsValid then RhinoScriptingException.Raise "Invalid Geometry.Plane:%s in RhinoScriptSyntax.BoundingBox of %s" plane.Pretty (Pretty.str objects)
-        let worldtoplane = Transform.ChangeBasis(Plane.WorldXY, plane)
-        objects
-        |> Seq.map RhinoScriptSyntax.CoerceGeometry
-        |> Seq.iter (fun g -> bbox <- BoundingBox.Union(bbox, g.GetBoundingBox(worldtoplane)))
-
-        if  inWorldCoords then
-            let planetoworld = Transform.ChangeBasis(plane, Plane.WorldXY)
-            let box = Box(bbox)
-            box.Transform(planetoworld) |> RhinoScriptingException.FailIfFalse "plane Transform in rs.BoundingBox()"
-            box
-        else
-            Box(bbox) // return in Plane coordinates not worldxy
+        RhinoScriptSyntax.BoundingBox(objects |> Seq.map RhinoScriptSyntax.CoerceGeometry, plane, inWorldCoords)
 
     /// <summary>Returns a custom Plane axis-aligned bounding box of one object.</summary>
     /// <param name="object">(Guid) The identifier of the object</param>
@@ -7423,6 +8454,54 @@ type RhinoScriptSyntax private () =
     ///    To get the eight 3D points that define the bounding box call box.GetCorners()
     ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
     static member BoundingBox(object:Guid, plane:Plane, [<OPT;DEF(true)>]inWorldCoords:bool) : Box =
+        RhinoScriptSyntax.BoundingBox(RhinoScriptSyntax.CoerceGeometry(object), plane, inWorldCoords)
+
+
+    /// <summary>Returns a world axis-aligned bounding box of one object.</summary>
+    /// <param name="object">(GeometryBase) Geometry to use directly.</param>
+    /// <returns>(Geometry.BoundingBox) The BoundingBox (oriented to the World XY Plane).
+    ///    To get the eight 3D points that define the bounding box call box.GetCorners()
+    ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
+    static member BoundingBox(object:GeometryBase) : BoundingBox =
+        let g =  object
+        g.GetBoundingBox(true) //https://discourse.mcneel.com/t/questions-about-getboundingbox-bool/32092/5
+
+
+    /// <summary>Returns a custom Plane axis-aligned bounding box of several objects.</summary>
+    /// <param name="objects">(GeometryBase seq) Geometry to use directly.</param>
+    /// <param name="plane">(Plane) Plane to which the bounding box should be aligned</param>
+    /// <param name="inWorldCoords">(bool) Optional, default value: <c>true</c>
+    ///    Returns the box as world coordinates or custom Plane coordinates.</param>
+    /// <returns>(Geometry.Box) The Box ,oriented to the Plane or in Plane coordinates.
+    ///    It cannot be a Geometry.BoundingBox since it is not in World XY
+    ///    To get the eight 3D points that define the bounding box call box.GetCorners()
+    ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
+    static member BoundingBox(objects:GeometryBase seq, plane:Plane, [<OPT;DEF(true)>]inWorldCoords:bool) : Box =
+        let mutable bbox = BoundingBox.Empty
+        if not plane.IsValid then RhinoScriptingException.Raise "Invalid Geometry.Plane:%s in RhinoScriptSyntax.BoundingBox of %s" plane.Pretty (Pretty.str objects)
+        let worldtoplane = Transform.ChangeBasis(Plane.WorldXY, plane)
+        objects
+        |> Seq.iter (fun g -> bbox <- BoundingBox.Union(bbox, g.GetBoundingBox(worldtoplane)))
+
+        if  inWorldCoords then
+            let planetoworld = Transform.ChangeBasis(plane, Plane.WorldXY)
+            let box = Box(bbox)
+            box.Transform(planetoworld) |> RhinoScriptingException.FailIfFalse "plane Transform in rs.BoundingBox()"
+            box
+        else
+            Box(bbox) // return in Plane coordinates not worldxy
+
+
+    /// <summary>Returns a custom Plane axis-aligned bounding box of one object.</summary>
+    /// <param name="object">(GeometryBase) Geometry to use directly.</param>
+    /// <param name="plane">(Plane) Plane to which the bounding box should be aligned</param>
+    /// <param name="inWorldCoords">(bool) Optional, default value: <c>true</c>
+    ///    Returns the box as world coordinates or custom Plane coordinates.</param>
+    /// <returns>(Geometry.Box) The Box ,oriented to the Plane or in Plane coordinates.
+    ///    It cannot be a Geometry.BoundingBox since it is not in World XY
+    ///    To get the eight 3D points that define the bounding box call box.GetCorners()
+    ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
+    static member BoundingBox(object:GeometryBase, plane:Plane, [<OPT;DEF(true)>]inWorldCoords:bool) : Box =
         RhinoScriptSyntax.BoundingBox([object],plane,inWorldCoords)
 
     /// <summary>Returns a new inflated the box with equal amounts in all directions.
@@ -7459,8 +8538,16 @@ type RhinoScriptSyntax private () =
     /// <param name="second">(Guid) The identifier of the second object to compare</param>
     /// <returns>(bool) True if the objects are geometrically identical, otherwise False.</returns>
     static member CompareGeometry(first:Guid, second:Guid) : bool =
-        let firstG = RhinoScriptSyntax.CoerceGeometry(first)
-        let secondG = RhinoScriptSyntax.CoerceGeometry(second)
+        RhinoScriptSyntax.CompareGeometry(RhinoScriptSyntax.CoerceGeometry(first), RhinoScriptSyntax.CoerceGeometry(second))
+
+
+    /// <summary>Compares two objects to determine if they are geometrically identical.</summary>
+    /// <param name="first">(GeometryBase) Geometry to use directly.</param>
+    /// <param name="second">(GeometryBase) Geometry to use directly.</param>
+    /// <returns>(bool) True if the objects are geometrically identical, otherwise False.</returns>
+    static member CompareGeometry(first:GeometryBase, second:GeometryBase) : bool =
+        let firstG = first
+        let secondG = second
         GeometryBase.GeometryEquals(firstG, secondG)
 
 
@@ -7470,55 +8557,105 @@ type RhinoScriptSyntax private () =
     ///    Delete the text object after the Curves have been created</param>
     /// <returns>(Guid array) Array of outline Curves.</returns>
     static member ExplodeText(textId:Guid, [<OPT;DEF(false)>]delete:bool) : ResizeArray<Guid> =
-        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(textId)
-        let curves = (rhobj.Geometry:?>TextEntity).Explode()
-        let attr = rhobj.Attributes
-        let rc = curves  |> RArr.mapArr ( fun curve -> State.Doc.Objects.AddCurve(curve, attr) )
-        if delete then State.Doc.Objects.Delete(rhobj, quiet=true) |> ignore<bool>
+        let textObject = RhinoScriptSyntax.CoerceRhinoObject(textId)
+        let curves = RhinoScriptSyntax.ExplodeText(textObject.Geometry :?> TextEntity)
+        let ids = curves |> RArr.mapSeq (fun curve -> State.Doc.Objects.AddCurve(curve, textObject.Attributes))
+        if delete then State.Doc.Objects.Delete(textObject, quiet=true) |> ignore<bool>
         State.Doc.Views.Redraw()
-        rc
+        ids
+
+
+    /// <summary>Creates outline curves from text geometry without adding them to the document.</summary>
+    /// <param name="text">(TextEntity) The text geometry to explode.</param>
+    /// <returns>(Curve ResizeArray) The outline curves.</returns>
+    static member ExplodeText(text:TextEntity) : ResizeArray<Curve> =
+        let curves = text.Explode()
+        if isNull curves then RhinoScriptingException.Raise "ExplodeText: Unable to create text outlines."
+        ResizeArray(curves)
 
 
     /// <summary>Checks if that an object is a clipping Plane object. Returns false for any other Rhino object.</summary>
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True if the object with a given objectId is a clipping Plane.</returns>
     static member IsClippingPlane(objectId:Guid) : bool =
-        RhinoScriptSyntax.CoerceGeometry objectId :? ClippingPlaneSurface
+        RhinoScriptSyntax.IsClippingPlane(RhinoScriptSyntax.CoerceGeometry(objectId))
+
+
+    /// <summary>Checks if that an object is a clipping Plane object. Returns false for any other Rhino object.</summary>
+    /// <param name="geometryObject">(GeometryBase) Geometry to use directly.</param>
+    /// <returns>(bool) True if the object with a given geometryObject is a clipping Plane.</returns>
+    static member IsClippingPlane(geometryObject:GeometryBase) : bool =
+        geometryObject :? ClippingPlaneSurface
 
 
     /// <summary>Checks if an object is a point object. Returns false for any other Rhino object.</summary>
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True if the object with a given objectId is a point.</returns>
     static member IsPoint(objectId:Guid) : bool =
-        RhinoScriptSyntax.CoerceGeometry objectId :? Point
+        RhinoScriptSyntax.IsPoint(RhinoScriptSyntax.CoerceGeometry(objectId))
+
+
+    /// <summary>Checks if an object is a point object. Returns false for any other Rhino object.</summary>
+    /// <param name="geometryObject">(GeometryBase) Geometry to use directly.</param>
+    /// <returns>(bool) True if the object with a given geometryObject is a point.</returns>
+    static member IsPoint(geometryObject:GeometryBase) : bool =
+        geometryObject :? Point
 
 
     /// <summary>Checks if an object is a point cloud object. Returns false for any other Rhino object.</summary>
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True if the object with a given objectId is a point cloud.</returns>
     static member IsPointCloud(objectId:Guid) : bool =
-        RhinoScriptSyntax.CoerceGeometry objectId :? PointCloud
+        RhinoScriptSyntax.IsPointCloud(RhinoScriptSyntax.CoerceGeometry(objectId))
+
+
+    /// <summary>Checks if an object is a point cloud object. Returns false for any other Rhino object.</summary>
+    /// <param name="geometryObject">(GeometryBase) Geometry to use directly.</param>
+    /// <returns>(bool) True if the object with a given geometryObject is a point cloud.</returns>
+    static member IsPointCloud(geometryObject:GeometryBase) : bool =
+        geometryObject :? PointCloud
 
 
     /// <summary>Checks if an object is a text object. Returns false for any other Rhino object.</summary>
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True if the object with a given objectId is a text object.</returns>
     static member IsText(objectId:Guid) : bool =
-        RhinoScriptSyntax.CoerceGeometry objectId :? TextEntity
+        RhinoScriptSyntax.IsText(RhinoScriptSyntax.CoerceGeometry(objectId))
+
+
+    /// <summary>Checks if an object is a text object. Returns false for any other Rhino object.</summary>
+    /// <param name="geometryObject">(GeometryBase) Geometry to use directly.</param>
+    /// <returns>(bool) True if the object with a given geometryObject is a text object.</returns>
+    static member IsText(geometryObject:GeometryBase) : bool =
+        geometryObject :? TextEntity
 
 
     /// <summary>Checks if an object is a text dot object. Returns false for any other Rhino object.</summary>
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True if the object with a given objectId is a text dot object.</returns>
     static member IsTextDot(objectId:Guid) : bool =
-        RhinoScriptSyntax.CoerceGeometry objectId :? TextDot
+        RhinoScriptSyntax.IsTextDot(RhinoScriptSyntax.CoerceGeometry(objectId))
+
+
+    /// <summary>Checks if an object is a text dot object. Returns false for any other Rhino object.</summary>
+    /// <param name="geometryObject">(GeometryBase) Geometry to use directly.</param>
+    /// <returns>(bool) True if the object with a given geometryObject is a text dot object.</returns>
+    static member IsTextDot(geometryObject:GeometryBase) : bool =
+        geometryObject :? TextDot
 
 
     /// <summary>Returns the point count of a point cloud object.</summary>
     /// <param name="objectId">(Guid) The point cloud object's identifier</param>
     /// <returns>(int) number of points.</returns>
     static member PointCloudCount(objectId:Guid) : int =
-        let pc = RhinoScriptSyntax.CoercePointCloud(objectId)
+        RhinoScriptSyntax.PointCloudCount(RhinoScriptSyntax.CoercePointCloud(objectId))
+
+
+    /// <summary>Returns the point count of a point cloud object.</summary>
+    /// <param name="geometryObject">(PointCloud) Geometry to use directly.</param>
+    /// <returns>(int) number of points.</returns>
+    static member PointCloudCount(geometryObject:PointCloud) : int =
+        let pc = geometryObject
         pc.Count
 
 
@@ -7526,7 +8663,14 @@ type RhinoScriptSyntax private () =
     /// <param name="objectId">(Guid) The point cloud object's identifier</param>
     /// <returns>(bool) True if cloud has hidden points, otherwise False.</returns>
     static member PointCloudHasHiddenPoints(objectId:Guid) : bool =
-        let pc = RhinoScriptSyntax.CoercePointCloud(objectId)
+        RhinoScriptSyntax.PointCloudHasHiddenPoints(RhinoScriptSyntax.CoercePointCloud(objectId))
+
+
+    /// <summary>Checks if a point cloud has hidden points.</summary>
+    /// <param name="geometryObject">(PointCloud) Geometry to use directly.</param>
+    /// <returns>(bool) True if cloud has hidden points, otherwise False.</returns>
+    static member PointCloudHasHiddenPoints(geometryObject:PointCloud) : bool =
+        let pc = geometryObject
         pc.HiddenPointCount>0
 
 
@@ -7534,7 +8678,14 @@ type RhinoScriptSyntax private () =
     /// <param name="objectId">(Guid) The point cloud object's identifier</param>
     /// <returns>(bool) True if cloud has point colors, otherwise False.</returns>
     static member PointCloudHasPointColors(objectId:Guid) : bool =
-        let pc = RhinoScriptSyntax.CoercePointCloud(objectId)
+        RhinoScriptSyntax.PointCloudHasPointColors(RhinoScriptSyntax.CoercePointCloud(objectId))
+
+
+    /// <summary>Checks if a point cloud has point colors.</summary>
+    /// <param name="geometryObject">(PointCloud) Geometry to use directly.</param>
+    /// <returns>(bool) True if cloud has point colors, otherwise False.</returns>
+    static member PointCloudHasPointColors(geometryObject:PointCloud) : bool =
+        let pc = geometryObject
         pc.ContainsColors
 
 
@@ -7542,11 +8693,7 @@ type RhinoScriptSyntax private () =
     /// <param name="objectId">(Guid) The point cloud object's identifier</param>
     /// <returns>(bool ResizeArray) List of point cloud hidden states.</returns>
     static member PointCloudHidePoints(objectId:Guid) : ResizeArray<bool> = //GET
-        let pc = RhinoScriptSyntax.CoercePointCloud(objectId)
-        let r = ResizeArray(pc.Count)
-        for i = 0 to pc.Count - 1 do
-            r.Add(pc.[i].Hidden)
-        r
+        RhinoScriptSyntax.PointCloudHidePoints(RhinoScriptSyntax.CoercePointCloud(objectId))
 
     /// <summary>Modifies the hidden points of a point cloud object.</summary>
     /// <param name="objectId">(Guid) The point cloud object's identifier</param>
@@ -7567,16 +8714,23 @@ type RhinoScriptSyntax private () =
         State.Doc.Views.Redraw()
 
 
+    /// <summary>Returns the hidden state of points in a point cloud object.</summary>
+    /// <param name="geometryObject">(PointCloud) Geometry to use directly.</param>
+    /// <returns>(bool ResizeArray) List of point cloud hidden states.</returns>
+    static member PointCloudHidePoints(geometryObject:PointCloud) : ResizeArray<bool> = //GET
+        let pc = geometryObject
+        let r = ResizeArray(pc.Count)
+        for i = 0 to pc.Count - 1 do
+            r.Add(pc.[i].Hidden)
+        r
+
+
 
     /// <summary>Returns the point colors of a point cloud object.</summary>
     /// <param name="objectId">(Guid) The point cloud object's identifier</param>
     /// <returns>(Drawing.Color ResizeArray) List of point cloud colors.</returns>
     static member PointCloudPointColors(objectId:Guid) : Drawing.Color ResizeArray = //GET
-        let pc = RhinoScriptSyntax.CoercePointCloud objectId
-        let r = ResizeArray(pc.Count)
-        for i = 0 to pc.Count - 1 do
-            r.Add(pc.[i].Color)
-        r
+        RhinoScriptSyntax.PointCloudPointColors(RhinoScriptSyntax.CoercePointCloud(objectId))
 
     /// <summary>Modifies the point colors of a point cloud object.</summary>
     /// <param name="objectId">(Guid) The point cloud object's identifier</param>
@@ -7594,12 +8748,30 @@ type RhinoScriptSyntax private () =
         State.Doc.Views.Redraw()
 
 
+    /// <summary>Returns the point colors of a point cloud object.</summary>
+    /// <param name="geometryObject">(PointCloud) Geometry to use directly.</param>
+    /// <returns>(Drawing.Color ResizeArray) List of point cloud colors.</returns>
+    static member PointCloudPointColors(geometryObject:PointCloud) : Drawing.Color ResizeArray = //GET
+        let pc = geometryObject
+        let r = ResizeArray(pc.Count)
+        for i = 0 to pc.Count - 1 do
+            r.Add(pc.[i].Color)
+        r
+
+
 
     /// <summary>Returns the points of a point cloud object.</summary>
     /// <param name="objectId">(Guid) The point cloud object's identifier</param>
     /// <returns>(Point3d array) list of points.</returns>
     static member PointCloudPoints(objectId:Guid) : array<Point3d> =
-        let pc = RhinoScriptSyntax.CoercePointCloud(objectId)
+        RhinoScriptSyntax.PointCloudPoints(RhinoScriptSyntax.CoercePointCloud(objectId))
+
+
+    /// <summary>Returns the points of a point cloud object.</summary>
+    /// <param name="geometryObject">(PointCloud) Geometry to use directly.</param>
+    /// <returns>(Point3d array) list of points.</returns>
+    static member PointCloudPoints(geometryObject:PointCloud) : array<Point3d> =
+        let pc = geometryObject
         pc.GetPoints()
 
 
@@ -7632,7 +8804,7 @@ type RhinoScriptSyntax private () =
     /// <param name="objectId">(Guid) The identifier of a point object</param>
     /// <returns>(Point3d) The current 3-D point location.</returns>
     static member PointCoordinates(objectId:Guid) : Point3d = //GET
-        RhinoScriptSyntax.Coerce3dPoint(objectId)
+        RhinoScriptSyntax.PointCoordinates(RhinoScriptSyntax.Coerce3dPoint(objectId))
 
 
     /// <summary>Modifies the X, Y, and Z coordinates of a point object.</summary>
@@ -7645,12 +8817,27 @@ type RhinoScriptSyntax private () =
         State.Doc.Views.Redraw()
 
 
+    /// <summary>Returns the X, Y, and Z coordinates of a point object.</summary>
+    /// <param name="point">(Point3d) Geometry to use directly.</param>
+    /// <returns>(Point3d) The current 3-D point location.</returns>
+    static member PointCoordinates(point:Point3d) : Point3d = //GET
+        point
+
+
+
+    /// <summary>Returns the X, Y, and Z coordinates of a point geometry object.</summary>
+    /// <param name="point">(Point) The point geometry.</param>
+    /// <returns>(Point3d) The current 3-D point location.</returns>
+    static member PointCoordinates(point:Point) : Point3d = //GET
+        point.Location
+
+
 
     /// <summary>Returns the font of a text dot.</summary>
     /// <param name="objectId">(Guid) Identifier of a text dot object</param>
     /// <returns>(string) The current text dot font.</returns>
     static member TextDotFont(objectId:Guid) : string = //GET
-        (RhinoScriptSyntax.CoerceTextDot(objectId)).FontFace
+        RhinoScriptSyntax.TextDotFont(RhinoScriptSyntax.CoerceTextDot(objectId))
 
     /// <summary>Modifies the font of a text dot.</summary>
     /// <param name="objectId">(Guid) Identifier of a text dot object</param>
@@ -7661,6 +8848,7 @@ type RhinoScriptSyntax private () =
         textdot.FontFace <-  fontFace
         if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "TextDotFont failed to change object %s to '%s'" (Pretty.str objectId) fontFace
         State.Doc.Views.Redraw()
+
 
     /// <summary>Modifies the font of multiple text dots.</summary>
     /// <param name="objectIds">(Guid seq) Identifiers of multiple text dot objects</param>
@@ -7674,11 +8862,20 @@ type RhinoScriptSyntax private () =
         State.Doc.Views.Redraw()
 
 
+    /// <summary>Returns the font of a text dot.</summary>
+    /// <param name="geometryObject">(TextDot) Geometry to use directly.</param>
+    /// <returns>(string) The current text dot font.</returns>
+    static member TextDotFont(geometryObject:TextDot) : string = //GET
+        (geometryObject).FontFace
+
+
+
+
     /// <summary>Returns the font height of a text dot.</summary>
     /// <param name="objectId">(Guid) Identifier of a text dot object</param>
     /// <returns>(int) The current text dot height.</returns>
     static member TextDotHeight(objectId:Guid) : int = //GET
-        (RhinoScriptSyntax.CoerceTextDot(objectId)).FontHeight
+        RhinoScriptSyntax.TextDotHeight(RhinoScriptSyntax.CoerceTextDot(objectId))
 
     /// <summary>Modifies the font height of a text dot.</summary>
     /// <param name="objectId">(Guid) Identifier of a text dot object</param>
@@ -7689,6 +8886,7 @@ type RhinoScriptSyntax private () =
         textdot.FontHeight <- height
         if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "TextDotHeight failed to change object %s to %d" (Pretty.str objectId) height
         State.Doc.Views.Redraw()
+
 
     /// <summary>Modifies the font height of multiple text dots.</summary>
     /// <param name="objectIds">(Guid seq) Identifiers of multiple text dot objects</param>
@@ -7702,11 +8900,20 @@ type RhinoScriptSyntax private () =
         State.Doc.Views.Redraw()
 
 
+    /// <summary>Returns the font height of a text dot.</summary>
+    /// <param name="geometryObject">(TextDot) Geometry to use directly.</param>
+    /// <returns>(int) The current text dot height.</returns>
+    static member TextDotHeight(geometryObject:TextDot) : int = //GET
+        (geometryObject).FontHeight
+
+
+
+
     /// <summary>Returns the location, or insertion point, on a text dot object.</summary>
     /// <param name="objectId">(Guid) Identifier of a text dot object</param>
     /// <returns>(Point3d) The current 3-D text dot location.</returns>
     static member TextDotPoint(objectId:Guid) : Point3d = //GET
-        (RhinoScriptSyntax.CoerceTextDot(objectId)).Point
+        RhinoScriptSyntax.TextDotPoint(RhinoScriptSyntax.CoerceTextDot(objectId))
 
 
     /// <summary>Modifies the location, or insertion point, on a text dot object.</summary>
@@ -7720,13 +8927,19 @@ type RhinoScriptSyntax private () =
         State.Doc.Views.Redraw()
 
 
+    /// <summary>Returns the location, or insertion point, on a text dot object.</summary>
+    /// <param name="geometryObject">(TextDot) Geometry to use directly.</param>
+    /// <returns>(Point3d) The current 3-D text dot location.</returns>
+    static member TextDotPoint(geometryObject:TextDot) : Point3d = //GET
+        (geometryObject).Point
+
 
 
     /// <summary>Returns the text on a text dot object.</summary>
     /// <param name="objectId">(Guid) The identifier of a text dot object</param>
     /// <returns>(string) The current text dot text.</returns>
     static member TextDotText(objectId:Guid) : string = //GET
-        (RhinoScriptSyntax.CoerceTextDot(objectId)).Text
+        RhinoScriptSyntax.TextDotText(RhinoScriptSyntax.CoerceTextDot(objectId))
 
 
 
@@ -7740,6 +8953,7 @@ type RhinoScriptSyntax private () =
         if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "TextDotText failed to change object %s to '%s'" (Pretty.str objectId) text
         State.Doc.Views.Redraw()
 
+
     /// <summary>Modifies the text on multiple text dot objects.</summary>
     /// <param name="objectIds">(Guid seq) The identifiers of multiple text dot objects</param>
     /// <param name="text">(string) A new string for the dot</param>
@@ -7752,11 +8966,59 @@ type RhinoScriptSyntax private () =
         State.Doc.Views.Redraw()
 
 
+    /// <summary>Returns the text on a text dot object.</summary>
+    /// <param name="geometryObject">(TextDot) Geometry to use directly.</param>
+    /// <returns>(string) The current text dot text.</returns>
+    static member TextDotText(geometryObject:TextDot) : string = //GET
+        (geometryObject).Text
+
+
+
+
     /// <summary>Returns the font used by a text object.</summary>
     /// <param name="objectId">(Guid) The identifier of a text object</param>
     /// <returns>(string) The current font face name.</returns>
     static member TextObjectFont(objectId:Guid) : string = //GET
-        (RhinoScriptSyntax.CoerceTextEntity(objectId)).Font.QuartetName
+        RhinoScriptSyntax.TextObjectFont(RhinoScriptSyntax.CoerceTextEntity(objectId))
+
+
+    /// <summary>Modifies the font used by a text object. Keeps the current state of bold and italic when possible.</summary>
+    /// <param name="objectId">(Guid) The identifier of a text object</param>
+    /// <param name="font">(string) The new Font Name</param>
+    /// <returns>(unit) void, nothing.</returns>
+    static member TextObjectFont(objectId:Guid, font:string) : unit = //SET
+        let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
+        let fontdata = annotation.Font
+        let f =
+            DocObjects.Font.FromQuartetProperties(font, fontdata.Bold, fontdata.Italic)
+            // normally calls will not  go further than FromQuartetProperties(font, false, false)
+            // but there are a few rare fonts that don"t have a regular font
+            |? DocObjects.Font.FromQuartetProperties(font, bold=false, italic=false)
+            |? DocObjects.Font.FromQuartetProperties(font, bold=true , italic=false)
+            |? DocObjects.Font.FromQuartetProperties(font, bold=false, italic=true )
+            |? DocObjects.Font.FromQuartetProperties(font, bold=true , italic=true )
+            |? (RhinoScriptingException.Raise "TextObjectFont failed.  objectId:'%s' font:''%s''" (Pretty.str objectId) font)
+        annotation.Font <- f
+        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "TextObjectFont failed.  objectId:'%s' font:''%s''" (Pretty.str objectId) font
+        State.Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
+
+
+    /// <summary>Modifies the font used by multiple text objects. Keeps the current state of bold and italic when possible.</summary>
+    /// <param name="objectIds">(Guid seq) The identifiers of multiple text objects</param>
+    /// <param name="font">(string) The new Font Name</param>
+    /// <returns>(unit) void, nothing.</returns>
+    static member TextObjectFont(objectIds:Guid seq, font:string) : unit = //MULTISET
+        for objectId in objectIds do  RhinoScriptSyntax.TextObjectFont(objectId, font)
+        State.Doc.Views.Redraw()
+
+
+    /// <summary>Returns the font used by a text object.</summary>
+    /// <param name="geometryObject">(TextEntity) Geometry to use directly.</param>
+    /// <returns>(string) The current font face name.</returns>
+    static member TextObjectFont(geometryObject:TextEntity) : string = //GET
+        (geometryObject).Font.QuartetName
+
 
 
 
@@ -7764,7 +9026,7 @@ type RhinoScriptSyntax private () =
     /// <param name="objectId">(Guid) The identifier of a text object</param>
     /// <returns>(float) The current text height.</returns>
     static member TextObjectHeight(objectId:Guid) : float = //GET
-        (RhinoScriptSyntax.CoerceTextEntity(objectId)).TextHeight
+        RhinoScriptSyntax.TextObjectHeight(RhinoScriptSyntax.CoerceTextEntity(objectId))
 
     /// <summary>Modifies the height of a text object.</summary>
     /// <param name="objectId">(Guid) The identifier of a text object</param>
@@ -7775,6 +9037,7 @@ type RhinoScriptSyntax private () =
         annotation.TextHeight <-  height
         if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "TextObjectHeight failed.  objectId:'%s' height:'%s'" (Pretty.str objectId) (PrettyFormat.float height)
         State.Doc.Views.Redraw()
+
 
     /// <summary>Modifies the height of multiple text objects.</summary>
     /// <param name="objectIds">(Guid seq) The identifiers of multiple text objects</param>
@@ -7788,11 +9051,21 @@ type RhinoScriptSyntax private () =
         State.Doc.Views.Redraw()
         State.Doc.Views.Redraw()
 
+
+    /// <summary>Returns the height of a text object.</summary>
+    /// <param name="geometryObject">(TextEntity) Geometry to use directly.</param>
+    /// <returns>(float) The current text height.</returns>
+    static member TextObjectHeight(geometryObject:TextEntity) : float = //GET
+        (geometryObject).TextHeight
+
+
+
+
     /// <summary>Returns the Plane used by a text object.</summary>
     /// <param name="objectId">(Guid) The identifier of a text object</param>
     /// <returns>(Plane) The current Plane.</returns>
     static member TextObjectPlane(objectId:Guid) : Plane = //GET
-        (RhinoScriptSyntax.CoerceTextEntity(objectId)).Plane
+        RhinoScriptSyntax.TextObjectPlane(RhinoScriptSyntax.CoerceTextEntity(objectId))
 
     /// <summary>Modifies the Plane used by a text object.</summary>
     /// <param name="objectId">(Guid) The identifier of a text object</param>
@@ -7805,11 +9078,19 @@ type RhinoScriptSyntax private () =
         State.Doc.Views.Redraw()
 
 
+    /// <summary>Returns the Plane used by a text object.</summary>
+    /// <param name="geometryObject">(TextEntity) Geometry to use directly.</param>
+    /// <returns>(Plane) The current Plane.</returns>
+    static member TextObjectPlane(geometryObject:TextEntity) : Plane = //GET
+        (geometryObject).Plane
+
+
+
     /// <summary>Returns the location of a text object.</summary>
     /// <param name="objectId">(Guid) The identifier of a text object</param>
     /// <returns>(Point3d) The 3D point identifying the current location.</returns>
     static member TextObjectPoint(objectId:Guid) : Point3d = //GET
-        (RhinoScriptSyntax.CoerceTextEntity(objectId)).Plane.Origin
+        RhinoScriptSyntax.TextObjectPoint(RhinoScriptSyntax.CoerceTextEntity(objectId))
 
     /// <summary>Modifies the location of a text object.</summary>
     /// <param name="objectId">(Guid) The identifier of a text object</param>
@@ -7824,6 +9105,15 @@ type RhinoScriptSyntax private () =
         if not <| State.Doc.Objects.Replace(objectId, text) then RhinoScriptingException.Raise "TextObjectPoint failed.  objectId:'%s' point:'%s'" (Pretty.str objectId) point.Pretty
         State.Doc.Views.Redraw()
 
+
+    /// <summary>Returns the location of a text object.</summary>
+    /// <param name="geometryObject">(TextEntity) Geometry to use directly.</param>
+    /// <returns>(Point3d) The 3D point identifying the current location.</returns>
+    static member TextObjectPoint(geometryObject:TextEntity) : Point3d = //GET
+        (geometryObject).Plane.Origin
+
+
+
     /// <summary>Returns the font style of a text object.</summary>
     /// <param name="objectId">(Guid) The identifier of a text object</param>
     /// <returns>(int) The current font style
@@ -7832,89 +9122,7 @@ type RhinoScriptSyntax private () =
     ///    2 = Italic
     ///    3 = Bold and Italic.</returns>
     static member TextObjectStyle(objectId:Guid) : int = //GET
-        let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
-        let fontdata = annotation.Font
-        let mutable rc = 0
-        if fontdata.Bold   then rc <- 1 + rc
-        if fontdata.Italic then rc <- 2 + rc
-        rc
-
-    /// <summary>Returns the plain text string of a text object.</summary>
-    /// <param name="objectId">(Guid) The identifier of a text object</param>
-    /// <returns>(string) The current string value.</returns>
-    static member TextObjectText(objectId:Guid) : string = //GET
-        let text = RhinoScriptSyntax.CoerceTextEntity(objectId)
-        text.PlainText
-
-    /// <summary>Modifies the plain text string of a text object.</summary>
-    /// <param name="objectId">(Guid) The identifier of a text object</param>
-    /// <param name="text">(string) A new text string</param>
-    /// <returns>(unit) void, nothing.</returns>
-    static member TextObjectText(objectId:Guid, text:string) : unit = //SET
-        let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
-        annotation.PlainText <-  text
-        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "TextObjectText failed.  objectId:'%s' text:'%s'" (Pretty.str objectId) text
-        State.Doc.Views.Redraw()
-
-
-
-    /// <summary>Modifies the plain text string of multiple text objects.</summary>
-    /// <param name="objectIds">(Guid seq) The identifiers of multiple text objects</param>
-    /// <param name="text">(string) A new text string</param>
-    /// <returns>(unit) void, nothing.</returns>
-    static member TextObjectText(objectIds:Guid seq, text:string) : unit = //MULTISET
-        for objectId in objectIds do
-            let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
-            annotation.PlainText <-  text
-            if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "TextObjectText failed.  objectId:'%s' text:'%s'" (Pretty.str objectId) text
-        State.Doc.Views.Redraw()
-
-
-     /// <summary>Returns the RichText formatting string of a text object.</summary>
-    /// <param name="objectId">(Guid) The identifier of a text object</param>
-    /// <returns>(string) The current RichText formatting string.</returns>
-    static member TextObjectRichText(objectId:Guid) : string = //GET
-        let text = RhinoScriptSyntax.CoerceTextEntity(objectId)
-        text.RichText
-
-
-    /// <summary>Modifies the RichText formatting string of a text object.</summary>
-    /// <param name="objectId">(Guid) The identifier of a text object</param>
-    /// <param name="rtfString">(string) A new text RichText formatting string</param>
-    /// <param name="style">(string) Optional, default value: <c>""</c> Name of dimension style</param>
-    /// <returns>(unit) void, nothing.</returns>
-    static member TextObjectRichText(objectId:Guid, rtfString:string,[<OPT;DEF("")>]style:string ) : unit = //SET
-        let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
-        if style <> "" then
-            let ds = State.Doc.DimStyles.FindName(style)
-            if isNull ds then  RhinoScriptingException.Raise "TextObjectRichText, style not found:'%s'"  style
-            annotation.SetRichText(rtfString, ds)
-        else
-            annotation.RichText <-  rtfString
-        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "TextObjectRichText failed.  objectId:'%s' text:'%s'" (Pretty.str objectId) rtfString
-        State.Doc.Views.Redraw()
-
-
-
-    /// <summary>Modifies the RichText formatting string of multiple text objects.</summary>
-    /// <param name="objectIds">(Guid seq) The identifiers of multiple text objects</param>
-    /// <param name="rtfString">(string) A new text RichText formatting string</param>
-    /// <param name="style">(string) Optional, default value: <c>""</c> Name of dimension style</param>
-    /// <returns>(unit) void, nothing.</returns>
-    static member TextObjectRichText(objectIds:Guid seq,  rtfString:string, [<OPT;DEF("")>]style:string ) : unit = //MULTISET
-        if style <> "" then
-            let ds = State.Doc.DimStyles.FindName(style)
-            if isNull ds then  RhinoScriptingException.Raise "TextObjectRichText, style not found:'%s'"  style
-            for objectId in objectIds do
-                let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
-                if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "TextObjectRichText failed.  objectId:'%s' text:'%s' style:'%s'" (Pretty.str objectId) rtfString style
-                annotation.SetRichText(rtfString, ds)
-        else
-            for objectId in objectIds do
-                let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
-                annotation.RichText <-  rtfString
-                if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "TextObjectRichText failed.  objectId:'%s' text:'%s'" (Pretty.str objectId) rtfString
-        State.Doc.Views.Redraw()
+        RhinoScriptSyntax.TextObjectStyle(RhinoScriptSyntax.CoerceTextEntity(objectId))
 
 
 
@@ -7941,6 +9149,7 @@ type RhinoScriptSyntax private () =
             RhinoScriptingException.Raise "TextObjectStyle failed.  objectId:'%s' bad style:%d" (Pretty.str objectId) style
         State.Doc.Views.Redraw()
 
+
     /// <summary>Modifies the font style of multiple text objects. Keeps the font face</summary>
     /// <param name="objectIds">(Guid seq) The identifiers of multiple text objects</param>
     /// <param name="style">(int) The font style. Can be any of the following flags
@@ -7953,35 +9162,114 @@ type RhinoScriptSyntax private () =
         for objectId in objectIds do RhinoScriptSyntax.TextObjectStyle(objectId, style)
 
 
-    /// <summary>Modifies the font used by a text object. Keeps the current state of bold and italic when possible.</summary>
-    /// <param name="objectId">(Guid) The identifier of a text object</param>
-    /// <param name="font">(string) The new Font Name</param>
-    /// <returns>(unit) void, nothing.</returns>
-    static member TextObjectFont(objectId:Guid, font:string) : unit = //SET
-        let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
+    /// <summary>Returns the font style of a text object.</summary>
+    /// <param name="geometryObject">(TextEntity) Geometry to use directly.</param>
+    /// <returns>(int) The current font style
+    ///    0 = Normal
+    ///    1 = Bold
+    ///    2 = Italic
+    ///    3 = Bold and Italic.</returns>
+    static member TextObjectStyle(geometryObject:TextEntity) : int = //GET
+        let annotation = geometryObject
         let fontdata = annotation.Font
-        let f =
-            DocObjects.Font.FromQuartetProperties(font, fontdata.Bold, fontdata.Italic)
-            // normally calls will not  go further than FromQuartetProperties(font, false, false)
-            // but there are a few rare fonts that don"t have a regular font
-            |? DocObjects.Font.FromQuartetProperties(font, bold=false, italic=false)
-            |? DocObjects.Font.FromQuartetProperties(font, bold=true , italic=false)
-            |? DocObjects.Font.FromQuartetProperties(font, bold=false, italic=true )
-            |? DocObjects.Font.FromQuartetProperties(font, bold=true , italic=true )
-            |? (RhinoScriptingException.Raise "TextObjectFont failed.  objectId:'%s' font:''%s''" (Pretty.str objectId) font)
-        annotation.Font <- f
-        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "TextObjectFont failed.  objectId:'%s' font:''%s''" (Pretty.str objectId) font
-        State.Doc.Views.Redraw()
-        State.Doc.Views.Redraw()
+        let mutable rc = 0
+        if fontdata.Bold   then rc <- 1 + rc
+        if fontdata.Italic then rc <- 2 + rc
+        rc
 
-    /// <summary>Modifies the font used by multiple text objects. Keeps the current state of bold and italic when possible.</summary>
-    /// <param name="objectIds">(Guid seq) The identifiers of multiple text objects</param>
-    /// <param name="font">(string) The new Font Name</param>
+
+
+
+    /// <summary>Returns the plain text string of a text object.</summary>
+    /// <param name="objectId">(Guid) The identifier of a text object</param>
+    /// <returns>(string) The current string value.</returns>
+    static member TextObjectText(objectId:Guid) : string = //GET
+        RhinoScriptSyntax.TextObjectText(RhinoScriptSyntax.CoerceTextEntity(objectId))
+
+    /// <summary>Modifies the plain text string of a text object.</summary>
+    /// <param name="objectId">(Guid) The identifier of a text object</param>
+    /// <param name="text">(string) A new text string</param>
     /// <returns>(unit) void, nothing.</returns>
-    static member TextObjectFont(objectIds:Guid seq, font:string) : unit = //MULTISET
-        for objectId in objectIds do  RhinoScriptSyntax.TextObjectFont(objectId, font)
+    static member TextObjectText(objectId:Guid, text:string) : unit = //SET
+        let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
+        annotation.PlainText <-  text
+        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "TextObjectText failed.  objectId:'%s' text:'%s'" (Pretty.str objectId) text
         State.Doc.Views.Redraw()
 
+
+    /// <summary>Modifies the plain text string of multiple text objects.</summary>
+    /// <param name="objectIds">(Guid seq) The identifiers of multiple text objects</param>
+    /// <param name="text">(string) A new text string</param>
+    /// <returns>(unit) void, nothing.</returns>
+    static member TextObjectText(objectIds:Guid seq, text:string) : unit = //MULTISET
+        for objectId in objectIds do
+            let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
+            annotation.PlainText <-  text
+            if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "TextObjectText failed.  objectId:'%s' text:'%s'" (Pretty.str objectId) text
+        State.Doc.Views.Redraw()
+
+
+    /// <summary>Returns the plain text string of a text object.</summary>
+    /// <param name="geometryObject">(TextEntity) Geometry to use directly.</param>
+    /// <returns>(string) The current string value.</returns>
+    static member TextObjectText(geometryObject:TextEntity) : string = //GET
+        let text = geometryObject
+        text.PlainText
+
+
+
+
+     /// <summary>Returns the RichText formatting string of a text object.</summary>
+    /// <param name="objectId">(Guid) The identifier of a text object</param>
+    /// <returns>(string) The current RichText formatting string.</returns>
+    static member TextObjectRichText(objectId:Guid) : string = //GET
+        RhinoScriptSyntax.TextObjectRichText(RhinoScriptSyntax.CoerceTextEntity(objectId))
+
+
+    /// <summary>Modifies the RichText formatting string of a text object.</summary>
+    /// <param name="objectId">(Guid) The identifier of a text object</param>
+    /// <param name="rtfString">(string) A new text RichText formatting string</param>
+    /// <param name="style">(string) Optional, default value: <c>""</c> Name of dimension style</param>
+    /// <returns>(unit) void, nothing.</returns>
+    static member TextObjectRichText(objectId:Guid, rtfString:string,[<OPT;DEF("")>]style:string ) : unit = //SET
+        let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
+        if style <> "" then
+            let ds = State.Doc.DimStyles.FindName(style)
+            if isNull ds then  RhinoScriptingException.Raise "TextObjectRichText, style not found:'%s'"  style
+            annotation.SetRichText(rtfString, ds)
+        else
+            annotation.RichText <-  rtfString
+        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "TextObjectRichText failed.  objectId:'%s' text:'%s'" (Pretty.str objectId) rtfString
+        State.Doc.Views.Redraw()
+
+
+    /// <summary>Modifies the RichText formatting string of multiple text objects.</summary>
+    /// <param name="objectIds">(Guid seq) The identifiers of multiple text objects</param>
+    /// <param name="rtfString">(string) A new text RichText formatting string</param>
+    /// <param name="style">(string) Optional, default value: <c>""</c> Name of dimension style</param>
+    /// <returns>(unit) void, nothing.</returns>
+    static member TextObjectRichText(objectIds:Guid seq,  rtfString:string, [<OPT;DEF("")>]style:string ) : unit = //MULTISET
+        if style <> "" then
+            let ds = State.Doc.DimStyles.FindName(style)
+            if isNull ds then  RhinoScriptingException.Raise "TextObjectRichText, style not found:'%s'"  style
+            for objectId in objectIds do
+                let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
+                if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "TextObjectRichText failed.  objectId:'%s' text:'%s' style:'%s'" (Pretty.str objectId) rtfString style
+                annotation.SetRichText(rtfString, ds)
+        else
+            for objectId in objectIds do
+                let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
+                annotation.RichText <-  rtfString
+                if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "TextObjectRichText failed.  objectId:'%s' text:'%s'" (Pretty.str objectId) rtfString
+        State.Doc.Views.Redraw()
+
+
+    /// <summary>Returns the RichText formatting string of a text object.</summary>
+    /// <param name="geometryObject">(TextEntity) Geometry to use directly.</param>
+    /// <returns>(string) The current RichText formatting string.</returns>
+    static member TextObjectRichText(geometryObject:TextEntity) : string = //GET
+        let text = geometryObject
+        text.RichText
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
 
@@ -8573,57 +9861,28 @@ type RhinoScriptSyntax private () =
     /// <param name="scale">(float) Optional, default value: <c>1.0</c>. Hatch pattern scale factor.</param>
     /// <param name="rotation">(float) Optional, default value: <c>0.0</c>. Hatch pattern rotation angle in degrees.</param>
     /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>. Tolerance for Hatch fills.</param>
-    /// <returns>(Guid ResizeArray) Identifiers of the newly created Hatches.</returns>
-    static member AddHatches( curves:Curve seq,
+    /// <returns>(Hatch ResizeArray) Hatch geometry, without adding it to the document.</returns>
+    static member MakeHatches( curves:Curve seq,
                               [<OPT;DEF(null:string)>]hatchPattern:string,
                               [<OPT;DEF(1.0)>]scale:float,
                               [<OPT;DEF(0.0)>]rotation:float,
-                              [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray =
-        RhinoScriptSyntax.InitHatchPatterns()
+                              [<OPT;DEF(0.0)>]tolerance:float) : Hatch ResizeArray =
         let mutable index = State.Doc.HatchPatterns.CurrentHatchPatternIndex
         if notNull hatchPattern then
             let patternInstance = State.Doc.HatchPatterns.FindName(hatchPattern)
             index <-  if patternInstance|> isNull then RhinoMath.UnsetIntIndex else patternInstance.Index
-            if index<0 then RhinoScriptingException.Raise "AddHatches failed to find hatchPattern:'%s'"  hatchPattern
+            if index<0 then RhinoScriptingException.Raise "MakeHatches failed to find hatchPattern:'%s'"  hatchPattern
         let rotation = RhinoMath.ToRadians(rotation)
 
         let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance
         let hatches = Hatch.Create(curves, index, rotation, scale, tolerance)
         if isNull hatches then
-            RhinoScriptingException.Raise "AddHatches failed to create hatch from %d curves, not closed: %d, not planar %d, tolerance:'%g' "
+            RhinoScriptingException.Raise "MakeHatches failed to create hatch from %d curves, not closed: %d, not planar %d, tolerance:'%g' "
                 (Seq.length curves)
                 (curves |> Seq.countIf ( fun c -> c.IsClosed   |> not ))
                 (curves |> Seq.countIf ( fun c -> c.IsPlanar() |> not ))
                 tolerance
-        let ids = ResizeArray()
-        for hatch in hatches do
-            let objectId = State.Doc.Objects.AddHatch(hatch)
-            if objectId <> Guid.Empty then
-                ids.Add(objectId)
-        if ids.Count = 0 then
-            RhinoScriptingException.Raise "AddHatches failed to add any hatches from %d curves, not closed: %d, not planar %d, tolerance:'%g' "
-                (Seq.length curves)
-                (curves |> Seq.countIf ( fun c -> c.IsClosed   |> not ))
-                (curves |> Seq.countIf ( fun c -> c.IsPlanar() |> not ))
-                tolerance
-        State.Doc.Views.Redraw()
-        ids
-
-    /// <summary>Creates one Hatch object from one closed planar Curve.</summary>
-    /// <param name="curve">(Curve) Geometry of the closed planar Curve that defines the boundary of the Hatch object</param>
-    /// <param name="hatchPattern">(string) Optional. Name of the Hatch pattern to be used by the Hatch object. If omitted, the current Hatch pattern will be used.</param>
-    /// <param name="scale">(float) Optional, default value: <c>1.0</c>. Hatch pattern scale factor.</param>
-    /// <param name="rotation">(float) Optional, default value: <c>0.0</c>. Hatch pattern rotation angle in degrees.</param>
-    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>. Tolerance for Hatch fills.</param>
-    /// <returns>(Guid) Identifier of the newly created Hatch.</returns>
-    static member AddHatch(   curve:Curve,
-                              [<OPT;DEF(null:string)>]hatchPattern:string,
-                              [<OPT;DEF(1.0)>]scale:float,
-                              [<OPT;DEF(0.0)>]rotation:float,
-                              [<OPT;DEF(0.0)>]tolerance:float) : Guid  =
-        let rc = RhinoScriptSyntax.AddHatches([curve], hatchPattern, scale, rotation,tolerance) // gives a good error message already
-        if rc.Count = 1 then rc.[0]
-        else RhinoScriptingException.Raise "AddHatch failed to create exactly one hatch from curve. It created %d Hatches"  rc.Count
+        ResizeArray(hatches)
 
 
     /// <summary>Creates one or more new Hatch objects from a list of closed planar Curves.</summary>
@@ -8639,9 +9898,41 @@ type RhinoScriptSyntax private () =
                               [<OPT;DEF(0.0)>]rotation:float,
                               [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray =
         let curves  = curveIds |> RArr.mapSeq RhinoScriptSyntax.CoerceCurve
-        try RhinoScriptSyntax.AddHatches(curves, hatchPattern, scale, rotation, tolerance)
+        try
+            RhinoScriptSyntax.InitHatchPatterns()
+            let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance
+            let hatches = RhinoScriptSyntax.MakeHatches(curves, hatchPattern, scale, rotation, tolerance)
+            let ids = ResizeArray()
+            for hatch in hatches do
+                let objectId = State.Doc.Objects.AddHatch(hatch)
+                if objectId <> Guid.Empty then
+                    ids.Add(objectId)
+            if ids.Count = 0 then
+                RhinoScriptingException.Raise "AddHatches failed to add any hatches from %d curves, not closed: %d, not planar %d, tolerance:'%g' "
+                    (Seq.length curves)
+                    (curves |> Seq.countIf ( fun c -> c.IsClosed   |> not ))
+                    (curves |> Seq.countIf ( fun c -> c.IsPlanar() |> not ))
+                    tolerance
+            State.Doc.Views.Redraw()
+            ids
         with e->
             RhinoScriptingException.RaiseWith e "AddHatches failed on curveIds %s%s%s" (Pretty.str curveIds) Environment.NewLine e.Message
+
+    /// <summary>Creates one Hatch object from one closed planar Curve.</summary>
+    /// <param name="curve">(Curve) Geometry of the closed planar Curve that defines the boundary of the Hatch object</param>
+    /// <param name="hatchPattern">(string) Optional. Name of the Hatch pattern to be used by the Hatch object. If omitted, the current Hatch pattern will be used.</param>
+    /// <param name="scale">(float) Optional, default value: <c>1.0</c>. Hatch pattern scale factor.</param>
+    /// <param name="rotation">(float) Optional, default value: <c>0.0</c>. Hatch pattern rotation angle in degrees.</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>. Tolerance for Hatch fills.</param>
+    /// <returns>(Hatch) Hatch geometry, without adding it to the document.</returns>
+    static member MakeHatch(   curve:Curve,
+                              [<OPT;DEF(null:string)>]hatchPattern:string,
+                              [<OPT;DEF(1.0)>]scale:float,
+                              [<OPT;DEF(0.0)>]rotation:float,
+                              [<OPT;DEF(0.0)>]tolerance:float) : Hatch =
+        let rc = RhinoScriptSyntax.MakeHatches([curve], hatchPattern, scale, rotation,tolerance) // gives a good error message already
+        if rc.Count = 1 then rc.[0]
+        else RhinoScriptingException.Raise "MakeHatch failed to create exactly one hatch from curve. It created %d Hatches"  rc.Count
 
     /// <summary>Creates a new Hatch object from a closed planar Curve object.</summary>
     /// <param name="curveId">(Guid) Identifier of the closed planar Curve that defines the boundary of the Hatch object</param>
@@ -8655,8 +9946,10 @@ type RhinoScriptSyntax private () =
                             [<OPT;DEF(1.0)>]scale:float,
                             [<OPT;DEF(0.0)>]rotation:float,
                             [<OPT;DEF(0.0)>]tolerance:float) : Guid =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
-        try RhinoScriptSyntax.AddHatch(curve, hatchPattern, scale, rotation, tolerance)
+        try
+            let ids = RhinoScriptSyntax.AddHatches([curveId], hatchPattern, scale, rotation, tolerance)
+            if ids.Count = 1 then ids.[0]
+            else RhinoScriptingException.Raise "AddHatch failed to create exactly one hatch from curve. It created %d Hatches" ids.Count
         with e->
             RhinoScriptingException.RaiseWith e "AddHatch failed on curveId %s%s%s" (Pretty.str curveId) Environment.NewLine e.Message
 
@@ -8712,10 +10005,8 @@ type RhinoScriptSyntax private () =
     ///    Delete the Hatch object</param>
     /// <returns>(Guid ResizeArray) list of identifiers for the newly created objects.</returns>
     static member ExplodeHatch(hatchId:Guid, [<OPT;DEF(false)>]delete:bool) : Guid ResizeArray =
-        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(hatchId)
-        let geo =  RhinoScriptSyntax.CoerceHatch(hatchId)
-        let pieces = geo.Explode()
-        if isNull pieces then RhinoScriptingException.Raise "ExplodeHatch failed.  hatchId:'%s' delete:'%A'" (Pretty.str hatchId) delete
+        let rhobj = RhinoScriptSyntax.CoerceHatchObject(hatchId)
+        let pieces = RhinoScriptSyntax.ExplodeHatch(rhobj.HatchGeometry)
         let attr = rhobj.Attributes
         let rc = ResizeArray()
         for piece in pieces do
@@ -8729,6 +10020,19 @@ type RhinoScriptSyntax private () =
             | _ -> RhinoScriptingException.Raise "ExplodeHatch: drawing of %A objects after exploding not implemented" piece.ObjectType //TODO test with hatch patterns that have points
         if delete then State.Doc.Objects.Delete(rhobj)|> ignore<bool>
         rc
+
+
+
+
+
+
+    /// <summary>Explodes hatch geometry into curves or planar breps without adding them to the document.</summary>
+    /// <param name="hatch">(Hatch) The hatch geometry to explode.</param>
+    /// <returns>(GeometryBase ResizeArray) The exploded geometry.</returns>
+    static member ExplodeHatch(hatch:Hatch) : GeometryBase ResizeArray =
+        let pieces = hatch.Explode()
+        if isNull pieces then RhinoScriptingException.Raise "ExplodeHatch: Unable to explode hatch geometry."
+        ResizeArray(pieces)
 
 
     /// <summary>Returns a Hatch object's Hatch pattern.</summary>
@@ -8767,6 +10071,14 @@ type RhinoScriptSyntax private () =
             hatchObj.HatchGeometry.PatternIndex <- newPattern.Index
             hatchObj.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
+
+
+    /// <summary>Returns a Hatch object's Hatch pattern.</summary>
+    /// <param name="hatchGeo">(Hatch) The Hatch geometry</param>
+    /// <returns>(string) The current Hatch pattern.</returns>
+    static member HatchPattern(hatchGeo:Hatch) : string = //GET
+        let oldIndex = hatchGeo.PatternIndex
+        State.Doc.HatchPatterns.[oldIndex].Name
 
 
     /// <summary>Returns the number of Hatch patterns in the document.</summary>
@@ -8854,6 +10166,15 @@ type RhinoScriptSyntax private () =
         State.Doc.Views.Redraw()
 
 
+    /// <summary>Returns the rotation applied to the Hatch pattern when
+    /// it is mapped to the Hatch's Plane.</summary>
+    /// <param name="hatchGeo">(Hatch) The Hatch geometry</param>
+    /// <returns>(float) if rotation is not defined, the current rotation angle.</returns>
+    static member HatchRotation(hatchGeo:Hatch) : float = //GET
+        let rc = hatchGeo.PatternRotation
+        RhinoMath.ToDegrees(rc)
+
+
     /// <summary>Returns the scale applied to the Hatch pattern when it is
     /// mapped to the Hatch's Plane.</summary>
     /// <param name="hatchId">(Guid) Identifier of a Hatch object</param>
@@ -8891,12 +10212,27 @@ type RhinoScriptSyntax private () =
         State.Doc.Views.Redraw()
 
 
+    /// <summary>Returns the scale applied to the Hatch pattern when it is
+    /// mapped to the Hatch's Plane.</summary>
+    /// <param name="hatchGeo">(Hatch) The Hatch geometry</param>
+    /// <returns>(float) if scale is not defined, the current scale factor.</returns>
+    static member HatchScale(hatchGeo:Hatch) : float = //GET
+        hatchGeo.PatternScale
+
+
     /// <summary>Verifies the existence of a Hatch object in the document.</summary>
     /// <param name="objectId">(Guid) Identifier of an object</param>
     /// <returns>(bool) True or False.</returns>
     static member IsHatch(objectId:Guid) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         match rhobj with :? DocObjects.HatchObject  -> true |_ -> false
+
+
+    /// <summary>Tests whether the supplied geometry is a Hatch.</summary>
+    /// <param name="geometry">(GeometryBase) The geometry to test.</param>
+    /// <returns>(bool) True if the geometry is a Hatch, otherwise false.</returns>
+    static member IsHatch(geometry:GeometryBase) : bool =
+        geometry :? Hatch
 
 
     /// <summary>Verifies the existence of a Hatch pattern in the document.</summary>
@@ -8925,11 +10261,7 @@ type RhinoScriptSyntax private () =
         let patternInstance = State.Doc.HatchPatterns.FindName(hatchPattern)
         if patternInstance|> isNull  then RhinoScriptingException.Raise "IsHatchPatternReference failed.  hatchPattern:'%A'" hatchPattern
         patternInstance.IsReference
-
-
-
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
-
 
     /// <summary>Adds a new directional light object to the document.</summary>
     /// <param name="startPoint">(Point3d) Starting point of the light</param>
@@ -9054,9 +10386,8 @@ type RhinoScriptSyntax private () =
     /// <param name="objectId">(Guid) The light object's identifier</param>
     /// <returns>(bool) The current enabled status.</returns>
     static member EnableLight(objectId:Guid) : bool = //GET
-        let light = RhinoScriptSyntax.CoerceLight(objectId)
-        let rc = light.IsEnabled
-        rc
+        RhinoScriptSyntax.EnableLight(RhinoScriptSyntax.CoerceLight(objectId))
+
 
     /// <summary>Enables or disables a light object.</summary>
     /// <param name="objectId">(Guid) The light object's identifier</param>
@@ -9068,6 +10399,7 @@ type RhinoScriptSyntax private () =
         if not <| State.Doc.Lights.Modify(objectId, light) then
             RhinoScriptingException.Raise "EnableLight failed.  objectId:'%s' enable:'%A'" (Pretty.str objectId) enable
         State.Doc.Views.Redraw()
+
 
     /// <summary>Enables or disables multiple light objects.</summary>
     /// <param name="objectIds">(Guid seq) The light objects's identifiers</param>
@@ -9082,28 +10414,61 @@ type RhinoScriptSyntax private () =
         State.Doc.Views.Redraw()
 
 
+    /// <summary>Get On / Off status of a light object.</summary>
+    /// <param name="geometryObject">(Light) The light geometry to use.</param>
+    /// <returns>(bool) The current enabled status.</returns>
+    static member EnableLight(geometryObject:Light) : bool = //GET
+        let light = geometryObject
+        let rc = light.IsEnabled
+        rc
+
+
     /// <summary>Verifies a light object is a directional light. Returns false for any other Rhino object or if the object does not exist.</summary>
     /// <param name="objectId">(Guid) The light object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsDirectionalLight(objectId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceLight(objectId) with
-        | Some light -> light.IsDirectionalLight
+        | Some light -> RhinoScriptSyntax.IsDirectionalLight(light)
         | None -> false
+
+
+    /// <summary>Verifies a light object is a directional light. Returns false for any other Rhino object or if the geometry is null.</summary>
+    /// <param name="geometryObject">(GeometryBase) The geometry to test.</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsDirectionalLight(geometryObject:GeometryBase) : bool =
+        match geometryObject with
+        | :? Light as light -> light.IsDirectionalLight
+        | _ -> false
 
 
     /// <summary>Verifies an object is a light object.</summary>
     /// <param name="objectId">(Guid) The light object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsLight(objectId:Guid) : bool =
-        RhinoScriptSyntax.TryCoerceLight(objectId)
-        |> Option.isSome
+        match RhinoScriptSyntax.TryCoerceLight(objectId) with
+        | Some light -> RhinoScriptSyntax.IsLight(light)
+        | None -> false
+
+
+    /// <summary>Verifies an object is a light object.</summary>
+    /// <param name="geometryObject">(GeometryBase) The geometry to test.</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsLight(geometryObject:GeometryBase) : bool =
+        geometryObject :? Light
 
 
     /// <summary>Verifies a light object is enabled.</summary>
     /// <param name="objectId">(Guid) The light object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsLightEnabled(objectId:Guid) : bool =
-        let light = RhinoScriptSyntax.CoerceLight(objectId)
+        RhinoScriptSyntax.IsLightEnabled(RhinoScriptSyntax.CoerceLight(objectId))
+
+
+    /// <summary>Verifies a light object is enabled.</summary>
+    /// <param name="geometryObject">(Light) The light geometry to use.</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsLightEnabled(geometryObject:Light) : bool =
+        let light = geometryObject
         light.IsEnabled
 
 
@@ -9121,8 +10486,17 @@ type RhinoScriptSyntax private () =
     /// <returns>(bool) True or False.</returns>
     static member IsLinearLight(objectId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceLight(objectId) with
-        | Some light -> light.IsLinearLight
+        | Some light -> RhinoScriptSyntax.IsLinearLight(light)
         | None -> false
+
+
+    /// <summary>Verifies a light object is a linear light. Returns false for any other Rhino object or if the geometry is null.</summary>
+    /// <param name="geometryObject">(GeometryBase) The geometry to test.</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsLinearLight(geometryObject:GeometryBase) : bool =
+        match geometryObject with
+        | :? Light as light -> light.IsLinearLight
+        | _ -> false
 
 
     /// <summary>Verifies a light object is a point light. Returns false for any other Rhino object or if the object does not exist.</summary>
@@ -9130,8 +10504,17 @@ type RhinoScriptSyntax private () =
     /// <returns>(bool) True or False.</returns>
     static member IsPointLight(objectId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceLight(objectId) with
-        | Some light -> light.IsPointLight
+        | Some light -> RhinoScriptSyntax.IsPointLight(light)
         | None -> false
+
+
+    /// <summary>Verifies a light object is a point light. Returns false for any other Rhino object or if the geometry is null.</summary>
+    /// <param name="geometryObject">(GeometryBase) The geometry to test.</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsPointLight(geometryObject:GeometryBase) : bool =
+        match geometryObject with
+        | :? Light as light -> light.IsPointLight
+        | _ -> false
 
 
     /// <summary>Verifies a light object is a rectangular light. Returns false for any other Rhino object or if the object does not exist.</summary>
@@ -9139,8 +10522,17 @@ type RhinoScriptSyntax private () =
     /// <returns>(bool) True or False.</returns>
     static member IsRectangularLight(objectId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceLight(objectId) with
-        | Some light -> light.IsRectangularLight
+        | Some light -> RhinoScriptSyntax.IsRectangularLight(light)
         | None -> false
+
+
+    /// <summary>Verifies a light object is a rectangular light. Returns false for any other Rhino object or if the geometry is null.</summary>
+    /// <param name="geometryObject">(GeometryBase) The geometry to test.</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsRectangularLight(geometryObject:GeometryBase) : bool =
+        match geometryObject with
+        | :? Light as light -> light.IsRectangularLight
+        | _ -> false
 
 
     /// <summary>Verifies a light object is a spot light. Returns false for any other Rhino object or if the object does not exist.</summary>
@@ -9148,17 +10540,25 @@ type RhinoScriptSyntax private () =
     /// <returns>(bool) True or False.</returns>
     static member IsSpotLight(objectId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceLight(objectId) with
-        | Some light -> light.IsSpotLight
+        | Some light -> RhinoScriptSyntax.IsSpotLight(light)
         | None -> false
+
+
+    /// <summary>Verifies a light object is a spot light. Returns false for any other Rhino object or if the geometry is null.</summary>
+    /// <param name="geometryObject">(GeometryBase) The geometry to test.</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsSpotLight(geometryObject:GeometryBase) : bool =
+        match geometryObject with
+        | :? Light as light -> light.IsSpotLight
+        | _ -> false
 
 
     /// <summary>Returns the color of a light.</summary>
     /// <param name="objectId">(Guid) The light object's identifier</param>
     /// <returns>(Drawing.Color) The current color.</returns>
     static member LightColor(objectId:Guid) : Drawing.Color = //GET
-        let light = RhinoScriptSyntax.CoerceLight(objectId)
-        let rc = light.Diffuse
-        rc
+        RhinoScriptSyntax.LightColor(RhinoScriptSyntax.CoerceLight(objectId))
+
 
     /// <summary>Changes the color of a light.</summary>
     /// <param name="objectId">(Guid) The light object's identifier</param>
@@ -9170,6 +10570,7 @@ type RhinoScriptSyntax private () =
         if not <|  State.Doc.Lights.Modify(objectId, light) then
             RhinoScriptingException.Raise "LightColor failed.  objectId:'%s' color:'%A'" (Pretty.str objectId) color
         State.Doc.Views.Redraw()
+
 
     /// <summary>Changes the color of multiple lights.</summary>
     /// <param name="objectIds">(Guid seq) The light objects's identifiers</param>
@@ -9184,6 +10585,15 @@ type RhinoScriptSyntax private () =
         State.Doc.Views.Redraw()
 
 
+    /// <summary>Returns the color of a light.</summary>
+    /// <param name="geometryObject">(Light) The light geometry to use.</param>
+    /// <returns>(Drawing.Color) The current color.</returns>
+    static member LightColor(geometryObject:Light) : Drawing.Color = //GET
+        let light = geometryObject
+        let rc = light.Diffuse
+        rc
+
+
     /// <summary>Returns the number of light objects in the document.</summary>
     /// <returns>(int) The number of light objects in the document.</returns>
     static member LightCount() : int =
@@ -9194,9 +10604,8 @@ type RhinoScriptSyntax private () =
     /// <param name="objectId">(Guid) The light object's identifier</param>
     /// <returns>(Vector3d) The current direction.</returns>
     static member LightDirection(objectId:Guid) : Vector3d = //GET
-        let light = RhinoScriptSyntax.CoerceLight(objectId)
-        let rc = light.Direction
-        rc
+        RhinoScriptSyntax.LightDirection(RhinoScriptSyntax.CoerceLight(objectId))
+
 
     /// <summary>Changes the direction of a light object.</summary>
     /// <param name="objectId">(Guid) The light object's identifier</param>
@@ -9208,6 +10617,7 @@ type RhinoScriptSyntax private () =
         if not<|  State.Doc.Lights.Modify(objectId, light) then
             RhinoScriptingException.Raise "LightDirection failed.  objectId:'%s' direction:'%A'" (Pretty.str objectId) direction
         State.Doc.Views.Redraw()
+
 
     /// <summary>Changes the direction of multiple light objects.</summary>
     /// <param name="objectIds">(Guid seq) The light objects's identifiers</param>
@@ -9222,13 +10632,21 @@ type RhinoScriptSyntax private () =
         State.Doc.Views.Redraw()
 
 
+    /// <summary>Returns the direction of a light object.</summary>
+    /// <param name="geometryObject">(Light) The light geometry to use.</param>
+    /// <returns>(Vector3d) The current direction.</returns>
+    static member LightDirection(geometryObject:Light) : Vector3d = //GET
+        let light = geometryObject
+        let rc = light.Direction
+        rc
+
+
     /// <summary>Returns the location of a light object.</summary>
     /// <param name="objectId">(Guid) The light object's identifier</param>
     /// <returns>(Point3d) The current location.</returns>
     static member LightLocation(objectId:Guid) : Point3d = //GET
-        let light = RhinoScriptSyntax.CoerceLight(objectId)
-        let rc = light.Location
-        rc
+        RhinoScriptSyntax.LightLocation(RhinoScriptSyntax.CoerceLight(objectId))
+
 
     /// <summary>Changes the location of a light object.</summary>
     /// <param name="objectId">(Guid) The light object's identifier</param>
@@ -9240,6 +10658,7 @@ type RhinoScriptSyntax private () =
         if not<|  State.Doc.Lights.Modify(objectId, light) then
             RhinoScriptingException.Raise "LightLocation failed.  objectId:'%s' location:'%A'" (Pretty.str objectId) location
         State.Doc.Views.Redraw()
+
 
     /// <summary>Changes the location of multiple light objects.</summary>
     /// <param name="objectIds">(Guid seq) The light objects's identifiers</param>
@@ -9254,13 +10673,21 @@ type RhinoScriptSyntax private () =
         State.Doc.Views.Redraw()
 
 
+    /// <summary>Returns the location of a light object.</summary>
+    /// <param name="geometryObject">(Light) The light geometry to use.</param>
+    /// <returns>(Point3d) The current location.</returns>
+    static member LightLocation(geometryObject:Light) : Point3d = //GET
+        let light = geometryObject
+        let rc = light.Location
+        rc
+
+
     /// <summary>Returns the name of a light object.</summary>
     /// <param name="objectId">(Guid) The light object's identifier</param>
     /// <returns>(string) The current name.</returns>
     static member LightName(objectId:Guid) : string = //GET
-        let light = RhinoScriptSyntax.CoerceLight(objectId)
-        let rc = light.Name
-        rc
+        RhinoScriptSyntax.LightName(RhinoScriptSyntax.CoerceLight(objectId))
+
 
     /// <summary>Changes the name of a light object.</summary>
     /// <param name="objectId">(Guid) The light object's identifier</param>
@@ -9272,6 +10699,8 @@ type RhinoScriptSyntax private () =
         if not <|  State.Doc.Lights.Modify(objectId, light) then
             RhinoScriptingException.Raise "LightName failed.  objectId:'%s' name:'%A'" (Pretty.str objectId) name
         State.Doc.Views.Redraw()
+
+
     /// <summary>Changes the name of multiple light objects.</summary>
     /// <param name="objectIds">(Guid seq) The light objects's identifiers</param>
     /// <param name="name">(string) The light's new name</param>
@@ -9283,6 +10712,15 @@ type RhinoScriptSyntax private () =
             if not <|  State.Doc.Lights.Modify(objectId, light) then
                 RhinoScriptingException.Raise "LightName failed.  objectId:'%s' name:'%A'" (Pretty.str objectId) name
         State.Doc.Views.Redraw()
+
+
+    /// <summary>Returns the name of a light object.</summary>
+    /// <param name="geometryObject">(Light) The light geometry to use.</param>
+    /// <returns>(string) The current name.</returns>
+    static member LightName(geometryObject:Light) : string = //GET
+        let light = geometryObject
+        let rc = light.Name
+        rc
 
 
     /// <summary>Returns list of identifiers of light objects in the document.</summary>
@@ -9300,9 +10738,16 @@ type RhinoScriptSyntax private () =
     /// <param name="objectId">(Guid) The light object's identifier</param>
     /// <returns>(Plane*float*float) The Plane, X and Y length.</returns>
     static member RectangularLightPlane(objectId:Guid) : Plane*float*float =
-        let light = RhinoScriptSyntax.CoerceLight(objectId)
+        RhinoScriptSyntax.RectangularLightPlane(RhinoScriptSyntax.CoerceLight(objectId))
+
+
+    /// <summary>Returns the Plane of a rectangular light object.</summary>
+    /// <param name="geometryObject">(Light) The light geometry to use.</param>
+    /// <returns>(Plane*float*float) The Plane, X and Y length.</returns>
+    static member RectangularLightPlane(geometryObject:Light) : Plane*float*float =
+        let light = geometryObject
         if light.LightStyle <> LightStyle.WorldRectangular then
-            RhinoScriptingException.Raise "RectangularLightPlane failed.  objectId:'%s'" (Pretty.str objectId)
+            RhinoScriptingException.Raise "RectangularLightPlane failed.  geometryObject:'%s'" (Pretty.str geometryObject)
         let location = light.Location
         let length = light.Length
         let width = light.Width
@@ -9315,11 +10760,8 @@ type RhinoScriptSyntax private () =
     /// <param name="objectId">(Guid) The light object's identifier</param>
     /// <returns>(float) The current hardness.</returns>
     static member SpotLightHardness(objectId:Guid) : float = //GET
-        let light = RhinoScriptSyntax.CoerceLight(objectId)
-        if light.LightStyle <> LightStyle.WorldSpot then
-            RhinoScriptingException.Raise "SpotLightHardness failed.  objectId:'%s'" (Pretty.str objectId)
-        let rc = light.HotSpot
-        rc
+        RhinoScriptSyntax.SpotLightHardness(RhinoScriptSyntax.CoerceLight(objectId))
+
 
     /// <summary>Changes the hardness of a spot light. Spotlight hardness
     /// controls the fully illuminated region.</summary>
@@ -9334,6 +10776,7 @@ type RhinoScriptSyntax private () =
         if not <|  State.Doc.Lights.Modify(objectId, light) then
             RhinoScriptingException.Raise "SpotLightHardness failed.  objectId:'%s' hardness:'%A'" (Pretty.str objectId) hardness
         State.Doc.Views.Redraw()
+
 
     /// <summary>Changes the hardness of multiple spot lights. Spotlight hardness
     /// controls the fully illuminated region.</summary>
@@ -9351,16 +10794,24 @@ type RhinoScriptSyntax private () =
         State.Doc.Views.Redraw()
 
 
+    /// <summary>Returns the hardness of a spot light. Spotlight hardness
+    /// controls the fully illuminated region.</summary>
+    /// <param name="geometryObject">(Light) The light geometry to use.</param>
+    /// <returns>(float) The current hardness.</returns>
+    static member SpotLightHardness(geometryObject:Light) : float = //GET
+        let light = geometryObject
+        if light.LightStyle <> LightStyle.WorldSpot then
+            RhinoScriptingException.Raise "SpotLightHardness failed.  geometryObject:'%s'" (Pretty.str geometryObject)
+        let rc = light.HotSpot
+        rc
+
+
     /// <summary>Returns the radius of a spot light.</summary>
     /// <param name="objectId">(Guid) The light object's identifier</param>
     /// <returns>(float) The current radius.</returns>
     static member SpotLightRadius(objectId:Guid) : float = //GET
-        let light = RhinoScriptSyntax.CoerceLight(objectId)
-        if light.LightStyle <> LightStyle.WorldSpot then
-            RhinoScriptingException.Raise "SpotLightRadius failed.  objectId:'%s'" (Pretty.str objectId)
-        let radians = light.SpotAngleRadians
-        let rc = light.Direction.Length * tan(radians)
-        rc
+        RhinoScriptSyntax.SpotLightRadius(RhinoScriptSyntax.CoerceLight(objectId))
+
 
     /// <summary>Changes the radius of a spot light.</summary>
     /// <param name="objectId">(Guid) The light object's identifier</param>
@@ -9375,6 +10826,7 @@ type RhinoScriptSyntax private () =
         if not <|  State.Doc.Lights.Modify(objectId, light) then
             RhinoScriptingException.Raise "SpotLightRadius failed.  objectId:'%s' radius:'%A'" (Pretty.str objectId) radius
         State.Doc.Views.Redraw()
+
 
     /// <summary>Changes the radius of multiple spot lights.</summary>
     /// <param name="objectIds">(Guid seq) The light objects's identifiers</param>
@@ -9392,15 +10844,24 @@ type RhinoScriptSyntax private () =
         State.Doc.Views.Redraw()
 
 
+    /// <summary>Returns the radius of a spot light.</summary>
+    /// <param name="geometryObject">(Light) The light geometry to use.</param>
+    /// <returns>(float) The current radius.</returns>
+    static member SpotLightRadius(geometryObject:Light) : float = //GET
+        let light = geometryObject
+        if light.LightStyle <> LightStyle.WorldSpot then
+            RhinoScriptingException.Raise "SpotLightRadius failed.  geometryObject:'%s'" (Pretty.str geometryObject)
+        let radians = light.SpotAngleRadians
+        let rc = light.Direction.Length * tan(radians)
+        rc
+
+
     /// <summary>Returns the shadow intensity of a spot light.</summary>
     /// <param name="objectId">(Guid) The light object's identifier</param>
     /// <returns>(float) The current intensity.</returns>
     static member SpotLightShadowIntensity(objectId:Guid) : float = //GET
-        let light = RhinoScriptSyntax.CoerceLight(objectId)
-        if light.LightStyle <> LightStyle.WorldSpot then
-            RhinoScriptingException.Raise "SpotLightShadowIntensity failed.  objectId:'%s'" (Pretty.str objectId)
-        let rc = light.ShadowIntensity
-        rc
+        RhinoScriptSyntax.SpotLightShadowIntensity(RhinoScriptSyntax.CoerceLight(objectId))
+
 
     /// <summary>Changes the shadow intensity of a spot light.</summary>
     /// <param name="objectId">(Guid) The light object's identifier</param>
@@ -9414,6 +10875,7 @@ type RhinoScriptSyntax private () =
         if not <|  State.Doc.Lights.Modify(objectId, light) then
             RhinoScriptingException.Raise "SpotLightShadowIntensity failed.  objectId:'%s' intensity:'%A'" (Pretty.str objectId) intensity
         State.Doc.Views.Redraw()
+
 
     /// <summary>Changes the shadow intensity of multiple spot lights.</summary>
     /// <param name="objectIds">(Guid seq) The light objects's identifiers</param>
@@ -9430,6 +10892,15 @@ type RhinoScriptSyntax private () =
         State.Doc.Views.Redraw()
 
 
+    /// <summary>Returns the shadow intensity of a spot light.</summary>
+    /// <param name="geometryObject">(Light) The light geometry to use.</param>
+    /// <returns>(float) The current intensity.</returns>
+    static member SpotLightShadowIntensity(geometryObject:Light) : float = //GET
+        let light = geometryObject
+        if light.LightStyle <> LightStyle.WorldSpot then
+            RhinoScriptingException.Raise "SpotLightShadowIntensity failed.  geometryObject:'%s'" (Pretty.str geometryObject)
+        let rc = light.ShadowIntensity
+        rc
 
 
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
@@ -9586,20 +11057,21 @@ type RhinoScriptSyntax private () =
                                     xForm:Transform,
                                     [<OPT;DEF(false)>]copy:bool)  : Guid =
 
-        // the original python  implementation has a bug, does not return Guid: https://github.com/mcneel/rhinoscriptsyntax/pull/204
-        let line = RhinoScriptSyntax.CoerceLine lineId
-        if copy then
-            let ln = Line(line.From,line.To)
-            let success = ln.Transform(xForm)
-            if not <| success then  RhinoScriptingException.Raise "LineTransform unable to transform line %A with  %A" line xForm
-            State.Ot.AddLine(ln)
-        else
-            // if not <| State.Ot.Replace(lineId,ln) then  RhinoScriptingException.Raise "LineTransform unable to replace geometry: line %A with  %A" line xForm
-            let success =line.Transform(xForm)
-            if not <| success then  RhinoScriptingException.Raise "LineTransform unable to transform line %A with  %A" line xForm
-            lineId
+        let line = RhinoScriptSyntax.CoerceLine(lineId)
+        let transformed = RhinoScriptSyntax.LineTransform(line, xForm)
+        if copy then State.Ot.AddLine(transformed)
+        else lineId
 
 
+    /// <summary>Transforms a line geometry and returns the transformed line.</summary>
+    /// <param name="line">(Line) The line geometry to transform.</param>
+    /// <param name="xForm">(Transform) The transformation to apply.</param>
+    /// <returns>(Line) The transformed line.</returns>
+    static member LineTransform(line:Line, xForm:Transform) : Line =
+        let mutable transformed = line
+        if not (transformed.Transform(xForm)) then
+            RhinoScriptingException.Raise "LineTransform unable to transform line %A with  %A" line xForm
+        transformed
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
 
@@ -9963,9 +11435,6 @@ type RhinoScriptSyntax private () =
             let rc = State.Doc.Materials.ResetMaterial(materialIndex)
             State.Doc.Views.Redraw()
             rc
-
-
-
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
 
@@ -10122,16 +11591,24 @@ type RhinoScriptSyntax private () =
     /// <returns>(Guid) id of the new Mesh.</returns>
     static member AddPlanarMesh(objectId:Guid, [<OPT;DEF(false)>]deleteInput:bool) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve(objectId)
-        let tolerance = State.Doc.ModelAbsoluteTolerance
-        let mesh = Mesh.CreateFromPlanarBoundary(curve, MeshingParameters.Default, tolerance)
-        if isNull mesh then RhinoScriptingException.Raise "AddPlanarMesh failed.  objectId:'%s' deleteInput:'%A'" (Pretty.str objectId) deleteInput
+        let mesh = RhinoScriptSyntax.MakePlanarMesh(curve)
         if deleteInput then
-            let ob = RhinoScriptSyntax.CoerceGuid(objectId)
-            if not<| State.Doc.Objects.Delete(ob, true) then RhinoScriptingException.Raise "AddPlanarMesh failed to delete input.  objectId:'%s' deleteInput:'%A'" (Pretty.str objectId) deleteInput
+            if not <| State.Doc.Objects.Delete(objectId, true) then RhinoScriptingException.Raise "AddPlanarMesh failed to delete input. objectId:'%s'" (Pretty.str objectId)
         let rc = State.Doc.Objects.AddMesh(mesh)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "AddPlanarMesh: Unable to add mesh to document.  objectId:'%s' deleteInput:'%A'" (Pretty.str objectId) deleteInput
+        if rc = Guid.Empty then RhinoScriptingException.Raise "AddPlanarMesh: Unable to add mesh to document. objectId:'%s'" (Pretty.str objectId)
         State.Doc.Views.Redraw()
         rc
+
+
+    /// <summary>Creates a planar Mesh from a closed, planar Curve.</summary>
+    /// <param name="curve">(Curve) Closed, planar input Curve.</param>
+    /// <returns>(Mesh) The new planar Mesh.</returns>
+    /// <remarks>Returns new geometry without adding it to a document.</remarks>
+    static member MakePlanarMesh(curve:Curve) : Mesh =
+        let tolerance = State.Doc.ModelAbsoluteTolerance
+        let mesh = Mesh.CreateFromPlanarBoundary(curve, MeshingParameters.Default, tolerance)
+        if isNull mesh then RhinoScriptingException.Raise "MakePlanarMesh: Unable to create a planar Mesh from the Curve."
+        mesh
 
 
     /// <summary>Calculates the intersection of a Curve object and a Mesh object.</summary>
@@ -10144,10 +11621,21 @@ type RhinoScriptSyntax private () =
                                          meshId:Guid) : array<Point3d>*array<int> =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
+        RhinoScriptSyntax.CurveMeshIntersection(curve, mesh)
+
+
+    /// <summary>Calculates the intersection of a Curve object and a Mesh object.</summary>
+    /// <param name="curve">(Curve) Input geometry.</param>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(Point3d array * int array) two arrays as tuple:
+    ///        [0] = point of intersection
+    ///        [1] = Mesh face index where intersection lies.</returns>
+    static member CurveMeshIntersection( curve:Curve,
+                                         mesh:Mesh) : array<Point3d>*array<int> =
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let polylinecurve = curve.ToPolyline(0 , 0 , 0.0 , 0.0 , 0.0, tolerance , 0.0 , 0.0 , true)
         let pts, faceids = Intersect.Intersection.MeshPolyline(mesh, polylinecurve)
-        if isNull pts then RhinoScriptingException.Raise "CurveMeshIntersection failed. curveId:'%s' meshId:'%s'" (Pretty.str curveId) (Pretty.str meshId)
+        if isNull pts then RhinoScriptingException.Raise "CurveMeshIntersection failed. curve:'%s' mesh:'%s'" (Pretty.str curve) (Pretty.str mesh)
         pts, faceids
 
 
@@ -10156,6 +11644,13 @@ type RhinoScriptSyntax private () =
     /// <returns>(int) The number of Meshes that could be created.</returns>
     static member DisjointMeshCount(objectId:Guid) : int =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        RhinoScriptSyntax.DisjointMeshCount(mesh)
+
+
+    /// <summary>Returns number of Meshes that could be created by calling SplitDisjointMesh.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(int) The number of Meshes that could be created.</returns>
+    static member DisjointMeshCount(mesh:Mesh) : int =
         mesh.DisjointMeshCount
 
 
@@ -10164,14 +11659,25 @@ type RhinoScriptSyntax private () =
     /// <returns>(Guid ResizeArray) list of Curve ids.</returns>
     static member DuplicateMeshBorder(meshId:Guid) : Guid ResizeArray =
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
-        let polylines = mesh.GetNakedEdges()
+        let curves = RhinoScriptSyntax.DuplicateMeshBorder(mesh)
         let rc = ResizeArray()
-        if notNull polylines then
-            for polyline in polylines do
-                let objectId = State.Doc.Objects.AddPolyline(polyline)
-                if objectId <> Guid.Empty then rc.Add(objectId)
+        for curve in curves do
+            let objectId = State.Doc.Objects.AddCurve(curve)
+            if objectId <> Guid.Empty then rc.Add(objectId)
         if rc.Count <> 0 then State.Doc.Views.Redraw()
         rc
+
+
+    /// <summary>Duplicates the naked borders of a Mesh as Polyline Curves.</summary>
+    /// <param name="mesh">(Mesh) Input Mesh.</param>
+    /// <returns>(PolylineCurve ResizeArray) New border Curves.</returns>
+    /// <remarks>Returns new geometry without adding it to a document.</remarks>
+    static member DuplicateMeshBorder(mesh:Mesh) : PolylineCurve ResizeArray =
+        let polylines = mesh.GetNakedEdges()
+        let curves = ResizeArray()
+        if notNull polylines then
+            for polyline in polylines do curves.Add(new PolylineCurve(polyline))
+        curves
 
 
     /// <summary>Explodes a Mesh object, or Mesh objects int subMeshes. A subMesh is a
@@ -10186,17 +11692,26 @@ type RhinoScriptSyntax private () =
     static member ExplodeMeshes(meshIds:Guid seq, [<OPT;DEF(false)>]delete:bool) : Guid ResizeArray =
         //id = RhinoScriptSyntax.CoerceGuid(meshIds)
         let rc = ResizeArray()
-        for meshid in meshIds do
-            let mesh = RhinoScriptSyntax.CoerceMesh(meshid)
-            if notNull mesh then
-                let submeshes = mesh.ExplodeAtUnweldedEdges()
-                if notNull submeshes then
-                    for submesh in submeshes do
-                        let objectId = State.Doc.Objects.AddMesh(submesh)
-                        if objectId <> Guid.Empty then rc.Add(objectId)
-                if delete then
-                    State.Doc.Objects.Delete(meshid, true)|> ignore<bool>
-        if rc.Count>0 then State.Doc.Views.Redraw()
+        for meshId in meshIds do
+            let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
+            let submeshes = RhinoScriptSyntax.ExplodeMeshes([mesh])
+            for submesh in submeshes do
+                let objectId = State.Doc.Objects.AddMesh(submesh)
+                if objectId <> Guid.Empty then rc.Add(objectId)
+            if delete then State.Doc.Objects.Delete(meshId, true) |> ignore<bool>
+        if rc.Count > 0 then State.Doc.Views.Redraw()
+        rc
+
+
+    /// <summary>Splits Meshes into submeshes along unwelded edges.</summary>
+    /// <param name="meshes">(Mesh seq) Input Meshes.</param>
+    /// <returns>(Mesh ResizeArray) New submeshes.</returns>
+    /// <remarks>Returns new geometry without adding it to a document.</remarks>
+    static member ExplodeMeshes(meshes:Mesh seq) : Mesh ResizeArray =
+        let rc = ResizeArray()
+        for mesh in meshes do
+            let submeshes = mesh.ExplodeAtUnweldedEdges()
+            if notNull submeshes then rc.AddRange(submeshes)
         rc
 
 
@@ -10204,8 +11719,16 @@ type RhinoScriptSyntax private () =
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True , otherwise False.</returns>
     static member IsMesh(objectId:Guid) : bool =
-        RhinoScriptSyntax.TryCoerceMesh(objectId)
-        |> Option.isSome
+        match RhinoScriptSyntax.TryCoerceMesh(objectId) with
+        | Some mesh -> RhinoScriptSyntax.IsMesh(mesh :> GeometryBase)
+        | None -> false
+
+
+    /// <summary>Verifies if an object is a Mesh.</summary>
+    /// <param name="geometry">(GeometryBase) Input geometry.</param>
+    /// <returns>(bool) True , otherwise False.</returns>
+    static member IsMesh(geometry:GeometryBase) : bool =
+        geometry :? Mesh
 
 
     /// <summary>Verifies a Mesh object is closed.</summary>
@@ -10213,8 +11736,15 @@ type RhinoScriptSyntax private () =
     /// <returns>(bool) True , otherwise False.</returns>
     static member IsMeshClosed(objectId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceMesh(objectId) with
-        | Some mesh -> mesh.IsClosed
+        | Some mesh -> RhinoScriptSyntax.IsMeshClosed(mesh)
         | None -> false
+
+
+    /// <summary>Verifies a Mesh object is closed.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(bool) True , otherwise False.</returns>
+    static member IsMeshClosed(mesh:Mesh) : bool =
+        notNull mesh && mesh.IsClosed
 
 
     /// <summary>Verifies a Mesh object is manifold. A Mesh for which every edge is shared
@@ -10224,8 +11754,18 @@ type RhinoScriptSyntax private () =
     /// <returns>(bool) True, otherwise False.</returns>
     static member IsMeshManifold(objectId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceMesh(objectId) with
-        | Some mesh -> mesh.IsManifold(true)  |> t1
+        | Some mesh -> RhinoScriptSyntax.IsMeshManifold(mesh)
         | None -> false
+
+
+
+    /// <summary>Verifies a Mesh object is manifold. A Mesh for which every edge is shared
+    ///    by at most two faces is called manifold. If a Mesh has at least one edge
+    ///    that is shared by more than two faces, then that Mesh is called non-manifold.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(bool) True, otherwise False.</returns>
+    static member IsMeshManifold(mesh:Mesh) : bool =
+        notNull mesh && (mesh.IsManifold(true) |> t1)
 
 
 
@@ -10239,7 +11779,19 @@ type RhinoScriptSyntax private () =
                                     point:Point3d,
                                     [<OPT;DEF(0.0)>]tolerance:float) : bool =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
-        //point = RhinoScriptSyntax.Coerce3dPoint(point)
+        RhinoScriptSyntax.IsPointOnMesh(mesh, point, tolerance)
+
+
+    /// <summary>Verifies a point is on a Mesh.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <param name="point">(Point3d) Test point</param>
+    /// <param name="tolerance">(float) Optional, Default Value <c>RhinoMath.SqrtEpsilon</c>
+    ///    The testing tolerance</param>
+    /// <returns>(bool) True , otherwise False.</returns>
+    static member IsPointOnMesh(    mesh:Mesh,
+                                    point:Point3d,
+                                    [<OPT;DEF(0.0)>]tolerance:float) : bool =
+
         let maxDistance = Util.ifZero1 tolerance RhinoMath.SqrtEpsilon
         let pt = ref Point3d.Origin
         let face = mesh.ClosestPoint(point, pt, maxDistance)
@@ -10260,15 +11812,13 @@ type RhinoScriptSyntax private () =
     ///    Delete input after joining</param>
     /// <returns>(Guid) identifier of newly created Mesh.</returns>
     static member JoinMeshes(objectIds:Guid seq, [<OPT;DEF(false)>]deleteInput:bool) : Guid =
-        let meshes  = objectIds |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
-        let joinedMesh = new Mesh()
-        joinedMesh.Append(meshes)
+        let objectIds = ResizeArray(objectIds)
+        let meshes = objectIds |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
+        let joinedMesh = RhinoScriptSyntax.JoinMeshes(meshes)
         let rc = State.Doc.Objects.AddMesh(joinedMesh)
         if rc = Guid.Empty then RhinoScriptingException.Raise "JoinMeshes: Failed to join Meshes %A" (Pretty.str objectIds)
         if deleteInput then
-            for objectId in objectIds do
-                //guid = RhinoScriptSyntax.CoerceGuid(objectId)
-                State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
+            for objectId in objectIds do State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
         State.Doc.Views.Redraw()
         rc
 
@@ -10278,11 +11828,19 @@ type RhinoScriptSyntax private () =
     /// <returns>(float) total area of Mesh.</returns>
     static member MeshArea(objectId:Guid ) : float =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        RhinoScriptSyntax.MeshArea(mesh)
+
+
+
+    /// <summary>Returns approximate area of one mesh object.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(float) total area of Mesh.</returns>
+    static member MeshArea(mesh:Mesh ) : float =
         let mp = AreaMassProperties.Compute(mesh)
         if notNull mp then
             mp.Area
         else
-            RhinoScriptingException.Raise "MeshArea failed.  objectId:'%s'" (Pretty.str objectId)
+            RhinoScriptingException.Raise "MeshArea failed.  mesh:'%s'" (Pretty.str mesh)
 
 
 
@@ -10291,8 +11849,15 @@ type RhinoScriptSyntax private () =
     /// <returns>(Point3d) representing the area centroid.</returns>
     static member MeshAreaCentroid(objectId:Guid) : Point3d =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        RhinoScriptSyntax.MeshAreaCentroid(mesh)
+
+
+    /// <summary>Calculates the area centroid of a Mesh object.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(Point3d) representing the area centroid.</returns>
+    static member MeshAreaCentroid(mesh:Mesh) : Point3d =
         let mp = AreaMassProperties.Compute(mesh)
-        if mp|> isNull  then RhinoScriptingException.Raise "MeshAreaCentroid failed.  objectId:'%s'" (Pretty.str objectId)
+        if mp|> isNull  then RhinoScriptingException.Raise "MeshAreaCentroid failed.  mesh:'%s'" (Pretty.str mesh)
         mp.Centroid
 
 
@@ -10305,20 +11870,33 @@ type RhinoScriptSyntax private () =
     static member MeshBooleanDifference( input0:Guid seq,
                                          input1:Guid seq,
                                          [<OPT;DEF(true)>]deleteInput:bool) : Guid ResizeArray =
-        let meshes0  = input0 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
-        let meshes1  = input1 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
-        if meshes0.Count = 0 || meshes1.Count = 0 then RhinoScriptingException.Raise "MeshBooleanDifference: No meshes to work with.  input0:'%A' input1:'%A' deleteInput:'%A'" input0 input1 deleteInput
-        let newmeshes = Mesh.CreateBooleanDifference  (meshes0, meshes1)
+        let input0 = ResizeArray(input0)
+        let input1 = ResizeArray(input1)
+        let meshes0 = input0 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
+        let meshes1 = input1 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
+        let newmeshes = RhinoScriptSyntax.MeshBooleanDifference(meshes0, meshes1)
         let rc = ResizeArray()
         for mesh in newmeshes do
             let objectId = State.Doc.Objects.AddMesh(mesh)
             if objectId <> Guid.Empty then rc.Add(objectId)
         if deleteInput then
-            for objectId in Seq.append input0 input1 do
-                //id = RhinoScriptSyntax.CoerceGuid(objectId)
-                State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
+            for objectId in Seq.append input0 input1 do State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
         State.Doc.Views.Redraw()
         rc
+
+
+    /// <summary>Performs a boolean difference on two sets of Meshes.</summary>
+    /// <param name="input0">(Mesh seq) First set of input Meshes.</param>
+    /// <param name="input1">(Mesh seq) Second set of input Meshes.</param>
+    /// <returns>(Mesh ResizeArray) New result Meshes.</returns>
+    /// <remarks>Returns new geometry without adding it to a document.</remarks>
+    static member MeshBooleanDifference(input0:Mesh seq, input1:Mesh seq) : Mesh ResizeArray =
+        let meshes0 = input0 |> RArr.mapSeq (fun mesh -> mesh.DuplicateMesh())
+        let meshes1 = input1 |> RArr.mapSeq (fun mesh -> mesh.DuplicateMesh())
+        if meshes0.Count = 0 || meshes1.Count = 0 then RhinoScriptingException.Raise "MeshBooleanDifference: No meshes to work with."
+        let meshes = Mesh.CreateBooleanDifference(meshes0, meshes1)
+        if isNull meshes then RhinoScriptingException.Raise "MeshBooleanDifference: Boolean operation failed."
+        ResizeArray(meshes)
 
 
     /// <summary>Performs boolean intersection operation on two sets of input Meshes.</summary>
@@ -10330,21 +11908,33 @@ type RhinoScriptSyntax private () =
     static member MeshBooleanIntersection( input0:Guid seq,
                                            input1:Guid seq,
                                            [<OPT;DEF(true)>]deleteInput:bool) : Guid ResizeArray =
-        let meshes0  = input0 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
-        let meshes1  = input1 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
-        if meshes0.Count = 0 || meshes1.Count = 0 then RhinoScriptingException.Raise "MeshBooleanIntersection: No meshes to work with.  input0:'%A' input1:'%A' deleteInput:'%A'" input0 input1 deleteInput
-        let newmeshes = Mesh.CreateBooleanIntersection  (meshes0, meshes1)
+        let input0 = ResizeArray(input0)
+        let input1 = ResizeArray(input1)
+        let meshes0 = input0 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
+        let meshes1 = input1 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
+        let newmeshes = RhinoScriptSyntax.MeshBooleanIntersection(meshes0, meshes1)
         let rc = ResizeArray()
         for mesh in newmeshes do
             let objectId = State.Doc.Objects.AddMesh(mesh)
             if objectId <> Guid.Empty then rc.Add(objectId)
         if deleteInput then
-            for objectId in Seq.append input0 input1 do
-                //id = RhinoScriptSyntax.CoerceGuid(objectId)
-                State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
+            for objectId in Seq.append input0 input1 do State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
         State.Doc.Views.Redraw()
         rc
 
+
+    /// <summary>Performs a boolean intersection on two sets of Meshes.</summary>
+    /// <param name="input0">(Mesh seq) First set of input Meshes.</param>
+    /// <param name="input1">(Mesh seq) Second set of input Meshes.</param>
+    /// <returns>(Mesh ResizeArray) New result Meshes.</returns>
+    /// <remarks>Returns new geometry without adding it to a document.</remarks>
+    static member MeshBooleanIntersection(input0:Mesh seq, input1:Mesh seq) : Mesh ResizeArray =
+        let meshes0 = input0 |> RArr.mapSeq (fun mesh -> mesh.DuplicateMesh())
+        let meshes1 = input1 |> RArr.mapSeq (fun mesh -> mesh.DuplicateMesh())
+        if meshes0.Count = 0 || meshes1.Count = 0 then RhinoScriptingException.Raise "MeshBooleanIntersection: No meshes to work with."
+        let meshes = Mesh.CreateBooleanIntersection(meshes0, meshes1)
+        if isNull meshes then RhinoScriptingException.Raise "MeshBooleanIntersection: Boolean operation failed."
+        ResizeArray(meshes)
 
 
     /// <summary>Performs boolean split operation on two sets of input Meshes.</summary>
@@ -10356,20 +11946,33 @@ type RhinoScriptSyntax private () =
     static member MeshBooleanSplit( input0:Guid seq,
                                     input1:Guid seq,
                                     [<OPT;DEF(true)>]deleteInput:bool) : Guid ResizeArray =
-        let meshes0  = input0 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
-        let meshes1  = input1 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
-        if meshes0.Count = 0 || meshes1.Count = 0 then RhinoScriptingException.Raise "MeshBooleanSplit: CreateBooleanSplit: No meshes to work with.  input0:'%A' input1:'%A' deleteInput:'%A'" input0 input1 deleteInput
-        let newmeshes = Mesh.CreateBooleanSplit  (meshes0, meshes1)
+        let input0 = ResizeArray(input0)
+        let input1 = ResizeArray(input1)
+        let meshes0 = input0 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
+        let meshes1 = input1 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
+        let newmeshes = RhinoScriptSyntax.MeshBooleanSplit(meshes0, meshes1)
         let rc = ResizeArray()
         for mesh in newmeshes do
             let objectId = State.Doc.Objects.AddMesh(mesh)
             if objectId <> Guid.Empty then rc.Add(objectId)
         if deleteInput then
-            for objectId in Seq.append input0 input1 do
-                State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
+            for objectId in Seq.append input0 input1 do State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
         State.Doc.Views.Redraw()
         rc
 
+
+    /// <summary>Performs a boolean split on two sets of Meshes.</summary>
+    /// <param name="input0">(Mesh seq) First set of input Meshes.</param>
+    /// <param name="input1">(Mesh seq) Second set of input Meshes.</param>
+    /// <returns>(Mesh ResizeArray) New result Meshes.</returns>
+    /// <remarks>Returns new geometry without adding it to a document.</remarks>
+    static member MeshBooleanSplit(input0:Mesh seq, input1:Mesh seq) : Mesh ResizeArray =
+        let meshes0 = input0 |> RArr.mapSeq (fun mesh -> mesh.DuplicateMesh())
+        let meshes1 = input1 |> RArr.mapSeq (fun mesh -> mesh.DuplicateMesh())
+        if meshes0.Count = 0 || meshes1.Count = 0 then RhinoScriptingException.Raise "MeshBooleanSplit: No meshes to work with."
+        let meshes = Mesh.CreateBooleanSplit(meshes0, meshes1)
+        if isNull meshes then RhinoScriptingException.Raise "MeshBooleanSplit: Boolean operation failed."
+        ResizeArray(meshes)
 
 
     /// <summary>Performs boolean union operation on a set of input Meshes.</summary>
@@ -10378,18 +11981,30 @@ type RhinoScriptSyntax private () =
     ///    Delete the input Meshes</param>
     /// <returns>(Guid ResizeArray) identifiers of new Meshes.</returns>
     static member MeshBooleanUnion(meshIds:Guid seq, [<OPT;DEF(true)>]deleteInput:bool) : Guid ResizeArray =
-        if Seq.length(meshIds)<2 then RhinoScriptingException.Raise "MeshBooleanUnion: MeshIds must contain at least 2 meshes.  meshIds:'%A' deleteInput:'%A'" meshIds deleteInput
-        let meshes  = meshIds |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
-        let newmeshes = Mesh.CreateBooleanUnion(meshes)
+        let meshIds = ResizeArray(meshIds)
+        if meshIds.Count < 2 then RhinoScriptingException.Raise "MeshBooleanUnion: MeshIds must contain at least 2 meshes."
+        let meshes = meshIds |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
+        let newmeshes = RhinoScriptSyntax.MeshBooleanUnion(meshes)
         let rc = ResizeArray()
         for mesh in newmeshes do
             let objectId = State.Doc.Objects.AddMesh(mesh)
             if objectId <> Guid.Empty then rc.Add(objectId)
-        if rc.Count>0 && deleteInput then
-            for objectId in meshIds do
-                State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
+        if rc.Count > 0 && deleteInput then
+            for objectId in meshIds do State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
         State.Doc.Views.Redraw()
         rc
+
+
+    /// <summary>Performs a boolean union on a set of Meshes.</summary>
+    /// <param name="meshes">(Mesh seq) At least two input Meshes.</param>
+    /// <returns>(Mesh ResizeArray) New result Meshes.</returns>
+    /// <remarks>Returns new geometry without adding it to a document.</remarks>
+    static member MeshBooleanUnion(meshes:Mesh seq) : Mesh ResizeArray =
+        let meshes = meshes |> RArr.mapSeq (fun mesh -> mesh.DuplicateMesh())
+        if meshes.Count < 2 then RhinoScriptingException.Raise "MeshBooleanUnion: At least 2 meshes are required."
+        let result = Mesh.CreateBooleanUnion(meshes)
+        if isNull result then RhinoScriptingException.Raise "MeshBooleanUnion: Boolean operation failed."
+        ResizeArray(result)
 
 
     /// <summary>Returns the point on a Mesh that is closest to a test point.</summary>
@@ -10406,9 +12021,25 @@ type RhinoScriptSyntax private () =
                                     point:Point3d,
                                     [<OPT;DEF(0.0)>]maximumDistance:float) : Point3d * int =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        RhinoScriptSyntax.MeshClosestPoint(mesh, point, maximumDistance)
+
+
+    /// <summary>Returns the point on a Mesh that is closest to a test point.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <param name="point">(Point3d) Point to test</param>
+    /// <param name="maximumDistance">(float) Optional, Upper bound used for closest point calculation.
+    ///    If you are only interested in finding a point Q on the Mesh when
+    ///    point.DistanceTo(Q) is smaller than maximumDistance, then set maximumDistance to
+    ///    that value</param>
+    /// <returns>(Point3d * int) containing the results of the calculation where
+    ///    [0] = the 3-D point on the Mesh
+    ///    [1] = the index of the Mesh face on which the 3-D point lies.</returns>
+    static member MeshClosestPoint( mesh:Mesh,
+                                    point:Point3d,
+                                    [<OPT;DEF(0.0)>]maximumDistance:float) : Point3d * int =
         let pt = ref Point3d.Origin
         let face = mesh.ClosestPoint(point, pt, maximumDistance)
-        if face<0 then RhinoScriptingException.Raise "MeshClosestPoint failed.  objectId:'%s' point:'%A' maximumDistance:'%A'" (Pretty.str objectId) point maximumDistance
+        if face<0 then RhinoScriptingException.Raise "MeshClosestPoint failed.  mesh:'%s' point:'%A' maximumDistance:'%A'" (Pretty.str mesh) point maximumDistance
         !pt, face
 
 
@@ -10417,6 +12048,13 @@ type RhinoScriptSyntax private () =
     /// <returns>(Point3d ResizeArray) points defining the center of each face.</returns>
     static member MeshFaceCenters(meshId:Guid) : Point3d ResizeArray =
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
+        RhinoScriptSyntax.MeshFaceCenters(mesh)
+
+
+    /// <summary>Returns the center of each face of the Mesh object.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(Point3d ResizeArray) points defining the center of each face.</returns>
+    static member MeshFaceCenters(mesh:Mesh) : Point3d ResizeArray =
         let r = ResizeArray(mesh.Faces.Count )
         for i = 0 to mesh.Faces.Count - 1 do
             let center = mesh.Faces.GetFaceCenter(i)
@@ -10429,6 +12067,13 @@ type RhinoScriptSyntax private () =
     /// <returns>(int) The number of Mesh faces.</returns>
     static member MeshFaceCount(objectId:Guid) : int =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        RhinoScriptSyntax.MeshFaceCount(mesh)
+
+
+    /// <summary>Returns total face count of a Mesh object.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(int) The number of Mesh faces.</returns>
+    static member MeshFaceCount(mesh:Mesh) : int =
         mesh.Faces.Count
 
 
@@ -10437,6 +12082,13 @@ type RhinoScriptSyntax private () =
     /// <returns>(Vector3d ResizeArray) 3D vectors that define the face unit normals of the Mesh.</returns>
     static member MeshFaceNormals(meshId:Guid) : Vector3d ResizeArray =
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
+        RhinoScriptSyntax.MeshFaceNormals(mesh)
+
+
+    /// <summary>Returns the face unit normal for each face of a Mesh object.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(Vector3d ResizeArray) 3D vectors that define the face unit normals of the Mesh.</returns>
+    static member MeshFaceNormals(mesh:Mesh) : Vector3d ResizeArray =
         if mesh.FaceNormals.Count <> mesh.Faces.Count then
             mesh.FaceNormals.ComputeFaceNormals() |> ignore<bool>
         let rc = ResizeArray()
@@ -10459,6 +12111,20 @@ type RhinoScriptSyntax private () =
     ///    (very three 3D points). Quads will be converted to triangles.</returns>
     static member MeshFaces(objectId:Guid, [<OPT;DEF(true)>]faceType:bool) : Point3d ResizeArray =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        RhinoScriptSyntax.MeshFaces(mesh, faceType)
+
+    /// <summary>Returns face vertices of a Mesh.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <param name="faceType">(bool) Optional, default value: <c>true</c>
+    ///    The face type to be returned.
+    ///    True = both triangles and quads.
+    ///    False = Quads are broken down into triangles</param>
+    /// <returns>(Point3d ResizeArray) List of 3D points that define the face vertices of the Mesh.
+    ///    If faceType is True, then faces are returned as both quads and triangles
+    ///    (every four  3D points). For triangles, the third and fourth vertex will be identical.
+    ///    If faceType is False, then faces are returned as only triangles
+    ///    (very three 3D points). Quads will be converted to triangles.</returns>
+    static member MeshFaces(mesh:Mesh, [<OPT;DEF(true)>]faceType:bool) : Point3d ResizeArray =
         let rc = ResizeArray()
         for i = 0 to mesh.Faces.Count - 1 do
             let _, p0, p1, p2, p3 = mesh.Faces.GetFaceVertices(i)
@@ -10484,6 +12150,15 @@ type RhinoScriptSyntax private () =
     ///    the faces are returned as both quads and triangles. For triangles, the third and fourth vertex will be identical.</returns>
     static member MeshFacePoints(objectId:Guid) : (Point3d*Point3d*Point3d*Point3d) ResizeArray = // TODO mark functions not part of rhinopython
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        RhinoScriptSyntax.MeshFacePoints(mesh)
+
+
+
+    /// <summary>Returns vertices of each face in a Mesh as tuple of 4 points.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(Point3d ResizeArray) List of 3D points that define the face vertices of the Mesh.
+    ///    the faces are returned as both quads and triangles. For triangles, the third and fourth vertex will be identical.</returns>
+    static member MeshFacePoints(mesh:Mesh) : (Point3d*Point3d*Point3d*Point3d) ResizeArray = // TODO mark functions not part of rhinopython
         let rc = ResizeArray()
         for i = 0 to mesh.Faces.Count - 1 do
             let _, p0, p1, p2, p3 = mesh.Faces.GetFaceVertices(i)
@@ -10502,6 +12177,14 @@ type RhinoScriptSyntax private () =
     ///    each face of the Mesh. Ngons, quad and triangle faces are returned.</returns>
     static member MeshNgonFaceVertices(objectId:Guid) : ResizeArray<ResizeArray<int>> = //TODO add more ngon support functions like this ???
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        RhinoScriptSyntax.MeshNgonFaceVertices(mesh)
+
+
+    /// <summary>Returns the vertex indices of all faces of a Ngon Mesh object.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(int ResizeArray ResizeArray) containing a nested List that define the vertex indices for
+    ///    each face of the Mesh. Ngons, quad and triangle faces are returned.</returns>
+    static member MeshNgonFaceVertices(mesh:Mesh) : ResizeArray<ResizeArray<int>> = //TODO add more ngon support functions like this ???
         let rc = ResizeArray()
         for ng in mesh.GetNgonAndFacesEnumerable() do
             let uixs = ng.BoundaryVertexIndexList()
@@ -10519,6 +12202,15 @@ type RhinoScriptSyntax private () =
     ///    third and fourth vertex indices are identical, the face is a triangle.</returns>
     static member MeshFaceVertices(objectId:Guid) : ResizeArray<int*int*int*int> =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        RhinoScriptSyntax.MeshFaceVertices(mesh)
+
+
+    /// <summary>Returns the vertex indices of all faces of a Mesh object, Does not suport Ngons yet.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>((int*int*int*int) ResizeArray) containing tuples of 4 numbers that define the vertex indices for
+    ///    each face of the Mesh. Both quad and triangle faces are returned. If the
+    ///    third and fourth vertex indices are identical, the face is a triangle.</returns>
+    static member MeshFaceVertices(mesh:Mesh) : ResizeArray<int*int*int*int> =
         let rc = ResizeArray()
         for i = 0 to mesh.Faces.Count - 1 do
             let face = mesh.Faces.GetFace(i)
@@ -10531,6 +12223,13 @@ type RhinoScriptSyntax private () =
     /// <returns>(bool) True , otherwise False.</returns>
     static member MeshHasFaceNormals(objectId:Guid) : bool =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        RhinoScriptSyntax.MeshHasFaceNormals(mesh)
+
+
+    /// <summary>Verifies a Mesh object has face normals.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(bool) True , otherwise False.</returns>
+    static member MeshHasFaceNormals(mesh:Mesh) : bool =
         mesh.FaceNormals.Count>0
 
 
@@ -10539,6 +12238,13 @@ type RhinoScriptSyntax private () =
     /// <returns>(bool) True , otherwise False.</returns>
     static member MeshHasTextureCoordinates(objectId:Guid) : bool =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        RhinoScriptSyntax.MeshHasTextureCoordinates(mesh)
+
+
+    /// <summary>Verifies a Mesh object has texture coordinates.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(bool) True , otherwise False.</returns>
+    static member MeshHasTextureCoordinates(mesh:Mesh) : bool =
         mesh.TextureCoordinates.Count>0
 
 
@@ -10547,6 +12253,13 @@ type RhinoScriptSyntax private () =
     /// <returns>(bool) True , otherwise False.</returns>
     static member MeshHasVertexColors(objectId:Guid) : bool =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        RhinoScriptSyntax.MeshHasVertexColors(mesh)
+
+
+    /// <summary>Verifies a Mesh object has vertex colors.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(bool) True , otherwise False.</returns>
+    static member MeshHasVertexColors(mesh:Mesh) : bool =
         mesh.VertexColors.Count>0
 
 
@@ -10555,6 +12268,13 @@ type RhinoScriptSyntax private () =
     /// <returns>(bool) True , otherwise False.</returns>
     static member MeshHasVertexNormals(objectId:Guid) : bool =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        RhinoScriptSyntax.MeshHasVertexNormals(mesh)
+
+
+    /// <summary>Verifies a Mesh object has vertex normals.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(bool) True , otherwise False.</returns>
+    static member MeshHasVertexNormals(mesh:Mesh) : bool =
         mesh.Normals.Count>0
 
 
@@ -10569,6 +12289,18 @@ type RhinoScriptSyntax private () =
                                         [<OPT;DEF(0.0)>]tolerance:float) : Polyline array =
         let mesh1 = RhinoScriptSyntax.CoerceMesh(mesh1)
         let mesh2 = RhinoScriptSyntax.CoerceMesh(mesh2)
+        RhinoScriptSyntax.MeshMeshIntersection(mesh1, mesh2, tolerance)
+
+
+    /// <summary>Calculates the intersections of a Mesh object with another Mesh object.</summary>
+    /// <param name="mesh1">(Mesh) Input geometry.</param>
+    /// <param name="mesh2">(Mesh) Input geometry.</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>ModelAbsoluteTolerance * MeshIntersectionsTolerancesCoefficient</c>
+    ///    The intersection tolerance</param>
+    /// <returns>(Polyline array) Array of points that define the vertices of the intersection Curves.</returns>
+    static member MeshMeshIntersection( mesh1:Mesh,
+                                        mesh2:Mesh,
+                                        [<OPT;DEF(0.0)>]tolerance:float) : Polyline array =
         let tolerance = Util.ifZero1 tolerance (State.Doc.ModelAbsoluteTolerance*Intersect.Intersection.MeshIntersectionsTolerancesCoefficient) // see https://github.com/mcneel/rhinoscriptsyntax/pull/202
         Intersect.Intersection.MeshMeshAccurate(mesh1, mesh2, tolerance)
 
@@ -10584,6 +12316,20 @@ type RhinoScriptSyntax private () =
     ///    identify the naked status for each vertex returned by MeshVertices.</returns>
     static member MeshNakedEdgePoints(objectId:Guid) : bool array =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        RhinoScriptSyntax.MeshNakedEdgePoints(mesh)
+
+
+
+    /// <summary>Identifies the naked edge points of a Mesh object. This function shows
+    ///    where Mesh vertices are not completely surrounded by faces. Joined
+    ///    Meshes, such as are made by MeshBox, have naked Mesh edge points where
+    ///    the sub-meshes are joined.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(bool array) Array of boolean values that represent whether or not a Mesh vertex is
+    ///    naked or not. The number of elements in the list will be equal to
+    ///    the value returned by MeshVertexCount. In which case, the list will
+    ///    identify the naked status for each vertex returned by MeshVertices.</returns>
+    static member MeshNakedEdgePoints(mesh:Mesh) : bool array =
         mesh.GetNakedEdgePointStatus()
 
 
@@ -10595,12 +12341,22 @@ type RhinoScriptSyntax private () =
     /// <returns>(Guid) identifier of the new Mesh object.</returns>
     static member MeshOffset(meshId:Guid, distance:float) : Guid =
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
-        let offsetmesh = mesh.Offset(distance)
-        if offsetmesh|> isNull  then RhinoScriptingException.Raise "MeshOffset failed.  meshId:'%s' distance:'%A'" (Pretty.str meshId) distance
+        let offsetmesh = RhinoScriptSyntax.MeshOffset(mesh, distance)
         let rc = State.Doc.Objects.AddMesh(offsetmesh)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "MeshOffset: Unable to add mesh to document.  meshId:'%s' distance:'%A'" (Pretty.str meshId) distance
+        if rc = Guid.Empty then RhinoScriptingException.Raise "MeshOffset: Unable to add mesh to document. meshId:'%s' distance:'%A'" (Pretty.str meshId) distance
         State.Doc.Views.Redraw()
         rc
+
+
+    /// <summary>Creates an offset copy of a Mesh.</summary>
+    /// <param name="mesh">(Mesh) Input Mesh.</param>
+    /// <param name="distance">(float) Offset distance.</param>
+    /// <returns>(Mesh) The new offset Mesh.</returns>
+    /// <remarks>Returns new geometry without adding it to a document.</remarks>
+    static member MeshOffset(mesh:Mesh, distance:float) : Mesh =
+        let offsetmesh = mesh.Offset(distance)
+        if isNull offsetmesh then RhinoScriptingException.Raise "MeshOffset: Unable to offset the Mesh by %g." distance
+        offsetmesh
 
 
     /// <summary>Creates Polyline Curve outlines of Mesh objects.</summary>
@@ -10609,26 +12365,30 @@ type RhinoScriptSyntax private () =
     ///    View to use for outline direction</param>
     /// <returns>(Guid ResizeArray) Polyline Curve identifiers.</returns>
     static member MeshOutline(objectIds:Guid seq, [<OPT;DEF(null:string)>]view:string) : Guid ResizeArray =
-        let  meshes  = objectIds |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
-        let rc = ResizeArray()
-        if notNull view then
-            let viewport = State.Doc.Views.Find(view, compareCase=false).MainViewport
-            if isNull viewport then RhinoScriptingException.Raise "MeshOutline: did not find view named '%A'" view
+        let meshes = objectIds |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
+        let viewport =
+            if isNull view then null
             else
-                for mesh in meshes do
-                    let polylines = mesh.GetOutlines(viewport)
-                    if notNull polylines then
-                        for polyline in polylines do
-                            let objectId = State.Doc.Objects.AddPolyline(polyline)
-                            rc.Add(objectId)
-        else
-            for mesh in meshes do
-                let polylines = mesh.GetOutlines(Plane.WorldXY)
-                if notNull polylines then
-                    for polyline in polylines do
-                        let objectId = State.Doc.Objects.AddPolyline(polyline)
-                        rc.Add(objectId)
+                let rhinoView = State.Doc.Views.Find(view, compareCase=false)
+                if isNull rhinoView then RhinoScriptingException.Raise "MeshOutline: did not find view named '%A'" view
+                rhinoView.MainViewport
+        let outlines = RhinoScriptSyntax.MeshOutline(meshes, viewport)
+        let rc = outlines |> RArr.mapSeq (fun curve -> State.Doc.Objects.AddCurve(curve))
         State.Doc.Views.Redraw()
+        rc
+
+
+    /// <summary>Creates Polyline Curve outlines of Meshes.</summary>
+    /// <param name="meshes">(Mesh seq) Input Meshes.</param>
+    /// <param name="view">(Rhino.Display.RhinoViewport) Optional, default value: <c>null</c>. Viewport for the outline direction. Null uses the world XY plane.</param>
+    /// <returns>(PolylineCurve ResizeArray) New outline Curves.</returns>
+    /// <remarks>Returns new geometry without adding it to a document.</remarks>
+    static member MeshOutline(meshes:Mesh seq, [<OPT;DEF(null:Rhino.Display.RhinoViewport)>]view:Rhino.Display.RhinoViewport) : PolylineCurve ResizeArray =
+        let rc = ResizeArray()
+        for mesh in meshes do
+            let polylines = if isNull view then mesh.GetOutlines(Plane.WorldXY) else mesh.GetOutlines(view)
+            if notNull polylines then
+                for polyline in polylines do rc.Add(new PolylineCurve(polyline))
         rc
 
 
@@ -10637,6 +12397,13 @@ type RhinoScriptSyntax private () =
     /// <returns>(int) The number of quad Mesh faces.</returns>
     static member MeshQuadCount(objectId:Guid) : int =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        RhinoScriptSyntax.MeshQuadCount(mesh)
+
+
+    /// <summary>Returns the number of quad faces of a Mesh object.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(int) The number of quad Mesh faces.</returns>
+    static member MeshQuadCount(mesh:Mesh) : int =
         mesh.Faces.QuadCount
 
 
@@ -10661,6 +12428,14 @@ type RhinoScriptSyntax private () =
     ///    An empty list if the Mesh has no texture coordinates.</returns>
     static member MeshTextureCoordinates(objectId:Guid) : Point2f ResizeArray =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        RhinoScriptSyntax.MeshTextureCoordinates(mesh)
+
+
+    /// <summary>Returns the texture coordinates of a Mesh.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(Point2f ResizeArray) The (u, v) texture coordinates, one per Mesh vertex.
+    ///    An empty list if the Mesh has no texture coordinates.</returns>
+    static member MeshTextureCoordinates(mesh:Mesh) : Point2f ResizeArray =
         let tcs = mesh.TextureCoordinates
         let rc = ResizeArray(tcs.Count)
         for i = 0 to tcs.Count - 1 do
@@ -10681,14 +12456,26 @@ type RhinoScriptSyntax private () =
                               [<OPT;DEF(true)>]trimmedTriangles:bool,
                               [<OPT;DEF(false)>]deleteInput:bool) : Guid ResizeArray =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
-        let pieces = mesh.SplitDisjointPieces()
-        let breps  = pieces |> RArr.mapArr (fun piece -> Brep.CreateFromMesh(piece, trimmedTriangles) )
+        let breps = RhinoScriptSyntax.MeshToNurb(mesh, trimmedTriangles)
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let attr = rhobj.Attributes
-        let ids  = breps |> RArr.mapSeq (fun brep -> State.Doc.Objects.AddBrep(brep, attr) )
-        if deleteInput then State.Doc.Objects.Delete(rhobj, quiet=true)|> ignore<bool>
+        let ids = breps |> RArr.mapSeq (fun brep -> State.Doc.Objects.AddBrep(brep, attr))
+        if deleteInput then State.Doc.Objects.Delete(rhobj, quiet=true) |> ignore<bool>
         State.Doc.Views.Redraw()
         ids
+
+
+    /// <summary>Duplicates each Mesh polygon with a NURBS Surface and joins the Surfaces for each connected piece.</summary>
+    /// <param name="mesh">(Mesh) Input Mesh.</param>
+    /// <param name="trimmedTriangles">(bool) Optional, default value: <c>true</c>. Represent triangles with trimmed planes.</param>
+    /// <returns>(Brep ResizeArray) New Breps for the connected pieces.</returns>
+    /// <remarks>Returns new geometry without adding it to a document.</remarks>
+    static member MeshToNurb(mesh:Mesh, [<OPT;DEF(true)>]trimmedTriangles:bool) : Brep ResizeArray =
+        mesh.SplitDisjointPieces()
+        |> RArr.mapArr (fun piece ->
+            let brep = Brep.CreateFromMesh(piece, trimmedTriangles)
+            if isNull brep then RhinoScriptingException.Raise "MeshToNurb: Unable to create a Brep from a Mesh piece."
+            brep)
 
 
     /// <summary>Returns number of triangular faces of a Mesh.</summary>
@@ -10696,6 +12483,13 @@ type RhinoScriptSyntax private () =
     /// <returns>(int) The number of triangular Mesh faces.</returns>
     static member MeshTriangleCount(objectId:Guid) : int =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        RhinoScriptSyntax.MeshTriangleCount(mesh)
+
+
+    /// <summary>Returns number of triangular faces of a Mesh.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(int) The number of triangular Mesh faces.</returns>
+    static member MeshTriangleCount(mesh:Mesh) : int =
         mesh.Faces.TriangleCount
 
 
@@ -10704,6 +12498,13 @@ type RhinoScriptSyntax private () =
     /// <returns>(Drawing.Color ResizeArray) The current vertex colors.</returns>
     static member MeshVertexColors(meshId:Guid) : Drawing.Color ResizeArray= //GET
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
+        RhinoScriptSyntax.MeshVertexColors(mesh)
+
+
+    /// <summary>Returns vertex colors of a Mesh.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(Drawing.Color ResizeArray) The current vertex colors.</returns>
+    static member MeshVertexColors(mesh:Mesh) : Drawing.Color ResizeArray= //GET
         let rc = ResizeArray(mesh.VertexColors.Count)
         for i = 0 to mesh.VertexColors.Count - 1 do
             rc.Add(mesh.VertexColors.[i])
@@ -10736,6 +12537,13 @@ type RhinoScriptSyntax private () =
     /// <returns>(int) The number of Mesh vertices.</returns>
     static member MeshVertexCount(objectId:Guid) : int =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        RhinoScriptSyntax.MeshVertexCount(mesh)
+
+
+    /// <summary>Returns the vertex count of a Mesh.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(int) The number of Mesh vertices.</returns>
+    static member MeshVertexCount(mesh:Mesh) : int =
         mesh.Vertices.Count
 
 
@@ -10745,6 +12553,14 @@ type RhinoScriptSyntax private () =
     /// <returns>(int array) face indices.</returns>
     static member MeshVertexFaces(meshId:Guid, vertexIndex:int) : int array =
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
+        RhinoScriptSyntax.MeshVertexFaces(mesh, vertexIndex)
+
+
+    /// <summary>Returns the Mesh faces that share a specified Mesh vertex.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <param name="vertexIndex">(int) Index of the Mesh vertex to find faces for</param>
+    /// <returns>(int array) face indices.</returns>
+    static member MeshVertexFaces(mesh:Mesh, vertexIndex:int) : int array =
         mesh.Vertices.GetVertexFaces(vertexIndex)
 
 
@@ -10753,6 +12569,13 @@ type RhinoScriptSyntax private () =
     /// <returns>(Vector3d ResizeArray) List of vertex normals, (empty list if no normals exist).</returns>.Pretty
     static member MeshVertexNormals(meshId:Guid) : Vector3d ResizeArray =
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
+        RhinoScriptSyntax.MeshVertexNormals(mesh)
+
+
+    /// <summary>Returns the vertex unit normal for each vertex of a Mesh.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(Vector3d ResizeArray) List of vertex normals, (empty list if no normals exist).</returns>
+    static member MeshVertexNormals(mesh:Mesh) : Vector3d ResizeArray =
         let count = mesh.Normals.Count
         if count < 1 then
             ResizeArray()
@@ -10768,6 +12591,13 @@ type RhinoScriptSyntax private () =
     /// <returns>(Point3d ResizeArray) vertex points in the Mesh.</returns>
     static member MeshVertices(objectId:Guid) : Point3d ResizeArray =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        RhinoScriptSyntax.MeshVertices(mesh)
+
+
+    /// <summary>Returns the vertices of a Mesh.</summary>
+    /// <param name="mesh">(Mesh) Input geometry.</param>
+    /// <returns>(Point3d ResizeArray) vertex points in the Mesh.</returns>
+    static member MeshVertices(mesh:Mesh) : Point3d ResizeArray =
         let count = mesh.Vertices.Count
         let rc = ResizeArray()
         for i = 0 to count - 1 do
@@ -10780,16 +12610,8 @@ type RhinoScriptSyntax private () =
     /// <param name="objectIds">(Guid seq) Identifiers of one or more Mesh objects</param>
     /// <returns>(float) total volume of all Meshes.</returns>
     static member MeshVolume(objectIds:Guid seq) : float =
-        let mutable totalVolume  = 0.0
-        for objectId in objectIds do
-            // TODO add check for mesh being closed
-            let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
-            let mp = VolumeMassProperties.Compute(mesh)
-            if notNull mp then
-                totalVolume <- totalVolume + mp.Volume
-            else
-                RhinoScriptingException.Raise "MeshVolume failed on objectId:'%s'" (Pretty.str objectId)
-        totalVolume
+        let meshes = objectIds |> Seq.map RhinoScriptSyntax.CoerceMesh
+        RhinoScriptSyntax.MeshVolume(meshes)
 
 
     /// <summary>Returns the approximate volume of one or more closed Meshes.</summary>
@@ -10812,9 +12634,7 @@ type RhinoScriptSyntax private () =
     /// <returns>(Point3d) Point3d representing the volume centroid.</returns>
     static member MeshVolumeCentroid(objectId:Guid) : Point3d =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
-        let mp = VolumeMassProperties.Compute(mesh)
-        if notNull mp then mp.Centroid
-        else RhinoScriptingException.Raise "MeshVolumeCentroid failed.  objectId:'%s'" (Pretty.str objectId)
+        RhinoScriptSyntax.MeshVolumeCentroid(mesh)
 
     /// <summary>Calculates the volume centroid of a Mesh.</summary>
     /// <param name="mesh">(Geometry.Mesh seq) Mesh Geometry</param>
@@ -10834,13 +12654,23 @@ type RhinoScriptSyntax private () =
     static member PullCurveToMesh(meshId:Guid, curveId:Guid) : Guid =
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
-        let tol = State.Doc.ModelAbsoluteTolerance
-        let polyline = curve.PullToMesh(mesh, tol)
-        if isNull polyline then RhinoScriptingException.Raise "PullCurveToMesh failed.  meshId:'%s' curveId:'%s'" (Pretty.str meshId)  (Pretty.str curveId)
+        let polyline = RhinoScriptSyntax.PullCurveToMesh(mesh, curve)
         let rc = State.Doc.Objects.AddCurve(polyline)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "PullCurveToMesh: Unable to add polyline to document.  meshId:'%s' curveId:'%s'" (Pretty.str meshId) (Pretty.str curveId)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "PullCurveToMesh: Unable to add polyline to document. meshId:'%s' curveId:'%s'" (Pretty.str meshId) (Pretty.str curveId)
         State.Doc.Views.Redraw()
         rc
+
+
+    /// <summary>Pulls a polyline approximation of a Curve onto a Mesh.</summary>
+    /// <param name="mesh">(Mesh) Mesh to pull onto.</param>
+    /// <param name="curve">(Curve) Input Curve.</param>
+    /// <returns>(PolylineCurve) The new pulled Curve.</returns>
+    /// <remarks>Returns new geometry without adding it to a document.</remarks>
+    static member PullCurveToMesh(mesh:Mesh, curve:Curve) : PolylineCurve =
+        let tolerance = State.Doc.ModelAbsoluteTolerance
+        let polyline = curve.PullToMesh(mesh, tolerance)
+        if isNull polyline then RhinoScriptingException.Raise "PullCurveToMesh: Unable to pull the Curve onto the Mesh."
+        polyline
 
 
     /// <summary>Splits up a Mesh into its unconnected pieces.</summary>
@@ -10850,13 +12680,19 @@ type RhinoScriptSyntax private () =
     /// <returns>(Guid ResizeArray) identifiers for the new Meshes.</returns>
     static member SplitDisjointMesh(objectId:Guid, [<OPT;DEF(false)>]deleteInput:bool) : Guid ResizeArray =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
-        let pieces = mesh.SplitDisjointPieces()
-        let rc  = pieces |> RArr.mapArr State.Doc.Objects.AddMesh
-        if rc.Count <> 0 && deleteInput then
-            //id = RhinoScriptSyntax.CoerceGuid(objectId)
-            State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
+        let pieces = RhinoScriptSyntax.SplitDisjointMesh(mesh)
+        let rc = pieces |> RArr.mapSeq (fun piece -> State.Doc.Objects.AddMesh(piece))
+        if rc.Count <> 0 && deleteInput then State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
         State.Doc.Views.Redraw()
         rc
+
+
+    /// <summary>Splits a Mesh into its unconnected pieces.</summary>
+    /// <param name="mesh">(Mesh) Input Mesh.</param>
+    /// <returns>(Mesh ResizeArray) New connected Mesh pieces.</returns>
+    /// <remarks>Returns new geometry without adding it to a document.</remarks>
+    static member SplitDisjointMesh(mesh:Mesh) : Mesh ResizeArray =
+        ResizeArray(mesh.SplitDisjointPieces())
 
 
     /// <summary>Fixes inconsistencies in the directions of faces of a Mesh.</summary>
@@ -10910,8 +12746,71 @@ type RhinoScriptSyntax private () =
             #endif
 
 
+    /// Computes the orient matrix shared by document and geometry operations.
+    static member private objectOrientTransform(referencePts:IList<Point3d>, targetPts:IList<Point3d>, scale:bool) : Transform =
+        if referencePts.Count <> targetPts.Count then
+            RhinoScriptingException.Raise "OrientObject referencePts.Count <> targetPts.Count: %d <> %d " referencePts.Count targetPts.Count
+        if referencePts.Count < 2 then
+            RhinoScriptingException.Raise "OrientObject referencePts.Count < 2: %d  " referencePts.Count
+        if targetPts.Count < 2 then
+            RhinoScriptingException.Raise "OrientObject targetPts.Count < 2 : %d"  targetPts.Count
+
+        let xform =
+            if referencePts.Count > 2 then
+                //Orient3Pt
+                let fromPlane = Rhino.Geometry.Plane(referencePts.[0], referencePts.[1], referencePts.[2])
+                let toPlane = Rhino.Geometry.Plane(targetPts.[0], targetPts.[1], targetPts.[2])
+                if not fromPlane.IsValid || not toPlane.IsValid then
+                    RhinoScriptingException.Raise "OrientObject unable to create valid planes from point lists %A and %A " referencePts targetPts
+                Rhino.Geometry.Transform.PlaneToPlane(fromPlane, toPlane)
+            else
+                //Orient2Pt
+                let xformMove = Rhino.Geometry.Transform.Translation( targetPts.[0]-referencePts.[0] )
+                let v0 = referencePts.[1] - referencePts.[0]
+                let v1 = targetPts.[1] - targetPts.[0]
+                let xformScale =
+                    if scale then
+                        let len0 = v0.Length
+                        let len1 = v1.Length
+                        if len0 < 0.000001 || len1 < 0.000001 then RhinoScriptingException.Raise "OrientObject vector lengths too short"
+                        let scaleF = len1 / len0
+                        if abs(1.0-scaleF) >= 0.000001 then
+                            let plane = Rhino.Geometry.Plane(referencePts.[0], v0)
+                            Rhino.Geometry.Transform.Scale(plane, scaleF, scaleF, scaleF)
+                        else
+                            Rhino.Geometry.Transform.Identity
+                    else
+                        Rhino.Geometry.Transform.Identity
+                v0.Unitize()  |> ignore<bool>
+                v1.Unitize()  |> ignore<bool>
+                let xformRotate = Rhino.Geometry.Transform.Rotation(v0, v1, referencePts.[0])
+                xformMove * xformScale * xformRotate
+
+        xform
+
+
+    /// Computes the shear matrix shared by document and geometry operations.
+    static member private objectShearTransform(origin:Point3d, referencePoint:Point3d, angleDegrees:float, plane:Plane) : Transform =
+        let mutable frame = Plane(plane)
+        frame.Origin <- origin
+        frame.ZAxis <- plane.Normal
+        let yAxis = referencePoint-origin
+        yAxis.Unitize() |> ignore<bool>
+        frame.YAxis <- yAxis
+        let xAxis = Vector3d.CrossProduct(frame.ZAxis, frame.YAxis)
+        xAxis.Unitize() |> ignore<bool>
+        frame.XAxis <- xAxis
+        let worldPlane = Plane.WorldXY
+        let cob = Transform.ChangeBasis(worldPlane, frame)
+        let mutable shear2d = Transform.Identity
+        shear2d.[0, 1] <- tan(toRadians(angleDegrees))
+        let cobinv = Transform.ChangeBasis(frame, worldPlane)
+        let xf = cobinv * shear2d * cob
+        xf
+
+
     /// <summary>Moves, scales, or rotates a list of objects given a 4x4 transformation
-    ///    matrix. The matrix acts on the left. To transform geometry objects instead of DocObjects or Guids use their .Transform(xForm) member.</summary>
+    ///    matrix. The matrix acts on the left. Use the geometry overload to return transformed duplicates without modifying document objects.</summary>
     /// <param name="objectIds">(Guid seq) List of object identifiers</param>
     /// <param name="matrix">(Transform) The transformation matrix (4x4 array of numbers)</param>
     /// <param name="copy">(bool) Optional, default value: <c>false</c>
@@ -10930,8 +12829,25 @@ type RhinoScriptSyntax private () =
         State.Doc.Views.Redraw()
         rc
 
+
+    /// <summary>Returns transformed duplicates of the input geometries. The input is unchanged and the result is not added to a document.</summary>
+    /// <param name="geometries">(GeometryBase seq) Input geometry to duplicate and transform.</param>
+    /// <param name="matrix">(Transform) The transformation matrix (4x4 array of numbers)</param>
+    /// <returns>(GeometryBase ResizeArray) The transformed geometry duplicates.</returns>
+    static member TransformObjects( geometries:GeometryBase seq,
+                                    matrix:Transform) : GeometryBase ResizeArray =   //PLURAL
+        let results = ResizeArray<GeometryBase>()
+        try
+            for geometry in geometries do
+                results.Add(RhinoScriptSyntax.TransformObject(geometry, matrix))
+            results
+        with _ ->
+            for geometry in results do geometry.Dispose()
+            reraise()
+
+
     /// <summary>Moves, scales, or rotates an object given a 4x4 transformation matrix.
-    ///    The matrix acts on the left. To transform geometry objects instead of DocObjects or Guids use their .Transform(xForm) member.</summary>
+    ///    The matrix acts on the left. Use the geometry overload to return transformed duplicates without modifying document objects.</summary>
     /// <param name="objectId">(Guid) The identifier of the object</param>
     /// <param name="matrix">(Transform) The transformation matrix (4x4 array of numbers)</param>
     /// <param name="copy">(bool) Optional, default value: <c>false</c>
@@ -10944,6 +12860,25 @@ type RhinoScriptSyntax private () =
         if res = Guid.Empty then RhinoScriptingException.Raise "TransformObject: Cannot apply transform to objectId:'%s' matrix:'%A' copy:'%A'"  (Pretty.str objectId) matrix copy
         if copy then RhinoScriptSyntax.putCopiesInNewGroups [res]
         res
+
+
+    /// <summary>Returns a transformed duplicate of the input geometry. The input is unchanged and the result is not added to a document.</summary>
+    /// <param name="geometry">(GeometryBase) Input geometry to duplicate and transform.</param>
+    /// <param name="matrix">(Transform) The transformation matrix (4x4 array of numbers)</param>
+    /// <returns>(GeometryBase) The transformed geometry duplicate.</returns>
+    static member TransformObject(  geometry:GeometryBase,
+                                    matrix:Transform) : GeometryBase =
+        if isNull geometry then RhinoScriptingException.Raise "TransformObject: Input geometry is null."
+        let result = geometry.Duplicate()
+        if isNull result then RhinoScriptingException.Raise "TransformObject: Unable to duplicate the input geometry."
+        try
+            if matrix.SimilarityType = TransformSimilarityType.NotSimilarity then
+                result.MakeDeformable() |> ignore<bool>
+            if not (result.Transform(matrix)) then RhinoScriptingException.Raise "TransformObject: Unable to apply the transformation to the geometry."
+            result
+        with _ ->
+            result.Dispose()
+            reraise()
 
 
     /// <summary>Copies an object from one location to another, or in-place.
@@ -10962,6 +12897,18 @@ type RhinoScriptSyntax private () =
         RhinoScriptSyntax.putCopiesInNewGroups [res]
         res
 
+
+    /// <summary>Returns a transformed duplicate of the input geometry. The input is unchanged and the result is not added to a document.</summary>
+    /// <param name="geometry">(GeometryBase) Input geometry to duplicate and transform.</param>
+    /// <param name="translation">(Vector3d) Optional, additional translation vector to apply</param>
+    /// <returns>(GeometryBase) The transformed geometry duplicate.</returns>
+    static member CopyObject(geometry:GeometryBase, [<OPT;DEF(Vector3d())>]translation:Vector3d) : GeometryBase =
+        let translation =
+            if not translation.IsZero then
+                Transform.Translation(translation)
+            else
+                Transform.Identity
+        RhinoScriptSyntax.TransformObject(geometry, translation)
 
 
     /// <summary>Copies one or more objects from one location to another, or in-place.
@@ -10982,6 +12929,19 @@ type RhinoScriptSyntax private () =
             rc.Add res
         RhinoScriptSyntax.putCopiesInNewGroups rc
         rc
+
+
+    /// <summary>Returns transformed duplicates of the input geometries. The input is unchanged and the result is not added to a document.</summary>
+    /// <param name="geometries">(GeometryBase seq) Input geometry to duplicate and transform.</param>
+    /// <param name="translation">(Vector3d) Optional, translation vector to apply to copied set</param>
+    /// <returns>(GeometryBase ResizeArray) The transformed geometry duplicates.</returns>
+    static member CopyObjects(geometries:GeometryBase seq, [<OPT;DEF(Vector3d())>]translation:Vector3d) : GeometryBase ResizeArray = //PLURAL
+        let translation =
+            if not translation.IsZero then
+                Transform.Translation(translation)
+            else
+                Transform.Identity
+        RhinoScriptSyntax.TransformObjects(geometries, translation)
 
 
     /// <summary>Deletes a single object from the document.</summary>
@@ -11068,8 +13028,21 @@ type RhinoScriptSyntax private () =
     static member IsObjectInBox( objectId:Guid,
                                  box:BoundingBox,
                                  [<OPT;DEF(true)>]testMode:bool) : bool =
-        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        let objbox = rhobj.Geometry.GetBoundingBox(true)
+        RhinoScriptSyntax.IsObjectInBox((RhinoScriptSyntax.CoerceRhinoObject(objectId)).Geometry, box, testMode)
+
+
+    /// <summary>Verifies an object's bounding box is inside of another bounding box.</summary>
+    /// <param name="geometryObject">(GeometryBase) Input geometry.</param>
+    /// <param name="box">(Geometry.BoundingBox) Bounding box to test for containment</param>
+    /// <param name="testMode">(bool) Optional, default value: <c>true</c>
+    ///    If True, the object's bounding box must be contained by box
+    ///    If False, the object's bounding box must be contained by or intersect box</param>
+    /// <returns>(bool) True if object is inside box, False is object is not inside box.</returns>
+    static member IsObjectInBox( geometryObject:GeometryBase,
+                                 box:BoundingBox,
+                                 [<OPT;DEF(true)>]testMode:bool) : bool =
+        let rhobj = geometryObject
+        let objbox = rhobj.GetBoundingBox(true)
         if testMode then
             box.Contains(objbox)
         else
@@ -11152,10 +13125,17 @@ type RhinoScriptSyntax private () =
     /// <param name="objectId">(Guid) The identifier of an object to test</param>
     /// <returns>(bool) True if the object is solid, or a Mesh is closed, False otherwise.</returns>
     static member IsObjectSolid(objectId:Guid) : bool =
-        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        RhinoScriptSyntax.IsObjectSolid((RhinoScriptSyntax.CoerceRhinoObject(objectId)).Geometry)
+
+
+    /// <summary>Determines if an object is closed or solid.</summary>
+    /// <param name="geometryObject">(GeometryBase) Input geometry.</param>
+    /// <returns>(bool) True if the object is solid, or a Mesh is closed, False otherwise.</returns>
+    static member IsObjectSolid(geometryObject:GeometryBase) : bool =
+        let rhobj = geometryObject
         // rhobj.IsSolid //TODO  'rhobj.IsSolid'  could be used from RhCommon 7.5 onwards see https://github.com/mcneel/rhinoscriptsyntax/pull/197
         // and https://github.com/mcneel/rhinoscriptsyntax/commit/aaa0906fa43003db093c1e6f58bf12c813eddbeb
-        let geom = rhobj.Geometry
+        let geom = rhobj
         match geom with
         | :? Mesh      as m -> m.IsClosed
         | :? Extrusion as s -> s.IsSolid
@@ -11163,7 +13143,7 @@ type RhinoScriptSyntax private () =
         | :? Brep      as s -> s.IsSolid
         | :? SubD      as s -> s.IsSolid // only for Rh7 and higher
         | _                 ->
-            RhinoScriptingException.Raise "IsObjectSolid only Mesh, Extrusion, Surface, Brep or SubD can be tested for solidity but not %s" (Pretty.str objectId)
+            RhinoScriptingException.Raise "IsObjectSolid only Mesh, Extrusion, Surface, Brep or SubD can be tested for solidity but not %s" (Pretty.str geometryObject)
 
 
 
@@ -11250,6 +13230,23 @@ type RhinoScriptSyntax private () =
         res
 
 
+    /// <summary>Returns a transformed duplicate of the input geometry. The input is unchanged and the result is not added to a document.</summary>
+    /// <param name="geometry">(GeometryBase) Input geometry to duplicate and transform.</param>
+    /// <param name="startPoint">(Point3d) Start of the mirror Plane</param>
+    /// <param name="endPoint">(Point3d) End of the mirror Plane</param>
+    /// <returns>(GeometryBase) The transformed geometry duplicate.</returns>
+    static member MirrorObject( geometry:GeometryBase,
+                                startPoint:Point3d,
+                                endPoint:Point3d) : GeometryBase =
+        let vec = endPoint-startPoint
+        if vec.IsTiny() then RhinoScriptingException.Raise "MirrorObject Start and  end points are too close to each other.  geometry:'%s' startPoint:'%A' endPoint:'%A'" (Pretty.str geometry) startPoint endPoint
+        let normal = Plane.WorldXY.Normal
+        let xv = Vector3d.CrossProduct(vec, normal)
+        xv.Unitize() |> ignore<bool>
+        let xf = Transform.Mirror(startPoint, vec)
+        RhinoScriptSyntax.TransformObject(geometry, xf)
+
+
     /// <summary>Mirrors a list of objects on World XY Plane.</summary>
     /// <param name="objectIds">(Guid seq) Identifiers of objects to mirror</param>
     /// <param name="startPoint">(Point3d) Start of the mirror Plane</param>
@@ -11275,6 +13272,22 @@ type RhinoScriptSyntax private () =
         if copy then RhinoScriptSyntax.putCopiesInNewGroups rc
         rc
 
+
+    /// <summary>Returns transformed duplicates of the input geometries. The input is unchanged and the result is not added to a document.</summary>
+    /// <param name="geometries">(GeometryBase seq) Input geometry to duplicate and transform.</param>
+    /// <param name="startPoint">(Point3d) Start of the mirror Plane</param>
+    /// <param name="endPoint">(Point3d) End of the mirror Plane</param>
+    /// <returns>(GeometryBase ResizeArray) The transformed geometry duplicates.</returns>
+    static member MirrorObjects(  geometries:GeometryBase seq,
+                                 startPoint:Point3d,
+                                 endPoint:Point3d) : GeometryBase ResizeArray = //PLURAL
+        let vec = endPoint-startPoint
+        if vec.IsTiny() then RhinoScriptingException.Raise "MirrorObjects Start and  end points are too close to each other.  objectId:'%s' startPoint:'%A' endPoint:'%A'" (Pretty.str geometries) startPoint endPoint
+        let normal = Plane.WorldXY.Normal
+        let xv = Vector3d.CrossProduct(vec, normal)
+        xv.Unitize() |> ignore<bool>
+        let xf = Transform.Mirror(startPoint, vec)
+        RhinoScriptSyntax.TransformObjects(geometries, xf)
 
 
     /// <summary>Moves a single object.</summary>
@@ -11949,51 +13962,24 @@ type RhinoScriptSyntax private () =
     /// </param>
     /// <returns>(Guid) The identifier of the oriented object. The original or the copied object. Depending on given flags</returns>
     static member OrientObject( objectId:Guid,  referencePts:IList<Point3d>,  targetPts:IList<Point3d>,   [<OPT;DEF(0)>]flags:int) : Guid =
-        if referencePts.Count <> targetPts.Count then
-            RhinoScriptingException.Raise "OrientObject referencePts.Count <> targetPts.Count: %d <> %d " referencePts.Count targetPts.Count
-        if referencePts.Count < 2 then
-            RhinoScriptingException.Raise "OrientObject referencePts.Count < 2: %d  " referencePts.Count
-        if targetPts.Count < 2 then
-            RhinoScriptingException.Raise "OrientObject targetPts.Count < 2 : %d"  targetPts.Count
-
-        let copy  = (flags &&& 1) = 1
-        let scale = (flags &&& 2) = 2
-        let xform =
-            if referencePts.Count > 2 then
-                //Orient3Pt
-                let fromPlane = Rhino.Geometry.Plane(referencePts.[0], referencePts.[1], referencePts.[2])
-                let toPlane = Rhino.Geometry.Plane(targetPts.[0], targetPts.[1], targetPts.[2])
-                if not fromPlane.IsValid || not toPlane.IsValid then
-                    RhinoScriptingException.Raise "OrientObject unable to create valid planes from point lists %A and %A " referencePts targetPts
-                Rhino.Geometry.Transform.PlaneToPlane(fromPlane, toPlane)
-            else
-                //Orient2Pt
-                let xformMove = Rhino.Geometry.Transform.Translation( targetPts.[0]-referencePts.[0] )
-                let v0 = referencePts.[1] - referencePts.[0]
-                let v1 = targetPts.[1] - targetPts.[0]
-                let xformScale =
-                    if scale then
-                        let len0 = v0.Length
-                        let len1 = v1.Length
-                        if len0 < 0.000001 || len1 < 0.000001 then RhinoScriptingException.Raise "OrientObject vector lengths too short"
-                        let scaleF = len1 / len0
-                        if abs(1.0-scaleF) >= 0.000001 then
-                            let plane = Rhino.Geometry.Plane(referencePts.[0], v0)
-                            Rhino.Geometry.Transform.Scale(plane, scaleF, scaleF, scaleF)
-                        else
-                            Rhino.Geometry.Transform.Identity
-                    else
-                        Rhino.Geometry.Transform.Identity
-                v0.Unitize()  |> ignore<bool>
-                v1.Unitize()  |> ignore<bool>
-                let xformRotate = Rhino.Geometry.Transform.Rotation(v0, v1, referencePts.[0])
-                xformMove * xformScale * xformRotate
-
+        let copy = (flags &&& 1) = 1
+        let xform = RhinoScriptSyntax.objectOrientTransform(referencePts, targetPts, (flags &&& 2) = 2)
         let rc = RhinoScriptSyntax.Ot.Transform(objectId, xform, not copy)
         if rc=System.Guid.Empty then
             RhinoScriptingException.Raise "OrientObject failed"
         RhinoScriptSyntax.Doc.Views.Redraw()
         rc
+
+
+    /// <summary>Returns a transformed duplicate of the input geometry. The input is unchanged and the result is not added to a document.</summary>
+    /// <param name="geometry">(GeometryBase) Input geometry to duplicate and transform.</param>
+    /// <param name="referencePts">(IList of Point3d) list of 3D reference points.</param>
+    /// <param name="targetPts">(IList of Point3d) list of 3D target points.</param>
+    /// <param name="scale">(bool) Optional, default value: <c>false</c>. Scale to match the target distance when both point lists contain two points.</param>
+    /// <returns>(GeometryBase) The transformed geometry duplicate.</returns>
+    static member OrientObject( geometry:GeometryBase,  referencePts:IList<Point3d>,  targetPts:IList<Point3d>,   [<OPT;DEF(false)>]scale:bool) : GeometryBase =
+        let xform = RhinoScriptSyntax.objectOrientTransform(referencePts, targetPts, scale)
+        RhinoScriptSyntax.TransformObject(geometry, xform)
 
 
     /// <summary>Rotates a single object.</summary>
@@ -12016,6 +14002,23 @@ type RhinoScriptSyntax private () =
         if res = Guid.Empty then RhinoScriptingException.Raise "RotateObject failed.  objectId:'%s' centerPoint:'%A' rotationAngle:'%A' axis:'%A' copy:'%A'" (Pretty.str objectId) centerPoint rotationAngle axis copy
         if copy then RhinoScriptSyntax.putCopiesInNewGroups [res]
         res
+
+
+    /// <summary>Returns a transformed duplicate of the input geometry. The input is unchanged and the result is not added to a document.</summary>
+    /// <param name="geometry">(GeometryBase) Input geometry to duplicate and transform.</param>
+    /// <param name="centerPoint">(Point3d) The center of rotation</param>
+    /// <param name="rotationAngle">(float) In degrees</param>
+    /// <param name="axis">(Vector3d) Optional, default value: <c>Vector3d.ZAxis</c>
+    ///    Axis of rotation, If omitted, the Vector3d.ZAxis is used as the rotation axis</param>
+    /// <returns>(GeometryBase) The transformed geometry duplicate.</returns>
+    static member RotateObject( geometry:GeometryBase,
+                                centerPoint:Point3d,
+                                rotationAngle:float,
+                                [<OPT;DEF(Vector3d())>]axis:Vector3d) : GeometryBase =
+        let axis = if axis.IsZero then Vector3d.ZAxis else axis
+        let rotationAngle = RhinoMath.ToRadians(rotationAngle)
+        let xf = Transform.Rotation(rotationAngle, axis, centerPoint)
+        RhinoScriptSyntax.TransformObject(geometry, xf)
 
 
     /// <summary>Rotates multiple objects.</summary>
@@ -12043,6 +14046,23 @@ type RhinoScriptSyntax private () =
         rc
 
 
+    /// <summary>Returns transformed duplicates of the input geometries. The input is unchanged and the result is not added to a document.</summary>
+    /// <param name="geometries">(GeometryBase seq) Input geometry to duplicate and transform.</param>
+    /// <param name="centerPoint">(Point3d) The center of rotation</param>
+    /// <param name="rotationAngle">(float) In degrees</param>
+    /// <param name="axis">(Vector3d) Optional, default value: <c>Vector3d.ZAxis</c>
+    ///    Axis of rotation, If omitted, the Vector3d.ZAxis is used as the rotation axis</param>
+    /// <returns>(GeometryBase ResizeArray) The transformed geometry duplicates.</returns>
+    static member RotateObjects( geometries:GeometryBase seq,
+                                 centerPoint:Point3d,
+                                 rotationAngle:float,
+                                 [<OPT;DEF(Vector3d())>]axis:Vector3d) : GeometryBase ResizeArray = //PLURAL
+        let axis = if axis.IsZero then Vector3d.ZAxis else axis
+        let rotationAngle = RhinoMath.ToRadians(rotationAngle)
+        let xf = Transform.Rotation(rotationAngle, axis, centerPoint)
+        RhinoScriptSyntax.TransformObjects(geometries, xf)
+
+
     /// <summary>Scales a single object. Can be used to perform a uniform or non-uniform
     ///    scale transformation. Scaling is based on the WorldXY Plane.</summary>
     /// <param name="objectId">(Guid) The identifier of an object</param>
@@ -12063,6 +14083,22 @@ type RhinoScriptSyntax private () =
         if copy then RhinoScriptSyntax.putCopiesInNewGroups [res]
         res
 
+
+    /// <summary>Returns a transformed duplicate of the input geometry. The input is unchanged and the result is not added to a document.</summary>
+    /// <param name="geometry">(GeometryBase) Input geometry to duplicate and transform.</param>
+    /// <param name="origin">(Point3d) The origin of the scale transformation</param>
+    /// <param name="scale">(float*float*float) Three numbers that identify the X, Y, and Z axis scale factors to apply</param>
+    /// <returns>(GeometryBase) The transformed geometry duplicate.</returns>
+    static member ScaleObject( geometry:GeometryBase,
+                               origin:Point3d,
+                               scale:float*float*float) : GeometryBase =
+        let mutable plane = Plane.WorldXY
+        plane.Origin <- origin
+        let x, y, z = scale
+        let xf = Transform.Scale(plane, x, y, z)
+        RhinoScriptSyntax.TransformObject(geometry, xf)
+
+
     /// <summary>Scales a single object. Uniform scale transformation. Scaling is based on the WorldXY Plane.</summary>
     /// <param name="objectId">(Guid) The identifier of an object</param>
     /// <param name="origin">(Point3d) The origin of the scale transformation</param>
@@ -12080,6 +14116,21 @@ type RhinoScriptSyntax private () =
         if res = Guid.Empty then RhinoScriptingException.Raise "ScaleObject failed.  objectId:'%s' origin:'%A' scale:'%A' copy:'%A'" (Pretty.str objectId) origin scale  copy
         if copy then RhinoScriptSyntax.putCopiesInNewGroups [res]
         res
+
+
+    /// <summary>Returns a transformed duplicate of the input geometry. The input is unchanged and the result is not added to a document.</summary>
+    /// <param name="geometry">(GeometryBase) Input geometry to duplicate and transform.</param>
+    /// <param name="origin">(Point3d) The origin of the scale transformation</param>
+    /// <param name="scale">(float) One numbers that identify the X, Y, and Z axis scale factors to apply</param>
+    /// <returns>(GeometryBase) The transformed geometry duplicate.</returns>
+    static member ScaleObject( geometry:GeometryBase,
+                               origin:Point3d,
+                               scale:float) : GeometryBase = //ALT
+        let mutable plane = Plane.WorldXY
+        plane.Origin <- origin
+        let xf = Transform.Scale(plane, scale, scale, scale)
+        RhinoScriptSyntax.TransformObject(geometry, xf)
+
 
     /// <summary>Scales one or more objects. Can be used to perform a uniform or non-
     ///    uniform scale transformation. Scaling is based on the WorldXY Plane.</summary>
@@ -12104,6 +14155,22 @@ type RhinoScriptSyntax private () =
         if copy then RhinoScriptSyntax.putCopiesInNewGroups rc
         rc
 
+
+    /// <summary>Returns transformed duplicates of the input geometries. The input is unchanged and the result is not added to a document.</summary>
+    /// <param name="geometries">(GeometryBase seq) Input geometry to duplicate and transform.</param>
+    /// <param name="origin">(Point3d) The origin of the scale transformation</param>
+    /// <param name="scale">(float*float*float) Three numbers that identify the X, Y, and Z axis scale factors to apply</param>
+    /// <returns>(GeometryBase ResizeArray) The transformed geometry duplicates.</returns>
+    static member ScaleObjects( geometries:GeometryBase seq,
+                                origin:Point3d,
+                                scale:float*float*float) : GeometryBase ResizeArray =  //PLURAL
+        let mutable plane = Plane.WorldXY
+        plane.Origin <- origin
+        let x, y, z = scale
+        let xf = Transform.Scale(plane, x, y, z)
+        RhinoScriptSyntax.TransformObjects(geometries, xf)
+
+
     /// <summary>Scales one or more objects. Uniform scale transformation. Scaling is based on the WorldXY Plane.</summary>
     /// <param name="objectIds">(Guid seq) Identifiers of objects to scale</param>
     /// <param name="origin">(Point3d) The origin of the scale transformation</param>
@@ -12126,6 +14193,19 @@ type RhinoScriptSyntax private () =
         if copy then RhinoScriptSyntax.putCopiesInNewGroups rc
         rc
 
+
+    /// <summary>Returns transformed duplicates of the input geometries. The input is unchanged and the result is not added to a document.</summary>
+    /// <param name="geometries">(GeometryBase seq) Input geometry to duplicate and transform.</param>
+    /// <param name="origin">(Point3d) The origin of the scale transformation</param>
+    /// <param name="scale">(float) One numbers that identify the X, Y, and Z axis scale factors to apply</param>
+    /// <returns>(GeometryBase ResizeArray) The transformed geometry duplicates.</returns>
+    static member ScaleObjects( geometries:GeometryBase seq,
+                                origin:Point3d,
+                                scale:float) : GeometryBase ResizeArray =  //PLURAL ALT
+        let mutable plane = Plane.WorldXY
+        plane.Origin <- origin
+        let xf = Transform.Scale(plane, scale, scale, scale)
+        RhinoScriptSyntax.TransformObjects(geometries, xf)
 
 
     /// <summary>Selects a single object.
@@ -12215,27 +14295,29 @@ type RhinoScriptSyntax private () =
                                referencePoint:Point3d,
                                angleDegrees:float,
                                [<OPT;DEF(false)>]copy:bool) : Guid =
-       if (origin-referencePoint).IsTiny() then RhinoScriptingException.Raise "ShearObject failed because (origin-referencePoint).IsTiny() : %s and %s" origin.Pretty referencePoint.Pretty
-       let plane = State.Doc.Views.ActiveView.MainViewport.ConstructionPlane()
-       let mutable frame = Plane(plane)
-       frame.Origin <- origin
-       frame.ZAxis <- plane.Normal
-       let yAxis = referencePoint-origin
-       yAxis.Unitize() |> ignore<bool>
-       frame.YAxis <- yAxis
-       let xAxis = Vector3d.CrossProduct(frame.ZAxis, frame.YAxis)
-       xAxis.Unitize() |> ignore<bool>
-       frame.XAxis <- xAxis
-       let worldPlane = Plane.WorldXY
-       let cob = Transform.ChangeBasis(worldPlane, frame)
-       let mutable shear2d = Transform.Identity
-       shear2d.[0, 1] <- tan(toRadians(angleDegrees))
-       let cobinv = Transform.ChangeBasis(frame, worldPlane)
-       let xf = cobinv * shear2d * cob
-       let res = State.Doc.Objects.Transform(objectId, xf, not copy)
-       if res = Guid.Empty then RhinoScriptingException.Raise "ShearObject failed for %s, origin %s, ref point  %s and angle in Deg  %f" (Pretty.str objectId) origin.Pretty referencePoint.Pretty angleDegrees
-       if copy then RhinoScriptSyntax.putCopiesInNewGroups [res]
-       res
+        if (origin-referencePoint).IsTiny() then RhinoScriptingException.Raise "ShearObject failed because (origin-referencePoint).IsTiny() : %s and %s" origin.Pretty referencePoint.Pretty
+        let plane = State.Doc.Views.ActiveView.MainViewport.ConstructionPlane()
+        let xf = RhinoScriptSyntax.objectShearTransform(origin, referencePoint, angleDegrees, plane)
+        let res = State.Doc.Objects.Transform(objectId, xf, not copy)
+        if res = Guid.Empty then RhinoScriptingException.Raise "ShearObject failed for %s, origin %s, ref point  %s and angle in Deg  %f" (Pretty.str objectId) origin.Pretty referencePoint.Pretty angleDegrees
+        if copy then RhinoScriptSyntax.putCopiesInNewGroups [res]
+        res
+
+
+    /// <summary>Returns a transformed duplicate of the input geometry. The input is unchanged and the result is not added to a document. Uses the active view construction plane.</summary>
+    /// <param name="geometry">(GeometryBase) Input geometry to duplicate and transform.</param>
+    /// <param name="origin">(Point3d) Origin point of the shear transformation</param>
+    /// <param name="referencePoint">(Point3d) Reference point of the shear transformation</param>
+    /// <param name="angleDegrees">(float) The shear angle in degrees</param>
+    /// <returns>(GeometryBase) The transformed geometry duplicate.</returns>
+    static member ShearObject( geometry:GeometryBase,
+                               origin:Point3d,
+                               referencePoint:Point3d,
+                               angleDegrees:float) : GeometryBase =
+        if (origin-referencePoint).IsTiny() then RhinoScriptingException.Raise "ShearObject failed because (origin-referencePoint).IsTiny() : %s and %s" origin.Pretty referencePoint.Pretty
+        let plane = State.Doc.Views.ActiveView.MainViewport.ConstructionPlane()
+        let xf = RhinoScriptSyntax.objectShearTransform(origin, referencePoint, angleDegrees, plane)
+        RhinoScriptSyntax.TransformObject(geometry, xf)
 
 
     /// <summary>Shears one or more objects.</summary>
@@ -12253,21 +14335,7 @@ type RhinoScriptSyntax private () =
                                 [<OPT;DEF(false)>]copy:bool) : Guid ResizeArray = //PLURAL
         if (origin-referencePoint).IsTiny() then RhinoScriptingException.Raise "ShearObjects failed because (origin-referencePoint).IsTiny() : %s and %s" origin.Pretty referencePoint.Pretty
         let plane = State.Doc.Views.ActiveView.MainViewport.ConstructionPlane()
-        let mutable frame = Plane(plane)
-        frame.Origin <- origin
-        frame.ZAxis <- plane.Normal
-        let yAxis = referencePoint-origin
-        yAxis.Unitize() |> ignore<bool>
-        frame.YAxis <- yAxis
-        let xAxis = Vector3d.CrossProduct(frame.ZAxis, frame.YAxis)
-        xAxis.Unitize() |> ignore<bool>
-        frame.XAxis <- xAxis
-        let worldPlane = Plane.WorldXY
-        let cob = Transform.ChangeBasis(worldPlane, frame)
-        let mutable shear2d = Transform.Identity
-        shear2d.[0, 1] <- tan(toRadians(angleDegrees))
-        let cobinv = Transform.ChangeBasis(frame, worldPlane)
-        let xf = cobinv * shear2d * cob
+        let xf = RhinoScriptSyntax.objectShearTransform(origin, referencePoint, angleDegrees, plane)
         let r = ResizeArray()
         for ob in objectIds do
             let res = State.Doc.Objects.Transform(ob, xf, not copy)
@@ -12277,6 +14345,22 @@ type RhinoScriptSyntax private () =
                 r.Add res
         if copy then RhinoScriptSyntax.putCopiesInNewGroups r
         r
+
+
+    /// <summary>Returns transformed duplicates of the input geometries. The input is unchanged and the result is not added to a document. Uses the active view construction plane.</summary>
+    /// <param name="geometries">(GeometryBase seq) Input geometry to duplicate and transform.</param>
+    /// <param name="origin">(Point3d) Origin point of the shear transformation</param>
+    /// <param name="referencePoint">(Point3d) Reference point of the shear transformation</param>
+    /// <param name="angleDegrees">(float) The shear angle in degrees</param>
+    /// <returns>(GeometryBase ResizeArray) The transformed geometry duplicates.</returns>
+    static member ShearObjects( geometries:GeometryBase seq,
+                                origin:Point3d,
+                                referencePoint:Point3d,
+                                angleDegrees:float) : GeometryBase ResizeArray = //PLURAL
+        if (origin-referencePoint).IsTiny() then RhinoScriptingException.Raise "ShearObjects failed because (origin-referencePoint).IsTiny() : %s and %s" origin.Pretty referencePoint.Pretty
+        let plane = State.Doc.Views.ActiveView.MainViewport.ConstructionPlane()
+        let xf = RhinoScriptSyntax.objectShearTransform(origin, referencePoint, angleDegrees, plane)
+        RhinoScriptSyntax.TransformObjects(geometries, xf)
 
 
     /// <summary>Shows a previously hidden object. Hidden objects are not visible, cannot
@@ -12444,6 +14528,45 @@ type RhinoScriptSyntax private () =
                                           curve:Guid,
                                           [<OPT;DEF(0.0)>]tolerance:float) : ResizeArray<int * Point3d * Point3d * Point3d * Point3d * float * float * float * float* float * float > =
         let curve = RhinoScriptSyntax.CoerceCurve(curve)
+        RhinoScriptSyntax.PlaneCurveIntersection(plane, curve, tolerance)
+
+
+
+
+
+
+    /// <summary>Intersect an infinite Plane and a Curve object.</summary>
+    /// <param name="plane">(Plane) The Plane to intersect</param>
+    /// <param name="curve">(Curve) The Curve geometry to intersect</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
+    ///    The intersection tolerance.</param>
+    /// <returns>(ResizeArray of int * Point3d * Point3d * Point3d * Point3d * float * float * float * float* float * float)
+    /// A list of intersection information tuple . The list will contain one or more of the following tuple:
+    ///    Element Type        Description
+    ///    [0]       Number      The intersection event type, either Point (1) or Overlap (2).
+    ///    [1]       Point3d     If the event type is Point (1), then the intersection point on the Curve.
+    ///      If the event type is Overlap (2), then intersection start point on the Curve.
+    ///    [2]       Point3d     If the event type is Point (1), then the intersection point on the Curve.
+    ///      If the event type is Overlap (2), then intersection end point on the Curve.
+    ///    [3]       Point3d     If the event type is Point (1), then the intersection point on the Plane.
+    ///      If the event type is Overlap (2), then intersection start point on the Plane.
+    ///    [4]       Point3d     If the event type is Point (1), then the intersection point on the Plane.
+    ///      If the event type is Overlap (2), then intersection end point on the Plane.
+    ///    [5]       Number      If the event type is Point (1), then the Curve parameter.
+    ///      If the event type is Overlap (2), then the start value of the Curve parameter range.
+    ///    [6]       Number      If the event type is Point (1), then the Curve parameter.
+    ///      If the event type is Overlap (2), then the end value of the Curve parameter range.
+    ///    [7]       Number      If the event type is Point (1), then the U Plane parameter.
+    ///      If the event type is Overlap (2), then the U Plane parameter for Curve at (n, 5).
+    ///    [8]       Number      If the event type is Point (1), then the V Plane parameter.
+    ///      If the event type is Overlap (2), then the V Plane parameter for Curve at (n, 5).
+    ///    [9]       Number      If the event type is Point (1), then the U Plane parameter.
+    ///      If the event type is Overlap (2), then the U Plane parameter for Curve at (n, 6).
+    ///    [10]      Number      If the event type is Point (1), then the V Plane parameter.
+    ///      If the event type is Overlap (2), then the V Plane parameter for Curve at (n, 6).</returns>
+    static member PlaneCurveIntersection( plane:Plane,
+                                          curve:Curve,
+                                          [<OPT;DEF(0.0)>]tolerance:float) : ResizeArray<int * Point3d * Point3d * Point3d * Point3d * float * float * float * float* float * float > =
         let  tolerance = if tolerance = 0.0 then  State.Doc.ModelAbsoluteTolerance else tolerance
         let intersections = Intersect.Intersection.CurvePlane(curve, plane, tolerance)
         if notNull intersections then
@@ -12622,11 +14745,6 @@ type RhinoScriptSyntax private () =
     /// <returns>(Plane) Rhino's world ZX Plane.</returns>
     static member WorldZXPlane() : Plane =
         Plane.WorldZX
-
-
-
-
-
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
 
@@ -12712,34 +14830,50 @@ type RhinoScriptSyntax private () =
     ///      [1] the point on object
     ///      [2] the distance.</returns>
     static member PointClosestObject(point:Point3d, objectIds:Guid seq) : Guid * Point3d * float =
-        let mutable closest = Unchecked.defaultof<Guid*Point3d*float>
+        let objects = objectIds |> Seq.map (fun id -> id, RhinoScriptSyntax.CoerceGeometry(id)) |> Seq.toArray
+        let geometry, closest, distance = RhinoScriptSyntax.PointClosestObject(point, objects |> Seq.map snd)
+        let id, _ = objects |> Array.find (fun (_, input) -> obj.ReferenceEquals(input, geometry))
+        id, closest, distance
+
+
+
+
+
+    /// <summary>Finds the object that is closest to a test point.</summary>
+    /// <param name="point">(Point3d) Point to test</param>
+    /// <param name="geometries">(GeometryBase seq) Geometry to compare directly</param>
+    /// <returns>(GeometryBase * Point3d * float) Tuple of 3 values
+    ///      [0] The closest input geometry
+    ///      [1] the point on object
+    ///      [2] the distance.</returns>
+    static member PointClosestObject(point:Point3d, geometries:GeometryBase seq) : GeometryBase * Point3d * float =
+        let mutable closest = ((null:GeometryBase), Point3d.Unset, Double.MaxValue)
         let mutable distance = Double.MaxValue
-        for objectId in objectIds do
-            let geom = RhinoScriptSyntax.CoerceGeometry(objectId)
-            match geom with
+        for geometry in geometries do
+            match geometry with
             | :?  Point as pointgeometry ->
                 distance <- point.DistanceTo( pointgeometry.Location )
                 if distance < t3 closest then
-                    closest  <-  objectId, pointgeometry.Location, distance
+                    closest  <-  geometry, pointgeometry.Location, distance
 
             | :?  TextDot as dot ->
                 distance <- point.DistanceTo(dot.Point)
                 if distance < t3 closest then
-                    closest  <-  objectId, dot.Point, distance
+                    closest  <-  geometry, dot.Point, distance
 
             | :?  PointCloud as pointcloud ->
                 let index = pointcloud.ClosestPoint(point)
                 if index>=0 then
                     distance <- point.DistanceTo( pointcloud.[index].Location )
                     if distance < t3 closest then
-                        closest  <-  objectId, pointcloud.[index].Location, distance
+                        closest  <-  geometry, pointcloud.[index].Location, distance
 
             | :?  Curve as curve ->
                 let rc, t = curve.ClosestPoint(point)
                 if rc then
                     distance <- point.DistanceTo( curve.PointAt(t))
                     if distance < t3 closest then
-                        closest  <-  objectId, curve.PointAt(t), distance
+                        closest  <-  geometry, curve.PointAt(t), distance
 
             | :?  Surface as srf ->
                 let ok, u, v = srf.ClosestPoint(point)
@@ -12747,24 +14881,24 @@ type RhinoScriptSyntax private () =
                     let srfclosest = srf.PointAt(u, v)
                     distance <- point.DistanceTo( srfclosest )
                     if distance < t3 closest then
-                        closest  <-  objectId, srfclosest, distance
+                        closest  <-  geometry, srfclosest, distance
 
             | :?  Brep as brep ->
                 let brepclosest = brep.ClosestPoint(point)
                 distance <- point.DistanceTo( brepclosest )
                 if distance < t3 closest then
-                    closest  <-  objectId, brepclosest, distance
+                    closest  <-  geometry, brepclosest, distance
 
             | :?  Mesh as mesh ->
                 let meshclosest = mesh.ClosestPoint(point)
                 distance <- point.DistanceTo( meshclosest )
                 if distance < t3 closest then
-                    closest  <-  objectId, meshclosest, distance
+                    closest  <-  geometry, meshclosest, distance
 
-            | _ -> RhinoScriptingException.Raise "PointClosestObject: non supported object type %A %A  Point, PointCloud, Curve, Brep or Mesh" (RhinoScriptSyntax.ObjectDescription(objectId)) objectId
+            | _ -> RhinoScriptingException.Raise "PointClosestObject: non supported object type %A %A  Point, PointCloud, Curve, Brep or Mesh" (geometry.GetType().Name) geometry
 
-        if t1 closest <> Guid.Empty then closest
-        else RhinoScriptingException.Raise "PointClosestObject failed on %A and %A" point objectIds
+        if notNull (t1 closest) then closest
+        else RhinoScriptingException.Raise "PointClosestObject failed on %A and %A" point geometries
 
 
     /// <summary>Compares two 3D points.</summary>
@@ -12839,10 +14973,20 @@ type RhinoScriptSyntax private () =
     static member ProjectPointToMesh( points:Point3d seq,
                                       meshIds:Guid seq,
                                       direction:Vector3d) : Point3d array =
-        let meshes  = meshIds |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
+        let meshes = meshIds |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
+        RhinoScriptSyntax.ProjectPointToMesh(points, meshes, direction)
+
+    /// <summary>Projects one or more points onto one or more Meshes.</summary>
+    /// <param name="points">(Point3d seq) One or more 3D points</param>
+    /// <param name="meshGeos">(Mesh seq) Meshes to use directly</param>
+    /// <param name="direction">(Vector3d) Direction vector to project the points</param>
+    /// <returns>(Point3d array) projected points.</returns>
+    static member ProjectPointToMesh( points:Point3d seq,
+                                      meshGeos:Mesh seq,
+                                      direction:Vector3d) : Point3d array =
+        let meshes  = meshGeos
         let tolerance = State.Doc.ModelAbsoluteTolerance
         Intersect.Intersection.ProjectPointsToMeshes(meshes, points, direction, tolerance)
-
 
 
     /// <summary>Projects one or more points onto one or more Surfaces or Polysurfaces.</summary>
@@ -12853,7 +14997,18 @@ type RhinoScriptSyntax private () =
     static member ProjectPointToSurface( points:Point3d seq,
                                          surfaceIds:Guid seq,
                                          direction:Vector3d) : Point3d array =
-        let breps  = surfaceIds |> RArr.mapSeq RhinoScriptSyntax.CoerceBrep
+        let breps = surfaceIds |> RArr.mapSeq RhinoScriptSyntax.CoerceBrep
+        RhinoScriptSyntax.ProjectPointToSurface(points, breps, direction)
+
+    /// <summary>Projects one or more points onto one or more Surfaces or Polysurfaces.</summary>
+    /// <param name="points">(Point3d seq) One or more 3D points</param>
+    /// <param name="surfaceGeos">(Brep seq) Surface or polysurface Breps to use directly</param>
+    /// <param name="direction">(Vector3d) Direction vector to project the points</param>
+    /// <returns>(Point3d array) projected points.</returns>
+    static member ProjectPointToSurface( points:Point3d seq,
+                                         surfaceGeos:Brep seq,
+                                         direction:Vector3d) : Point3d array =
+        let breps  = surfaceGeos
         let tolerance = State.Doc.ModelAbsoluteTolerance
         Intersect.Intersection.ProjectPointsToBreps(breps, points, direction, tolerance)
 
@@ -12864,7 +15019,15 @@ type RhinoScriptSyntax private () =
     /// <param name="points">(Point3d seq) List of 3D points</param>
     /// <returns>(Point3d array) 3D points pulled onto Surface or Mesh.</returns>
     static member PullPoints(objectId:Guid, points:Point3d seq) : Point3d array =
-        match RhinoScriptSyntax.CoerceGeometry(objectId) with
+        RhinoScriptSyntax.PullPoints(RhinoScriptSyntax.CoerceGeometry(objectId), points)
+
+    /// <summary>Pulls an array of points to a Surface or Mesh object. For more
+    ///    information, see the Rhino help file Pull command.</summary>
+    /// <param name="geometryObject">(GeometryBase) The Surface or Mesh geometry that pulls</param>
+    /// <param name="points">(Point3d seq) List of 3D points</param>
+    /// <returns>(Point3d array) 3D points pulled onto Surface or Mesh.</returns>
+    static member PullPoints(geometryObject:GeometryBase, points:Point3d seq) : Point3d array =
+        match geometryObject with
         | :? Mesh as mesh->
             let points = mesh.PullPointsToMesh(points)
             points
@@ -12874,7 +15037,7 @@ type RhinoScriptSyntax private () =
                 brep.Faces.[0].PullPointsToFace(points, tolerance)
             else
                 RhinoScriptingException.Raise "PullPoints only works on surface and single sided breps not %d sided ones" brep.Faces.Count
-        | _ -> RhinoScriptingException.Raise "PullPoints does not support %A" (RhinoScriptSyntax.ObjectDescription(objectId))
+        | _ -> RhinoScriptingException.Raise "PullPoints does not support %A" geometryObject.ObjectType
 
 
     /// <summary>Adds two 3D vectors.</summary>
@@ -13033,9 +15196,6 @@ type RhinoScriptSyntax private () =
             Box(plane, points)
         else
             Box(BoundingBox(points))
-
-
-
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
     // moved to Rhino.RhinoScriptSyntax.Fsharp project:
@@ -14015,12 +16175,33 @@ type RhinoScriptSyntax private () =
                                startPoint:Point3d,
                                endPoint:Point3d,
                                [<OPT;DEF(Vector3d())>]normal:Vector3d) : Guid =
-        // from commit in v8.x : https://github.com/mcneel/rhinoscriptsyntax/commit/85e122790647a932e50d743a37af5efe9cfda955
+        let objectIdsGeometry = objectIds |> RArr.mapSeq RhinoScriptSyntax.CoerceGeometry
+        let geometry = RhinoScriptSyntax.MakeCutPlane(objectIdsGeometry, startPoint, endPoint, normal)
+        let rc = State.Doc.Objects.AddSurface(geometry)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "AddCutPlane: unable to add geometry to the document."
+        State.Doc.Views.Redraw()
+        rc
+
+
+    /// <summary>Creates a planar Surface through objects at a designated location. For more
+    ///    information, see the Rhino help file for the CutPlane command. Returns geometry without adding it.</summary>
+    /// <param name="geometryObjects">(GeometryBase seq) Objects of objects that the cutting Plane will
+    ///    pass through</param>
+    /// <param name="startPoint">(Point3d) Start point of line that defines the cutting Plane</param>
+    /// <param name="endPoint">(Point3d) End point of line that defines the cutting Plane</param>
+    /// <param name="normal">(Vector3d) Optional, default value: <c>world Z axis</c>
+    ///    Vector that will be contained in the returned planar Surface.
+    ///    If omitted, the world Z axis is used (NOT the normal to, or Z axis of, the active view's construction plane as in rhinopython).</param>
+    /// <returns>(PlaneSurface) Newly created geometry. The caller owns the returned objects.</returns>
+    static member MakeCutPlane( geometryObjects:GeometryBase seq,
+                               startPoint:Point3d,
+                               endPoint:Point3d,
+                               [<OPT;DEF(Vector3d())>]normal:Vector3d) : PlaneSurface =
         let bbox =
-            let objs = objectIds|> Seq.map RhinoScriptSyntax.CoerceRhinoObject
-            let  _,bbox0 = DocObjects.RhinoObject.GetTightBoundingBox(objs) //not available on Rhino 6 !!
+            let mutable bbox0 = BoundingBox.Unset
+            for geometry in geometryObjects do bbox0.Union(geometry.GetBoundingBox(true))
             if not bbox0.IsValid then
-                RhinoScriptingException.Raise "AddCutPlane GetTightBoundingBox failed.startPoint:'%A' endPoint:'%A' normal:'%A' objectIds:%s "startPoint endPoint normal (Pretty.str objectIds)
+                RhinoScriptingException.Raise "MakeCutPlane GetTightBoundingBox failed.startPoint:'%A' endPoint:'%A' normal:'%A' geometryObjects:%s "startPoint endPoint normal (Pretty.str geometryObjects)
             let mutable bboxMin = bbox0.Min
             let mutable bboxMax = bbox0.Max
             for i=0 to 2 do
@@ -14033,24 +16214,11 @@ type RhinoScriptSyntax private () =
             bboxMin <- bboxMax - v
             bboxMax <- p
             Rhino.Geometry.BoundingBox(bboxMin, bboxMax)
-        // #else RH6
-        // let bbox = BoundingBox.Unset
-        // for objectId in objectIds do
-        //     let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        //     let geometry = rhobj.Geometry
-        //     bbox.Union( geometry.GetBoundingBox(true))
-        // if not bbox.IsValid then
-        //     RhinoScriptingException.Raise "AddCutPlane failed.  objectIds:'%A' startPoint:'%A' endPoint:'%A' normal:'%A'" (Pretty.str objectIds) startPoint endPoint normal
-        // #endif
         let line = Geometry.Line(startPoint, endPoint)
         let normal = if normal.IsZero then Vector3d.ZAxis else normal // TODO or use original ?? : scriptcontext.doc.Views.ActiveView.ActiveViewport.ConstructionPlane().Normal
         let surface = Rhino.Geometry.PlaneSurface.CreateThroughBox(line, normal, bbox)
-        if surface|> isNull  then RhinoScriptingException.Raise "AddCutPlane failed.  objectIds:'%A' startPoint:'%A' endPoint:'%A' normal:'%A'" (Pretty.str objectIds) startPoint endPoint normal
-        let objectId = State.Doc.Objects.AddSurface(surface)
-        if objectId = Guid.Empty then RhinoScriptingException.Raise "AddCutPlane failed.  objectIds:'%A' startPoint:'%A' endPoint:'%A' normal:'%A'" (Pretty.str objectIds) startPoint endPoint normal
-        State.Doc.Views.Redraw()
-        objectId
-
+        if surface|> isNull  then RhinoScriptingException.Raise "MakeCutPlane failed.  geometryObjects:'%A' startPoint:'%A' endPoint:'%A' normal:'%A'" (Pretty.str geometryObjects) startPoint endPoint normal
+        surface
 
 
     /// <summary>Adds a cylinder-shaped Polysurface to the document.</summary>
@@ -14080,13 +16248,22 @@ type RhinoScriptSyntax private () =
     /// <param name="curveIds">(Guid seq) List of Curves</param>
     /// <returns>(Guid) identifier of new object.</returns>
     static member AddEdgeSrf(curveIds:Guid seq) : Guid =
-        let curves  = curveIds |> RArr.mapSeq RhinoScriptSyntax.CoerceCurve
-        let brep = Brep.CreateEdgeSurface(curves)
-        if brep|> isNull  then RhinoScriptingException.Raise "AddEdgeSrf failed.  curveIds:'%s'" (Pretty.str curveIds)
-        let objectId = State.Doc.Objects.AddBrep(brep)
-        if objectId = Guid.Empty then RhinoScriptingException.Raise "AddEdgeSrf failed.  curveIds:'%s'" (Pretty.str curveIds)
+        let curveIdsGeometry = curveIds |> RArr.mapSeq RhinoScriptSyntax.CoerceCurve
+        let geometry = RhinoScriptSyntax.MakeEdgeSrf(curveIdsGeometry)
+        let rc = State.Doc.Objects.AddBrep(geometry)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "AddEdgeSrf: unable to add geometry to the document."
         State.Doc.Views.Redraw()
-        objectId
+        rc
+
+
+    /// <summary>Creates a Surface from 2, 3, or 4 edge Curves. Returns geometry without adding it.</summary>
+    /// <param name="curveGeos">(Curve seq) List of Curves</param>
+    /// <returns>(Brep) Newly created geometry. The caller owns the returned objects.</returns>
+    static member MakeEdgeSrf(curveGeos:Curve seq) : Brep =
+        let curves  = curveGeos |> RArr.mapSeq (fun geometry -> geometry)
+        let brep = Brep.CreateEdgeSurface(curves)
+        if brep|> isNull  then RhinoScriptingException.Raise "MakeEdgeSrf failed.  curveGeos:'%s'" (Pretty.str curveGeos)
+        brep
 
 
     /// <summary>Creates a Surface from a network of crossing Curves.</summary>
@@ -14106,14 +16283,37 @@ type RhinoScriptSyntax private () =
                                  [<OPT;DEF(0.0)>]edgeTolerance:float,
                                  [<OPT;DEF(0.0)>]interiorTolerance:float,
                                  [<OPT;DEF(0.0)>]angleTolerance:float) : Guid =
-        let curves  = curves |> RArr.mapSeq RhinoScriptSyntax.CoerceCurve
+        let curvesGeometry = curves |> RArr.mapSeq RhinoScriptSyntax.CoerceCurve
+        let geometry = RhinoScriptSyntax.MakeNetworkSrf(curvesGeometry, continuity, edgeTolerance, interiorTolerance, angleTolerance)
+        let rc = State.Doc.Objects.AddSurface(geometry)
+        State.Doc.Views.Redraw()
+        rc
+
+
+    /// <summary>Creates a Surface from a network of crossing Curves. Returns geometry without adding it.</summary>
+    /// <param name="curves">(Curve seq) Curves from which to create the Surface</param>
+    /// <param name="continuity">(int) Optional, default value: <c>1</c>
+    ///    How the edges match the input geometry
+    ///    0 = loose
+    ///    1 = position
+    ///    2 = tangency
+    ///    3 = curvature</param>
+    /// <param name="edgeTolerance">(float) Optional, Edge tolerance</param>
+    /// <param name="interiorTolerance">(float) Optional, Interior tolerance</param>
+    /// <param name="angleTolerance">(float) Optional, Angle tolerance , in radians?</param>
+    /// <returns>(NurbsSurface) Newly created geometry. The caller owns the returned objects.</returns>
+    static member MakeNetworkSrf( curves:Curve seq,
+                                 [<OPT;DEF(1)>]continuity:int,
+                                 [<OPT;DEF(0.0)>]edgeTolerance:float,
+                                 [<OPT;DEF(0.0)>]interiorTolerance:float,
+                                 [<OPT;DEF(0.0)>]angleTolerance:float) : NurbsSurface =
+        let curves  = curves |> RArr.mapSeq (fun geometry -> geometry)
         let surf, _ = NurbsSurface.CreateNetworkSurface(curves, continuity, edgeTolerance, interiorTolerance, angleTolerance)// 0.0 Tolerance OK ? TODO
         if notNull surf then
-            let rc = State.Doc.Objects.AddSurface(surf)
-            State.Doc.Views.Redraw()
-            rc
+            surf
         else
-            RhinoScriptingException.Raise "AddNetworkSrf failed on %A" curves
+            RhinoScriptingException.Raise "MakeNetworkSrf failed on %A" curves
+
 
     /// <summary>Adds a NURBS Surface object to the document.</summary>
     /// <param name="pointCount">(int * int) Number of control points in the u and v direction</param>
@@ -14219,18 +16419,13 @@ type RhinoScriptSyntax private () =
                               [<OPT;DEF(1.0)>]flexibility:float,
                               [<OPT;DEF(1.0)>]surfacePull:float,
                               [<OPT;DEF(false)>]fixEdges:bool) : Guid =
-                    let uspan, vspan = 10, 10
-                    let geometry =  objectIds |> RArr.mapSeq RhinoScriptSyntax.CoerceGeometry
-                    let surface = RhinoScriptSyntax.CoerceSurface(startSurfaceId)
-                    let tolerance = if 0.0 = tolerance then State.Doc.ModelAbsoluteTolerance else tolerance
-                    let b =  Array.create 4 fixEdges
-                    let brep = Brep.CreatePatch(geometry, surface, uspan, vspan, trim, false, pointSpacing, flexibility, surfacePull, b, tolerance)
-                    if notNull brep then
-                        let rc =  State.Doc.Objects.AddBrep(brep)
-                        State.Doc.Views.Redraw()
-                        rc
-                    else
-                        RhinoScriptingException.Raise "AddPatch failed for %A and %A" (Pretty.str objectIds) startSurfaceId
+        let objectIdsGeometry = objectIds |> RArr.mapSeq RhinoScriptSyntax.CoerceGeometry
+        let startSurfaceIdGeometry = RhinoScriptSyntax.CoerceSurface(startSurfaceId)
+        let geometry = RhinoScriptSyntax.MakePatch(objectIdsGeometry, startSurfaceIdGeometry, tolerance, trim, pointSpacing, flexibility, surfacePull, fixEdges)
+        let rc = State.Doc.Objects.AddBrep(geometry)
+        State.Doc.Views.Redraw()
+        rc
+
 
     /// <summary>Fits a Surface through Curve, point, point cloud, and Mesh objects.</summary>
     /// <param name="objectIds">(Guid seq) A list of object identifiers that indicate the objects to use for the patch fitting.
@@ -14266,18 +16461,102 @@ type RhinoScriptSyntax private () =
                             [<OPT;DEF(1.0)>]flexibility:float,
                             [<OPT;DEF(1.0)>]surfacePull:float,
                             [<OPT;DEF(false)>]fixEdges:bool) : Guid =
+        let objectIdsGeometry = objectIds |> RArr.mapSeq RhinoScriptSyntax.CoerceGeometry
+        let geometry = RhinoScriptSyntax.MakePatch(objectIdsGeometry, uvSpans, tolerance, trim, pointSpacing, flexibility, surfacePull, fixEdges)
+        let rc = State.Doc.Objects.AddBrep(geometry)
+        State.Doc.Views.Redraw()
+        rc
 
+
+    /// <summary>Fits a Surface through Curve, point, point cloud, and Mesh objects. Returns geometry without adding it.</summary>
+    /// <param name="geometryObjects">(GeometryBase seq) A list of objects that indicate the objects to use for the patch fitting.
+    ///    Acceptable object types include Curves, points, point clouds, and Meshes</param>
+    /// <param name="startSurfaceGeo">(Surface) The starting Surface. It is best if you create a starting Surface that is similar in shape
+    ///    to the Surface you are trying to create</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
+    ///    The tolerance used by input analysis functions.</param>
+    /// <param name="trim">(bool) Optional, default value: <c>true</c>
+    ///    Try to find an outside Curve and trims the Surface to it. The default value is True</param>
+    /// <param name="pointSpacing">(float) Optional, default value: <c>0.1</c>
+    ///    The basic distance between points sampled from input Curves. The default value is 0.1</param>
+    /// <param name="flexibility">(float) Optional, default value: <c>1.0</c>
+    ///    Determines the behavior of the Surface in areas where its not otherwise controlled by the input.
+    ///    Lower numbers make the Surface behave more like a stiff material, higher, more like a flexible material.
+    ///    That is, each span is made to more closely match the spans adjacent to it if there is no input geometry
+    ///    mapping to that area of the Surface when the flexibility value is low. The scale is logarithmic.
+    ///    For example, numbers around 0.001 or 0.1 make the patch pretty stiff and numbers around 10 or 100
+    ///    make the Surface flexible. The default value is 1.0</param>
+    /// <param name="surfacePull">(float) Optional, default value: <c>1.0</c>
+    ///    Similar to stiffness, but applies to the starting Surface. The bigger the pull, the closer
+    ///    the resulting Surface shape will be to the starting Surface. The default value is 1.0</param>
+    /// <param name="fixEdges">(bool) Optional, default value: <c>false</c>
+    ///    Clamps the edges of the starting Surface in place. This option is useful if you are using a
+    ///    Curve or points for deforming an existing Surface, and you do not want the edges of the starting Surface
+    ///    to move. The default is False</param>
+    /// <returns>(Brep) Newly created geometry. The caller owns the returned objects.</returns>
+    static member MakePatch( geometryObjects:GeometryBase seq,
+                              startSurfaceGeo:Surface,
+                              [<OPT;DEF(0.0)>]tolerance:float,
+                              [<OPT;DEF(true)>]trim:bool,
+                              [<OPT;DEF(0.1)>]pointSpacing:float,
+                              [<OPT;DEF(1.0)>]flexibility:float,
+                              [<OPT;DEF(1.0)>]surfacePull:float,
+                              [<OPT;DEF(false)>]fixEdges:bool) : Brep =
+                    let uspan, vspan = 10, 10
+                    let geometry =  geometryObjects |> RArr.mapSeq (fun geometry -> geometry)
+                    let surface = startSurfaceGeo
+                    let tolerance = if 0.0 = tolerance then State.Doc.ModelAbsoluteTolerance else tolerance
+                    let b =  Array.create 4 fixEdges
+                    let brep = Brep.CreatePatch(geometry, surface, uspan, vspan, trim, false, pointSpacing, flexibility, surfacePull, b, tolerance)
+                    if notNull brep then
+                        brep
+                    else
+                        RhinoScriptingException.Raise "MakePatch failed for %A and %A" (Pretty.str geometryObjects) startSurfaceGeo
+
+
+    /// <summary>Fits a Surface through Curve, point, point cloud, and Mesh objects. Returns geometry without adding it.</summary>
+    /// <param name="geometryObjects">(GeometryBase seq) A list of objects that indicate the objects to use for the patch fitting.
+    ///    Acceptable object types include Curves, points, point clouds, and Meshes</param>
+    /// <param name="uvSpans">(int * int) The U and V direction span counts for the automatically generated Surface . however it is best if you create a starting Surface that is similar in shape
+    ///    to the Surface you are trying to create an use the other overload of this method</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
+    ///    The tolerance used by input analysis functions.</param>
+    /// <param name="trim">(bool) Optional, default value: <c>true</c>
+    ///    Try to find an outside Curve and trims the Surface to it. The default value is True</param>
+    /// <param name="pointSpacing">(float) Optional, default value: <c>0.1</c>
+    ///    The basic distance between points sampled from input Curves. The default value is 0.1</param>
+    /// <param name="flexibility">(float) Optional, default value: <c>1.0</c>
+    ///    Determines the behavior of the Surface in areas where its not otherwise controlled by the input.
+    ///    Lower numbers make the Surface behave more like a stiff material, higher, more like a flexible material.
+    ///    That is, each span is made to more closely match the spans adjacent to it if there is no input geometry
+    ///    mapping to that area of the Surface when the flexibility value is low. The scale is logarithmic.
+    ///    For example, numbers around 0.001 or 0.1 make the patch pretty stiff and numbers around 10 or 100
+    ///    make the Surface flexible. The default value is 1.0</param>
+    /// <param name="surfacePull">(float) Optional, default value: <c>1.0</c>
+    ///    Similar to stiffness, but applies to the starting Surface. The bigger the pull, the closer
+    ///    the resulting Surface shape will be to the starting Surface. The default value is 1.0</param>
+    /// <param name="fixEdges">(bool) Optional, default value: <c>false</c>
+    ///    Clamps the edges of the starting Surface in place. This option is useful if you are using a
+    ///    Curve or points for deforming an existing Surface, and you do not want the edges of the starting Surface
+    ///    to move. The default is False</param>
+    /// <returns>(Brep) Newly created geometry. The caller owns the returned objects.</returns>
+    static member MakePatch( geometryObjects:GeometryBase seq,
+                            uvSpans: int * int ,
+                            [<OPT;DEF(0.0)>]tolerance:float,
+                            [<OPT;DEF(true)>]trim:bool,
+                            [<OPT;DEF(0.1)>]pointSpacing:float,
+                            [<OPT;DEF(1.0)>]flexibility:float,
+                            [<OPT;DEF(1.0)>]surfacePull:float,
+                            [<OPT;DEF(false)>]fixEdges:bool) : Brep =
         let uspan, vspan = uvSpans
-        let geometry =   objectIds |> RArr.mapSeq RhinoScriptSyntax.CoerceGeometry
+        let geometry =   geometryObjects |> RArr.mapSeq (fun geometry -> geometry)
         let tolerance = if 0.0 = tolerance then State.Doc.ModelAbsoluteTolerance else tolerance
         let b =  Array.create 4 fixEdges
         let brep = Brep.CreatePatch(geometry, null, uspan, vspan, trim, false, pointSpacing, flexibility, surfacePull, b, tolerance) //TODO test with null as srf
         if notNull brep then
-            let rc =  State.Doc.Objects.AddBrep(brep)
-            State.Doc.Views.Redraw()
-            rc
+            brep
         else
-            RhinoScriptingException.Raise "AddPatch failed for %A and %A" (Pretty.str objectIds) uvSpans
+            RhinoScriptingException.Raise "MakePatch failed for %A and %A" (Pretty.str geometryObjects) uvSpans
 
 
     /// <summary>Creates a single walled Surface with a circular profile around a Curve.</summary>
@@ -14297,72 +16576,85 @@ type RhinoScriptSyntax private () =
                            [<OPT;DEF(0)>]blendType:int,
                            [<OPT;DEF(0)>]cap:int,
                            [<OPT;DEF(false)>]fit:bool) : Guid ResizeArray =
-        let rail = RhinoScriptSyntax.CoerceCurve(curveId)
-        let abstol = State.Doc.ModelAbsoluteTolerance
-        let angtol = State.Doc.ModelAngleToleranceRadians
-        let cap :PipeCapMode  = LanguagePrimitives.EnumOfValue  cap
-        let breps = Brep.CreatePipe(rail, parameters, radii, (blendType = 0), cap, fit, abstol, angtol)
-        let rc  = breps |> RArr.mapArr State.Doc.Objects.AddBrep
+        let curveIdGeometry = RhinoScriptSyntax.CoerceCurve(curveId)
+        let geometry = RhinoScriptSyntax.MakePipe(curveIdGeometry, parameters, radii, blendType, cap, fit)
+        let rc = geometry |> RArr.mapSeq State.Doc.Objects.AddBrep
         State.Doc.Views.Redraw()
         rc
 
 
+    /// <summary>Creates a single walled Surface with a circular profile around a Curve. Returns geometry without adding it.</summary>
+    /// <param name="curveGeo">(Curve) Object of rail Curve</param>
+    /// <param name="parameters">(float seq) normalized Curve parameters</param>
+    /// <param name="radii">(float seq) radius values at normalized Curve parameters</param>
+    /// <param name="blendType">(int) Optional, default value: <c>0</c>
+    ///    0(local) or 1(global)</param>
+    /// <param name="cap">(int) Optional, default value: <c>0</c>
+    ///    0(none), 1(flat), 2(round)</param>
+    /// <param name="fit">(bool) Optional, default value: <c>false</c>
+    ///    Attempt to fit a single Surface</param>
+    /// <returns>(Brep ResizeArray) Newly created geometry. The caller owns the returned objects.</returns>
+    static member MakePipe( curveGeo:Curve,
+                           parameters:float seq,
+                           radii:float seq,
+                           [<OPT;DEF(0)>]blendType:int,
+                           [<OPT;DEF(0)>]cap:int,
+                           [<OPT;DEF(false)>]fit:bool) : Brep ResizeArray =
+        let rail = curveGeo
+        let abstol = State.Doc.ModelAbsoluteTolerance
+        let angtol = State.Doc.ModelAngleToleranceRadians
+        let cap :PipeCapMode  = LanguagePrimitives.EnumOfValue  cap
+        let breps = Brep.CreatePipe(rail, parameters, radii, (blendType = 0), cap, fit, abstol, angtol)
+        ResizeArray(breps)
+
 
     /// <summary>Creates one Surface from one Polyline Geometry.</summary>
     /// <param name="polyline">(Polyline) one Polyline Geometry to use for creating planar Surfaces</param>
-    /// <returns>(Guid) identifier of Surface created .</returns>
-    static member AddPlanarSrf(polyline:Polyline) : Guid=
+    /// <returns>(Brep) Newly created geometry. The caller owns the returned objects.</returns>
+    static member MakePlanarSrf(polyline:Polyline) : Brep =
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let breps = Brep.CreatePlanarBreps(new PolylineCurve(polyline), tolerance)
         if notNull breps then
-            if breps.Length <> 1 then RhinoScriptingException.Raise "AddPlanarSrf created more then one surface on one input curve, use the seq overload instead on the same function on %s" (Pretty.str polyline)
-            let rc =  State.Doc.Objects.AddBrep(breps.[0])
-            State.Doc.Views.Redraw()
-            rc
+            if breps.Length <> 1 then RhinoScriptingException.Raise "MakePlanarSrf created more then one surface on one input curve, use the seq overload instead on the same function on %s" (Pretty.str polyline)
+            breps.[0]
         else
-            RhinoScriptingException.Raise "AddPlanarSrf(polyline:Polyline) failed on  %s" (Pretty.str polyline)
+            RhinoScriptingException.Raise "MakePlanarSrf(polyline:Polyline) failed on  %s" (Pretty.str polyline)
+
 
     /// <summary>Creates one Surface from one planar Curve.</summary>
     /// <param name="curve">(Curve) one Curve Geometry to use for creating planar Surfaces</param>
-    /// <returns>(Guid) identifier of Surface created .</returns>
-    static member AddPlanarSrf(curve:Curve) : Guid=
+    /// <returns>(Brep) Newly created geometry. The caller owns the returned objects.</returns>
+    static member MakePlanarSrf(curve:Curve) : Brep =
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let breps = Brep.CreatePlanarBreps(curve, tolerance)
         if notNull breps then
-            if breps.Length <> 1 then RhinoScriptingException.Raise "AddPlanarSrf created more then one surface on one input curve, use the seq overload instead on the same function on %s" (Pretty.str curve)
-            let rc =  State.Doc.Objects.AddBrep(breps.[0])
-            State.Doc.Views.Redraw()
-            rc
+            if breps.Length <> 1 then RhinoScriptingException.Raise "MakePlanarSrf created more then one surface on one input curve, use the seq overload instead on the same function on %s" (Pretty.str curve)
+            breps.[0]
         else
-            RhinoScriptingException.Raise "AddPlanarSrf(curve:Curve) failed on %s" (Pretty.str curve)
+            RhinoScriptingException.Raise "MakePlanarSrf(curve:Curve) failed on %s" (Pretty.str curve)
+
 
     /// <summary>Creates one or more Surfaces from planar Curves.</summary>
     /// <param name="curves">(Curve seq) several Curves Geometries to use for creating planar Surfaces</param>
-    /// <returns>(Guid ResizeArray) identifiers of Surfaces created .</returns>
-    static member AddPlanarSrf(curves:Curve seq) : Guid ResizeArray =
+    /// <returns>(Brep ResizeArray) Newly created geometry. The caller owns the returned objects.</returns>
+    static member MakePlanarSrf(curves:Curve seq) : Brep ResizeArray =
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let breps = Brep.CreatePlanarBreps(curves, tolerance)
         if notNull breps then
-            let rc  = breps |> RArr.mapArr State.Doc.Objects.AddBrep
-            State.Doc.Views.Redraw()
-            rc
+            ResizeArray(breps)
         else
-            RhinoScriptingException.Raise "AddPlanarSrf(curves:Curve seq) failed on %s" (Pretty.str curves)
+            RhinoScriptingException.Raise "MakePlanarSrf(curves:Curve seq) failed on %s" (Pretty.str curves)
+
 
     /// <summary>Creates one or more Surfaces from planar Curves.</summary>
     /// <param name="objectIds">(Guid seq) Curves to use for creating planar Surfaces</param>
     /// <returns>(Guid ResizeArray) identifiers of Surfaces created .</returns>
     static member AddPlanarSrf(objectIds:Guid seq) : Guid ResizeArray =
-        let curves  = objectIds |> RArr.mapSeq RhinoScriptSyntax.CoerceCurve
-        let tolerance = State.Doc.ModelAbsoluteTolerance
-        let breps = Brep.CreatePlanarBreps(curves, tolerance)
-        if notNull breps then
-            let rc  = breps |> RArr.mapArr State.Doc.Objects.AddBrep
-            State.Doc.Views.Redraw()
-            rc
-        else
-            RhinoScriptingException.Raise "AddPlanarSrf(objectIds:Guid seq) failed on %s" (Pretty.str objectIds)
-
+        let curvesGeometry = objectIds |> RArr.mapSeq RhinoScriptSyntax.CoerceCurve
+        let geometry = RhinoScriptSyntax.MakePlanarSrf(curvesGeometry)
+        let rc = geometry |> RArr.mapSeq State.Doc.Objects.AddBrep
+        State.Doc.Views.Redraw()
+        rc
 
 
     /// <summary>Create a Plane Surface and add it to the document.</summary>
@@ -14416,17 +16708,58 @@ type RhinoScriptSyntax private () =
                               [<OPT;DEF(0)>]rebuild:int,
                               [<OPT;DEF(0.0)>]refit:float,
                               [<OPT;DEF(false)>]closed:bool) : Guid ResizeArray =
-        if loftType<0 || loftType>4 then RhinoScriptingException.Raise "AddLoftSrf: LoftType must be 0-4.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" (Pretty.str objectIds) start ende loftType rebuild refit closed
-        if rebuild<>0 && refit<>0.0 then RhinoScriptingException.Raise "AddLoftSrf: set either rebuild or refit to a value ! not both.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" (Pretty.str objectIds) start ende loftType rebuild refit closed
-        let curves  = objectIds |> RArr.mapSeq RhinoScriptSyntax.CoerceCurve
-        if Seq.length(curves)<2 then RhinoScriptingException.Raise "AddLoftSrf failed.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" (Pretty.str objectIds) start ende loftType rebuild refit closed
+        let objectIdsGeometry = objectIds |> RArr.mapSeq RhinoScriptSyntax.CoerceCurve
+        let geometry = RhinoScriptSyntax.MakeLoftSrf(objectIdsGeometry, start, ende, loftType, rebuild, refit, closed)
+        let rc = ResizeArray<Guid>()
+        for item in geometry do
+            let id = State.Doc.Objects.AddBrep(item)
+            if id <> Guid.Empty then rc.Add(id)
+        if rc.Count > 0 then State.Doc.Views.Redraw()
+        rc
+
+
+    /// <summary>Creates a Surface created by lofting Curves.
+    ///    - no Curve sorting performed. pass in Curves in the order you want them sorted
+    ///    - directions of open Curves not adjusted. Use CurveDirectionsMatch and
+    ///      ReverseCurve to adjust the directions of open Curves
+    ///    - seams of closed Curves are not adjusted. Use CurveSeam to adjust the seam
+    ///      of closed Curves. Returns geometry without adding it.</summary>
+    /// <param name="geometryObjects">(Curve seq) Ordered list of the Curves to loft through</param>
+    /// <param name="start">(Point3d) Optional, Starting point of the loft</param>
+    /// <param name="ende">(Point3d) Optional, Ending point of the loft</param>
+    /// <param name="loftType">(int) Optional, default value: <c>0</c>
+    ///    Type of loft. Possible options are:
+    ///    0 = Normal. Uses chord-length parameterization in the loft direction
+    ///    1 = Loose. The Surface is allowed to move away from the original Curves
+    ///      to make a smoother Surface. The Surface control points are created
+    ///      at the same locations as the control points of the loft input Curves.
+    ///    2 = Straight. The sections between the Curves are straight. This is
+    ///      also known as a ruled Surface.
+    ///    3 = Tight. The Surface sticks closely to the original Curves. Uses square
+    ///      root of chord-length parameterization in the loft direction</param>
+    /// <param name="rebuild">(int) Optional, default value: <c>0</c>
+    ///    If not 0 then Rebuilds the shape Curves before lofting with this control point count</param>
+    /// <param name="refit">(float) Optional, if given the loft is refitted, the value is the tolerance used to rebuild</param>
+    /// <param name="closed">(bool) Optional, default value: <c>false</c>
+    ///    Close the loft back to the first Curve</param>
+    /// <returns>(Brep ResizeArray) Newly created geometry. The caller owns the returned objects.</returns>
+    static member MakeLoftSrf( geometryObjects:Curve seq,
+                              [<OPT;DEF(Point3d())>]start:Point3d, //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
+                              [<OPT;DEF(Point3d())>]ende:Point3d,
+                              [<OPT;DEF(0)>]loftType:int,
+                              [<OPT;DEF(0)>]rebuild:int,
+                              [<OPT;DEF(0.0)>]refit:float,
+                              [<OPT;DEF(false)>]closed:bool) : Brep ResizeArray =
+        if loftType<0 || loftType>4 then RhinoScriptingException.Raise "MakeLoftSrf: LoftType must be 0-4.  geometryObjects:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" (Pretty.str geometryObjects) start ende loftType rebuild refit closed
+        if rebuild<>0 && refit<>0.0 then RhinoScriptingException.Raise "MakeLoftSrf: set either rebuild or refit to a value ! not both.  geometryObjects:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" (Pretty.str geometryObjects) start ende loftType rebuild refit closed
+        let curves  = geometryObjects |> RArr.mapSeq (fun geometry -> geometry)
+        if Seq.length(curves)<2 then RhinoScriptingException.Raise "MakeLoftSrf failed.  geometryObjects:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" (Pretty.str geometryObjects) start ende loftType rebuild refit closed
         let start = if start = Point3d.Origin  then Point3d.Unset else start
         let ende  = if ende  = Point3d.Origin  then Point3d.Unset else ende
         let mutable lt = LoftType.Normal
         if loftType = 1 then lt <- LoftType.Loose
         elif loftType = 2 then lt <- LoftType.Straight
         elif loftType = 3 then lt <- LoftType.Tight
-        //elif loftType = 4 then lt <- LoftType.Developable
         let mutable breps = null
         if rebuild = 0 && refit = 0.0 then
             breps <- Brep.CreateFromLoft(curves, start, ende, lt, closed)
@@ -14434,13 +16767,8 @@ type RhinoScriptSyntax private () =
             breps <- Brep.CreateFromLoftRebuild(curves, start, ende, lt, closed, rebuild)
         elif refit > 0.0 then
             breps <- Brep.CreateFromLoftRefit(curves, start, ende, lt, closed, refit)
-        if isNull breps then RhinoScriptingException.Raise "AddLoftSrf failed.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" (Pretty.str objectIds) start ende loftType rebuild refit closed
-        let idlist = ResizeArray()
-        for brep in breps do
-            let objectId = State.Doc.Objects.AddBrep(brep)
-            if objectId <> Guid.Empty then idlist.Add(objectId)
-        if idlist.Count > 0 then State.Doc.Views.Redraw()
-        idlist
+        if isNull breps then RhinoScriptingException.Raise "MakeLoftSrf failed.  geometryObjects:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" (Pretty.str geometryObjects) start ende loftType rebuild refit closed
+        ResizeArray(breps)
 
 
     /// <summary>Create a Surface by revolving a Curve around an axis.</summary>
@@ -14455,17 +16783,33 @@ type RhinoScriptSyntax private () =
                              axis:Line,
                              [<OPT;DEF(0.0)>]startAngle:float,
                              [<OPT;DEF(360.0)>]endAngle:float) : Guid =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
-        //axis = RhinoScriptSyntax.Coerceline(axis)
+        let curveIdGeometry = RhinoScriptSyntax.CoerceCurve(curveId)
+        let geometry = RhinoScriptSyntax.MakeRevSrf(curveIdGeometry, axis, startAngle, endAngle)
+        let rc = State.Doc.Objects.AddSurface(geometry)
+        State.Doc.Views.Redraw()
+        rc
+
+
+    /// <summary>Create a Surface by revolving a Curve around an axis. Returns geometry without adding it.</summary>
+    /// <param name="curveGeo">(Curve) Object of profile Curve</param>
+    /// <param name="axis">(Line) Line for the rail revolve axis</param>
+    /// <param name="startAngle">(float) Optional, default value: <c>0.0</c>
+    ///    Start angles of revolve</param>
+    /// <param name="endAngle">(float) Optional, default value: <c>360.0</c>
+    ///    End angles of revolve</param>
+    /// <returns>(NurbsSurface) Newly created geometry. The caller owns the returned objects.</returns>
+    static member MakeRevSrf( curveGeo:Curve,
+                             axis:Line,
+                             [<OPT;DEF(0.0)>]startAngle:float,
+                             [<OPT;DEF(360.0)>]endAngle:float) : NurbsSurface =
+        let curve = curveGeo
         let startAngle = toRadians(startAngle)
         let endAngle = toRadians(endAngle)
         let srf = RevSurface.Create(curve, axis, startAngle, endAngle)
-        if isNull srf then RhinoScriptingException.Raise "AddRevSrf failed. curveId:'%s' axis:'%A' startAngle:'%A' endAngle:'%A'" (Pretty.str curveId) axis startAngle endAngle
+        if isNull srf then RhinoScriptingException.Raise "MakeRevSrf failed. curveGeo:'%s' axis:'%A' startAngle:'%A' endAngle:'%A'" (Pretty.str curveGeo) axis startAngle endAngle
         let ns = srf.ToNurbsSurface()
-        if isNull ns then RhinoScriptingException.Raise "AddRevSrf failed. curveId:'%s' axis:'%A' startAngle:'%A' endAngle:'%A'" (Pretty.str curveId) axis startAngle endAngle
-        let rc = State.Doc.Objects.AddSurface(ns)
-        State.Doc.Views.Redraw()
-        rc
+        if isNull ns then RhinoScriptingException.Raise "MakeRevSrf failed. curveGeo:'%s' axis:'%A' startAngle:'%A' endAngle:'%A'" (Pretty.str curveGeo) axis startAngle endAngle
+        ns
 
 
     /// <summary>Add a spherical Surface to the document.</summary>
@@ -14488,13 +16832,12 @@ type RhinoScriptSyntax private () =
     /// <returns>(Guid ResizeArray) ids of new contour Curves .</returns>
     static member AddSrfContourCrvs( objectId:Guid,
                                      plane:Plane) : Guid ResizeArray =
-        let brep = RhinoScriptSyntax.CoerceBrep(objectId)
-        //plane = RhinoScriptSyntax.CoercePlane(pointsOrPlane)
-        let curves =  Brep.CreateContourCurves(brep, plane)
-        let rc = ResizeArray()
-        for crv in curves do
-            let objectId = State.Doc.Objects.AddCurve(crv)
-            if objectId <> Guid.Empty then rc.Add(objectId)
+        let objectIdGeometry = RhinoScriptSyntax.CoerceBrep(objectId)
+        let geometry = RhinoScriptSyntax.MakeSrfContourCrvs(objectIdGeometry, plane)
+        let rc = ResizeArray<Guid>()
+        for item in geometry do
+            let id = State.Doc.Objects.AddCurve(item)
+            if id <> Guid.Empty then rc.Add(id)
         State.Doc.Views.Redraw()
         rc
 
@@ -14511,14 +16854,44 @@ type RhinoScriptSyntax private () =
                                      startPoint:Point3d,
                                      endPoint :Point3d ,
                                      interval:float) : Guid ResizeArray=
-        let brep = RhinoScriptSyntax.CoerceBrep(objectId)
-        let curves =  Brep.CreateContourCurves(brep, startPoint , endPoint, interval)
-        let rc = ResizeArray()
-        for crv in curves do
-            let objectId = State.Doc.Objects.AddCurve(crv)
-            if objectId <> Guid.Empty then rc.Add(objectId)
+        let objectIdGeometry = RhinoScriptSyntax.CoerceBrep(objectId)
+        let geometry = RhinoScriptSyntax.MakeSrfContourCrvs(objectIdGeometry, startPoint, endPoint, interval)
+        let rc = ResizeArray<Guid>()
+        for item in geometry do
+            let id = State.Doc.Objects.AddCurve(item)
+            if id <> Guid.Empty then rc.Add(id)
         State.Doc.Views.Redraw()
         rc
+
+
+    /// <summary>Creates a spaced series of planar Curves resulting from the intersection of
+    ///    defined cutting Planes through a Surface or Polysurface. For more
+    ///    information, see Rhino help for details on the Contour command. Returns geometry without adding it.</summary>
+    /// <param name="geometryObject">(Brep) Object to contour</param>
+    /// <param name="plane">(Plane) The Plane that defines the cutting Plane</param>
+    /// <returns>(Curve ResizeArray) Newly created geometry. The caller owns the returned objects.</returns>
+    static member MakeSrfContourCrvs( geometryObject:Brep,
+                                     plane:Plane) : Curve ResizeArray =
+        let brep = geometryObject
+        let curves =  Brep.CreateContourCurves(brep, plane)
+        ResizeArray(curves)
+
+
+    /// <summary>Creates a spaced series of planar Curves resulting from the intersection of
+    ///    defined cutting Planes through a Surface or Polysurface. For more
+    ///    information, see Rhino help for details on the Contour command. Returns geometry without adding it.</summary>
+    /// <param name="geometryObject">(Brep) Object to contour</param>
+    /// <param name="startPoint">(Point3d) The start point of a center line</param>
+    /// <param name="endPoint">(Point3d)   the end point of a center line</param>
+    /// <param name="interval">(float) Distance between contour Curves</param>
+    /// <returns>(Curve ResizeArray) Newly created geometry. The caller owns the returned objects.</returns>
+    static member MakeSrfContourCrvs( geometryObject:Brep,
+                                     startPoint:Point3d,
+                                     endPoint :Point3d ,
+                                     interval:float) : Curve ResizeArray =
+        let brep = geometryObject
+        let curves =  Brep.CreateContourCurves(brep, startPoint , endPoint, interval)
+        ResizeArray(curves)
 
 
     /// <summary>Creates a Surface from a grid of points.</summary>
@@ -14604,14 +16977,30 @@ type RhinoScriptSyntax private () =
     static member AddSweep1( rail:Guid,
                              shapes:Guid seq,
                              [<OPT;DEF(false)>]closed:bool) : Guid ResizeArray =
-        let rail = RhinoScriptSyntax.CoerceCurve(rail)
-        let shapes  = shapes |> RArr.mapSeq RhinoScriptSyntax.CoerceCurve
-        let tolerance = State.Doc.ModelAbsoluteTolerance
-        let breps = Brep.CreateFromSweep(rail, shapes, closed, tolerance)
-        if isNull breps then RhinoScriptingException.Raise "AddSweep1 failed.  rail:'%A' shapes:'%A' closed:'%A'" rail shapes closed
-        let rc  = breps |> RArr.mapArr State.Doc.Objects.AddBrep
+        let railGeometry = RhinoScriptSyntax.CoerceCurve(rail)
+        let shapesGeometry = shapes |> RArr.mapSeq RhinoScriptSyntax.CoerceCurve
+        let geometry = RhinoScriptSyntax.MakeSweep1(railGeometry, shapesGeometry, closed)
+        let rc = geometry |> RArr.mapSeq State.Doc.Objects.AddBrep
         State.Doc.Views.Redraw()
         rc
+
+
+    /// <summary>Creates a Surface created through profile Curves that define the Surface
+    ///    shape and one Curve that defines a Surface edge. Returns geometry without adding it.</summary>
+    /// <param name="rail">(Curve) Object of the rail Curve</param>
+    /// <param name="shapes">(Curve seq) One or more cross section shape Curves</param>
+    /// <param name="closed">(bool) Optional, default value: <c>false</c>
+    ///    If True, then create a closed Surface</param>
+    /// <returns>(Brep ResizeArray) Newly created geometry. The caller owns the returned objects.</returns>
+    static member MakeSweep1( rail:Curve,
+                             shapes:Curve seq,
+                             [<OPT;DEF(false)>]closed:bool) : Brep ResizeArray =
+        let rail = rail
+        let shapes  = shapes |> RArr.mapSeq (fun geometry -> geometry)
+        let tolerance = State.Doc.ModelAbsoluteTolerance
+        let breps = Brep.CreateFromSweep(rail, shapes, closed, tolerance)
+        if isNull breps then RhinoScriptingException.Raise "MakeSweep1 failed.  rail:'%A' shapes:'%A' closed:'%A'" rail shapes closed
+        ResizeArray(breps)
 
 
     /// <summary>Adds a Surface created through profile Curves that define the Surface
@@ -14624,15 +17013,31 @@ type RhinoScriptSyntax private () =
     static member AddSweep2( rails:Guid * Guid,
                              shapes:Guid seq,
                              [<OPT;DEF(false)>]closed:bool) : Guid ResizeArray =
-        let rail1 = RhinoScriptSyntax.CoerceCurve(fst rails)
-        let rail2 = RhinoScriptSyntax.CoerceCurve(snd rails)
-        let shapes  = shapes |> RArr.mapSeq RhinoScriptSyntax.CoerceCurve
-        let tolerance = State.Doc.ModelAbsoluteTolerance
-        let breps = Brep.CreateFromSweep(rail1, rail2, shapes, closed, tolerance)
-        if isNull breps then RhinoScriptingException.Raise "AddSweep2 failed.  rails:'%A' shapes:'%A' closed:'%A'" rails shapes closed
-        let rc  = breps |> RArr.mapArr State.Doc.Objects.AddBrep
+        let railsGeometry = (RhinoScriptSyntax.CoerceCurve(fst rails), RhinoScriptSyntax.CoerceCurve(snd rails))
+        let shapesGeometry = shapes |> RArr.mapSeq RhinoScriptSyntax.CoerceCurve
+        let geometry = RhinoScriptSyntax.MakeSweep2(railsGeometry, shapesGeometry, closed)
+        let rc = geometry |> RArr.mapSeq State.Doc.Objects.AddBrep
         State.Doc.Views.Redraw()
         rc
+
+
+    /// <summary>Creates a Surface created through profile Curves that define the Surface
+    ///    shape and two Curves that defines a Surface edge. Returns geometry without adding it.</summary>
+    /// <param name="rails">(Curve * Curve) Objects of the two rail Curve</param>
+    /// <param name="shapes">(Curve seq) One or more cross section shape Curves</param>
+    /// <param name="closed">(bool) Optional, default value: <c>false</c>
+    ///    If True, then create a closed Surface</param>
+    /// <returns>(Brep ResizeArray) Newly created geometry. The caller owns the returned objects.</returns>
+    static member MakeSweep2( rails:Curve * Curve,
+                             shapes:Curve seq,
+                             [<OPT;DEF(false)>]closed:bool) : Brep ResizeArray =
+        let rail1 = fst rails
+        let rail2 = snd rails
+        let shapes  = shapes |> RArr.mapSeq (fun geometry -> geometry)
+        let tolerance = State.Doc.ModelAbsoluteTolerance
+        let breps = Brep.CreateFromSweep(rail1, rail2, shapes, closed, tolerance)
+        if isNull breps then RhinoScriptingException.Raise "MakeSweep2 failed.  rails:'%A' shapes:'%A' closed:'%A'" rails shapes closed
+        ResizeArray(breps)
 
 
     /// <summary>Adds a Surface created through profile Curves that define the Surface
@@ -14647,13 +17052,31 @@ type RhinoScriptSyntax private () =
                                  rail:Guid,
                                  axis:Line,
                                  [<OPT;DEF(false)>]scaleHeight:bool) : Guid =
-        let profileinst = RhinoScriptSyntax.CoerceCurve(profile)
-        let railinst = RhinoScriptSyntax.CoerceCurve(rail)
-        let surface = NurbsSurface.CreateRailRevolvedSurface(profileinst, railinst, axis, scaleHeight)
-        if isNull surface then RhinoScriptingException.Raise "AddRailRevSrf failed.  profile:'%A' rail:'%A' axis:'%A' scaleHeight:'%A'" profile rail axis scaleHeight
-        let rc = State.Doc.Objects.AddSurface(surface)
+        let profileGeometry = RhinoScriptSyntax.CoerceCurve(profile)
+        let railGeometry = RhinoScriptSyntax.CoerceCurve(rail)
+        let geometry = RhinoScriptSyntax.MakeRailRevSrf(profileGeometry, railGeometry, axis, scaleHeight)
+        let rc = State.Doc.Objects.AddSurface(geometry)
         State.Doc.Views.Redraw()
         rc
+
+
+    /// <summary>Creates a Surface created through profile Curves that define the Surface
+    ///    shape and two Curves that defines a Surface edge. Returns geometry without adding it.</summary>
+    /// <param name="profile">(Curve) Object of the profile Curve</param>
+    /// <param name="rail">(Curve) Object of the rail Curve</param>
+    /// <param name="axis">(Line) A Line identifying the start point and end point of the rail revolve axis</param>
+    /// <param name="scaleHeight">(bool) Optional, default value: <c>false</c>
+    ///    If True, Surface will be locally scaled. Defaults to False</param>
+    /// <returns>(NurbsSurface) Newly created geometry. The caller owns the returned objects.</returns>
+    static member MakeRailRevSrf( profile:Curve,
+                                 rail:Curve,
+                                 axis:Line,
+                                 [<OPT;DEF(false)>]scaleHeight:bool) : NurbsSurface =
+        let profileinst = profile
+        let railinst = rail
+        let surface = NurbsSurface.CreateRailRevolvedSurface(profileinst, railinst, axis, scaleHeight)
+        if isNull surface then RhinoScriptingException.Raise "MakeRailRevSrf failed.  profile:'%A' rail:'%A' axis:'%A' scaleHeight:'%A'" profile rail axis scaleHeight
+        surface
 
 
     /// <summary>Adds a torus shaped revolved Surface to the document.</summary>
@@ -14682,18 +17105,32 @@ type RhinoScriptSyntax private () =
     static member BooleanDifference( input0:Guid seq,
                                      input1:Guid seq,
                                      [<OPT;DEF(true)>]deleteInput:bool) : Guid ResizeArray =
-
-        let breps0  = input0 |> RArr.mapSeq RhinoScriptSyntax.CoerceBrep
-        let breps1  = input1 |> RArr.mapSeq RhinoScriptSyntax.CoerceBrep
-        let tolerance = State.Doc.ModelAbsoluteTolerance
-        let newbreps = Brep.CreateBooleanDifference(breps0, breps1, tolerance)
-        if newbreps|> isNull  then RhinoScriptingException.Raise "BooleanDifference failed.  input0:'%A' input1:'%A' deleteInput:'%A'" input0 input1 deleteInput
-        let rc  = newbreps |> RArr.mapArr State.Doc.Objects.AddBrep
+        let input0 = input0 |> Seq.toArray
+        let input1 = input1 |> Seq.toArray
+        let input0Geometry = input0 |> RArr.mapSeq RhinoScriptSyntax.CoerceBrep
+        let input1Geometry = input1 |> RArr.mapSeq RhinoScriptSyntax.CoerceBrep
+        let geometry = RhinoScriptSyntax.BooleanDifference(input0Geometry, input1Geometry)
+        let rc = geometry |> RArr.mapSeq State.Doc.Objects.AddBrep
         if deleteInput then
-            for objectId in input0 do State.Doc.Objects.Delete(objectId, true)|> ignore<bool>
-            for objectId in input1 do State.Doc.Objects.Delete(objectId, true)|> ignore<bool>
+            for id in input0 do State.Doc.Objects.Delete(id, true) |> ignore<bool>
+            for id in input1 do State.Doc.Objects.Delete(id, true) |> ignore<bool>
         State.Doc.Views.Redraw()
         rc
+
+
+    /// <summary>Performs a boolean difference operation on two sets of input Surfaces
+    ///    and Polysurfaces. For more details, see the BooleanDifference command in
+    ///    the Rhino help file. Returns geometry without adding it.</summary>
+    /// <param name="input0">(Brep seq) List of Surfaces to subtract from</param>
+    /// <param name="input1">(Brep seq) List of Surfaces to be subtracted</param>
+    /// <returns>(Brep ResizeArray) Newly created geometry. The caller owns the returned objects.</returns>
+    static member BooleanDifference( input0:Brep seq,
+                                     input1:Brep seq) : Brep ResizeArray =
+        let breps0 = input0 |> Seq.toArray
+        let breps1 = input1 |> Seq.toArray
+        let breps = Brep.CreateBooleanDifference(breps0, breps1, State.Doc.ModelAbsoluteTolerance)
+        if isNull breps then RhinoScriptingException.Raise "BooleanDifference: operation failed."
+        ResizeArray(breps)
 
 
     /// <summary>Performs a boolean intersection operation on two sets of input Surfaces
@@ -14707,17 +17144,32 @@ type RhinoScriptSyntax private () =
     static member BooleanIntersection( input0:Guid seq,
                                        input1:Guid seq,
                                        [<OPT;DEF(true)>]deleteInput:bool) : Guid ResizeArray =
-        let breps0  = input0 |> RArr.mapSeq RhinoScriptSyntax.CoerceBrep
-        let breps1  = input1 |> RArr.mapSeq RhinoScriptSyntax.CoerceBrep
-        let tolerance = State.Doc.ModelAbsoluteTolerance
-        let newbreps = Brep.CreateBooleanIntersection(breps0, breps1, tolerance)
-        if newbreps|> isNull  then RhinoScriptingException.Raise "BooleanIntersection failed.  input0:'%A' input1:'%A' deleteInput:'%A'" input0 input1 deleteInput
-        let rc  = newbreps |> RArr.mapArr State.Doc.Objects.AddBrep
+        let input0 = input0 |> Seq.toArray
+        let input1 = input1 |> Seq.toArray
+        let input0Geometry = input0 |> RArr.mapSeq RhinoScriptSyntax.CoerceBrep
+        let input1Geometry = input1 |> RArr.mapSeq RhinoScriptSyntax.CoerceBrep
+        let geometry = RhinoScriptSyntax.BooleanIntersection(input0Geometry, input1Geometry)
+        let rc = geometry |> RArr.mapSeq State.Doc.Objects.AddBrep
         if deleteInput then
-            for objectId in input0 do State.Doc.Objects.Delete(objectId, true)|> ignore<bool>
-            for objectId in input1 do State.Doc.Objects.Delete(objectId, true)|> ignore<bool>
+            for id in input0 do State.Doc.Objects.Delete(id, true) |> ignore<bool>
+            for id in input1 do State.Doc.Objects.Delete(id, true) |> ignore<bool>
         State.Doc.Views.Redraw()
         rc
+
+
+    /// <summary>Performs a boolean intersection operation on two sets of input Surfaces
+    ///    and Polysurfaces. For more details, see the BooleanIntersection command in
+    ///    the Rhino help file. Returns geometry without adding it.</summary>
+    /// <param name="input0">(Brep seq) List of Surfaces</param>
+    /// <param name="input1">(Brep seq) List of Surfaces</param>
+    /// <returns>(Brep ResizeArray) Newly created geometry. The caller owns the returned objects.</returns>
+    static member BooleanIntersection( input0:Brep seq,
+                                       input1:Brep seq) : Brep ResizeArray =
+        let breps0 = input0 |> Seq.toArray
+        let breps1 = input1 |> Seq.toArray
+        let breps = Brep.CreateBooleanIntersection(breps0, breps1, State.Doc.ModelAbsoluteTolerance)
+        if isNull breps then RhinoScriptingException.Raise "BooleanIntersection: operation failed."
+        ResizeArray(breps)
 
 
     /// <summary>Performs a boolean union operation on a set of input Surfaces and
@@ -14728,16 +17180,27 @@ type RhinoScriptSyntax private () =
     ///    Delete all input objects</param>
     /// <returns>(Guid ResizeArray) List of identifiers of newly created objects .</returns>
     static member BooleanUnion(input:Guid seq, [<OPT;DEF(true)>]deleteInput:bool) : Guid ResizeArray =
-        if Seq.length(input)<2 then RhinoScriptingException.Raise "BooleanUnion failed.  input:'%A' deleteInput:'%A'" input deleteInput
-        let breps  = input |> RArr.mapSeq RhinoScriptSyntax.CoerceBrep
-        let tolerance = State.Doc.ModelAbsoluteTolerance
-        let newbreps = Brep.CreateBooleanUnion(breps, tolerance)
-        if newbreps|> isNull  then RhinoScriptingException.Raise "BooleanUnion failed.  input:'%A' deleteInput:'%A'" input deleteInput
-        let rc  = newbreps |> RArr.mapArr State.Doc.Objects.AddBrep
-        if  deleteInput then
-            for objectId in input do State.Doc.Objects.Delete(objectId, true)|> ignore<bool>
+        let input = input |> Seq.toArray
+        let inputGeometry = input |> RArr.mapSeq RhinoScriptSyntax.CoerceBrep
+        let geometry = RhinoScriptSyntax.BooleanUnion(inputGeometry)
+        let rc = geometry |> RArr.mapSeq State.Doc.Objects.AddBrep
+        if deleteInput then
+            for id in input do State.Doc.Objects.Delete(id, true) |> ignore<bool>
         State.Doc.Views.Redraw()
         rc
+
+
+    /// <summary>Performs a boolean union operation on a set of input Surfaces and
+    ///    Polysurfaces. For more details, see the BooleanUnion command in the
+    ///    Rhino help file. Returns geometry without adding it.</summary>
+    /// <param name="input">(Brep seq) List of Surfaces to union</param>
+    /// <returns>(Brep ResizeArray) Newly created geometry. The caller owns the returned objects.</returns>
+    static member BooleanUnion(input:Brep seq) : Brep ResizeArray =
+        let breps = input |> Seq.toArray
+        if breps.Length < 2 then RhinoScriptingException.Raise "BooleanUnion: at least two Breps are required."
+        let breps = Brep.CreateBooleanUnion(breps, State.Doc.ModelAbsoluteTolerance)
+        if isNull breps then RhinoScriptingException.Raise "BooleanUnion: operation failed."
+        ResizeArray(breps)
 
 
     /// <summary>Returns the point on a Surface or Polysurface that is closest to a test
@@ -14761,7 +17224,31 @@ type RhinoScriptSyntax private () =
     ///      4        int             The index of the brep component
     ///      5        Vector3d        The normal to the brepFace, or the tangent to the brepEdge.</returns>
     static member BrepClosestPoint(objectId:Guid, point:Point3d) : Point3d * float * float * ComponentIndexType * int * Vector3d =
-        let brep = RhinoScriptSyntax.CoerceBrep(objectId)
+        let objectIdObject = RhinoScriptSyntax.CoerceBrep(objectId)
+        RhinoScriptSyntax.BrepClosestPoint(objectIdObject, point)
+
+    /// <summary>Returns the point on a Surface or Polysurface that is closest to a test
+    ///    point. This function works on both untrimmed and trimmed Surfaces. Uses the supplied objects directly.</summary>
+    /// <param name="geometryObject">(Brep) The object</param>
+    /// <param name="point">(Point3d) The test, or sampling point</param>
+    /// <returns>(Point3d * float * float * ComponentIndexType * int * Vector3d) of closest point information . The list will
+    ///    contain the following information:
+    ///    Element     Type            Description
+    ///      0        Point3d          The 3-D point at the parameter value of the closest point.
+    ///      1        (U of U, V)      Parameter values of closest point.
+    ///                                   Note, V is 0 if the component index type is brepEdge or brepVertex.
+    ///      2        (V of U, V)      Parameter values of closest point.
+    ///                                   Note, V is 0 if the component index type is brepEdge or brepVertex.
+    ///      3        (type, index)   The type  the brep component that contains the closest point. Possible types are
+    ///                                   BrepVertex 1 Targets a brep vertex index.
+    ///                                   BrepEdge   2 Targets a brep edge index.
+    ///                                   BrepFace   3 Targets a brep face index.
+    ///                                   BrepTrim   4 Targets a brep trim index.
+    ///                                   BrepLoop   5 Targets a brep loop index.
+    ///      4        int             The index of the brep component
+    ///      5        Vector3d        The normal to the brepFace, or the tangent to the brepEdge.</returns>
+    static member BrepClosestPoint(geometryObject:Brep, point:Point3d) : Point3d * float * float * ComponentIndexType * int * Vector3d =
+        let brep = geometryObject
         let clpt = ref Point3d.Origin
         let ci = ref ComponentIndex.Unset
         let s = ref 0.0
@@ -14773,7 +17260,7 @@ type RhinoScriptSyntax private () =
             let idx = (!ci).Index
             !clpt,!s,!t, typ, idx, !n
         else
-            RhinoScriptingException.Raise "BrepClosestPoint failed for %A and %A" (Pretty.str objectId) point
+            RhinoScriptingException.Raise "BrepClosestPoint failed for %A and %A" (Pretty.str geometryObject) point
 
 
     /// <summary>Caps planar holes in a Surface or Polysurface.</summary>
@@ -14804,20 +17291,26 @@ type RhinoScriptSyntax private () =
     ///    Select the duplicated edge Curves. The default is not to select (False)</param>
     /// <returns>(Guid ResizeArray) identifying the newly created Curve objects.</returns>
     static member DuplicateEdgeCurves(objectId:Guid, [<OPT;DEF(false)>]select:bool) : Guid ResizeArray =
-        let brep = RhinoScriptSyntax.CoerceBrep(objectId)
-        let outcurves = brep.DuplicateEdgeCurves()
-        let curves = ResizeArray()
-        for curve in outcurves do
-            if curve.IsValid then
-                let rc = State.Doc.Objects.AddCurve(curve)
-                curve.Dispose()
-                if rc = Guid.Empty then RhinoScriptingException.Raise "DuplicateEdgeCurves failed on one of the edge curves"
-                curves.Add(rc)
-                if select then
-                    let rhobject = RhinoScriptSyntax.CoerceRhinoObject(rc)
-                    rhobject.Select(true)  |>  ignore // TODO needs sync ? apparently not needed!
-        if curves.Count > 0 then State.Doc.Views.Redraw()
-        curves
+        let objectIdGeometry = RhinoScriptSyntax.CoerceBrep(objectId)
+        let curves = RhinoScriptSyntax.DuplicateEdgeCurves(objectIdGeometry)
+        let ids = ResizeArray<Guid>()
+        for curve in curves do
+            let id = State.Doc.Objects.AddCurve(curve)
+            curve.Dispose()
+            if id = Guid.Empty then RhinoScriptingException.Raise "DuplicateEdgeCurves: unable to add curve to the document."
+            ids.Add(id)
+            if select then (RhinoScriptSyntax.CoerceRhinoObject(id)).Select(true) |> ignore
+        if ids.Count > 0 then State.Doc.Views.Redraw()
+        ids
+
+
+    /// <summary>Duplicates the edge Curves of a Surface or Polysurface. For more
+    ///    information, see the Rhino help file for information on the DupEdge
+    ///    command. Returns geometry without adding it.</summary>
+    /// <param name="geometryObject">(Brep) The Surface or Polysurface object</param>
+    /// <returns>(Curve ResizeArray) Newly created geometry. The caller owns the returned objects.</returns>
+    static member DuplicateEdgeCurves(geometryObject:Brep) : Curve ResizeArray =
+        geometryObject.DuplicateEdgeCurves() |> Seq.filter (fun curve -> curve.IsValid) |> ResizeArray
 
 
     /// <summary>Create Curves that duplicate a Surface or Polysurface border.</summary>
@@ -14829,17 +17322,31 @@ type RhinoScriptSyntax private () =
     ///    2 = interior</param>
     /// <returns>(Guid ResizeArray) list of Curve ids .</returns>
     static member DuplicateSurfaceBorder(surfaceId:Guid, [<OPT;DEF(0)>]typ:int) : Guid ResizeArray =
-        let brep = RhinoScriptSyntax.CoerceBrep(surfaceId)
+        let surfaceIdGeometry = RhinoScriptSyntax.CoerceBrep(surfaceId)
+        let geometry = RhinoScriptSyntax.DuplicateSurfaceBorder(surfaceIdGeometry, typ)
+        let rc = geometry |> RArr.mapSeq State.Doc.Objects.AddCurve
+        State.Doc.Views.Redraw()
+        rc
+
+
+    /// <summary>Create Curves that duplicate a Surface or Polysurface border. Returns geometry without adding it.</summary>
+    /// <param name="surfaceGeo">(Brep) Object of a Surface</param>
+    /// <param name="typ">(int) Optional, default value: <c>0</c>
+    ///    The border Curves to return
+    ///    0 = both exterior and interior,
+    ///    1 = exterior
+    ///    2 = interior</param>
+    /// <returns>(Curve ResizeArray) Newly created geometry. The caller owns the returned objects.</returns>
+    static member DuplicateSurfaceBorder(surfaceGeo:Brep, [<OPT;DEF(0)>]typ:int) : Curve ResizeArray =
+        let brep = surfaceGeo
         let inner = typ = 0 || typ = 2
         let outer = typ = 0 || typ = 1
         let mutable curves = brep.DuplicateNakedEdgeCurves(outer, inner)
-        if curves|> isNull  then RhinoScriptingException.Raise "DuplicateSurfaceBorder failed.  surfaceId:'%s' type:'%d'" (Pretty.str surfaceId) typ
+        if curves|> isNull  then RhinoScriptingException.Raise "DuplicateSurfaceBorder failed.  surfaceGeo:'%s' type:'%d'" (Pretty.str surfaceGeo) typ
         let tolerance = State.Doc.ModelAbsoluteTolerance * 2.1
         curves <- Curve.JoinCurves(curves, tolerance)
-        if curves|> isNull  then RhinoScriptingException.Raise "DuplicateSurfaceBorder failed.  surfaceId:'%s' type:'%d'" (Pretty.str surfaceId) typ
-        let rc  = curves |> RArr.mapArr State.Doc.Objects.AddCurve
-        State.Doc.Views.Redraw()
-        rc
+        if curves|> isNull  then RhinoScriptingException.Raise "DuplicateSurfaceBorder failed.  surfaceGeo:'%s' type:'%d'" (Pretty.str surfaceGeo) typ
+        ResizeArray(curves)
 
 
     /// <summary>Evaluates a Surface at a U, V parameter.</summary>
@@ -14850,10 +17357,21 @@ type RhinoScriptSyntax private () =
     static member EvaluateSurface( surfaceId:Guid,
                                    u:float ,
                                    v:float ) : Point3d =
-        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let surfaceIdObject = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        RhinoScriptSyntax.EvaluateSurface(surfaceIdObject, u, v)
+
+    /// <summary>Evaluates a Surface at a U, V parameter. Uses the supplied objects directly.</summary>
+    /// <param name="surfaceGeo">(Surface) The object</param>
+    /// <param name="u">(float) U of u, v parameters to evaluate</param>
+    /// <param name="v">(float) V of u, v parameters to evaluate</param>
+    /// <returns>(Point3d) a 3-D point.</returns>
+    static member EvaluateSurface( surfaceGeo:Surface,
+                                   u:float ,
+                                   v:float ) : Point3d =
+        let surface = surfaceGeo
         let rc = surface.PointAt(u, v)
         if rc.IsValid then rc
-        else RhinoScriptingException.Raise "EvaluateSurface failed.  surfaceId:'%s' u:'%f' v:'%f'" (Pretty.str surfaceId) u v
+        else RhinoScriptingException.Raise "EvaluateSurface failed.  surfaceGeo:'%s' u:'%f' v:'%f'" (Pretty.str surfaceGeo) u v
 
 
     /// <summary>Lengthens an untrimmed Surface object.</summary>
@@ -14887,17 +17405,28 @@ type RhinoScriptSyntax private () =
     ///    Delete input objects after exploding</param>
     /// <returns>(Guid ResizeArray) List of identifiers of exploded pieces .</returns>
     static member ExplodePolysurfaces(objectIds:Guid seq, [<OPT;DEF(false)>]deleteInput:bool) : Guid ResizeArray =
-        let ids = ResizeArray()
+        let ids = ResizeArray<Guid>()
         for objectId in objectIds do
             let brep = RhinoScriptSyntax.CoerceBrep(objectId)
-            if brep.Faces.Count>1 then
-                for i = 0 to brep.Faces.Count - 1 do
-                    let copyface = brep.Faces.[i].DuplicateFace(false)
-                    let faceid = State.Doc.Objects.AddBrep(copyface)
-                    if faceid <> Guid.Empty then ids.Add(faceid)
-                if  deleteInput then State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
+            let faces = RhinoScriptSyntax.ExplodePolysurfaces([brep])
+            for face in faces do
+                let id = State.Doc.Objects.AddBrep(face)
+                if id <> Guid.Empty then ids.Add(id)
+            if deleteInput && brep.Faces.Count > 1 then State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
         State.Doc.Views.Redraw()
         ids
+
+
+    /// <summary>Explodes, or un-joins, one or more Polysurface objects. Polysurfaces
+    ///    will be exploded into separate Surfaces. Returns geometry without adding it.</summary>
+    /// <param name="geometryObjects">(Brep seq) Polysurfaces to explode</param>
+    /// <returns>(Brep ResizeArray) Newly created geometry. The caller owns the returned objects.</returns>
+    static member ExplodePolysurfaces(geometryObjects:Brep seq) : Brep ResizeArray =
+        let faces = ResizeArray<Brep>()
+        for brep in geometryObjects do
+            if brep.Faces.Count > 1 then
+                for face in brep.Faces do faces.Add(face.DuplicateFace(false))
+        faces
 
 
     /// <summary>Extracts iso-parametric Curves from a Surface.</summary>
@@ -14911,8 +17440,29 @@ type RhinoScriptSyntax private () =
     static member ExtractIsoCurve( surfaceId:Guid,
                                    parameter:float * float,
                                    direction:int) : Guid ResizeArray =
-        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
-        let ids = ResizeArray()
+        let surfaceIdGeometry = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let geometry = RhinoScriptSyntax.ExtractIsoCurve(surfaceIdGeometry, parameter, direction)
+        let rc = ResizeArray<Guid>()
+        for item in geometry do
+            let id = State.Doc.Objects.AddCurve(item)
+            if id <> Guid.Empty then rc.Add(id)
+        State.Doc.Views.Redraw()
+        rc
+
+
+    /// <summary>Extracts iso-parametric Curves from a Surface. Returns geometry without adding it.</summary>
+    /// <param name="surfaceGeo">(Surface) Object of a Surface</param>
+    /// <param name="parameter">(float * float) U, v parameter of the Surface to evaluate</param>
+    /// <param name="direction">(int) Direction to evaluate
+    ///    0 = u
+    ///    1 = v
+    ///    2 = both</param>
+    /// <returns>(Curve ResizeArray) Newly created geometry. The caller owns the returned objects.</returns>
+    static member ExtractIsoCurve( surfaceGeo:Surface,
+                                   parameter:float * float,
+                                   direction:int) : Curve ResizeArray =
+        let surface = surfaceGeo
+        let ids = ResizeArray<Curve>()
         let mutable curves = [| |]
         if direction = 0 || direction = 2 then
 
@@ -14923,8 +17473,7 @@ type RhinoScriptSyntax private () =
                 curves <- [|surface.IsoCurve(0, parameter|> snd) |]
             if notNull curves then
                 for curve in curves do
-                    let objectId = State.Doc.Objects.AddCurve(curve)
-                    if objectId <> Guid.Empty then ids.Add(objectId)
+                    ids.Add(curve)
 
         if direction = 1 || direction = 2 then
             curves <- null
@@ -14935,9 +17484,7 @@ type RhinoScriptSyntax private () =
                 curves <- [|surface.IsoCurve(1, parameter|> fst)|]
             if notNull curves then
                 for curve in curves do
-                    let objectId = State.Doc.Objects.AddCurve(curve)
-                    if objectId <> Guid.Empty then ids.Add(objectId)
-        State.Doc.Views.Redraw()
+                    ids.Add(curve)
         ids
 
 
@@ -14951,18 +17498,24 @@ type RhinoScriptSyntax private () =
                                   faceIndices:int seq,
                                   [<OPT;DEF(false)>]copy:bool) : Guid ResizeArray =
         let brep = RhinoScriptSyntax.CoerceBrep(objectId)
-        let rc = ResizeArray()
-        let faceIndices = Seq.sort(faceIndices)|> Seq.rev
-        for index in faceIndices do
-            let face = brep.Faces.[index]
-            let newbrep = face.DuplicateFace(true)
-            let objectId = State.Doc.Objects.AddBrep(newbrep)
-            rc.Add(objectId)
+        let faceIndices = faceIndices |> Seq.sortDescending |> Seq.toArray
+        let faces = RhinoScriptSyntax.ExtractSurface(brep, faceIndices)
+        let ids = faces |> RArr.mapSeq State.Doc.Objects.AddBrep
         if copy then
-            for index in faceIndices do brep.Faces.RemoveAt(index)
-            State.Doc.Objects.Replace(objectId, brep)|> ignore<bool>
+            let remaining = brep.DuplicateBrep()
+            for index in faceIndices do remaining.Faces.RemoveAt(index)
+            State.Doc.Objects.Replace(objectId, remaining) |> ignore<bool>
         State.Doc.Views.Redraw()
-        rc
+        ids
+
+
+    /// <summary>Duplicates the selected faces of a Polysurface as independent Breps. Returns geometry without adding it to the document.</summary>
+    /// <param name="geometryObject">(Brep) Polysurface object</param>
+    /// <param name="faceIndices">(int seq) One or more numbers representing faces</param>
+    /// <returns>(Brep ResizeArray) Newly created geometry. The caller owns the returned objects.</returns>
+    static member ExtractSurface( geometryObject:Brep,
+                                  faceIndices:int seq) : Brep ResizeArray =
+        faceIndices |> Seq.sortDescending |> Seq.map (fun index -> geometryObject.Faces.[index].DuplicateFace(true)) |> ResizeArray
 
 
     /// <summary>Creates a Surface by extruding a Curve along a path.</summary>
@@ -14970,13 +17523,25 @@ type RhinoScriptSyntax private () =
     /// <param name="pathId">(Guid) Identifier of the path Curve</param>
     /// <returns>(Guid) identifier of new Surface .</returns>
     static member ExtrudeCurve(curveId:Guid, pathId:Guid) : Guid =
-        let curve1 = RhinoScriptSyntax.CoerceCurve(curveId)
-        let curve2 = RhinoScriptSyntax.CoerceCurve(pathId)
-        let srf = SumSurface.Create(curve1, curve2)
-        let rc = State.Doc.Objects.AddSurface(srf)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "ExtrudeCurve failed. curveId:'%s' pathId:'%s'" (Pretty.str curveId) <| Pretty.str pathId
+        let curveIdGeometry = RhinoScriptSyntax.CoerceCurve(curveId)
+        let pathIdGeometry = RhinoScriptSyntax.CoerceCurve(pathId)
+        let geometry = RhinoScriptSyntax.ExtrudeCurve(curveIdGeometry, pathIdGeometry)
+        let rc = State.Doc.Objects.AddSurface(geometry)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "ExtrudeCurve: unable to add geometry to the document."
         State.Doc.Views.Redraw()
         rc
+
+
+    /// <summary>Creates a Surface by extruding a Curve along a path. Returns geometry without adding it.</summary>
+    /// <param name="curveGeo">(Curve) Object of the Curve to extrude</param>
+    /// <param name="pathGeo">(Curve) Object of the path Curve</param>
+    /// <returns>(SumSurface) Newly created geometry. The caller owns the returned objects.</returns>
+    static member ExtrudeCurve(curveGeo:Curve, pathGeo:Curve) : SumSurface =
+        let curve1 = curveGeo
+        let curve2 = pathGeo
+        let srf = SumSurface.Create(curve1, curve2)
+        if isNull srf then RhinoScriptingException.Raise "ExtrudeCurve: extrusion failed."
+        srf
 
 
     /// <summary>Creates a Surface by extruding a Curve to a point.</summary>
@@ -14984,13 +17549,23 @@ type RhinoScriptSyntax private () =
     /// <param name="point">(Point3d) 3D point</param>
     /// <returns>(Guid) identifier of new Surface .</returns>
     static member ExtrudeCurvePoint(curveId:Guid, point:Point3d) : Guid =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
-        //point = RhinoScriptSyntax.Coerce3dPoint(point)
-        let srf = Surface.CreateExtrusionToPoint(curve, point)
-        let rc = State.Doc.Objects.AddSurface(srf)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "ExtrudeCurvePoint failed. curveId:'%s' point:'%A'" (Pretty.str curveId) point
+        let curveIdGeometry = RhinoScriptSyntax.CoerceCurve(curveId)
+        let geometry = RhinoScriptSyntax.ExtrudeCurvePoint(curveIdGeometry, point)
+        let rc = State.Doc.Objects.AddSurface(geometry)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "ExtrudeCurvePoint: unable to add geometry to the document."
         State.Doc.Views.Redraw()
         rc
+
+
+    /// <summary>Creates a Surface by extruding a Curve to a point. Returns geometry without adding it.</summary>
+    /// <param name="curveGeo">(Curve) Object of the Curve to extrude</param>
+    /// <param name="point">(Point3d) 3D point</param>
+    /// <returns>(Surface) Newly created geometry. The caller owns the returned objects.</returns>
+    static member ExtrudeCurvePoint(curveGeo:Curve, point:Point3d) : Surface =
+        let curve = curveGeo
+        let srf = Surface.CreateExtrusionToPoint(curve, point)
+        if isNull srf then RhinoScriptingException.Raise "ExtrudeCurvePoint: extrusion failed."
+        srf
 
 
     /// <summary>Create Surface by extruding a Curve along two points that define a line.</summary>
@@ -15001,15 +17576,27 @@ type RhinoScriptSyntax private () =
     static member ExtrudeCurveStraight( curveId:Guid,
                                         startPoint:Point3d,
                                         endPoint:Point3d) : Guid =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
-        //startPoint = RhinoScriptSyntax.Coerce3dPoint(startPoint)
-        //endPoint = RhinoScriptSyntax.Coerce3dPoint(endPoint)
-        let vec = endPoint - startPoint
-        let srf = Surface.CreateExtrusion(curve, vec)
-        let rc = State.Doc.Objects.AddSurface(srf)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "ExtrudeCurveStraight failed. curveId:'%s' startPoint:'%A' endPoint:'%A'" (Pretty.str curveId) startPoint endPoint
+        let curveIdGeometry = RhinoScriptSyntax.CoerceCurve(curveId)
+        let geometry = RhinoScriptSyntax.ExtrudeCurveStraight(curveIdGeometry, startPoint, endPoint)
+        let rc = State.Doc.Objects.AddSurface(geometry)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "ExtrudeCurveStraight: unable to add geometry to the document."
         State.Doc.Views.Redraw()
         rc
+
+
+    /// <summary>Create Surface by extruding a Curve along two points that define a line. Returns geometry without adding it.</summary>
+    /// <param name="curveGeo">(Curve) Object of the Curve to extrude</param>
+    /// <param name="startPoint">(Point3d) Start point</param>
+    /// <param name="endPoint">(Point3d) End point, that specifies distance and direction</param>
+    /// <returns>(Surface) Newly created geometry. The caller owns the returned objects.</returns>
+    static member ExtrudeCurveStraight( curveGeo:Curve,
+                                        startPoint:Point3d,
+                                        endPoint:Point3d) : Surface =
+        let curve = curveGeo
+        let vec = endPoint - startPoint
+        let srf = Surface.CreateExtrusion(curve, vec)
+        if isNull srf then RhinoScriptingException.Raise "ExtrudeCurveStraight: extrusion failed."
+        srf
 
 
     /// <summary>Create Surface by extruding along a path Curve.</summary>
@@ -15021,15 +17608,30 @@ type RhinoScriptSyntax private () =
     static member ExtrudeSurface( surfaceId:Guid,
                                   curveId:Guid,
                                   [<OPT;DEF(true)>]cap:bool) : Guid =
-        let brep = RhinoScriptSyntax.CoerceBrep(surfaceId)
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
+        let surfaceIdGeometry = RhinoScriptSyntax.CoerceBrep(surfaceId)
+        let curveIdGeometry = RhinoScriptSyntax.CoerceCurve(curveId)
+        let geometry = RhinoScriptSyntax.ExtrudeSurface(surfaceIdGeometry, curveIdGeometry, cap)
+        let rc = State.Doc.Objects.AddBrep(geometry)
+        State.Doc.Views.Redraw()
+        rc
+
+
+    /// <summary>Create Surface by extruding along a path Curve. Returns geometry without adding it.</summary>
+    /// <param name="surfaceGeo">(Brep) Object of the Surface to extrude</param>
+    /// <param name="curveGeo">(Curve) Object of the path Curve</param>
+    /// <param name="cap">(bool) Optional, default value: <c>true</c>
+    ///    Extrusion is capped at both ends</param>
+    /// <returns>(Brep) Newly created geometry. The caller owns the returned objects.</returns>
+    static member ExtrudeSurface( surfaceGeo:Brep,
+                                  curveGeo:Curve,
+                                  [<OPT;DEF(true)>]cap:bool) : Brep =
+        let brep = surfaceGeo
+        let curve = curveGeo
         let newbrep = brep.Faces.[0].CreateExtrusion(curve, cap)
         if notNull newbrep then
-            let rc = State.Doc.Objects.AddBrep(newbrep)
-            State.Doc.Views.Redraw()
-            rc
+            newbrep
         else
-            RhinoScriptingException.Raise "ExtrudeSurface failed on Surface: %s and Curve %s" (Pretty.str surfaceId)  (Pretty.str curveId)
+            RhinoScriptingException.Raise "ExtrudeSurface failed on Surface: %s and Curve %s" (Pretty.str surfaceGeo)  (Pretty.str curveGeo)
 
 
     /// <summary>Create constant radius rolling ball fillets between two Surfaces. Note,
@@ -15046,8 +17648,30 @@ type RhinoScriptSyntax private () =
                                   radius:float,
                                   [<OPT;DEF(Point2d())>]uvparam0:Point2d,
                                   [<OPT;DEF(Point2d())>]uvparam1:Point2d) : Guid ResizeArray=
-        let surface0 = RhinoScriptSyntax.CoerceSurface(surface0)
-        let surface1 = RhinoScriptSyntax.CoerceSurface(surface1)
+        let surface0Geometry = RhinoScriptSyntax.CoerceSurface(surface0)
+        let surface1Geometry = RhinoScriptSyntax.CoerceSurface(surface1)
+        let geometry = RhinoScriptSyntax.FilletSurfaces(surface0Geometry, surface1Geometry, radius, uvparam0, uvparam1)
+        let rc = geometry |> RArr.mapSeq State.Doc.Objects.AddSurface
+        State.Doc.Views.Redraw()
+        rc
+
+
+    /// <summary>Create constant radius rolling ball fillets between two Surfaces. Note,
+    ///    this function does not trim the original Surfaces of the fillets. Returns geometry without adding it.</summary>
+    /// <param name="surface0">(Surface) first Surface</param>
+    /// <param name="surface1">(Surface) second Surface</param>
+    /// <param name="radius">(float) A positive fillet radius</param>
+    /// <param name="uvparam0">(Point2d) Optional, A u, v Surface parameter of Surface0 near where the fillet
+    ///    is expected to hit the Surface</param>
+    /// <param name="uvparam1">(Point2d) Optional, Same as uvparam0, but for Surface1</param>
+    /// <returns>(Surface ResizeArray) Newly created geometry. The caller owns the returned objects.</returns>
+    static member FilletSurfaces( surface0:Surface,
+                                  surface1:Surface,
+                                  radius:float,
+                                  [<OPT;DEF(Point2d())>]uvparam0:Point2d,
+                                  [<OPT;DEF(Point2d())>]uvparam1:Point2d) : Surface ResizeArray =
+        let surface0 = surface0
+        let surface1 = surface1
         let tol = State.Doc.ModelAbsoluteTolerance
         let surfaces =
             if uvparam0<>Point2d.Origin && uvparam1<>Point2d.Origin then
@@ -15055,11 +17679,7 @@ type RhinoScriptSyntax private () =
             else
                 Surface.CreateRollingBallFillet(surface0, surface1, radius, tol)
         if isNull surfaces then RhinoScriptingException.Raise "FilletSurfaces failed.  surface0:'%A' surface1:'%A' radius:'%A' uvparam0:'%A' uvparam1:'%A'" surface0 surface1 radius uvparam0 uvparam1
-        let rc = ResizeArray()
-        for surf in surfaces do
-            rc.Add( State.Doc.Objects.AddSurface(surf))
-        State.Doc.Views.Redraw()
-        rc
+        ResizeArray(surfaces)
 
 
     /// <summary>Returns the normal direction of a Surface. This feature can
@@ -15067,10 +17687,19 @@ type RhinoScriptSyntax private () =
     /// <param name="surfaceId">(Guid) Identifier of a Surface object</param>
     /// <returns>(bool) The current normal orientation.</returns>
     static member IsSurfaceFliped(surfaceId:Guid) : bool = //GET
-        let brep = RhinoScriptSyntax.CoerceBrep(surfaceId)
-        if brep.Faces.Count>1 then RhinoScriptingException.Raise "IsSurfaceFliped failed. surfaceId:'%s'" (Pretty.str surfaceId)
+        let surfaceIdObject = RhinoScriptSyntax.CoerceBrep(surfaceId)
+        RhinoScriptSyntax.IsSurfaceFliped(surfaceIdObject)
+
+    /// <summary>Returns the normal direction of a Surface. This feature can
+    /// also be found in Rhino's Dir command. Uses the supplied objects directly.</summary>
+    /// <param name="surfaceGeo">(Brep) Object of a Surface object</param>
+    /// <returns>(bool) The current normal orientation.</returns>
+    static member IsSurfaceFliped(surfaceGeo:Brep) : bool = //GET
+        let brep = surfaceGeo
+        if brep.Faces.Count>1 then RhinoScriptingException.Raise "IsSurfaceFliped failed. surfaceGeo:'%s'" (Pretty.str surfaceGeo)
         let face = brep.Faces.[0]
         face.OrientationIsReversed
+
 
     /// <summary>Changes the normal direction of a Surface. This feature can
     /// also be found in Rhino's Dir command.
@@ -15117,35 +17746,46 @@ type RhinoScriptSyntax private () =
     static member IntersectBreps( brep1:Guid,
                                   brep2:Guid,
                                   [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray =
-        let brep1 = RhinoScriptSyntax.CoerceBrep(brep1)
-        let brep2 = RhinoScriptSyntax.CoerceBrep(brep2)
-        let tolerance = Util.ifZero2 State.Doc.ModelAbsoluteTolerance  tolerance
-        let ok, outcurves, outpoints = Intersect.Intersection.BrepBrep(brep1, brep2, tolerance)
-        let ids = ResizeArray()
-        if not ok then ids // empty array TODO or fail ?
-        else
-            let mergedcurves = Curve.JoinCurves(outcurves, 2.1 * tolerance)
+        let brep1Geometry = RhinoScriptSyntax.CoerceBrep(brep1)
+        let brep2Geometry = RhinoScriptSyntax.CoerceBrep(brep2)
+        let geometry = RhinoScriptSyntax.IntersectBreps(brep1Geometry, brep2Geometry, tolerance)
+        let ids = ResizeArray<Guid>()
+        for item in geometry do
+            let id =
+                match item with
+                | :? Curve as curve ->
+                    let id = State.Doc.Objects.AddCurve(curve)
+                    curve.Dispose()
+                    id
+                | :? Point as point -> State.Doc.Objects.AddPoint(point.Location)
+                | _ -> RhinoScriptingException.Raise "IntersectBreps: unexpected intersection geometry."
+            if id = Guid.Empty then RhinoScriptingException.Raise "IntersectBreps: unable to add geometry to the document."
+            ids.Add(id)
+        if ids.Count > 0 then State.Doc.Views.Redraw()
+        ids
 
-            if notNull mergedcurves then
-                for curve in mergedcurves do
-                    if curve.IsValid then
-                        let rc = State.Doc.Objects.AddCurve(curve)
-                        curve.Dispose()
-                        if rc = Guid.Empty then RhinoScriptingException.Raise "IntersectBreps failed.  brep1:'%A' brep2:'%A' tolerance:'%A'" brep1 brep2 tolerance
-                        ids.Add(rc)
-            else
-                for curve in outcurves do
-                    if curve.IsValid then
-                        let rc = State.Doc.Objects.AddCurve(curve)
-                        curve.Dispose()
-                        if rc = Guid.Empty then RhinoScriptingException.Raise "IntersectBreps failed.  brep1:'%A' brep2:'%A' tolerance:'%A'" brep1 brep2 tolerance
-                        ids.Add(rc)
-            for point in outpoints do
-                let rc = State.Doc.Objects.AddPoint(point)
-                if rc = Guid.Empty then RhinoScriptingException.Raise "IntersectBreps failed.  brep1:'%A' brep2:'%A' tolerance:'%A'" brep1 brep2 tolerance
-                ids.Add(rc)
-            State.Doc.Views.Redraw()
-            ids
+
+    /// <summary>Intersects a brep object with another brep object. Note, unlike the
+    ///    SurfaceSurfaceIntersection function this function works on trimmed Surfaces. Returns geometry without adding it.</summary>
+    /// <param name="brep1">(Brep) Object of first brep object</param>
+    /// <param name="brep2">(Brep) Object of second brep object</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
+    ///    Distance tolerance at segment midpoints. If omitted,
+    ///    the current absolute tolerance is used</param>
+    /// <returns>(GeometryBase ResizeArray) Newly created geometry. The caller owns the returned objects.</returns>
+    static member IntersectBreps( brep1:Brep,
+                                  brep2:Brep,
+                                  [<OPT;DEF(0.0)>]tolerance:float) : GeometryBase ResizeArray =
+        let tolerance = Util.ifZero2 State.Doc.ModelAbsoluteTolerance tolerance
+        let ok, curves, points = Intersect.Intersection.BrepBrep(brep1, brep2, tolerance)
+        let geometry = ResizeArray<GeometryBase>()
+        if ok then
+            let joined = Curve.JoinCurves(curves, 2.1 * tolerance)
+            let curves = if isNull joined then curves else joined
+            for curve in curves do
+                if curve.IsValid then geometry.Add(curve)
+            for point in points do geometry.Add(new Point(point))
+        geometry
 
 
     /// <summary>Calculates intersections of two spheres.</summary>
@@ -15182,6 +17822,15 @@ type RhinoScriptSyntax private () =
     /// <returns>(bool) True , otherwise False.</returns>
     static member IsCone(objectId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceSurface(objectId) with
+        | Some geometry -> RhinoScriptSyntax.IsCone(geometry)
+        | None -> false
+
+    /// <summary>Determines if a Surface is a portion of a cone.
+    /// Returns false for any other Rhino object or if the object does not exist. Uses the supplied objects directly.</summary>
+    /// <param name="geometryObject">(Surface) The Surface object</param>
+    /// <returns>(bool) True , otherwise False.</returns>
+    static member IsCone(geometryObject:Surface) : bool =
+        match (Option.ofObj geometryObject) with
         | Some surface -> surface.IsCone()
         | None -> false
 
@@ -15192,6 +17841,15 @@ type RhinoScriptSyntax private () =
     /// <returns>(bool) True , otherwise False.</returns>
     static member IsCylinder(objectId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceSurface(objectId) with
+        | Some geometry -> RhinoScriptSyntax.IsCylinder(geometry)
+        | None -> false
+
+    /// <summary>Determines if a Surface is a portion of a cylinder.
+    /// Returns false for any other Rhino object or if the object does not exist. Uses the supplied objects directly.</summary>
+    /// <param name="geometryObject">(Surface) The cylinder object</param>
+    /// <returns>(bool) True , otherwise False.</returns>
+    static member IsCylinder(geometryObject:Surface) : bool =
+        match (Option.ofObj geometryObject) with
         | Some surface -> surface.IsCylinder()
         | None -> false
 
@@ -15203,6 +17861,16 @@ type RhinoScriptSyntax private () =
     /// <returns>(bool) True , otherwise False.</returns>
     static member IsPlaneSurface(objectId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceSurface(objectId) with
+        | Some geometry -> RhinoScriptSyntax.IsPlaneSurface(geometry)
+        | None -> false
+
+    /// <summary>Verifies an object is a Plane Surface. Plane Surfaces can be created by
+    ///    the Plane command. Note, a Plane Surface is not a planar NURBS Surface.
+    ///    Returns false for any other Rhino object or if the object does not exist. Uses the supplied objects directly.</summary>
+    /// <param name="geometryObject">(Surface) The object</param>
+    /// <returns>(bool) True , otherwise False.</returns>
+    static member IsPlaneSurface(geometryObject:Surface) : bool =
+        match (Option.ofObj geometryObject) with
         | Some (:? BrepFace  as bface) ->
             if bface.IsSurface then
                 match bface.UnderlyingSurface() with
@@ -15226,45 +17894,73 @@ type RhinoScriptSyntax private () =
                                     point:Point3d,
                                     [<OPT;DEF(false)>]strictlyIn:bool,
                                     [<OPT;DEF(0.0)>]tolerance:float) : bool =
-        //objectId = RhinoScriptSyntax.CoerceGuid(objectId)
-        //point = RhinoScriptSyntax.Coerce3dPoint(point)
-        //if objectId|> isNull  || point|> isNull  then RhinoScriptingException.Raise "IsPointInSurface failed.  objectId:'%s' point:'%A' strictlyIn:'%A' tolerance:'%A'" (Pretty.str objectId) point strictlyIn tolerance
-        let obj = State.Doc.Objects.FindId(objectId)
+        let objectIdObject = RhinoScriptSyntax.CoerceGeometry(objectId)
+        RhinoScriptSyntax.IsPointInSurface(objectIdObject, point, strictlyIn, tolerance)
+
+    /// <summary>Checks if a point is inside a closed Mesh , Surface or Polysurface. Uses the supplied objects directly.</summary>
+    /// <param name="geometryObject">(GeometryBase) The object</param>
+    /// <param name="point">(Point3d) The test, or sampling point</param>
+    /// <param name="strictlyIn">(bool) Optional, default value: <c>false</c>
+    ///    If true, the test point must be inside by at least tolerance</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>RhinoMath.SqrtEpsilon</c>
+    ///    Distance tolerance used for intersection and determining
+    ///    strict inclusion.</param>
+    /// <returns>(bool) True , otherwise False.</returns>
+    static member IsPointInSurface( geometryObject:GeometryBase,
+                                    point:Point3d,
+                                    [<OPT;DEF(false)>]strictlyIn:bool,
+                                    [<OPT;DEF(0.0)>]tolerance:float) : bool =
+        let obj = geometryObject
         let  tolerance= Util.ifZero1 tolerance RhinoMath.SqrtEpsilon
         match obj with
-        | :? DocObjects.ExtrusionObject as es->
-            let brep= es.ExtrusionGeometry.ToBrep(false)
-            if not brep.IsSolid then RhinoScriptingException.Raise "IsPointInSurface failed on not closed Extrusion %A"  objectId
+        | :? Extrusion as es->
+            let brep= es.ToBrep(false)
+            if not brep.IsSolid then RhinoScriptingException.Raise "IsPointInSurface failed on not closed Extrusion %A"  geometryObject
             brep.IsPointInside(point, tolerance, strictlyIn)
-        | :? DocObjects.BrepObject as bo->
-            let br= bo.BrepGeometry
-            if not br.IsSolid then RhinoScriptingException.Raise "IsPointInSurface failed on not closed Brep %A"  objectId
+        | :? Brep as bo->
+            let br= bo
+            if not br.IsSolid then RhinoScriptingException.Raise "IsPointInSurface failed on not closed Brep %A"  geometryObject
             br.IsPointInside(point, tolerance, strictlyIn)
-        | :? DocObjects.MeshObject as mo ->
-            let me = mo.MeshGeometry
-            if not me.IsClosed then RhinoScriptingException.Raise "IsPointInSurface failed on not closed Mesh %A"  objectId
+        | :? Mesh as mo ->
+            let me = mo
+            if not me.IsClosed then RhinoScriptingException.Raise "IsPointInSurface failed on not closed Mesh %A"  geometryObject
             me.IsPointInside(point, tolerance, strictlyIn)
-        | _ -> RhinoScriptingException.Raise "IsPointInSurface does not work  on %s %A" (RhinoScriptSyntax.ObjectDescription(objectId)) objectId
+        | _ -> RhinoScriptingException.Raise "IsPointInSurface does not work  on %s %A" (Pretty.str geometryObject) geometryObject
+
 
     /// <summary>Checks if a point lies on a Surface.</summary>
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <param name="point">(Point3d) The test, or sampling point</param>
     /// <returns>(bool) True , otherwise False.</returns>
     static member IsPointOnSurface(objectId:Guid, point:Point3d) : bool =
-        let surf = RhinoScriptSyntax.CoerceSurface(objectId)
-        //point = RhinoScriptSyntax.Coerce3dPoint(point)
+        let geometry = RhinoScriptSyntax.CoerceGeometry(objectId)
+        RhinoScriptSyntax.IsPointOnSurface(geometry, point)
+
+    /// <summary>Checks if a point lies on a Surface. Uses the supplied objects directly.</summary>
+    /// <param name="geometryObject">(GeometryBase) The object</param>
+    /// <param name="point">(Point3d) The test, or sampling point</param>
+    /// <returns>(bool) True , otherwise False.</returns>
+    static member IsPointOnSurface(geometryObject:GeometryBase, point:Point3d) : bool =
+        let tryGetSurface (value:GeometryBase) =
+            let geometry = value
+            match geometry with | :? Surface as surface -> Some surface | :? Brep as brep when brep.Faces.Count = 1 -> Some (brep.Faces.[0] :> Surface) | _ -> None
+        let getSurface value =
+            match tryGetSurface value with
+            | Some geometry -> geometry
+            | None -> RhinoScriptingException.Raise "IsPointOnSurface: expected Surface geometry."
+        let surf = getSurface(geometryObject)
         let mutable rc, u, v = surf.ClosestPoint(point)
         if rc  then
             let srfpt = surf.PointAt(u, v)
             if srfpt.DistanceTo(point) > State.Doc.ModelAbsoluteTolerance then
                 rc <- false
             else
-                match RhinoScriptSyntax.TryCoerceBrep(objectId) with
-                | Some b ->
-                    rc <- b.Faces.[0].IsPointOnFace(u, v) <> PointFaceRelation.Exterior
+                match surf with
+                | :? BrepFace as face ->
+                    rc <- face.IsPointOnFace(u, v) <> PointFaceRelation.Exterior
                 | _ -> ()
         else
-            RhinoScriptingException.Raise "IsPointOnSurface failed for surf.ClosestPoint on %A %A" (Pretty.str objectId) point
+            RhinoScriptingException.Raise "IsPointOnSurface failed for surf.ClosestPoint on %A %A" (Pretty.str geometryObject) point
         rc
 
 
@@ -15272,33 +17968,52 @@ type RhinoScriptSyntax private () =
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True if successful, otherwise False.</returns>
     static member IsPolysurface(objectId:Guid) : bool =
-        match State.Doc.Objects.FindId(objectId) with
-        | null -> RhinoScriptingException.Raise "IsPolysurface: %A is not an object in State.Doc.Objects table" objectId
-        | o ->  match o.Geometry with
-                | :? Brep as b -> b.Faces.Count > 1
-                | :? Extrusion  -> true
-                | _ -> false
+        match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
+        | Some geometry -> RhinoScriptSyntax.IsPolysurface(geometry)
+        | None -> RhinoScriptingException.Raise "IsPolysurface: %A is not an object in State.Doc.Objects table" objectId
+
+    /// <summary>Verifies an object is a Polysurface or Extrusion. Polysurfaces consist of two or more Surfaces joined together. Uses the supplied objects directly.</summary>
+    /// <param name="geometryObject">(GeometryBase) The object</param>
+    /// <returns>(bool) True if successful, otherwise False.</returns>
+    static member IsPolysurface(geometryObject:GeometryBase) : bool =
+        match geometryObject with
+        | :? Brep as b -> b.Faces.Count > 1
+        | :? Extrusion  -> true
+        | _ -> false
+
 
     /// <summary>Verifies an object is a or Extrusion. </summary>
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True if successful, otherwise False.</returns>
     static member IsExtrusion(objectId:Guid) : bool =
-        match State.Doc.Objects.FindId(objectId) with
-        | null -> RhinoScriptingException.Raise "IsExtrusion: %A is not an object in State.Doc.Objects table" objectId
-        | o ->  match o.Geometry with
-                | :? Extrusion  -> true
-                | _ -> false
+        match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
+        | Some geometry -> RhinoScriptSyntax.IsExtrusion(geometry)
+        | None -> RhinoScriptingException.Raise "IsExtrusion: %A is not an object in State.Doc.Objects table" objectId
+
+    /// <summary>Verifies an object is a or Extrusion.  Uses the supplied objects directly.</summary>
+    /// <param name="geometryObject">(GeometryBase) The object</param>
+    /// <returns>(bool) True if successful, otherwise False.</returns>
+    static member IsExtrusion(geometryObject:GeometryBase) : bool =
+        match geometryObject with
+        | :? Extrusion  -> true
+        | _ -> false
+
 
     /// <summary>Verifies an object is a Brep. That is a trimmed surface or a polysurface but not an extrusion.</summary>
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True if successful, otherwise False.</returns>
     static member IsBrep(objectId:Guid) : bool =
-        match State.Doc.Objects.FindId(objectId) with
-        | null -> RhinoScriptingException.Raise "IsBrep: %A is not an object in State.Doc.Objects table" objectId
-        | o ->  match o.Geometry with
-                | :? Brep  -> true
-                | _ -> false
+        match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
+        | Some geometry -> RhinoScriptSyntax.IsBrep(geometry)
+        | None -> RhinoScriptingException.Raise "IsBrep: %A is not an object in State.Doc.Objects table" objectId
 
+    /// <summary>Verifies an object is a Brep. That is a trimmed surface or a polysurface but not an extrusion. Uses the supplied objects directly.</summary>
+    /// <param name="geometryObject">(GeometryBase) The object</param>
+    /// <returns>(bool) True if successful, otherwise False.</returns>
+    static member IsBrep(geometryObject:GeometryBase) : bool =
+        match geometryObject with
+        | :? Brep  -> true
+        | _ -> false
 
 
     /// <summary>Verifies a Guid refers to a closed Polysurface or closed Extrusion. If the Polysurface fully encloses
@@ -15306,12 +18021,19 @@ type RhinoScriptSyntax private () =
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True if successful, otherwise False.</returns>
     static member IsPolysurfaceClosed(objectId:Guid) : bool =
-        match State.Doc.Objects.FindId(objectId) with
-        | null -> RhinoScriptingException.Raise "IsPolysurfaceClosed: %A is not an object in State.Doc.Objects table" objectId
-        | o ->  match o.Geometry with
-                | :? Brep as b -> b.IsSolid
-                | :? Extrusion as e -> e.IsSolid
-                | _ -> false
+        match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
+        | Some geometry -> RhinoScriptSyntax.IsPolysurfaceClosed(geometry)
+        | None -> RhinoScriptingException.Raise "IsPolysurfaceClosed: %A is not an object in State.Doc.Objects table" objectId
+
+    /// <summary>Verifies a Guid refers to a closed Polysurface or closed Extrusion. If the Polysurface fully encloses
+    ///    a volume, it is considered a solid. Uses the supplied objects directly.</summary>
+    /// <param name="geometryObject">(GeometryBase) The object</param>
+    /// <returns>(bool) True if successful, otherwise False.</returns>
+    static member IsPolysurfaceClosed(geometryObject:GeometryBase) : bool =
+        match geometryObject with
+        | :? Brep as b -> b.IsSolid
+        | :? Extrusion as e -> e.IsSolid
+        | _ -> false
 
 
     /// <summary>Determines if a Surface is a portion of a Sphere.</summary>
@@ -15319,16 +18041,31 @@ type RhinoScriptSyntax private () =
     /// <returns>(bool) True , otherwise False.</returns>
     static member IsSphere(objectId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceSurface(objectId) with
+        | Some geometry -> RhinoScriptSyntax.IsSphere(geometry)
+        | None -> false
+
+    /// <summary>Determines if a Surface is a portion of a Sphere. Uses the supplied objects directly.</summary>
+    /// <param name="geometryObject">(Surface) The object</param>
+    /// <returns>(bool) True , otherwise False.</returns>
+    static member IsSphere(geometryObject:Surface) : bool =
+        match (Option.ofObj geometryObject) with
         | Some b ->  b.IsSphere()
         | _ -> false
-
 
 
     /// <summary>Verifies an object is a Surface, Extrusion or Brep objects with only one face.</summary>
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True , otherwise False.</returns>
     static member IsSurface(objectId:Guid) : bool =
-        RhinoScriptSyntax.TryCoerceSurface(objectId).IsSome
+        match RhinoScriptSyntax.TryCoerceSurface(objectId) with
+        | Some geometry -> RhinoScriptSyntax.IsSurface(geometry)
+        | None -> false
+
+    /// <summary>Verifies an object is a Surface, Extrusion or Brep objects with only one face. Uses the supplied objects directly.</summary>
+    /// <param name="geometryObject">(Surface) The object</param>
+    /// <returns>(bool) True , otherwise False.</returns>
+    static member IsSurface(geometryObject:Surface) : bool =
+        (Option.ofObj geometryObject).IsSome
 
 
     /// <summary>Verifies a Surface object is closed in the specified direction. If the
@@ -15340,6 +18077,18 @@ type RhinoScriptSyntax private () =
     /// <returns>(bool) True or False.</returns>
     static member IsSurfaceClosed(surfaceId:Guid, direction:int) : bool =
         match RhinoScriptSyntax.TryCoerceSurface(surfaceId) with
+        | Some geometry -> RhinoScriptSyntax.IsSurfaceClosed(geometry, direction)
+        | None -> false
+
+    /// <summary>Verifies a Surface object is closed in the specified direction. If the
+    ///    Surface fully encloses a volume, it is considered a solid. Uses the supplied objects directly.</summary>
+    /// <param name="surfaceGeo">(Surface) Object of a Surface</param>
+    /// <param name="direction">(int)
+    ///    0 = U direction check,
+    ///    1 = V direction check</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsSurfaceClosed(surfaceGeo:Surface, direction:int) : bool =
+        match (Option.ofObj surfaceGeo) with
         | Some surface ->  surface.IsClosed(direction)
         | _ -> false
 
@@ -15352,9 +18101,19 @@ type RhinoScriptSyntax private () =
     /// <returns>(bool) True or False.</returns>
     static member IsSurfacePeriodic(surfaceId:Guid, direction:int) : bool =
         match RhinoScriptSyntax.TryCoerceSurface(surfaceId) with
+        | Some geometry -> RhinoScriptSyntax.IsSurfacePeriodic(geometry, direction)
+        | None -> false
+
+    /// <summary>Verifies a Surface object is periodic in the specified direction. Uses the supplied objects directly.</summary>
+    /// <param name="surfaceGeo">(Surface) Object of a Surface</param>
+    /// <param name="direction">(int)
+    ///    0 = U direction check,
+    ///    1 = V direction check</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsSurfacePeriodic(surfaceGeo:Surface, direction:int) : bool =
+        match (Option.ofObj surfaceGeo) with
         | Some surface ->  surface.IsPeriodic(direction)
         | _ -> false
-
 
 
     /// <summary>Verifies a Surface object is planar.</summary>
@@ -15366,6 +18125,18 @@ type RhinoScriptSyntax private () =
     static member IsSurfacePlanar(surfaceId:Guid, [<OPT;DEF(0.0)>]tolerance:float) : bool =
         let tolerance = Util.ifZero1 tolerance State.Doc.ModelAbsoluteTolerance
         match RhinoScriptSyntax.TryCoerceSurface(surfaceId) with
+        | Some geometry -> RhinoScriptSyntax.IsSurfacePlanar(geometry, tolerance)
+        | None -> false
+
+    /// <summary>Verifies a Surface object is planar. Uses the supplied objects directly.</summary>
+    /// <param name="surfaceGeo">(Surface) Object of a Surface</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
+    ///    Tolerance used when checked. If omitted, the current absolute
+    ///    tolerance is used</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsSurfacePlanar(surfaceGeo:Surface, [<OPT;DEF(0.0)>]tolerance:float) : bool =
+        let tolerance = Util.ifZero1 tolerance State.Doc.ModelAbsoluteTolerance
+        match (Option.ofObj surfaceGeo) with
         | Some surface ->  surface.IsPlanar(tolerance)
         | _ -> false
 
@@ -15374,7 +18145,15 @@ type RhinoScriptSyntax private () =
     /// <param name="surfaceId">(Guid) The Surface's identifier</param>
     /// <returns>(bool) True , otherwise False.</returns>
     static member IsSurfaceRational(surfaceId:Guid) : bool =
-        match RhinoScriptSyntax.TryCoerceSurface(surfaceId) with //TODO better fail if input is not a surface ?? here and above functions
+        match RhinoScriptSyntax.TryCoerceSurface(surfaceId) with
+        | Some geometry -> RhinoScriptSyntax.IsSurfaceRational(geometry)
+        | None -> false
+
+    /// <summary>Verifies a Surface object is rational. Uses the supplied objects directly.</summary>
+    /// <param name="surfaceGeo">(Surface) The Surface</param>
+    /// <returns>(bool) True , otherwise False.</returns>
+    static member IsSurfaceRational(surfaceGeo:Surface) : bool =
+        match (Option.ofObj surfaceGeo) with //TODO better fail if input is not a surface ?? here and above functions
         | Some surface ->
             let ns = surface.ToNurbsSurface()
             if ns|> isNull  then false
@@ -15392,7 +18171,21 @@ type RhinoScriptSyntax private () =
     ///    3 = west</param>
     /// <returns>(bool) True or False.</returns>
     static member IsSurfaceSingular(surfaceId:Guid, direction:int) : bool =
-        match RhinoScriptSyntax.TryCoerceSurface(surfaceId) with    //TODO better fail if input is not a surface ?? here and above functions
+        match RhinoScriptSyntax.TryCoerceSurface(surfaceId) with
+        | Some geometry -> RhinoScriptSyntax.IsSurfaceSingular(geometry, direction)
+        | None -> false
+
+    /// <summary>Verifies a Surface object is singular in the specified direction.
+    ///    Surfaces are considered singular if a side collapses to a point. Uses the supplied objects directly.</summary>
+    /// <param name="surfaceGeo">(Surface) The Surface</param>
+    /// <param name="direction">(int)
+    ///    0 = south
+    ///    1 = east
+    ///    2 = north
+    ///    3 = west</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsSurfaceSingular(surfaceGeo:Surface, direction:int) : bool =
+        match (Option.ofObj surfaceGeo) with    //TODO better fail if input is not a surface ?? here and above functions
         | Some surface ->
             surface.IsSingular(direction)
         | _ -> false
@@ -15403,16 +18196,31 @@ type RhinoScriptSyntax private () =
     /// <returns>(bool) True or False.</returns>
     static member IsSurfaceTrimmed(surfaceId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceBrep(surfaceId) with
+        | Some geometry -> RhinoScriptSyntax.IsSurfaceTrimmed(geometry)
+        | None -> false
+
+    /// <summary>Verifies a Surface object has been trimmed. Uses the supplied objects directly.</summary>
+    /// <param name="surfaceGeo">(Brep) The Surface</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsSurfaceTrimmed(surfaceGeo:Brep) : bool =
+        match (Option.ofObj surfaceGeo) with
         | Some brep ->  not brep.IsSurface
         | _ -> false //TODO better fail if input is not a surface ?? here and above functions
-
 
 
     /// <summary>Determines if a Surface is a portion of a torus.</summary>
     /// <param name="surfaceId">(Guid) The Surface object's identifier</param>
     /// <returns>(bool) True , otherwise False.</returns>
     static member IsTorus(surfaceId:Guid) : bool =
-        match RhinoScriptSyntax.TryCoerceSurface(surfaceId) with //TODO better fail if input is not a surface ?? here and above functions
+        match RhinoScriptSyntax.TryCoerceSurface(surfaceId) with
+        | Some geometry -> RhinoScriptSyntax.IsTorus(geometry)
+        | None -> false
+
+    /// <summary>Determines if a Surface is a portion of a torus. Uses the supplied objects directly.</summary>
+    /// <param name="surfaceGeo">(Surface) The Surface object</param>
+    /// <returns>(bool) True , otherwise False.</returns>
+    static member IsTorus(surfaceGeo:Surface) : bool =
+        match (Option.ofObj surfaceGeo) with //TODO better fail if input is not a surface ?? here and above functions
         | Some surface ->  surface.IsTorus()
         | _ -> false
 
@@ -15421,12 +18229,19 @@ type RhinoScriptSyntax private () =
     /// <param name="surfaceId">(Guid) The identifier of the Surface object</param>
     /// <returns>(Plane * float) The equatorial Plane of the sphere, and its radius.</returns>
     static member SurfaceSphere(surfaceId:Guid) : Plane * float =
-        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let surfaceIdObject = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        RhinoScriptSyntax.SurfaceSphere(surfaceIdObject)
+
+    /// <summary>Gets the sphere definition from a Surface, if possible. Uses the supplied objects directly.</summary>
+    /// <param name="surfaceGeo">(Surface) The Surface object</param>
+    /// <returns>(Plane * float) The equatorial Plane of the sphere, and its radius.</returns>
+    static member SurfaceSphere(surfaceGeo:Surface) : Plane * float =
+        let surface = surfaceGeo
         let tol = State.Doc.ModelAbsoluteTolerance
         let sphere = ref Sphere.Unset
         let issphere = surface.TryGetSphere(sphere, tol)
         if issphere then (!sphere).EquatorialPlane, (!sphere).Radius
-        else RhinoScriptingException.Raise "SurfaceSphere input is not a sphere %A"surfaceId
+        else RhinoScriptingException.Raise "SurfaceSphere input is not a sphere %A"surfaceGeo
 
 
     /// <summary>Joins two or more Surface or Polysurface objects together to form one
@@ -15436,22 +18251,28 @@ type RhinoScriptSyntax private () =
     ///    Delete the original Surfaces</param>
     /// <returns>(Guid) identifier of newly created object.</returns>
     static member JoinSurfaces(objectIds:Guid seq, [<OPT;DEF(false)>]deleteInput:bool) : Guid =
-        let breps  = objectIds |> RArr.mapSeq RhinoScriptSyntax.CoerceBrep
-        if breps.Count<2 then RhinoScriptingException.Raise "JoinSurfaces failed, less than two objects given.  objectIds:'%A' deleteInput:'%A'" (Pretty.str objectIds) deleteInput
-        let tol = State.Doc.ModelAbsoluteTolerance * 2.1
-        let joinedbreps = Brep.JoinBreps(breps, tol)
-        if joinedbreps|> isNull  then
-            RhinoScriptingException.Raise "JoinSurfaces failed.  objectIds:'%A' deleteInput:'%A'" (Pretty.str objectIds) deleteInput
-        if joinedbreps.Length <> 1 then
-            RhinoScriptingException.Raise "JoinSurfaces resulted in more than one object: %d  objectIds:'%A' deleteInput:'%A'" joinedbreps.Length objectIds deleteInput
-        let rc = State.Doc.Objects.AddBrep(joinedbreps.[0])
-        if rc = Guid.Empty then RhinoScriptingException.Raise "JoinSurfaces failed.  objectIds:'%A' deleteInput:'%A'" (Pretty.str objectIds) deleteInput
-        if  deleteInput then
-            for objectId in objectIds do
-                //id = RhinoScriptSyntax.CoerceGuid(objectId)
-                State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
+        let objectIds = objectIds |> Seq.toArray
+        let objectIdsGeometry = objectIds |> RArr.mapSeq RhinoScriptSyntax.CoerceBrep
+        let geometry = RhinoScriptSyntax.JoinSurfaces(objectIdsGeometry)
+        let rc = State.Doc.Objects.AddBrep(geometry)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "JoinSurfaces: unable to add geometry to the document."
+        if deleteInput then
+            for id in objectIds do State.Doc.Objects.Delete(id, true) |> ignore<bool>
         State.Doc.Views.Redraw()
         rc
+
+
+    /// <summary>Joins two or more Surface or Polysurface objects together to form one
+    ///    Polysurface object. Returns geometry without adding it.</summary>
+    /// <param name="geometryObjects">(Brep seq) List of objects</param>
+    /// <returns>(Brep) Newly created geometry. The caller owns the returned objects.</returns>
+    static member JoinSurfaces(geometryObjects:Brep seq) : Brep =
+        let breps = geometryObjects |> Seq.toArray
+        if breps.Length < 2 then RhinoScriptingException.Raise "JoinSurfaces: at least two Breps are required."
+        let joined = Brep.JoinBreps(breps, State.Doc.ModelAbsoluteTolerance * 2.1)
+        if isNull joined then RhinoScriptingException.Raise "JoinSurfaces: operation failed."
+        if joined.Length <> 1 then RhinoScriptingException.Raise "JoinSurfaces resulted in more than one object: %d" joined.Length
+        joined.[0]
 
 
     /// <summary>Makes an existing Surface a periodic NURBS Surface.</summary>
@@ -15465,18 +18286,28 @@ type RhinoScriptSyntax private () =
     static member MakeSurfacePeriodic( surfaceId:Guid,
                                        direction:int,
                                        [<OPT;DEF(false)>]deleteInput:bool) : Guid =
-        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
-        let newsurf = Surface.CreatePeriodicSurface(surface, direction)
-        if newsurf|> isNull  then RhinoScriptingException.Raise "MakeSurfacePeriodic failed.  surfaceId:'%s' direction:'%A' deleteInput:'%A'" (Pretty.str surfaceId) direction deleteInput
-        //id = RhinoScriptSyntax.CoerceGuid(surfaceId)
-        if deleteInput then
-            State.Doc.Objects.Replace(surfaceId, newsurf)|> ignore<bool>
-            State.Doc.Views.Redraw()
-            surfaceId
-        else
-            let objectIdn = State.Doc.Objects.AddSurface(newsurf)
-            State.Doc.Views.Redraw()
-            objectIdn
+        let surfaceIdGeometry = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let surface = RhinoScriptSyntax.MakeSurfacePeriodic(surfaceIdGeometry, direction)
+        let id =
+            if deleteInput then
+                State.Doc.Objects.Replace(surfaceId, surface) |> ignore<bool>
+                surfaceId
+            else State.Doc.Objects.AddSurface(surface)
+        State.Doc.Views.Redraw()
+        id
+
+
+    /// <summary>Makes an existing Surface a periodic NURBS Surface. Returns geometry without adding it.</summary>
+    /// <param name="surfaceGeo">(Surface) The Surface</param>
+    /// <param name="direction">(int) The direction to make periodic, either
+    ///    0 = U
+    ///    1 = V</param>
+    /// <returns>(Surface) Newly created geometry. The caller owns the returned objects.</returns>
+    static member MakeSurfacePeriodic( surfaceGeo:Surface,
+                                       direction:int) : Surface =
+        let surface = Surface.CreatePeriodicSurface(surfaceGeo, direction)
+        if isNull surface then RhinoScriptingException.Raise "MakeSurfacePeriodic: operation failed."
+        surface
 
 
     /// <summary>Offsets a trimmed or untrimmed Surface by a distance. The offset Surface
@@ -15496,17 +18327,38 @@ type RhinoScriptSyntax private () =
                                  [<OPT;DEF(0.0)>]tolerance:float,
                                  [<OPT;DEF(false)>]bothSides:bool,
                                  [<OPT;DEF(false)>]createSolid:bool) : Guid =
-        let brep = RhinoScriptSyntax.CoerceBrep(surfaceId)
-        let mutable face = null
-        if (1 = brep.Faces.Count) then face <- brep.Faces.[0]
-        if face|> isNull  then RhinoScriptingException.Raise "OffsetSurface failed.  surfaceId:'%s' distance:'%A' tolerance:'%A' bothSides:'%A' createSolid:'%A'" (Pretty.str surfaceId) distance tolerance bothSides createSolid
-        let tolerance= Util.ifZero1 tolerance State.Doc.ModelAbsoluteTolerance
-        let newbrep = Brep.CreateFromOffsetFace(face, distance, tolerance, bothSides, createSolid)
-        if newbrep|> isNull  then RhinoScriptingException.Raise "OffsetSurface failed.  surfaceId:'%s' distance:'%A' tolerance:'%A' bothSides:'%A' createSolid:'%A'" (Pretty.str surfaceId) distance tolerance bothSides createSolid
-        let rc = State.Doc.Objects.AddBrep(newbrep)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "OffsetSurface failed.  surfaceId:'%s' distance:'%A' tolerance:'%A' bothSides:'%A' createSolid:'%A'" (Pretty.str surfaceId) distance tolerance bothSides createSolid
+        let surfaceIdGeometry = RhinoScriptSyntax.CoerceBrep(surfaceId)
+        let geometry = RhinoScriptSyntax.OffsetSurface(surfaceIdGeometry, distance, tolerance, bothSides, createSolid)
+        let rc = State.Doc.Objects.AddBrep(geometry)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "OffsetSurface: unable to add geometry to the document."
         State.Doc.Views.Redraw()
         rc
+
+
+    /// <summary>Offsets a trimmed or untrimmed Surface by a distance. The result is returned as a new Brep. Returns geometry without adding it.</summary>
+    /// <param name="surfaceGeo">(Brep) The Surface</param>
+    /// <param name="distance">(float) The distance to offset</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
+    ///    The offset tolerance. Use 0.0 to make a loose offset. Otherwise, the
+    ///    document's absolute tolerance is usually sufficient</param>
+    /// <param name="bothSides">(bool) Optional, default value: <c>false</c>
+    ///    Offset to both sides of the input Surface</param>
+    /// <param name="createSolid">(bool) Optional, default value: <c>false</c>
+    ///    Make a solid object</param>
+    /// <returns>(Brep) Newly created geometry. The caller owns the returned objects.</returns>
+    static member OffsetSurface( surfaceGeo:Brep,
+                                 distance:float,
+                                 [<OPT;DEF(0.0)>]tolerance:float,
+                                 [<OPT;DEF(false)>]bothSides:bool,
+                                 [<OPT;DEF(false)>]createSolid:bool) : Brep =
+        let brep = surfaceGeo
+        let mutable face = null
+        if (1 = brep.Faces.Count) then face <- brep.Faces.[0]
+        if face|> isNull  then RhinoScriptingException.Raise "OffsetSurface failed.  surfaceGeo:'%s' distance:'%A' tolerance:'%A' bothSides:'%A' createSolid:'%A'" (Pretty.str surfaceGeo) distance tolerance bothSides createSolid
+        let tolerance= Util.ifZero1 tolerance State.Doc.ModelAbsoluteTolerance
+        let newbrep = Brep.CreateFromOffsetFace(face, distance, tolerance, bothSides, createSolid)
+        if newbrep|> isNull  then RhinoScriptingException.Raise "OffsetSurface failed.  surfaceGeo:'%s' distance:'%A' tolerance:'%A' bothSides:'%A' createSolid:'%A'" (Pretty.str surfaceGeo) distance tolerance bothSides createSolid
+        newbrep
 
 
     /// <summary>Pulls a Curve object to a Surface object.</summary>
@@ -15518,16 +18370,24 @@ type RhinoScriptSyntax private () =
     static member PullCurve( surface:Guid,
                              curve:Guid,
                              [<OPT;DEF(false)>]deleteInput:bool) : Guid ResizeArray =
-        let crvobj = RhinoScriptSyntax.CoerceRhinoObject(curve)
-        let brep = RhinoScriptSyntax.CoerceBrep(surface)
-        let curve = RhinoScriptSyntax.CoerceCurve(curve)
-        let tol = State.Doc.ModelAbsoluteTolerance
-        let curves = Curve.PullToBrepFace(curve, brep.Faces.[0], tol)
-        let rc  = curves |> RArr.mapArr State.Doc.Objects.AddCurve
-        if deleteInput  then
-            State.Doc.Objects.Delete(crvobj, true) |> ignore<bool>
+        let surfaceGeometry = RhinoScriptSyntax.CoerceBrep(surface)
+        let curveGeometry = RhinoScriptSyntax.CoerceCurve(curve)
+        let curves = RhinoScriptSyntax.PullCurve(surfaceGeometry, curveGeometry)
+        let ids = curves |> RArr.mapSeq State.Doc.Objects.AddCurve
+        if deleteInput then State.Doc.Objects.Delete(curve, true) |> ignore<bool>
         State.Doc.Views.Redraw()
-        rc
+        ids
+
+
+    /// <summary>Pulls a Curve object to a Surface object. Returns geometry without adding it.</summary>
+    /// <param name="surface">(Brep) The Surface</param>
+    /// <param name="curve">(Curve) The Curve</param>
+    /// <returns>(Curve ResizeArray) Newly created geometry. The caller owns the returned objects.</returns>
+    static member PullCurve( surface:Brep,
+                             curve:Curve) : Curve ResizeArray =
+        let curves = Curve.PullToBrepFace(curve, surface.Faces.[0], State.Doc.ModelAbsoluteTolerance)
+        if isNull curves then RhinoScriptingException.Raise "PullCurve: operation failed."
+        ResizeArray(curves)
 
 
     /// <summary>Rebuilds a Surface to a given degree and control point count. For more
@@ -15612,15 +18472,24 @@ type RhinoScriptSyntax private () =
                             startPoint:Point3d,
                             direction:Vector3d,
                             [<OPT;DEF(10)>]reflections:int) : Point3d array =
-        //startPoint = RhinoScriptSyntax.Coerce3dPoint(startPoint)
-        //direction = RhinoScriptSyntax.Coerce3dvector(direction)
-        //id = RhinoScriptSyntax.CoerceGuid(surfaceIds)
-        //if notNull objectId then surfaceIds <- .[id]
-        let ray = Ray3d(startPoint, direction)
-        let breps = surfaceIds |> RArr.mapSeq RhinoScriptSyntax.CoerceBrep
-        if breps.Count = 0 then RhinoScriptingException.Raise "ShootRay failed.  surfaceIds:'%A' startPoint:'%A' direction:'%A' reflections:'%A'"  surfaceIds startPoint direction reflections
-        Intersect.Intersection.RayShoot(ray, Seq.cast breps, reflections)
+        let surfaceIdsObjects = surfaceIds |> Seq.map RhinoScriptSyntax.CoerceBrep
+        RhinoScriptSyntax.ShootRay(surfaceIdsObjects, startPoint, direction, reflections)
 
+    /// <summary>Shoots a ray at a collection of Surfaces or Polysurfaces. Uses the supplied objects directly.</summary>
+    /// <param name="surfaceGeos">(Brep seq) One of more Surface objects</param>
+    /// <param name="startPoint">(Point3d) Starting point of the ray</param>
+    /// <param name="direction">(Vector3d) Vector identifying the direction of the ray</param>
+    /// <param name="reflections">(int) Optional, default value: <c>10</c>
+    ///    The maximum number of times the ray will be reflected</param>
+    /// <returns>(Point3d array) Array of reflection points.</returns>
+    static member ShootRay( surfaceGeos:Brep seq,
+                            startPoint:Point3d,
+                            direction:Vector3d,
+                            [<OPT;DEF(10)>]reflections:int) : Point3d array =
+        let ray = Ray3d(startPoint, direction)
+        let breps = surfaceGeos |> RArr.mapSeq (fun geometry -> geometry)
+        if breps.Count = 0 then RhinoScriptingException.Raise "ShootRay failed.  surfaceGeos:'%A' startPoint:'%A' direction:'%A' reflections:'%A'"  surfaceGeos startPoint direction reflections
+        Intersect.Intersection.RayShoot(ray, Seq.cast breps, reflections)
 
 
     /// <summary>Creates the shortest possible Curve(geodesic) between two points on a
@@ -15632,21 +18501,33 @@ type RhinoScriptSyntax private () =
     static member ShortPath( surfaceId:Guid,
                              startPoint:Point3d,
                              endPoint:Point3d) : Guid =
-        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
-        //start = RhinoScriptSyntax.Coerce3dPoint(startPoint)
-        //end = RhinoScriptSyntax.Coerce3dPoint(endPoint)
+        let surfaceIdGeometry = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let geometry = RhinoScriptSyntax.ShortPath(surfaceIdGeometry, startPoint, endPoint)
+        let rc = State.Doc.Objects.AddCurve(geometry)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "ShortPath: unable to add geometry to the document."
+        State.Doc.Views.Redraw()
+        rc
+
+
+    /// <summary>Creates the shortest possible Curve(geodesic) between two points on a
+    ///    Surface. For more details, see the ShortPath command in Rhino help. Returns geometry without adding it.</summary>
+    /// <param name="surfaceGeo">(Surface) Object of a Surface</param>
+    /// <param name="startPoint">(Point3d) Start point the short Curve</param>
+    /// <param name="endPoint">(Point3d) End point of the short Curve</param>
+    /// <returns>(Curve) Newly created geometry. The caller owns the returned objects.</returns>
+    static member ShortPath( surfaceGeo:Surface,
+                             startPoint:Point3d,
+                             endPoint:Point3d) : Curve =
+        let surface = surfaceGeo
         let rcstart, ustart, vstart = surface.ClosestPoint(startPoint)
         let rcend, uend, vend = surface.ClosestPoint(endPoint)
-        if not rcstart || not rcend then RhinoScriptingException.Raise "ShortPath failed.  surfaceId:'%s' startPoint:'%A' endPoint:'%A'" (Pretty.str surfaceId) startPoint endPoint
+        if not rcstart || not rcend then RhinoScriptingException.Raise "ShortPath failed.  surfaceGeo:'%s' startPoint:'%A' endPoint:'%A'" (Pretty.str surfaceGeo) startPoint endPoint
         let start = Point2d(ustart, vstart)
         let ende = Point2d(uend, vend)
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let curve = surface.ShortPath(start, ende, tolerance)
-        if curve|> isNull  then RhinoScriptingException.Raise "ShortPath failed.  surfaceId:'%s' startPoint:'%A' endPoint:'%A'" (Pretty.str surfaceId) startPoint endPoint
-        let objectId = State.Doc.Objects.AddCurve(curve)
-        if objectId = Guid.Empty then RhinoScriptingException.Raise "ShortPath failed.  surfaceId:'%s' startPoint:'%A' endPoint:'%A'" (Pretty.str surfaceId) startPoint endPoint
-        State.Doc.Views.Redraw()
-        objectId
+        if curve|> isNull  then RhinoScriptingException.Raise "ShortPath failed.  surfaceGeo:'%s' startPoint:'%A' endPoint:'%A'" (Pretty.str surfaceGeo) startPoint endPoint
+        curve
 
 
     /// <summary>Shrinks the underlying untrimmed Surfaces near to the trimming
@@ -15656,19 +18537,27 @@ type RhinoScriptSyntax private () =
     ///    If True, the original Surface is not deleted</param>
     /// <returns>(Guid) If createCopy is true the new Guid, else the input Guid.</returns>
     static member ShrinkTrimmedSurface(objectId:Guid, [<OPT;DEF(false)>]createCopy:bool) : Guid =
-        let brep = RhinoScriptSyntax.CoerceBrep(objectId)
-        if brep.Faces.ShrinkFaces() then RhinoScriptingException.Raise "ShrinkTrimmedSurface failed.  objectId:'%s' createCopy:'%A'" (Pretty.str objectId) createCopy
-        if  createCopy then
-            let oldobj = State.Doc.Objects.FindId(objectId)
-            let attr = oldobj.Attributes
-            let rc = State.Doc.Objects.AddBrep(brep, attr)
-            State.Doc.Views.Redraw()
-            rc
-        else
-            State.Doc.Objects.Replace(objectId, brep)|> ignore<bool>
-            State.Doc.Views.Redraw()
-            objectId
+        let objectIdGeometry = RhinoScriptSyntax.CoerceBrep(objectId)
+        let brep = RhinoScriptSyntax.ShrinkTrimmedSurface(objectIdGeometry)
+        let id =
+            if createCopy then
+                let attributes = (RhinoScriptSyntax.CoerceRhinoObject(objectId)).Attributes
+                State.Doc.Objects.AddBrep(brep, attributes)
+            else
+                State.Doc.Objects.Replace(objectId, brep) |> ignore<bool>
+                objectId
+        State.Doc.Views.Redraw()
+        id
 
+
+    /// <summary>Shrinks the underlying untrimmed Surfaces near to the trimming
+    ///    boundaries. See the ShrinkTrimmedSrf command in the Rhino help. Returns geometry without adding it.</summary>
+    /// <param name="geometryObject">(Brep) The Surface</param>
+    /// <returns>(Brep) Newly created geometry. The caller owns the returned objects.</returns>
+    static member ShrinkTrimmedSurface(geometryObject:Brep) : Brep =
+        let brep = geometryObject.DuplicateBrep()
+        if not (brep.Faces.ShrinkFaces()) then RhinoScriptingException.Raise "ShrinkTrimmedSurface failed."
+        brep
 
 
     /// <summary>Splits a brep.</summary>
@@ -15680,17 +18569,24 @@ type RhinoScriptSyntax private () =
     static member SplitBrep( brepId:Guid,
                              cutterId:Guid,
                              [<OPT;DEF(false)>]deleteInput:bool) : Guid ResizeArray =
-        let brep = RhinoScriptSyntax.CoerceBrep(brepId)
-        let cutter = RhinoScriptSyntax.CoerceBrep(cutterId)
-        let tol = State.Doc.ModelAbsoluteTolerance
-        let pieces = brep.Split(cutter, tol)
-        if isNull pieces then RhinoScriptingException.Raise "SplitBrep failed.  brepId:'%s' cutterId:'%s' deleteInput:'%A'" (Pretty.str brepId) (Pretty.str cutterId) deleteInput
-        if deleteInput then
-            //brepId = RhinoScriptSyntax.CoerceGuid(brepId)
-            State.Doc.Objects.Delete(brepId, true) |> ignore<bool>
-        let rc  = pieces |> RArr.mapArr State.Doc.Objects.AddBrep
+        let brepIdGeometry = RhinoScriptSyntax.CoerceBrep(brepId)
+        let cutterIdGeometry = RhinoScriptSyntax.CoerceBrep(cutterId)
+        let pieces = RhinoScriptSyntax.SplitBrep(brepIdGeometry, cutterIdGeometry)
+        if deleteInput then State.Doc.Objects.Delete(brepId, true) |> ignore<bool>
+        let ids = pieces |> RArr.mapSeq State.Doc.Objects.AddBrep
         State.Doc.Views.Redraw()
-        rc
+        ids
+
+
+    /// <summary>Splits a brep. Returns geometry without adding it.</summary>
+    /// <param name="brepGeo">(Brep) Object of the brep to split</param>
+    /// <param name="cutterGeo">(Brep) Object of the brep to split with</param>
+    /// <returns>(Brep ResizeArray) Newly created geometry. The caller owns the returned objects.</returns>
+    static member SplitBrep( brepGeo:Brep,
+                             cutterGeo:Brep) : Brep ResizeArray =
+        let pieces = brepGeo.Split(cutterGeo, State.Doc.ModelAbsoluteTolerance)
+        if isNull pieces then RhinoScriptingException.Raise "SplitBrep: operation failed."
+        ResizeArray(pieces)
 
 
     /// <summary>Calculate the area of a Surface Geometry.
@@ -15717,25 +18613,47 @@ type RhinoScriptSyntax private () =
     /// <param name="objectId">(Guid) The Surface's identifier</param>
     /// <returns>(float) of area.</returns>
     static member SurfaceArea(objectId:Guid) : float  =
-        match RhinoScriptSyntax.CoerceGeometry objectId with
+        let objectIdObject = RhinoScriptSyntax.CoerceGeometry(objectId)
+        RhinoScriptSyntax.SurfaceArea(objectIdObject)
+
+    /// <summary>Calculate the area of a Surface or Polysurface object.
+    /// The results are based on the current drawing units. Uses the supplied objects directly.</summary>
+    /// <param name="geometryObject">(GeometryBase) The Surface</param>
+    /// <returns>(float) of area.</returns>
+    static member SurfaceArea(geometryObject:GeometryBase) : float  =
+        match geometryObject with
         | :? Surface as s -> RhinoScriptSyntax.SurfaceArea s
         | :? Brep    as b -> RhinoScriptSyntax.SurfaceArea b
-        | _ -> RhinoScriptingException.Raise "SurfaceArea doesnt work on on %A" (Pretty.str  objectId)
+        | _ -> RhinoScriptingException.Raise "SurfaceArea doesnt work on on %A" (Pretty.str  geometryObject)
 
 
     /// <summary>Calculates the area centroid of a Surface or Polysurface.</summary>
     /// <param name="objectId">(Guid) The Surface's identifier</param>
     /// <returns>(Point3d ) Area centroid.</returns>
     static member SurfaceAreaCentroid(objectId:Guid) : Point3d =
-        objectId
-        |> RhinoScriptSyntax.TryCoerceBrep
+        match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
+        | Some geometry -> RhinoScriptSyntax.SurfaceAreaCentroid(geometry)
+        | None -> RhinoScriptingException.Raise "SurfaceAreaCentroid failed.  objectId:'%s'" (Pretty.str objectId)
+
+    /// <summary>Calculates the area centroid of a Surface or Polysurface. Uses the supplied objects directly.</summary>
+    /// <param name="geometryObject">(GeometryBase) The Surface</param>
+    /// <returns>(Point3d ) Area centroid.</returns>
+    static member SurfaceAreaCentroid(geometryObject:GeometryBase) : Point3d =
+        let tryGetBrep (value:GeometryBase) =
+            let geometry = value
+            match geometry with | :? Brep as brep -> Some brep | :? Extrusion as extrusion -> Some (extrusion.ToBrep(true)) | _ -> None
+        let tryGetSurface (value:GeometryBase) =
+            let geometry = value
+            match geometry with | :? Surface as surface -> Some surface | :? Brep as brep when brep.Faces.Count = 1 -> Some (brep.Faces.[0] :> Surface) | _ -> None
+        geometryObject
+        |> tryGetBrep
         |> Option.map AreaMassProperties.Compute
         |> Option.orElseWith (fun () ->
-            objectId
-            |> RhinoScriptSyntax.TryCoerceSurface
+            geometryObject
+            |> tryGetSurface
             |> Option.map AreaMassProperties.Compute
             )
-        |> Option.defaultWith (fun () -> RhinoScriptingException.Raise "SurfaceAreaCentroid failed.  objectId:'%s'" (Pretty.str objectId))
+        |> Option.defaultWith (fun () -> RhinoScriptingException.Raise "SurfaceAreaCentroid failed.  geometryObject:'%s'" (Pretty.str geometryObject))
         |> fun amp -> amp.Centroid
 
 
@@ -15759,15 +18677,45 @@ type RhinoScriptSyntax private () =
     ///    [12]    Area Radii of Gyration about the Centroid Coordinate Axes.
     ///    [13]    (Not implemented yet) The absolute (+/-) error bound for the Area Radii of Gyration about the Centroid Coordinate Axes.</returns>
     static member SurfaceAreaMoments(surfaceId:Guid) : (float*float*float) ResizeArray =
-        surfaceId
-        |> RhinoScriptSyntax.TryCoerceBrep
+        match RhinoScriptSyntax.TryCoerceGeometry(surfaceId) with
+        | Some geometry -> RhinoScriptSyntax.SurfaceAreaMoments(geometry)
+        | None -> RhinoScriptingException.Raise "SurfaceAreaMoments failed on %A" surfaceId
+
+    /// <summary>Calculates area moments of inertia of a Surface or Polysurface object.
+    ///    See the Rhino help for "Mass Properties calculation details". Uses the supplied objects directly.</summary>
+    /// <param name="surfaceGeo">(GeometryBase) The Surface</param>
+    /// <returns>((float*float*float) ResizeArray ) of moments and error bounds in tuples(X, Y, Z) - see help topic
+    ///    Index   Description
+    ///    [0]     First Moments.
+    ///    [1]     The absolute (+/-) error bound for the First Moments.
+    ///    [2]     Second Moments.
+    ///    [3]     The absolute (+/-) error bound for the Second Moments.
+    ///    [4]     Product Moments.
+    ///    [5]     The absolute (+/-) error bound for the Product Moments.
+    ///    [6]     Area Moments of Inertia about the World Coordinate Axes.
+    ///    [7]     The absolute (+/-) error bound for the Area Moments of Inertia about World Coordinate Axes.
+    ///    [8]     Area Radii of Gyration about the World Coordinate Axes.
+    ///    [9]     (Not implemented yet) The absolute (+/-) error bound for the Area Radii of Gyration about World Coordinate Axes.
+    ///    [10]    Area Moments of Inertia about the Centroid Coordinate Axes.
+    ///    [11]    The absolute (+/-) error bound for the Area Moments of Inertia about the Centroid Coordinate Axes.
+    ///    [12]    Area Radii of Gyration about the Centroid Coordinate Axes.
+    ///    [13]    (Not implemented yet) The absolute (+/-) error bound for the Area Radii of Gyration about the Centroid Coordinate Axes.</returns>
+    static member SurfaceAreaMoments(surfaceGeo:GeometryBase) : (float*float*float) ResizeArray =
+        let tryGetBrep (value:GeometryBase) =
+            let geometry = value
+            match geometry with | :? Brep as brep -> Some brep | :? Extrusion as extrusion -> Some (extrusion.ToBrep(true)) | _ -> None
+        let tryGetSurface (value:GeometryBase) =
+            let geometry = value
+            match geometry with | :? Surface as surface -> Some surface | :? Brep as brep when brep.Faces.Count = 1 -> Some (brep.Faces.[0] :> Surface) | _ -> None
+        surfaceGeo
+        |> tryGetBrep
         |> Option.map AreaMassProperties.Compute
         |> Option.orElseWith (fun () ->
-            surfaceId
-            |> RhinoScriptSyntax.TryCoerceSurface
+            surfaceGeo
+            |> tryGetSurface
             |> Option.map AreaMassProperties.Compute
             )
-        |> Option.defaultWith (fun () -> RhinoScriptingException.Raise "SurfaceAreaMoments failed on %A" surfaceId)
+        |> Option.defaultWith (fun () -> RhinoScriptingException.Raise "SurfaceAreaMoments failed on %A" surfaceGeo)
         |> fun mp ->
             let r = ResizeArray(15)
             r.Add (mp.WorldCoordinatesFirstMoments.X, mp.WorldCoordinatesFirstMoments.Y, mp.WorldCoordinatesFirstMoments.Z)                                     //  [0]     First Moments.
@@ -15792,19 +18740,36 @@ type RhinoScriptSyntax private () =
     /// <param name="testPoint">(Point3d) Sampling point</param>
     /// <returns>(Point3d) The closest point on the Surface.</returns>
     static member SurfaceClosestPoint(surfaceId:Guid, testPoint:Point3d) : Point3d =
-        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let surfaceIdObject = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        RhinoScriptSyntax.SurfaceClosestPoint(surfaceIdObject, testPoint)
+
+    /// <summary>Returns the point on a Surface that is closest to a test point. Uses the supplied objects directly.</summary>
+    /// <param name="surfaceGeo">(Surface) Object of a Surface object</param>
+    /// <param name="testPoint">(Point3d) Sampling point</param>
+    /// <returns>(Point3d) The closest point on the Surface.</returns>
+    static member SurfaceClosestPoint(surfaceGeo:Surface, testPoint:Point3d) : Point3d =
+        let surface = surfaceGeo
         let rc, u, v = surface.ClosestPoint(testPoint)
-        if not rc then RhinoScriptingException.Raise "SurfaceClosestPoint failed on %A and %A" surfaceId testPoint
+        if not rc then RhinoScriptingException.Raise "SurfaceClosestPoint failed on %A and %A" surfaceGeo testPoint
         surface.PointAt(u, v)
+
 
     /// <summary>Returns U, V parameters of point on a Surface that is closest to a test point.</summary>
     /// <param name="surfaceId">(Guid) Identifier of a Surface object</param>
     /// <param name="testPoint">(Point3d) Sampling point</param>
     /// <returns>(float * float) The U, V parameters of the closest point on the Surface.</returns>
     static member SurfaceClosestParameter(surfaceId:Guid, testPoint:Point3d) : float * float =
-        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let surfaceIdObject = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        RhinoScriptSyntax.SurfaceClosestParameter(surfaceIdObject, testPoint)
+
+    /// <summary>Returns U, V parameters of point on a Surface that is closest to a test point. Uses the supplied objects directly.</summary>
+    /// <param name="surfaceGeo">(Surface) Object of a Surface object</param>
+    /// <param name="testPoint">(Point3d) Sampling point</param>
+    /// <returns>(float * float) The U, V parameters of the closest point on the Surface.</returns>
+    static member SurfaceClosestParameter(surfaceGeo:Surface, testPoint:Point3d) : float * float =
+        let surface = surfaceGeo
         let rc, u, v = surface.ClosestPoint(testPoint)
-        if not rc then RhinoScriptingException.Raise "SurfaceClosestParameter failed on %A and %A" surfaceId testPoint
+        if not rc then RhinoScriptingException.Raise "SurfaceClosestParameter failed on %A and %A" surfaceGeo testPoint
         u, v
 
 
@@ -15816,9 +18781,20 @@ type RhinoScriptSyntax private () =
     ///    [1]   the height of the cone
     ///    [2]   the radius of the cone.</returns>
     static member SurfaceCone(surfaceId:Guid) : Plane * float * float =
-        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let surfaceIdObject = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        RhinoScriptSyntax.SurfaceCone(surfaceIdObject)
+
+    /// <summary>Returns the definition of a Surface cone. Uses the supplied objects directly.</summary>
+    /// <param name="surfaceGeo">(Surface) The Surface</param>
+    /// <returns>(Plane * float * float) containing the definition of the cone
+    ///    [0]   the Plane of the cone. The apex of the cone is at the
+    ///      Plane's origin and the axis of the cone is the Plane's z-axis
+    ///    [1]   the height of the cone
+    ///    [2]   the radius of the cone.</returns>
+    static member SurfaceCone(surfaceGeo:Surface) : Plane * float * float =
+        let surface = surfaceGeo
         let rc, cone = surface.TryGetCone()
-        if not rc then RhinoScriptingException.Raise "SurfaceCone failed.  surfaceId:'%s'" (Pretty.str surfaceId)
+        if not rc then RhinoScriptingException.Raise "SurfaceCone failed.  surfaceGeo:'%s'" (Pretty.str surfaceGeo)
         cone.Plane, cone.Height, cone.Radius
 
 
@@ -15836,10 +18812,26 @@ type RhinoScriptSyntax private () =
     ///    [6]   gaussian curvature
     ///    [7]   mean curvature.</returns>
     static member SurfaceCurvature(surfaceId:Guid, parameter:float * float) : Point3d * Vector3d * float * Vector3d * float * Vector3d * float * float=
-        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
-        //if Seq.length(parameter)<2 then RhinoScriptingException.Raise "SurfaceCurvature failed.  surfaceId:'%s' parameter:'%A'" (Pretty.str surfaceId) parameter
+        let surfaceIdObject = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        RhinoScriptSyntax.SurfaceCurvature(surfaceIdObject, parameter)
+
+    /// <summary>Returns the curvature of a Surface at a U, V parameter. See Rhino help
+    ///    for details of Surface curvature. Uses the supplied objects directly.</summary>
+    /// <param name="surfaceGeo">(Surface) The Surface</param>
+    /// <param name="parameter">(float * float) U, v parameter</param>
+    /// <returns>(Point3d * Vector3d * float * Vector3d * float * Vector3d * float * float) of curvature information
+    ///    [0]   point at specified U, V parameter
+    ///    [1]   normal direction
+    ///    [2]   maximum principal curvature
+    ///    [3]   maximum principal curvature direction
+    ///    [4]   minimum principal curvature
+    ///    [5]   minimum principal curvature direction
+    ///    [6]   gaussian curvature
+    ///    [7]   mean curvature.</returns>
+    static member SurfaceCurvature(surfaceGeo:Surface, parameter:float * float) : Point3d * Vector3d * float * Vector3d * float * Vector3d * float * float=
+        let surface = surfaceGeo
         let c = surface.CurvatureAt(parameter|> fst, parameter|> snd)
-        if c|> isNull  then RhinoScriptingException.Raise "SurfaceCurvature failed.  surfaceId:'%s' parameter:'%A'" (Pretty.str surfaceId) parameter
+        if c|> isNull  then RhinoScriptingException.Raise "SurfaceCurvature failed.  surfaceGeo:'%s' parameter:'%A'" (Pretty.str surfaceGeo) parameter
         c.Point, c.Normal, c.Kappa(0), c.Direction(0), c.Kappa(1), c.Direction(1), c.Gaussian, c.Mean
 
 
@@ -15847,7 +18839,14 @@ type RhinoScriptSyntax private () =
     /// <param name="surfaceId">(Guid) The Surface's identifier</param>
     /// <returns>(Plane * float * float) of the cylinder Plane, height and radius.</returns>
     static member SurfaceCylinder(surfaceId:Guid) : Plane * float * float =
-        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let surfaceIdObject = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        RhinoScriptSyntax.SurfaceCylinder(surfaceIdObject)
+
+    /// <summary>Returns the definition of a cylinder Surface. Uses the supplied objects directly.</summary>
+    /// <param name="surfaceGeo">(Surface) The Surface</param>
+    /// <returns>(Plane * float * float) of the cylinder Plane, height and radius.</returns>
+    static member SurfaceCylinder(surfaceGeo:Surface) : Plane * float * float =
+        let surface = surfaceGeo
         let tol = State.Doc.ModelAbsoluteTolerance
         let cy = ref Cylinder.Unset
         let rc = surface.TryGetFiniteCylinder(cy, tol)
@@ -15855,14 +18854,21 @@ type RhinoScriptSyntax private () =
             let cylinder = !cy
             cylinder.BasePlane, cylinder.TotalHeight, cylinder.Radius
         else
-            RhinoScriptingException.Raise "SurfaceCylinder failed on %A" surfaceId
+            RhinoScriptingException.Raise "SurfaceCylinder failed on %A" surfaceGeo
 
 
     /// <summary>Returns the U and V degrees of a Surface.</summary>
     /// <param name="surfaceId">(Guid) The Surface's identifier</param>
     /// <returns>(int*int) The degree in U and V direction.</returns>
     static member SurfaceDegree(surfaceId:Guid ) : int*int =
-        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let surfaceIdObject = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        RhinoScriptSyntax.SurfaceDegree(surfaceIdObject)
+
+    /// <summary>Returns the U and V degrees of a Surface. Uses the supplied objects directly.</summary>
+    /// <param name="surfaceGeo">(Surface) The Surface</param>
+    /// <returns>(int*int) The degree in U and V direction.</returns>
+    static member SurfaceDegree(surfaceGeo:Surface ) : int*int =
+        let surface = surfaceGeo
         surface.Degree(0), surface.Degree(1)
 
 
@@ -15871,8 +18877,16 @@ type RhinoScriptSyntax private () =
     /// <param name="direction">(int) Domain direction 0 = U, or 1 = V</param>
     /// <returns>(float * float) containing the domain interval in the specified direction.</returns>
     static member SurfaceDomain(surfaceId:Guid, direction:int) : float * float =
-        if direction <> 0 && direction <> 1 then RhinoScriptingException.Raise "SurfaceDomain failed.  surfaceId:'%s' direction:'%A'" (Pretty.str surfaceId) direction
-        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let surfaceIdObject = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        RhinoScriptSyntax.SurfaceDomain(surfaceIdObject, direction)
+
+    /// <summary>Returns the domain of a Surface object in the specified direction. Uses the supplied objects directly.</summary>
+    /// <param name="surfaceGeo">(Surface) The Surface</param>
+    /// <param name="direction">(int) Domain direction 0 = U, or 1 = V</param>
+    /// <returns>(float * float) containing the domain interval in the specified direction.</returns>
+    static member SurfaceDomain(surfaceGeo:Surface, direction:int) : float * float =
+        if direction <> 0 && direction <> 1 then RhinoScriptingException.Raise "SurfaceDomain failed.  surfaceGeo:'%s' direction:'%A'" (Pretty.str surfaceGeo) direction
+        let surface = surfaceGeo
         let domain = surface.Domain(direction)
         domain.T0, domain.T1
 
@@ -15886,9 +18900,21 @@ type RhinoScriptSyntax private () =
     ///    Surface is closed or periodic</param>
     /// <returns>(Point3d ResizeArray) a list of 3D points.</returns>
     static member SurfaceEditPoints( surfaceId:Guid, [<OPT;DEF(true)>]returnAll:bool) : Point3d ResizeArray =
-        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let surfaceIdObject = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        RhinoScriptSyntax.SurfaceEditPoints(surfaceIdObject, returnAll)
+
+    /// <summary>Returns the edit, or Greville points of a Surface object. For each
+    ///    Surface control point, there is a corresponding edit point. Uses the supplied objects directly.</summary>
+    /// <param name="surfaceGeo">(Surface) The Surface</param>
+    /// <param name="returnAll">(bool) Optional, default value: <c>true</c>
+    ///    If True, all Surface edit points are returned. If False,
+    ///    the function will return Surface edit points based on whether or not the
+    ///    Surface is closed or periodic</param>
+    /// <returns>(Point3d ResizeArray) a list of 3D points.</returns>
+    static member SurfaceEditPoints( surfaceGeo:Surface, [<OPT;DEF(true)>]returnAll:bool) : Point3d ResizeArray =
+        let surface = surfaceGeo
         let nurb = surface.ToNurbsSurface()
-        if isNull nurb then RhinoScriptingException.Raise "SurfaceEditPoints failed.  surfaceId:'%s'  returnAll:'%A'" (Pretty.str surfaceId) returnAll
+        if isNull nurb then RhinoScriptingException.Raise "SurfaceEditPoints failed.  surfaceGeo:'%s'  returnAll:'%A'" (Pretty.str surfaceGeo) returnAll
         let mutable ufirst = 0
         let mutable ulast = nurb.Points.CountU
         let mutable vfirst = 0
@@ -15922,9 +18948,21 @@ type RhinoScriptSyntax private () =
     ///    Surface is closed or periodic</param>
     /// <returns>((float*float) ResizeArray) a list of U and V parameters.</returns>
     static member SurfaceEditPointParameters( surfaceId:Guid, [<OPT;DEF(true)>]returnAll:bool) : (float*float) ResizeArray =
-        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let surfaceIdObject = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        RhinoScriptSyntax.SurfaceEditPointParameters(surfaceIdObject, returnAll)
+
+    /// <summary>Returns the parameters at edit, or Greville points of a Surface object. For each
+    ///    Surface control point, there is a corresponding edit point. Uses the supplied objects directly.</summary>
+    /// <param name="surfaceGeo">(Surface) The Surface</param>
+    /// <param name="returnAll">(bool) Optional, default value: <c>true</c>
+    ///    If True, all Surface edit points are returned. If False,
+    ///    the function will return Surface edit points based on whether or not the
+    ///    Surface is closed or periodic</param>
+    /// <returns>((float*float) ResizeArray) a list of U and V parameters.</returns>
+    static member SurfaceEditPointParameters( surfaceGeo:Surface, [<OPT;DEF(true)>]returnAll:bool) : (float*float) ResizeArray =
+        let surface = surfaceGeo
         let nurb = surface.ToNurbsSurface()
-        if isNull nurb then RhinoScriptingException.Raise "SurfaceEditPointParameters failed.  surfaceId:'%s'  returnAll:'%A'" (Pretty.str surfaceId) returnAll
+        if isNull nurb then RhinoScriptingException.Raise "SurfaceEditPointParameters failed.  surfaceGeo:'%s'  returnAll:'%A'" (Pretty.str surfaceGeo) returnAll
         let mutable ufirst = 0
         let mutable ulast = nurb.Points.CountU
         let mutable vfirst = 0
@@ -15949,7 +18987,6 @@ type RhinoScriptSyntax private () =
         r
 
 
-
     /// <summary>A general purpose Surface evaluator.</summary>
     /// <param name="surfaceId">(Guid) The Surface's identifier</param>
     /// <param name="parameter">(float * float) U, v parameter to evaluate</param>
@@ -15967,9 +19004,29 @@ type RhinoScriptSyntax private () =
     static member SurfaceEvaluate( surfaceId:Guid,
                                    parameter:float * float,
                                    derivative:int) : Point3d * Vector3d ResizeArray =
-        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let surfaceIdObject = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        RhinoScriptSyntax.SurfaceEvaluate(surfaceIdObject, parameter, derivative)
+
+    /// <summary>A general purpose Surface evaluator. Uses the supplied objects directly.</summary>
+    /// <param name="surfaceGeo">(Surface) The Surface</param>
+    /// <param name="parameter">(float * float) U, v parameter to evaluate</param>
+    /// <param name="derivative">(int) Number of derivatives to evaluate</param>
+    /// <returns>(Point3d * Vector3d ResizeArray) list length (derivative + 1)*(derivative + 2)/2
+    ///    Elements of tuple:
+    ///    [fst] The 3-D point.
+    ///    [snd] List of Vectors:
+    ///            [0]      The first derivative.
+    ///            [1]      The first derivative.
+    ///            [2]      The second derivative.
+    ///            [3]      The second derivative.
+    ///            [4]      The second derivative.
+    ///            [5]      etc...</returns>
+    static member SurfaceEvaluate( surfaceGeo:Surface,
+                                   parameter:float * float,
+                                   derivative:int) : Point3d * Vector3d ResizeArray =
+        let surface = surfaceGeo
         let success, point, der = surface.Evaluate(parameter|> fst, parameter|> snd, derivative)
-        if not success then RhinoScriptingException.Raise "SurfaceEvaluate failed.  surfaceId:'%s' parameter:'%A' derivative:'%A'" (Pretty.str surfaceId) parameter derivative
+        if not success then RhinoScriptingException.Raise "SurfaceEvaluate failed.  surfaceGeo:'%s' parameter:'%A' derivative:'%A'" (Pretty.str surfaceGeo) parameter derivative
         let rc = ResizeArray(der.Length)
         if der.Length > 0 then
           for d in der do rc.Add(d)
@@ -15982,10 +19039,19 @@ type RhinoScriptSyntax private () =
     /// <param name="uvParameter">(float * float) U, v parameter to evaluate</param>
     /// <returns>(Plane) Plane.</returns>
     static member SurfaceFrame(surfaceId:Guid, uvParameter:float * float) : Plane =
-        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let surfaceIdObject = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        RhinoScriptSyntax.SurfaceFrame(surfaceIdObject, uvParameter)
+
+    /// <summary>Returns a Plane based on the normal, u, and v directions at a Surface
+    ///    U, V parameter. Uses the supplied objects directly.</summary>
+    /// <param name="surfaceGeo">(Surface) The Surface</param>
+    /// <param name="uvParameter">(float * float) U, v parameter to evaluate</param>
+    /// <returns>(Plane) Plane.</returns>
+    static member SurfaceFrame(surfaceGeo:Surface, uvParameter:float * float) : Plane =
+        let surface = surfaceGeo
         let rc, frame = surface.FrameAt(uvParameter|> fst, uvParameter|> snd)
         if rc  then frame
-        else RhinoScriptingException.Raise "SurfaceFrame failed on %A at %A" surfaceId uvParameter
+        else RhinoScriptingException.Raise "SurfaceFrame failed on %A at %A" surfaceGeo uvParameter
 
 
     /// <summary>Returns the isocurve density of a Surface or Polysurface object.
@@ -16074,7 +19140,15 @@ type RhinoScriptSyntax private () =
     /// <param name="surfaceId">(Guid) The Surface object's identifier</param>
     /// <returns>(int * int) a list containing (U count, V count).</returns>
     static member SurfaceKnotCount(surfaceId:Guid) : int * int =
-        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let surfaceIdObject = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        RhinoScriptSyntax.SurfaceKnotCount(surfaceIdObject)
+
+    /// <summary>Returns the control point count of a Surface
+    ///    SurfaceId = the Surface's identifier. Uses the supplied objects directly.</summary>
+    /// <param name="surfaceGeo">(Surface) The Surface object</param>
+    /// <returns>(int * int) a list containing (U count, V count).</returns>
+    static member SurfaceKnotCount(surfaceGeo:Surface) : int * int =
+        let surface = surfaceGeo
         let ns = surface.ToNurbsSurface()
         ns.KnotsU.Count, ns.KnotsV.Count
 
@@ -16087,14 +19161,21 @@ type RhinoScriptSyntax private () =
     ///      [0]     Knot vectors in U direction
     ///      [1]     Knot vectors in V direction.</returns>
     static member SurfaceKnots(surfaceId:Guid) : Collections.NurbsSurfaceKnotList * Collections.NurbsSurfaceKnotList=
-        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let surfaceIdObject = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        RhinoScriptSyntax.SurfaceKnots(surfaceIdObject)
+
+    /// <summary>Returns the knots, or knot vector, of a Surface object. Uses the supplied objects directly.</summary>
+    /// <param name="surfaceGeo">(Surface) The Surface</param>
+    /// <returns>(NurbsSurfaceKnotList * NurbsSurfaceKnotList) knot values of the Surface.
+    ///    The list will contain the following information:
+    ///    Element   Description
+    ///      [0]     Knot vectors in U direction
+    ///      [1]     Knot vectors in V direction.</returns>
+    static member SurfaceKnots(surfaceGeo:Surface) : Collections.NurbsSurfaceKnotList * Collections.NurbsSurfaceKnotList=
+        let surface = surfaceGeo
         let nurbsurf = surface.ToNurbsSurface()
-        if nurbsurf|> isNull  then RhinoScriptingException.Raise "SurfaceKnots failed.  surfaceId:'%s'" (Pretty.str surfaceId)
+        if nurbsurf|> isNull  then RhinoScriptingException.Raise "SurfaceKnots failed.  surfaceGeo:'%s'" (Pretty.str surfaceGeo)
         nurbsurf.KnotsU , nurbsurf.KnotsV
-        //let sknots =  resizeArray { for knot in nurbsurf.KnotsU do yield knot }
-        //let tknots =  resizeArray { for knot in nurbsurf.KnotsV do yield knot }
-        //if isNull sknots || not tknots then RhinoScriptingException.Raise "SurfaceKnots failed.  surfaceId:'%s'" (Pretty.str surfaceId)
-        //sknots, tknots
 
 
     /// <summary>Returns 3D vector that is the normal to a Surface at a parameter.</summary>
@@ -16102,20 +19183,33 @@ type RhinoScriptSyntax private () =
     /// <param name="uvParameter">(float * float) The uv parameter to evaluate</param>
     /// <returns>(Vector3d) Normal vector.</returns>
     static member SurfaceNormal(surfaceId:Guid, uvParameter:float * float) : Vector3d =
-        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
-        surface.NormalAt(uvParameter|> fst, uvParameter|> snd)
+        let surfaceIdObject = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        RhinoScriptSyntax.SurfaceNormal(surfaceIdObject, uvParameter)
+
 
     /// <summary>Returns 3D vector that is the normal to a Surface at mid parameter.</summary>
     /// <param name="surfaceId">(Guid) The Surface's identifier</param>
     /// <returns>(Vector3d) Normal vector.</returns>
     static member SurfaceNormal(surfaceId:Guid) : Vector3d =
-        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let surfaceIdObject = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        RhinoScriptSyntax.SurfaceNormal(surfaceIdObject)
+
+    /// <summary>Returns 3D vector that is the normal to a Surface at a parameter. Uses the supplied objects directly.</summary>
+    /// <param name="surfaceGeo">(Surface) The Surface</param>
+    /// <param name="uvParameter">(float * float) The uv parameter to evaluate</param>
+    /// <returns>(Vector3d) Normal vector.</returns>
+    static member SurfaceNormal(surfaceGeo:Surface, uvParameter:float * float) : Vector3d =
+        let surface = surfaceGeo
+        surface.NormalAt(uvParameter|> fst, uvParameter|> snd)
+
+    /// <summary>Returns 3D vector that is the normal to a Surface at mid parameter. Uses the supplied objects directly.</summary>
+    /// <param name="surfaceGeo">(Surface) The Surface</param>
+    /// <returns>(Vector3d) Normal vector.</returns>
+    static member SurfaceNormal(surfaceGeo:Surface) : Vector3d =
+        let surface = surfaceGeo
         let u = surface.Domain(0).ParameterAt(0.5)
         let v = surface.Domain(1).ParameterAt(0.5)
         surface.NormalAt(u,v)
-
-
-
 
 
     /// <summary>Converts Surface parameter to a normalized Surface parameter; one that
@@ -16124,13 +19218,22 @@ type RhinoScriptSyntax private () =
     /// <param name="parameter">(float * float) The Surface parameter to convert</param>
     /// <returns>(float * float) normalized Surface parameter.</returns>
     static member SurfaceNormalizedParameter(surfaceId:Guid, parameter:float * float) : float * float =
-        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let surfaceIdObject = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        RhinoScriptSyntax.SurfaceNormalizedParameter(surfaceIdObject, parameter)
+
+    /// <summary>Converts Surface parameter to a normalized Surface parameter; one that
+    ///    ranges between 0.0 and 1.0 in both the U and V directions. Uses the supplied objects directly.</summary>
+    /// <param name="surfaceGeo">(Surface) The Surface</param>
+    /// <param name="parameter">(float * float) The Surface parameter to convert</param>
+    /// <returns>(float * float) normalized Surface parameter.</returns>
+    static member SurfaceNormalizedParameter(surfaceGeo:Surface, parameter:float * float) : float * float =
+        let surface = surfaceGeo
         let udomain = surface.Domain(0)
         let vdomain = surface.Domain(1)
         if parameter|> fst<udomain.Min || parameter|> fst>udomain.Max then
-            RhinoScriptingException.Raise "SurfaceNormalizedParameter failed.  surfaceId:'%s' parameter:'%A'" (Pretty.str surfaceId) parameter
+            RhinoScriptingException.Raise "SurfaceNormalizedParameter failed.  surfaceGeo:'%s' parameter:'%A'" (Pretty.str surfaceGeo) parameter
         if parameter|> snd<vdomain.Min || parameter|> snd>vdomain.Max then
-            RhinoScriptingException.Raise "SurfaceNormalizedParameter failed.  surfaceId:'%s' parameter:'%A'" (Pretty.str surfaceId) parameter
+            RhinoScriptingException.Raise "SurfaceNormalizedParameter failed.  surfaceGeo:'%s' parameter:'%A'" (Pretty.str surfaceGeo) parameter
         let u = udomain.NormalizedParameterAt(parameter|> fst)
         let v = vdomain.NormalizedParameterAt(parameter|> snd)
         u, v
@@ -16142,7 +19245,16 @@ type RhinoScriptSyntax private () =
     /// <param name="parameter">(float * float) The normalized parameter to convert</param>
     /// <returns>(float * float) u and v Surface parameters.</returns>
     static member SurfaceParameter(surfaceId:Guid, parameter:float * float) : float * float =
-        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let surfaceIdObject = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        RhinoScriptSyntax.SurfaceParameter(surfaceIdObject, parameter)
+
+    /// <summary>Converts normalized Surface parameter to a Surface domain specific (regular) parameter.
+    /// or a parameter within the Surface's domain. Uses the supplied objects directly.</summary>
+    /// <param name="surfaceGeo">(Surface) The Surface</param>
+    /// <param name="parameter">(float * float) The normalized parameter to convert</param>
+    /// <returns>(float * float) u and v Surface parameters.</returns>
+    static member SurfaceParameter(surfaceGeo:Surface, parameter:float * float) : float * float =
+        let surface = surfaceGeo
         let x = surface.Domain(0).ParameterAt(parameter|> fst)
         let y = surface.Domain(1).ParameterAt(parameter|> snd)
         x, y
@@ -16153,7 +19265,15 @@ type RhinoScriptSyntax private () =
     /// <param name="surfaceId">(Guid) The Surface object's identifier</param>
     /// <returns>(int * int) THe number of control points in UV direction. (U count, V count).</returns>
     static member SurfacePointCount(surfaceId:Guid) : int * int =
-        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let surfaceIdObject = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        RhinoScriptSyntax.SurfacePointCount(surfaceIdObject)
+
+    /// <summary>Returns the control point count of a Surface
+    ///    SurfaceId = the Surface's identifier. Uses the supplied objects directly.</summary>
+    /// <param name="surfaceGeo">(Surface) The Surface object</param>
+    /// <returns>(int * int) THe number of control points in UV direction. (U count, V count).</returns>
+    static member SurfacePointCount(surfaceGeo:Surface) : int * int =
+        let surface = surfaceGeo
         let ns = surface.ToNurbsSurface()
         ns.Points.CountU, ns.Points.CountV
 
@@ -16166,9 +19286,20 @@ type RhinoScriptSyntax private () =
     ///    the Surface is closed or periodic</param>
     /// <returns>(Point3d ResizeArray) The control points.</returns>
     static member SurfacePoints(surfaceId:Guid, [<OPT;DEF(true)>]returnAll:bool) : Point3d ResizeArray =
-        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let surfaceIdObject = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        RhinoScriptSyntax.SurfacePoints(surfaceIdObject, returnAll)
+
+    /// <summary>Returns the control points, or control vertices, of a Surface object. Uses the supplied objects directly.</summary>
+    /// <param name="surfaceGeo">(Surface) The Surface</param>
+    /// <param name="returnAll">(bool) Optional, default value: <c>true</c>
+    ///    If True all Surface edit points are returned. If False,
+    ///    the function will return Surface edit points based on whether or not
+    ///    the Surface is closed or periodic</param>
+    /// <returns>(Point3d ResizeArray) The control points.</returns>
+    static member SurfacePoints(surfaceGeo:Surface, [<OPT;DEF(true)>]returnAll:bool) : Point3d ResizeArray =
+        let surface = surfaceGeo
         let ns = surface.ToNurbsSurface()
-        if ns|> isNull  then RhinoScriptingException.Raise "SurfacePoints failed.  surfaceId:'%s' returnAll:'%A'" (Pretty.str surfaceId) returnAll
+        if ns|> isNull  then RhinoScriptingException.Raise "SurfacePoints failed.  surfaceGeo:'%s' returnAll:'%A'" (Pretty.str surfaceGeo) returnAll
         let rc = ResizeArray()
         for u = 0 to ns.Points.CountU - 1 do
             for v = 0 to ns.Points.CountV - 1 do
@@ -16184,25 +19315,49 @@ type RhinoScriptSyntax private () =
     ///    [1]   the major radius of the torus
     ///    [2]   the minor radius of the torus.</returns>
     static member SurfaceTorus(surfaceId:Guid) : Plane * float * float =
-        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let surfaceIdObject = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        RhinoScriptSyntax.SurfaceTorus(surfaceIdObject)
+
+    /// <summary>Returns the definition of a Surface torus. Uses the supplied objects directly.</summary>
+    /// <param name="surfaceGeo">(Surface) The Surface</param>
+    /// <returns>(Plane * float * float) containing the definition of the torus
+    ///    [0]   the base Plane of the torus
+    ///    [1]   the major radius of the torus
+    ///    [2]   the minor radius of the torus.</returns>
+    static member SurfaceTorus(surfaceGeo:Surface) : Plane * float * float =
+        let surface = surfaceGeo
         let rc, torus = surface.TryGetTorus()
         if rc then torus.Plane, torus.MajorRadius, torus.MinorRadius
-        else RhinoScriptingException.Raise "SurfaceTorus failed for %A" surfaceId
+        else RhinoScriptingException.Raise "SurfaceTorus failed for %A" surfaceGeo
 
 
     /// <summary>Calculates volume of a closed Surface or Polysurface.</summary>
     /// <param name="objectId">(Guid) The Surface's identifier</param>
     /// <returns>(float) The volume.</returns>
     static member SurfaceVolume(objectId:Guid) : float =
-        objectId
-        |> RhinoScriptSyntax.TryCoerceBrep
+        match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
+        | Some geometry -> RhinoScriptSyntax.SurfaceVolume(geometry)
+        | None -> RhinoScriptingException.Raise "SurfaceVolume failed on %A" (Pretty.str objectId)
+
+    /// <summary>Calculates volume of a closed Surface or Polysurface. Uses the supplied objects directly.</summary>
+    /// <param name="geometryObject">(GeometryBase) The Surface</param>
+    /// <returns>(float) The volume.</returns>
+    static member SurfaceVolume(geometryObject:GeometryBase) : float =
+        let tryGetBrep (value:GeometryBase) =
+            let geometry = value
+            match geometry with | :? Brep as brep -> Some brep | :? Extrusion as extrusion -> Some (extrusion.ToBrep(true)) | _ -> None
+        let tryGetSurface (value:GeometryBase) =
+            let geometry = value
+            match geometry with | :? Surface as surface -> Some surface | :? Brep as brep when brep.Faces.Count = 1 -> Some (brep.Faces.[0] :> Surface) | _ -> None
+        geometryObject
+        |> tryGetBrep
         |> Option.map VolumeMassProperties.Compute
         |> Option.orElseWith (fun () ->
-            objectId
-            |> RhinoScriptSyntax.TryCoerceSurface
+            geometryObject
+            |> tryGetSurface
             |> Option.map VolumeMassProperties.Compute
             )
-        |> Option.defaultWith (fun () -> RhinoScriptingException.Raise "SurfaceVolume failed on %A" (Pretty.str objectId))
+        |> Option.defaultWith (fun () -> RhinoScriptingException.Raise "SurfaceVolume failed on %A" (Pretty.str geometryObject))
         |> fun amp -> amp.Volume
 
 
@@ -16210,17 +19365,31 @@ type RhinoScriptSyntax private () =
     /// <param name="objectId">(Guid) The Surface's identifier</param>
     /// <returns>(Point3d) Volume Centroid.</returns>
     static member SurfaceVolumeCentroid(objectId:Guid) : Point3d =
-        objectId
-        |> RhinoScriptSyntax.TryCoerceBrep
-        |> Option.bind (fun b -> if b.IsSolid then Some b else RhinoScriptingException.Raise "SurfaceVolumeCentroid failed on  open Brep %A" (Pretty.str objectId))
+        match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
+        | Some geometry -> RhinoScriptSyntax.SurfaceVolumeCentroid(geometry)
+        | None -> RhinoScriptingException.Raise "SurfaceVolumeCentroid failed on %A" (Pretty.str objectId)
+
+    /// <summary>Calculates volume centroid of a closed Surface or Polysurface. Uses the supplied objects directly.</summary>
+    /// <param name="geometryObject">(GeometryBase) The Surface</param>
+    /// <returns>(Point3d) Volume Centroid.</returns>
+    static member SurfaceVolumeCentroid(geometryObject:GeometryBase) : Point3d =
+        let tryGetBrep (value:GeometryBase) =
+            let geometry = value
+            match geometry with | :? Brep as brep -> Some brep | :? Extrusion as extrusion -> Some (extrusion.ToBrep(true)) | _ -> None
+        let tryGetSurface (value:GeometryBase) =
+            let geometry = value
+            match geometry with | :? Surface as surface -> Some surface | :? Brep as brep when brep.Faces.Count = 1 -> Some (brep.Faces.[0] :> Surface) | _ -> None
+        geometryObject
+        |> tryGetBrep
+        |> Option.bind (fun b -> if b.IsSolid then Some b else RhinoScriptingException.Raise "SurfaceVolumeCentroid failed on  open Brep %A" (Pretty.str geometryObject))
         |> Option.map VolumeMassProperties.Compute
         |> Option.orElseWith (fun () ->
-            objectId
-            |> RhinoScriptSyntax.TryCoerceSurface
-            |> Option.bind (fun s -> if s.IsSolid then Some s else RhinoScriptingException.Raise "SurfaceVolumeCentroid failed on  open Surface %A" (Pretty.str objectId))
+            geometryObject
+            |> tryGetSurface
+            |> Option.bind (fun s -> if s.IsSolid then Some s else RhinoScriptingException.Raise "SurfaceVolumeCentroid failed on  open Surface %A" (Pretty.str geometryObject))
             |> Option.map VolumeMassProperties.Compute
             )
-        |> Option.defaultWith (fun () -> RhinoScriptingException.Raise "SurfaceVolumeCentroid failed on %A" (Pretty.str objectId))
+        |> Option.defaultWith (fun () -> RhinoScriptingException.Raise "SurfaceVolumeCentroid failed on %A" (Pretty.str geometryObject))
         |> fun amp -> amp.Centroid
 
 
@@ -16245,17 +19414,48 @@ type RhinoScriptSyntax private () =
     ///    [13]    (0,0,0) NOT WORKING , but should be: The absolute (+/-) error bound for the Area Radii of Gyration about the Centroid Coordinate Axes.
     /// </returns>
     static member SurfaceVolumeMoments(objectId:Guid) : (float*float*float) ResizeArray =
-        objectId
-        |> RhinoScriptSyntax.TryCoerceBrep
-        |> Option.bind (fun b -> if b.IsSolid then Some b else RhinoScriptingException.Raise "SurfaceVolumeMoments failed on  open Brep %A" (Pretty.str objectId))
+        match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
+        | Some geometry -> RhinoScriptSyntax.SurfaceVolumeMoments(geometry)
+        | None -> RhinoScriptingException.Raise "SurfaceVolumeMoments failed on %A" (Pretty.str objectId)
+
+    /// <summary>Calculates volume moments of inertia of a Surface or Polysurface object.
+    ///    For more information, see Rhino help for "Mass Properties calculation details". Uses the supplied objects directly.</summary>
+    /// <param name="geometryObject">(GeometryBase) The Surface</param>
+    /// <returns>((float*float*float) ResizeArray) A List of moments and error bounds in tuple(X, Y, Z) - see help topic
+    ///    Index   Description
+    ///    [ 0]    First Moments.
+    ///    [ 1]    The absolute (+/-) error bound for the First Moments.
+    ///    [ 2]    Second Moments.
+    ///    [ 3]    The absolute (+/-) error bound for the Second Moments.
+    ///    [ 4]    Product Moments.
+    ///    [ 5]    The absolute (+/-) error bound for the Product Moments.
+    ///    [ 6]    Area Moments of Inertia about the World Coordinate Axes.
+    ///    [ 7]    The absolute (+/-) error bound for the Area Moments of Inertia about World Coordinate Axes.
+    ///    [ 8]    Area Radii of Gyration about the World Coordinate Axes.
+    ///    [ 9]    (0,0,0) NOT WORKING , but should be: The absolute (+/-) error bound for the Area Radii of Gyration about World Coordinate Axes.
+    ///    [10]    Area Moments of Inertia about the Centroid Coordinate Axes.
+    ///    [11]    The absolute (+/-) error bound for the Area Moments of Inertia about the Centroid Coordinate Axes.
+    ///    [12]    Area Radii of Gyration about the Centroid Coordinate Axes.
+    ///    [13]    (0,0,0) NOT WORKING , but should be: The absolute (+/-) error bound for the Area Radii of Gyration about the Centroid Coordinate Axes.
+    /// </returns>
+    static member SurfaceVolumeMoments(geometryObject:GeometryBase) : (float*float*float) ResizeArray =
+        let tryGetBrep (value:GeometryBase) =
+            let geometry = value
+            match geometry with | :? Brep as brep -> Some brep | :? Extrusion as extrusion -> Some (extrusion.ToBrep(true)) | _ -> None
+        let tryGetSurface (value:GeometryBase) =
+            let geometry = value
+            match geometry with | :? Surface as surface -> Some surface | :? Brep as brep when brep.Faces.Count = 1 -> Some (brep.Faces.[0] :> Surface) | _ -> None
+        geometryObject
+        |> tryGetBrep
+        |> Option.bind (fun b -> if b.IsSolid then Some b else RhinoScriptingException.Raise "SurfaceVolumeMoments failed on  open Brep %A" (Pretty.str geometryObject))
         |> Option.map VolumeMassProperties.Compute
         |> Option.orElseWith (fun () ->
-            objectId
-            |> RhinoScriptSyntax.TryCoerceSurface
-            |> Option.bind (fun s -> if s.IsSolid then Some s else RhinoScriptingException.Raise "SurfaceVolumeMoments failed on  open Surface %A" (Pretty.str objectId))
+            geometryObject
+            |> tryGetSurface
+            |> Option.bind (fun s -> if s.IsSolid then Some s else RhinoScriptingException.Raise "SurfaceVolumeMoments failed on  open Surface %A" (Pretty.str geometryObject))
             |> Option.map VolumeMassProperties.Compute
             )
-        |> Option.defaultWith (fun () -> RhinoScriptingException.Raise "SurfaceVolumeMoments failed on %A" (Pretty.str objectId))
+        |> Option.defaultWith (fun () -> RhinoScriptingException.Raise "SurfaceVolumeMoments failed on %A" (Pretty.str geometryObject))
         |> fun mp ->
             let r = ResizeArray(15)
             r.Add (mp.WorldCoordinatesFirstMoments.X, mp.WorldCoordinatesFirstMoments.Y, mp.WorldCoordinatesFirstMoments.Z)                                     //  [0]     First Moments.
@@ -16281,15 +19481,25 @@ type RhinoScriptSyntax private () =
     /// <param name="objectId">(Guid) The Surface's identifier</param>
     /// <returns>(float ResizeArray) point weights.</returns>
     static member SurfaceWeights(objectId:Guid) : float ResizeArray =
-        let surface = RhinoScriptSyntax.CoerceSurface(objectId)
+        let objectIdObject = RhinoScriptSyntax.CoerceSurface(objectId)
+        RhinoScriptSyntax.SurfaceWeights(objectIdObject)
+
+    /// <summary>Returns list of weight values assigned to the control points of a Surface.
+    ///    The number of weights returned will be equal to the number of control points
+    ///    in the U and V directions. Uses the supplied objects directly.</summary>
+    /// <param name="geometryObject">(Surface) The Surface</param>
+    /// <returns>(float ResizeArray) point weights.</returns>
+    static member SurfaceWeights(geometryObject:Surface) : float ResizeArray =
+        let surface = geometryObject
         let ns = surface.ToNurbsSurface()
-        if ns|> isNull  then RhinoScriptingException.Raise "SurfaceWeights failed.  objectId:'%s'" (Pretty.str objectId)
+        if ns|> isNull  then RhinoScriptingException.Raise "SurfaceWeights failed.  geometryObject:'%s'" (Pretty.str geometryObject)
         let rc = ResizeArray()
         for u = 0 to ns.Points.CountU - 1 do
             for v = 0 to ns.Points.CountV - 1 do
                 let pt = ns.Points.GetControlPoint(u, v)
                 rc.Add(pt.Weight)
         rc
+
 
     /// <summary>Trims a Surface or Polysurface using an oriented cutter brep or Surface.</summary>
     /// <param name="objectId">(Guid) Surface or Polysurface identifier</param>
@@ -16299,26 +19509,20 @@ type RhinoScriptSyntax private () =
     static member TrimBrep( objectId:Guid,
                             cutter:Guid,
                             [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray =
-        let brep = RhinoScriptSyntax.CoerceBrep(objectId)
-        let cutter = RhinoScriptSyntax.CoerceBrep(cutter)
-        let tolerance= Util.ifZero1 tolerance  State.Doc.ModelAbsoluteTolerance
-        let breps = brep.Trim(cutter, tolerance)
-        if breps.Length > 1 then
-            let rho = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-            let attrs = rho.Attributes
-            let rc = ResizeArray()
-            for i = 0 to breps.Length - 1 do
-                if i = 0 then
-                    State.Doc.Objects.Replace(objectId, breps.[i]) |> ignore<bool>
-                    rc.Add(objectId)
-                else
-                    rc.Add(State.Doc.Objects.AddBrep(breps.[i], attrs))
-            State.Doc.Views.Redraw()
-            rc
+        let objectIdGeometry = RhinoScriptSyntax.CoerceBrep(objectId)
+        let cutterGeometry = RhinoScriptSyntax.CoerceBrep(cutter)
+        let breps = RhinoScriptSyntax.TrimBrep(objectIdGeometry, cutterGeometry, tolerance)
+        let ids = ResizeArray<Guid>()
+        if breps.Count > 1 then
+            let attributes = (RhinoScriptSyntax.CoerceRhinoObject(objectId)).Attributes
+            State.Doc.Objects.Replace(objectId, breps.[0]) |> ignore<bool>
+            ids.Add(objectId)
+            for index = 1 to breps.Count - 1 do ids.Add(State.Doc.Objects.AddBrep(breps.[index], attributes))
         else
-            let rc  = breps |> RArr.mapArr State.Doc.Objects.AddBrep
-            State.Doc.Views.Redraw()
-            rc
+            for brep in breps do ids.Add(State.Doc.Objects.AddBrep(brep))
+        State.Doc.Views.Redraw()
+        ids
+
 
     /// <summary>Trims a Surface using an oriented cutter Plane.</summary>
     /// <param name="objectId">(Guid) Surface or Polysurface identifier</param>
@@ -16328,25 +19532,47 @@ type RhinoScriptSyntax private () =
     static member TrimBrep( objectId:Guid,
                             cutter:Plane,
                             [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray =
-        let brep = RhinoScriptSyntax.CoerceBrep(objectId)
-        let tolerance = Util.ifZero1 tolerance  State.Doc.ModelAbsoluteTolerance
-        let breps = brep.Trim(cutter, tolerance)
-        if breps.Length > 1 then
-            let rho = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-            let attrs = rho.Attributes
-            let rc = ResizeArray()
-            for i = 0 to breps.Length - 1 do
-                if i = 0 then
-                    State.Doc.Objects.Replace(objectId, breps.[i]) |> ignore<bool>
-                    rc.Add(objectId)
-                else
-                    rc.Add(State.Doc.Objects.AddBrep(breps.[i], attrs))
-            State.Doc.Views.Redraw()
-            rc
+        let objectIdGeometry = RhinoScriptSyntax.CoerceBrep(objectId)
+        let breps = RhinoScriptSyntax.TrimBrep(objectIdGeometry, cutter, tolerance)
+        let ids = ResizeArray<Guid>()
+        if breps.Count > 1 then
+            let attributes = (RhinoScriptSyntax.CoerceRhinoObject(objectId)).Attributes
+            State.Doc.Objects.Replace(objectId, breps.[0]) |> ignore<bool>
+            ids.Add(objectId)
+            for index = 1 to breps.Count - 1 do ids.Add(State.Doc.Objects.AddBrep(breps.[index], attributes))
         else
-            let rc  = breps |> RArr.mapArr State.Doc.Objects.AddBrep
-            State.Doc.Views.Redraw()
-            rc
+            for brep in breps do ids.Add(State.Doc.Objects.AddBrep(brep))
+        State.Doc.Views.Redraw()
+        ids
+
+
+    /// <summary>Trims a Surface or Polysurface using an oriented cutter brep or Surface. Returns geometry without adding it.</summary>
+    /// <param name="geometryObject">(Brep) Surface or Polysurface object</param>
+    /// <param name="cutter">(Brep) Surface or Polysurface  performing the trim</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c></param>
+    /// <returns>(Brep ResizeArray) Newly created geometry. The caller owns the returned objects.</returns>
+    static member TrimBrep( geometryObject:Brep,
+                            cutter:Brep,
+                            [<OPT;DEF(0.0)>]tolerance:float) : Brep ResizeArray =
+        let tolerance = Util.ifZero1 tolerance State.Doc.ModelAbsoluteTolerance
+        let pieces = geometryObject.Trim(cutter, tolerance)
+        if isNull pieces then RhinoScriptingException.Raise "TrimBrep: operation failed."
+        ResizeArray(pieces)
+
+
+    /// <summary>Trims a Surface using an oriented cutter Plane. Returns geometry without adding it.</summary>
+    /// <param name="geometryObject">(Brep) Surface or Polysurface object</param>
+    /// <param name="cutter">(Plane) Plane performing the trim</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c></param>
+    /// <returns>(Brep ResizeArray) Newly created geometry. The caller owns the returned objects.</returns>
+    static member TrimBrep( geometryObject:Brep,
+                            cutter:Plane,
+                            [<OPT;DEF(0.0)>]tolerance:float) : Brep ResizeArray =
+        let tolerance = Util.ifZero1 tolerance State.Doc.ModelAbsoluteTolerance
+        let pieces = geometryObject.Trim(cutter, tolerance)
+        if isNull pieces then RhinoScriptingException.Raise "TrimBrep: operation failed."
+        ResizeArray(pieces)
+
 
     /// <summary>Remove portions of the Surface outside of the specified interval in U direction.</summary>
     /// <param name="surfaceId">(Guid) Surface identifier</param>
@@ -16357,19 +19583,29 @@ type RhinoScriptSyntax private () =
     static member TrimSurfaceU( surfaceId:Guid,
                                 interval:float*float,
                                 [<OPT;DEF(false)>]deleteInput:bool) : Guid =
-        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let surfaceIdGeometry = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let surface = RhinoScriptSyntax.TrimSurfaceU(surfaceIdGeometry, interval)
+        let id = State.Doc.Objects.AddSurface(surface)
+        if deleteInput then State.Doc.Objects.Delete(surfaceId, true) |> ignore<bool>
+        State.Doc.Views.Redraw()
+        id
+
+
+    /// <summary>Remove portions of the Surface outside of the specified interval in U direction. Returns geometry without adding it.</summary>
+    /// <param name="surfaceGeo">(Surface) Surface object</param>
+    /// <param name="interval">(float*float) Sub section of the Surface to keep.</param>
+    /// <returns>(Surface) Newly created geometry. The caller owns the returned objects.</returns>
+    static member TrimSurfaceU( surfaceGeo:Surface,
+                                interval:float*float) : Surface =
+        let surface = surfaceGeo
         let mutable u = surface.Domain(0)
         let mutable v = surface.Domain(1)
         u.[0] <-  interval|> fst
         u.[1] <-  interval|> snd
         let newsurface = surface.Trim(u, v)
-        if notNull newsurface then
-            let rc = State.Doc.Objects.AddSurface(newsurface)
-            if deleteInput then  State.Doc.Objects.Delete(surfaceId, true) |> ignore<bool>
-            State.Doc.Views.Redraw()
-            rc
-        else
-            RhinoScriptingException.Raise "TrimSurfaceU failed on %A with domain %A" surfaceId interval
+        if isNull newsurface then RhinoScriptingException.Raise "TrimSurfaceU: operation failed."
+        newsurface
+
 
     /// <summary>Remove portions of the Surface outside of the specified interval in V direction.</summary>
     /// <param name="surfaceId">(Guid) Surface identifier</param>
@@ -16380,19 +19616,28 @@ type RhinoScriptSyntax private () =
     static member TrimSurfaceV( surfaceId:Guid,
                                interval:float*float,
                                [<OPT;DEF(false)>]deleteInput:bool) : Guid =
-        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let surfaceIdGeometry = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let surface = RhinoScriptSyntax.TrimSurfaceV(surfaceIdGeometry, interval)
+        let id = State.Doc.Objects.AddSurface(surface)
+        if deleteInput then State.Doc.Objects.Delete(surfaceId, true) |> ignore<bool>
+        State.Doc.Views.Redraw()
+        id
+
+
+    /// <summary>Remove portions of the Surface outside of the specified interval in V direction. Returns geometry without adding it.</summary>
+    /// <param name="surfaceGeo">(Surface) Surface object</param>
+    /// <param name="interval">(float*float) Sub section of the Surface to keep.</param>
+    /// <returns>(Surface) Newly created geometry. The caller owns the returned objects.</returns>
+    static member TrimSurfaceV( surfaceGeo:Surface,
+                               interval:float*float) : Surface =
+        let surface = surfaceGeo
         let mutable u = surface.Domain(0)
         let mutable v = surface.Domain(1)
         v.[0] <-  interval|> fst
         v.[1] <-  interval|> snd
         let newsurface = surface.Trim(u, v)
-        if notNull newsurface then
-            let rc = State.Doc.Objects.AddSurface(newsurface)
-            if deleteInput then  State.Doc.Objects.Delete(surfaceId, true) |> ignore<bool>
-            State.Doc.Views.Redraw()
-            rc
-        else
-            RhinoScriptingException.Raise "TrimSurfaceV failed on %A with domain %A" surfaceId interval
+        if isNull newsurface then RhinoScriptingException.Raise "TrimSurfaceV: operation failed."
+        newsurface
 
 
     /// <summary>Remove portions of the Surface outside of the specified interval ain U and V direction.</summary>
@@ -16406,7 +19651,23 @@ type RhinoScriptSyntax private () =
                                intervalU:float*float,
                                intervalV:float*float,
                                [<OPT;DEF(false)>]deleteInput:bool) : Guid =
-        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let surfaceIdGeometry = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let surface = RhinoScriptSyntax.TrimSurfaceUV(surfaceIdGeometry, intervalU, intervalV)
+        let id = State.Doc.Objects.AddSurface(surface)
+        if deleteInput then State.Doc.Objects.Delete(surfaceId, true) |> ignore<bool>
+        State.Doc.Views.Redraw()
+        id
+
+
+    /// <summary>Remove portions of the Surface outside of the specified interval ain U and V direction. Returns geometry without adding it.</summary>
+    /// <param name="surfaceGeo">(Surface) Surface object</param>
+    /// <param name="intervalU">(float*float) Sub section of the Surface to keep in U direction</param>
+    /// <param name="intervalV">(float*float) Sub section of the Surface to keep in V direction</param>
+    /// <returns>(Surface) Newly created geometry. The caller owns the returned objects.</returns>
+    static member TrimSurfaceUV( surfaceGeo:Surface,
+                               intervalU:float*float,
+                               intervalV:float*float) : Surface =
+        let surface = surfaceGeo
         let mutable u = surface.Domain(0)
         let mutable v = surface.Domain(1)
         u.[0]  <- intervalU|> fst
@@ -16414,14 +19675,8 @@ type RhinoScriptSyntax private () =
         v.[0]  <- intervalV|> fst
         v.[1]  <- intervalV|> snd
         let newsurface = surface.Trim(u, v)
-        if notNull newsurface then
-            let rc = State.Doc.Objects.AddSurface(newsurface)
-            if deleteInput then  State.Doc.Objects.Delete(surfaceId, true) |> ignore<bool>
-            State.Doc.Views.Redraw()
-            rc
-        else
-            RhinoScriptingException.Raise "TrimSurfaceUV failed on %A with domain %A and %A" surfaceId intervalU intervalV
-
+        if isNull newsurface then RhinoScriptingException.Raise "TrimSurfaceUV: operation failed."
+        newsurface
 
 
     /// <summary>Flattens a develop-able Surface or Polysurface.</summary>
@@ -16440,7 +19695,40 @@ type RhinoScriptSyntax private () =
                                  [<OPT;DEF(null:Guid seq)>]followingGeometry:Guid seq,
                                  [<OPT;DEF(0.0)>]absoluteTolerance:float,
                                  [<OPT;DEF(0.0)>]relativeTolerance:float) : Guid ResizeArray * Guid ResizeArray =
-        let brep = RhinoScriptSyntax.CoerceBrep(surfaceId)
+        let surfaceIdGeometry = RhinoScriptSyntax.CoerceBrep(surfaceId)
+        let followingGeometryGeometry = if isNull followingGeometry then null else followingGeometry |> Seq.map RhinoScriptSyntax.CoerceGeometry
+        let breps, following = RhinoScriptSyntax.UnrollSurface(surfaceIdGeometry, explode, followingGeometryGeometry, absoluteTolerance, relativeTolerance)
+        let ids = breps |> RArr.mapSeq State.Doc.Objects.AddBrep
+        let followingIds = ResizeArray<Guid>()
+        for geometry in following do
+            let id =
+                match geometry with
+                | :? Curve as curve -> State.Doc.Objects.AddCurve(curve)
+                | :? Point as point -> State.Doc.Objects.AddPoint(point.Location)
+                | :? TextDot as dot -> State.Doc.Objects.AddTextDot(dot)
+                | _ -> RhinoScriptingException.Raise "UnrollSurface: unexpected following geometry."
+            followingIds.Add(id)
+        State.Doc.Views.Redraw()
+        ids, followingIds
+
+
+    /// <summary>Flattens a develop-able Surface or Polysurface. Returns geometry without adding it.</summary>
+    /// <param name="surfaceGeo">(Brep) The Surface</param>
+    /// <param name="explode">(bool) Optional, default value: <c>false</c>
+    ///    If True, the resulting Surfaces are not joined</param>
+    /// <param name="followingGeometry">(GeometryBase seq) Optional, List of Curves, dots, and points which
+    ///    should be unrolled with the Surface</param>
+    /// <param name="absoluteTolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
+    ///    Absolute tolerance</param>
+    /// <param name="relativeTolerance">(float) Optional, default value: <c>State.Doc.ModelRelativeTolerance</c>
+    ///    Relative tolerance</param>
+    /// <returns>(Brep ResizeArray * GeometryBase ResizeArray) Unrolled Breps and following geometry, in curve, point, then text-dot order. The caller owns the returned objects.</returns>
+    static member UnrollSurface( surfaceGeo:Brep,
+                                 [<OPT;DEF(false)>]explode:bool,
+                                 [<OPT;DEF(null:GeometryBase seq)>]followingGeometry:GeometryBase seq,
+                                 [<OPT;DEF(0.0)>]absoluteTolerance:float,
+                                 [<OPT;DEF(0.0)>]relativeTolerance:float) : Brep ResizeArray * GeometryBase ResizeArray =
+        let brep = surfaceGeo
         let unroll = Unroller(brep)
         unroll.ExplodeOutput <- explode
         let relativeTolerance = Util.ifZero1 relativeTolerance  State.Doc.ModelRelativeTolerance
@@ -16449,7 +19737,7 @@ type RhinoScriptSyntax private () =
         unroll.RelativeTolerance <- relativeTolerance
         if notNull followingGeometry then
             for objectId in followingGeometry do
-                let geom = RhinoScriptSyntax.CoerceGeometry(objectId)
+                let geom = objectId
                 match geom with
                 | :? Curve as g -> unroll.AddFollowingGeometry(g) //TODO verify order is correct ???
                 | :? Point as g -> unroll.AddFollowingGeometry(g)
@@ -16457,20 +19745,12 @@ type RhinoScriptSyntax private () =
                 | _ -> RhinoScriptingException.Raise "UnrollSurface: cannot add (a %s) as following Geometry" (Pretty.str objectId)
 
         let breps, curves, points, dots = unroll.PerformUnroll()
-        if isNull breps then RhinoScriptingException.Raise "UnrollSurface: failed on  %A" surfaceId
-        let rc  = breps |> RArr.mapArr State.Doc.Objects.AddBrep
-        let newfollowing = ResizeArray()
-        for curve in curves do
-            let objectId = State.Doc.Objects.AddCurve(curve) //TODO verify order is correct ???
-            newfollowing.Add(objectId)
-        for point in points do
-            let objectId = State.Doc.Objects.AddPoint(point)
-            newfollowing.Add(objectId)
-        for dot in dots do
-            let objectId = State.Doc.Objects.AddTextDot(dot)
-            newfollowing.Add(objectId)
-        State.Doc.Views.Redraw()
-        rc, newfollowing
+        if isNull breps then RhinoScriptingException.Raise "UnrollSurface: failed on  %A" surfaceGeo
+        let following = ResizeArray<GeometryBase>()
+        for curve in curves do following.Add(curve)
+        for point in points do following.Add(new Point(point))
+        for dot in dots do following.Add(dot)
+        ResizeArray(breps), following
 
 
     /// <summary>Changes the degree of a Surface object. For more information see the Rhino help file for the ChangeDegree command.</summary>
@@ -17847,8 +21127,18 @@ type RhinoScriptSyntax private () =
     /// <returns>(Point3d) 3d point.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetPointOnCurve(curveId:Guid, [<OPT;DEF("Pick Point On Curve")>]message:string) : Point3d =
+        RhinoSync.DoSync (fun () ->
+            RhinoScriptSyntax.GetPointOnCurve(RhinoScriptSyntax.CoerceCurve(curveId), message))
+
+    /// <summary>Pauses for user input of a point constrained to a Curve object.</summary>
+    /// <param name="curveGeo">(Curve) Curve geometry to get a point on</param>
+    /// <param name="message">(string) Optional, default value: <c>"Pick Point On Curve"</c>
+    ///    A prompt of message</param>
+    /// <returns>(Point3d) 3d point.
+    /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
+    static member GetPointOnCurve(curveGeo:Curve, [<OPT;DEF("Pick Point On Curve")>]message:string) : Point3d =
         let get () =
-            let curve = RhinoScriptSyntax.CoerceCurve(curveId)
+            let curve = curveGeo
             use gp = new Input.Custom.GetPoint()
             gp.SetCommandPrompt(message)
             gp.Constrain(curve, allowPickingPointOffObject=false) |> ignore<bool>
@@ -17891,10 +21181,21 @@ type RhinoScriptSyntax private () =
     /// <returns>(Point3d) 3d point.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetPointOnSurface(surfaceId:Guid, [<OPT;DEF("Pick Point on Surface or Polysurface")>]message:string) : Point3d =
+        RhinoSync.DoSync (fun () ->
+            RhinoScriptSyntax.GetPointOnSurface(RhinoScriptSyntax.CoerceGeometry(surfaceId), message))
+
+    /// <summary>Pauses for user input of a point constrained to a Surface or Polysurface
+    ///    object.</summary>
+    /// <param name="surfaceGeo">(GeometryBase) Surface or Brep geometry to get a point on</param>
+    /// <param name="message">(string) Optional, default value: <c>"Pick Point on Surface or Polysurface"</c>
+    ///    A prompt or message</param>
+    /// <returns>(Point3d) 3d point.
+    /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
+    static member GetPointOnSurface(surfaceGeo:GeometryBase, [<OPT;DEF("Pick Point on Surface or Polysurface")>]message:string) : Point3d =
         let get () =
             use gp = new Input.Custom.GetPoint()
             gp.SetCommandPrompt(message)
-            match RhinoScriptSyntax.CoerceGeometry surfaceId with
+            match surfaceGeo with
             | :? Surface as srf ->
                 gp.Constrain(srf, allowPickingPointOffObject=false) |> ignore<bool>
 
@@ -17902,7 +21203,7 @@ type RhinoScriptSyntax private () =
                 gp.Constrain(brep, -1, -1, allowPickingPointOffObject=false) |> ignore<bool>
 
             | _ ->
-                RhinoScriptingException.Raise "GetPointOnSurface failed input is not surface or Polysurface.  surfaceId:'%s' message:'%A'" (Pretty.str surfaceId) message
+                RhinoScriptingException.Raise "GetPointOnSurface failed input is not surface or Polysurface.  surfaceGeo:'%s' message:'%A'" (Pretty.str surfaceGeo) message
 
             gp.Get() |> ignore<Input.GetResult>
             if gp.CommandResult() <> Commands.Result.Success then
@@ -19067,8 +22368,7 @@ type RhinoScriptSyntax private () =
     /// <param name="detailId">(Guid) Identifier of a detail rectangle object</param>
     /// <returns>(bool) The current detail projection locked state.</returns>
     static member DetailLock(detailId:Guid) : bool = //GET
-        let detail = RhinoScriptSyntax.CoerceDetailView(detailId)
-        detail.IsProjectionLocked
+        RhinoScriptSyntax.DetailLock(RhinoScriptSyntax.CoerceDetailView(detailId))
 
     /// <summary>Modifies the projection locked state of a detail.</summary>
     /// <param name="detailId">(Guid) Identifier of a detail object</param>
@@ -19083,6 +22383,13 @@ type RhinoScriptSyntax private () =
             detail.CommitChanges() |> ignore<bool>
 
 
+
+
+    /// <summary>Returns the projection locked state of a detail view-port rectangle.</summary>
+    /// <param name="detailGeo">(DetailView) The detail geometry to query.</param>
+    /// <returns>(bool) The current detail projection locked state.</returns>
+    static member DetailLock(detailGeo:DetailView) : bool = //GET
+        detailGeo.IsProjectionLocked
 
     /// <summary>Returns the scale of a detail object.</summary>
     /// <param name="detailId">(Guid) Identifier of a detail object</param>
@@ -19106,7 +22413,11 @@ type RhinoScriptSyntax private () =
         else
             RhinoScriptingException.Raise "DetailScale failed.  detailId:'%s' modelLength:'%A' pageLength:'%A'" (Pretty.str detailId) modelLength pageLength
 
-
+    /// <summary>Returns the scale of a detail geometry object.</summary>
+    /// <param name="detailGeo">(DetailView) The detail geometry to query.</param>
+    /// <returns>(float) The current page to model scale ratio.</returns>
+    static member DetailScale(detailGeo:DetailView) : float = //GET
+        detailGeo.PageToModelRatio
 
     /// <summary>Checks if a detail view exists on a page layout view.</summary>
     /// <param name="layout">(string) Title of an existing page layout</param>
@@ -19826,7 +23137,6 @@ type RhinoScriptSyntax private () =
         let view = RhinoScriptSyntax.CoerceView(viewId)
         view.MainViewport.Name
 
-
     /// <summary>Returns the wallpaper bitmap of the specified view. To remove a
     /// <param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     /// wallpaper bitmap, pass an empty string "".</summary>
@@ -19955,5 +23265,3 @@ type RhinoScriptSyntax private () =
             let view = RhinoScriptSyntax.CoerceView(view)
             view.ActiveViewport.ZoomExtentsSelected()|> ignore<bool>
         State.Doc.Views.Redraw()
-
-

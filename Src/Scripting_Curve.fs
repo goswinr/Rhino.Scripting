@@ -18,6 +18,18 @@ module AutoOpenCurve =
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
 
+    static member private TryDirectCurveInput(geometry:GeometryBase, segmentIndex:int) : Curve option =
+        match geometry with
+        | :? PolyCurve as curve when segmentIndex >= 0 ->
+            let segment = curve.SegmentCurve(segmentIndex)
+            if isNull segment then None else Some segment
+        | :? Curve as curve -> Some curve
+        | _ -> None
+
+    static member private DirectCurveInput(curve:Curve, segmentIndex:int) : Curve =
+        match RhinoScriptSyntax.TryDirectCurveInput(curve, segmentIndex) with
+        | Some result -> result
+        | None -> RhinoScriptingException.Raise "Curve: Null curve or invalid segment index %d" segmentIndex
 
     /// <summary>Adds an arc curve to the document.</summary>
     /// <param name="plane">(Plane) Plane on which the arc will lie. The origin of the plane will be the center point of the arc. The x-axis of the plane defines the 0 angle direction.</param>
@@ -66,16 +78,26 @@ module AutoOpenCurve =
     /// <param name="continuities">(int * int) Tuple of two numbers specifying continuity at end points: 0 = position, 1 = tangency, 2 = curvature.</param>
     /// <returns>(Guid) Identifier of new curve.</returns>
     static member AddBlendCurve(curves:Guid * Guid, parameters:float * float, reverses:bool * bool, continuities:int * int) : Guid =
-        let crv0 = RhinoScriptSyntax.CoerceCurve (fst curves)
-        let crv1 = RhinoScriptSyntax.CoerceCurve (snd curves)
-        let c0:BlendContinuity = EnumOfValue(fst continuities)
-        let c1:BlendContinuity = EnumOfValue(snd continuities)
-        let curve = Curve.CreateBlendCurve(crv0, fst parameters, fst reverses, c0, crv1, snd parameters, snd reverses, c1)
-        let rc = State.Doc.Objects.AddCurve(curve)
-        if rc = Guid.Empty then  RhinoScriptingException.Raise "AddBlendCurve: Unable to add curve to document.  curves:'%A' parameters:'%A' reverses:'%A' continuities:'%A'" curves parameters reverses continuities
+        let geometry = RhinoScriptSyntax.MakeBlendCurve((RhinoScriptSyntax.CoerceCurve(fst curves), RhinoScriptSyntax.CoerceCurve(snd curves)), parameters, reverses, continuities)
+        let rc = State.Doc.Objects.AddCurve(geometry)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "AddBlendCurve: Unable to add geometry to document"
         State.Doc.Views.Redraw()
         rc
 
+    /// <summary>Computes MakeBlendCurve from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="curves">(Curve * Curve) The pair of input curves.</param>
+    /// <param name="parameters">(float * float) Tuple of two curve parameters defining the blend end points.</param>
+    /// <param name="reverses">(bool * bool) Tuple of two boolean values specifying to use the natural or opposite direction of the curve.</param>
+    /// <param name="continuities">(int * int) Tuple of two numbers specifying continuity at end points: 0 = position, 1 = tangency, 2 = curvature.</param>
+    /// <returns>(Curve) The resulting geometry; it is not added to a document.</returns>
+    static member MakeBlendCurve(curves:Curve * Curve, parameters:float * float, reverses:bool * bool, continuities:int * int) : Curve =
+        let crv0 = RhinoScriptSyntax.DirectCurveInput(fst curves, -1)
+        let crv1 = RhinoScriptSyntax.DirectCurveInput(snd curves, -1)
+        let c0:BlendContinuity = EnumOfValue(fst continuities)
+        let c1:BlendContinuity = EnumOfValue(snd continuities)
+        let curve = Curve.CreateBlendCurve(crv0, fst parameters, fst reverses, c0, crv1, snd parameters, snd reverses, c1)
+        if isNull curve then RhinoScriptingException.Raise "MakeBlendCurve: Unable to create blend curve"
+        curve
 
     /// <summary>Adds a circle curve to the document.</summary>
     /// <param name="plane">(Plane) Plane on which the circle will lie.</param>
@@ -159,61 +181,85 @@ module AutoOpenCurve =
     /// <param name="basePointB">(Point3d) Optional. Base point of the second curve. If omitted, starting point of the curve is used.</param>
     /// <returns>(Guid) ObjectId of the new curve object.</returns>
     static member AddFilletCurve(curveA:Guid, curveB:Guid, [<OPT;DEF(1.0)>]radius:float, [<OPT;DEF(Point3d())>]basePointA:Point3d, [<OPT;DEF(Point3d())>]basePointB:Point3d) : Guid =
+        let geometry = RhinoScriptSyntax.MakeFilletCurve(RhinoScriptSyntax.CoerceCurve(curveA), RhinoScriptSyntax.CoerceCurve(curveB), radius, basePointA, basePointB)
+        let rc = State.Doc.Objects.AddCurve(geometry)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "AddFilletCurve: Unable to add geometry to document"
+        State.Doc.Views.Redraw()
+        rc
+
+    /// <summary>Computes MakeFilletCurve from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="curveA">(Curve) The input geometry.</param>
+    /// <param name="curveB">(Curve) The input geometry.</param>
+    /// <param name="radius">(float) Optional, default value: <c>1.0</c>. Fillet radius.</param>
+    /// <param name="basePointA">(Point3d) Optional. Base point of the first curve. If omitted, starting point of the curve is used.</param>
+    /// <param name="basePointB">(Point3d) Optional. Base point of the second curve. If omitted, starting point of the curve is used.</param>
+    /// <returns>(ArcCurve) The resulting geometry; it is not added to a document.</returns>
+    static member MakeFilletCurve(curveA:Curve, curveB:Curve, [<OPT;DEF(1.0)>]radius:float, [<OPT;DEF(Point3d())>]basePointA:Point3d, [<OPT;DEF(Point3d())>]basePointB:Point3d) : ArcCurve =
         //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
         let basePointA = if basePointA = Point3d.Origin then Point3d.Unset else basePointA
         let basePointB = if basePointB = Point3d.Origin then Point3d.Unset else basePointB
-        let  curve0 = RhinoScriptSyntax.CoerceCurve (curveA)
-        let  curve1 = RhinoScriptSyntax.CoerceCurve (curveB)
+        let  curve0 = RhinoScriptSyntax.DirectCurveInput(curveA, -1)
+        let  curve1 = RhinoScriptSyntax.DirectCurveInput(curveB, -1)
         let mutable crv0T = 0.0
         if basePointA= Point3d.Unset then
             crv0T <- curve0.Domain.Min
         else
             let rc, t = curve0.ClosestPoint(basePointA)
-            if not <| rc then RhinoScriptingException.Raise "AddFilletCurve ClosestPoint failed.  curveA:'%A' curveB:'%A' radius:'%A' basePointA:'%A' basePointB:'%A'" curveA curveB radius basePointA basePointB
+            if not <| rc then RhinoScriptingException.Raise "MakeFilletCurve ClosestPoint failed.  curveA:'%A' curveB:'%A' radius:'%A' basePointA:'%A' basePointB:'%A'" curveA curveB radius basePointA basePointB
             crv0T <- t
         let mutable crv1T = 0.0
         if basePointB= Point3d.Unset then
             crv1T <- curve1.Domain.Min
         else
             let rc, t = curve1.ClosestPoint(basePointB)
-            if not <| rc then RhinoScriptingException.Raise "AddFilletCurve ClosestPoint failed.  curveA:'%A' curveB:'%A' radius:'%A' basePointA:'%A' basePointB:'%A'" curveA curveB radius basePointA basePointB
+            if not <| rc then RhinoScriptingException.Raise "MakeFilletCurve ClosestPoint failed.  curveA:'%A' curveB:'%A' radius:'%A' basePointA:'%A' basePointB:'%A'" curveA curveB radius basePointA basePointB
             crv1T <- t
         let mutable arc = Curve.CreateFillet(curve0, curve1, radius, crv0T, crv1T)
-        let mutable rc = State.Doc.Objects.AddArc(arc)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "AddFilletCurve: Unable to add fillet curve to document.  curveA:'%A' curveB:'%A' radius:'%A' basePointA:'%A' basePointB:'%A'" curveA curveB radius basePointA basePointB
-        State.Doc.Views.Redraw()
-        rc
-
+        new ArcCurve(arc)
 
     /// <summary>Adds an interpolated curve object that lies on a specified surface. Note, this function will not create periodic curves, but it will create closed curves.</summary>
     /// <param name="surfaceId">(Guid) Identifier of the surface to create the curve on.</param>
     /// <param name="points">(Point3d seq) List of 3D points that lie on the specified surface. The list must contain at least 2 points.</param>
     /// <returns>(Guid) ObjectId of the new curve object.</returns>
     static member AddInterpCrvOnSrf(surfaceId:Guid, points:Point3d seq) : Guid =
-        let  surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
-        let  tolerance = State.Doc.ModelAbsoluteTolerance
-        let  curve = surface.InterpolatedCurveOnSurface(points, tolerance)
-        if isNull curve then RhinoScriptingException.Raise "AddInterpCrvOnSrf: Unable to create InterpolatedCurveOnSurface.  surfaceId:'%s' points:'%A'" (Pretty.str surfaceId) points
-        let mutable rc = State.Doc.Objects.AddCurve(curve)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "AddInterpCrvOnSrf: Unable to add curve to document.  surfaceId:'%s' points:'%A'" (Pretty.str surfaceId) points
+        let geometry = RhinoScriptSyntax.MakeInterpCrvOnSrf(RhinoScriptSyntax.CoerceSurface(surfaceId), points)
+        let rc = State.Doc.Objects.AddCurve(geometry)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "AddInterpCrvOnSrf: Unable to add geometry to document"
         State.Doc.Views.Redraw()
         rc
 
+    /// <summary>Computes MakeInterpCrvOnSrf from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="surfaceGeo">(Surface) The input geometry.</param>
+    /// <param name="points">(Point3d seq) List of 3D points that lie on the specified surface. The list must contain at least 2 points.</param>
+    /// <returns>(Curve) The resulting geometry; it is not added to a document.</returns>
+    static member MakeInterpCrvOnSrf(surfaceGeo:Surface, points:Point3d seq) : Curve =
+        let  surface = (surfaceGeo)
+        let  tolerance = State.Doc.ModelAbsoluteTolerance
+        let  curve = surface.InterpolatedCurveOnSurface(points, tolerance)
+        if isNull curve then RhinoScriptingException.Raise "MakeInterpCrvOnSrf: Unable to create InterpolatedCurveOnSurface.  surfaceGeo:'%s' points:'%A'" (Pretty.str surfaceGeo) points
+        curve
 
     /// <summary>Adds an interpolated curve object based on surface parameters, that lies on a specified surface. Note, this function will not create periodic curves, but it will create closed curves.</summary>
     /// <param name="surfaceId">(Guid) Identifier of the surface to create the curve on.</param>
     /// <param name="points">(Point2d seq) A list of 2D surface parameters. The list must contain at least 2 sets of parameters.</param>
     /// <returns>(Guid) ObjectId of the new curve object.</returns>
     static member AddInterpCrvOnSrfUV(surfaceId:Guid, points:Point2d seq) : Guid =
-        let mutable surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
-        let mutable tolerance = State.Doc.ModelAbsoluteTolerance
-        let mutable curve = surface.InterpolatedCurveOnSurfaceUV(points, tolerance)
-        if isNull curve then RhinoScriptingException.Raise "AddInterpCrvOnSrfUV: Unable to create InterpolatedCurveOnSurfaceUV.  surfaceId:'%s' points:'%A'" (Pretty.str surfaceId) points
-        let mutable rc = State.Doc.Objects.AddCurve(curve)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "AddInterpCrvOnSrfUV: Unable to add curve to document.  surfaceId:'%s' points:'%A'" (Pretty.str surfaceId) points
+        let geometry = RhinoScriptSyntax.MakeInterpCrvOnSrfUV(RhinoScriptSyntax.CoerceSurface(surfaceId), points)
+        let rc = State.Doc.Objects.AddCurve(geometry)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "AddInterpCrvOnSrfUV: Unable to add geometry to document"
         State.Doc.Views.Redraw()
         rc
 
+    /// <summary>Computes MakeInterpCrvOnSrfUV from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="surfaceGeo">(Surface) The input geometry.</param>
+    /// <param name="points">(Point2d seq) A list of 2D surface parameters. The list must contain at least 2 sets of parameters.</param>
+    /// <returns>(Curve) The resulting geometry; it is not added to a document.</returns>
+    static member MakeInterpCrvOnSrfUV(surfaceGeo:Surface, points:Point2d seq) : Curve =
+        let mutable surface = (surfaceGeo)
+        let mutable tolerance = State.Doc.ModelAbsoluteTolerance
+        let mutable curve = surface.InterpolatedCurveOnSurfaceUV(points, tolerance)
+        if isNull curve then RhinoScriptingException.Raise "MakeInterpCrvOnSrfUV: Unable to create InterpolatedCurveOnSurfaceUV.  surfaceGeo:'%s' points:'%A'" (Pretty.str surfaceGeo) points
+        curve
 
     ///<summary>Adds an interpolated Curve object to the document. Options exist to make
     ///    a periodic Curve or to specify the tangent at the endpoints. The resulting
@@ -433,14 +479,22 @@ module AutoOpenCurve =
     /// <param name="param1">(float) Second parameters on the source Curve</param>
     /// <returns>(Guid) ObjectId of the new curve object.</returns>
     static member AddSubCrv(curveId:Guid, param0:float, param1:float) : Guid =
-        let curve = RhinoScriptSyntax.CoerceCurve (curveId)
-        let trimcurve = curve.Trim(param0, param1)
-        if isNull trimcurve then RhinoScriptingException.Raise "AddSubCrv: Unable to trim curve. curveId:'%s' param0:'%A' param1:'%A'" (Pretty.str curveId) param0 param1
-        let rc = State.Doc.Objects.AddCurve(trimcurve)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "AddSubCrv: Unable to add curve to document. curveId:'%s' param0:'%A' param1:'%A'" (Pretty.str curveId) param0 param1
+        let geometry = RhinoScriptSyntax.MakeSubCrv(RhinoScriptSyntax.CoerceCurve(curveId), param0, param1)
+        let rc = State.Doc.Objects.AddCurve(geometry)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "AddSubCrv: Unable to add geometry to document"
         State.Doc.Views.Redraw()
         rc
 
+    /// <summary>Computes MakeSubCrv from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="param0">(float) First parameters on the source Curve</param>
+    /// <param name="param1">(float) Second parameters on the source Curve</param>
+    /// <returns>(Curve) The resulting geometry; it is not added to a document.</returns>
+    static member MakeSubCrv(curveGeo:Curve, param0:float, param1:float) : Curve =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
+        let trimcurve = curve.Trim(param0, param1)
+        if isNull trimcurve then RhinoScriptingException.Raise "MakeSubCrv: Unable to trim curve. curveGeo:'%s' param0:'%A' param1:'%A'" (Pretty.str curveGeo) param0 param1
+        trimcurve
 
     /// <summary>Returns the angle of an arc Curve object.</summary>
     /// <param name="curveId">(Guid) Identifier of a Curve object</param>
@@ -448,10 +502,18 @@ module AutoOpenCurve =
     ///    Identifies the Curve segment if CurveId identifies a poly-curve</param>
     /// <returns>(float) The angle in degrees.</returns>
     static member ArcAngle(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : float =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.ArcAngle(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the angle of an arc Curve object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional,
+    ///    Identifies the Curve segment if CurveId identifies a poly-curve</param>
+    /// <returns>(float) The angle in degrees.</returns>
+    static member ArcAngle(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : float =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let arc = ref Arc.Unset
         let rc = curve.TryGetArc( arc, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "ArcAngle: Curve is not an arc. curveId:'%s' segmentIndex:'%A'" (Pretty.str curveId) segmentIndex
+        if not <| rc then RhinoScriptingException.Raise "ArcAngle: Curve is not an arc. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
         (arc.Value).AngleDegrees
 
 
@@ -460,10 +522,17 @@ module AutoOpenCurve =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a poly-curve</param>
     /// <returns>(Point3d) The 3D center point of the arc.</returns>
     static member ArcCenterPoint(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.ArcCenterPoint(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the center point of an arc Curve object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a poly-curve</param>
+    /// <returns>(Point3d) The 3D center point of the arc.</returns>
+    static member ArcCenterPoint(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let arc = ref Arc.Unset
         let rc = curve.TryGetArc( arc, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "ArcCenterPoint: Curve is not an arc. curveId:'%s' segmentIndex:'%A'" (Pretty.str curveId) segmentIndex
+        if not <| rc then RhinoScriptingException.Raise "ArcCenterPoint: Curve is not an arc. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
         (arc.Value).Center
 
 
@@ -472,10 +541,17 @@ module AutoOpenCurve =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a poly-curve</param>
     /// <returns>(Point3d) The 3D mid point of the arc.</returns>
     static member ArcMidPoint(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.ArcMidPoint(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the mid point of an arc Curve object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a poly-curve</param>
+    /// <returns>(Point3d) The 3D mid point of the arc.</returns>
+    static member ArcMidPoint(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let arc = ref Arc.Unset
         let rc = curve.TryGetArc( arc, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "ArcMidPoint: Curve is not an arc. curveId:'%s' segmentIndex:'%A'" (Pretty.str curveId) segmentIndex
+        if not <| rc then RhinoScriptingException.Raise "ArcMidPoint: Curve is not an arc. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
         (arc.Value).MidPoint
 
 
@@ -484,10 +560,17 @@ module AutoOpenCurve =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a poly-curve</param>
     /// <returns>(float) The radius of the arc.</returns>
     static member ArcRadius(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : float =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.ArcRadius(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the radius of an arc Curve object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a poly-curve</param>
+    /// <returns>(float) The radius of the arc.</returns>
+    static member ArcRadius(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : float =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let arc = ref Arc.Unset
         let rc = curve.TryGetArc( arc, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "ArcRadius: Curve is not an arc. curveId:'%s' segmentIndex:'%A'" (Pretty.str curveId) segmentIndex
+        if not <| rc then RhinoScriptingException.Raise "ArcRadius: Curve is not an arc. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
         (arc.Value).Radius
 
 
@@ -497,10 +580,17 @@ module AutoOpenCurve =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a poly-curve</param>
     /// <returns>(Point3d) The 3D center point of the circle.</returns>
     static member CircleCenterPoint(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.CircleCenterPoint(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the center point of a circle Curve object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a poly-curve</param>
+    /// <returns>(Point3d) The 3D center point of the circle.</returns>
+    static member CircleCenterPoint(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let circle = ref Circle.Unset
         let rc = curve.TryGetCircle(circle, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "CircleCenterPoint: Curve is not circle. curveId:'%s' segmentIndex:'%A'" (Pretty.str curveId) segmentIndex
+        if not <| rc then RhinoScriptingException.Raise "CircleCenterPoint: Curve is not circle. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
         (!circle).Center
 
 
@@ -509,10 +599,17 @@ module AutoOpenCurve =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a poly-curve</param>
     /// <returns>(Plane) The 3D Plane at the center point of the circle.</returns>
     static member CircleCenterPlane(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Plane =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.CircleCenterPlane(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the center Plane of a circle Curve object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a poly-curve</param>
+    /// <returns>(Plane) The 3D Plane at the center point of the circle.</returns>
+    static member CircleCenterPlane(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : Plane =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let circle = ref Circle.Unset
         let rc = curve.TryGetCircle(circle, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "CircleCenterPlane: Curve is not circle. curveId:'%s' segmentIndex:'%A'" (Pretty.str curveId) segmentIndex
+        if not <| rc then RhinoScriptingException.Raise "CircleCenterPlane: Curve is not circle. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
         (!circle).Plane
 
 
@@ -524,10 +621,17 @@ module AutoOpenCurve =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a poly-curve</param>
     /// <returns>(float) The circumference of the circle.</returns>
     static member CircleCircumference(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : float =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.CircleCircumference(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the circumference of a circle Curve object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a poly-curve</param>
+    /// <returns>(float) The circumference of the circle.</returns>
+    static member CircleCircumference(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : float =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let circle = ref Circle.Unset
         let rc = curve.TryGetCircle(circle, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "CircleCircumference: Curve is not circle. curveId:'%s' segmentIndex:'%A'" (Pretty.str curveId) segmentIndex
+        if not <| rc then RhinoScriptingException.Raise "CircleCircumference: Curve is not circle. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
         (!circle).Circumference
 
 
@@ -536,10 +640,17 @@ module AutoOpenCurve =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a poly-curve</param>
     /// <returns>(float) The radius of the circle.</returns>
     static member CircleRadius(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : float =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.CircleRadius(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the radius of a circle Curve object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a poly-curve</param>
+    /// <returns>(float) The radius of the circle.</returns>
+    static member CircleRadius(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : float =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let circle = ref Circle.Unset
         let rc = curve.TryGetCircle(circle, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "CircleRadius: Curve is not circle. curveId:'%s' segmentIndex:'%A'" (Pretty.str curveId) segmentIndex
+        if not <| rc then RhinoScriptingException.Raise "CircleRadius: Curve is not circle. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
         (!circle).Radius
 
 
@@ -551,14 +662,24 @@ module AutoOpenCurve =
     /// <returns>(Guid) ObjectId of the new Curve object.</returns>
     static member CloseCurve(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
-        if curve.IsClosed then  curveId
+        if curve.IsClosed then curveId
         else
-            if not <| curve.MakeClosed(Util.ifZero1 tolerance State.Doc.ModelAbsoluteTolerance) then  RhinoScriptingException.Raise "CloseCurve: Unable to add curve to document. curveId:'%s' tolerance:'%A'" (Pretty.str curveId) tolerance
-            let rc = State.Doc.Objects.AddCurve(curve)
-            if rc = Guid.Empty then RhinoScriptingException.Raise "CloseCurve: Unable to add curve to document. curveId:'%s' tolerance:'%A'" (Pretty.str curveId) tolerance
+            let closed = RhinoScriptSyntax.CloseCurve(curve, tolerance)
+            let rc = State.Doc.Objects.AddCurve(closed)
+            if rc = Guid.Empty then RhinoScriptingException.Raise "CloseCurve: Unable to add curve to document"
             State.Doc.Views.Redraw()
             rc
 
+    /// <summary>Computes CloseCurve from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="curveGeo">(Curve) The input curve geometry.</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
+    ///    Maximum allowable distance between start and end point</param>
+    /// <returns>(Curve) The resulting geometry; it is not added to a document.</returns>
+    static member CloseCurve(curveGeo:Curve, [<OPT;DEF(0.0)>]tolerance:float) : Curve =
+        let curve = (RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)).DuplicateCurve()
+        if not curve.IsClosed && not (curve.MakeClosed(Util.ifZero1 tolerance State.Doc.ModelAbsoluteTolerance)) then
+            RhinoScriptingException.Raise "CloseCurve: Unable to close curve"
+        curve
 
     /// <summary>Determine the orientation (counter-clockwise or clockwise) of a closed,
     ///    planar Curve.</summary>
@@ -570,8 +691,20 @@ module AutoOpenCurve =
     ///    -1 if the Curve's orientation is counter-clockwise
     ///     0 if unable to compute the Curve's orientation.</returns>
     static member ClosedCurveOrientation(curveId:Guid, [<OPT;DEF(Vector3d())>]direction:Vector3d) : int = //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
+        RhinoScriptSyntax.ClosedCurveOrientation(RhinoScriptSyntax.CoerceCurve(curveId), direction)
+
+    /// <summary>Determine the orientation (counter-clockwise or clockwise) of a closed,
+    ///    planar Curve. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="direction">(Vector3d) Optional, default value: <c>Vector3d.ZAxis</c>
+    ///    3d vector that identifies up, or Z axs, direction of
+    ///    the Plane to test against</param>
+    /// <returns>(int) 1 if the Curve's orientation is clockwise
+    ///    -1 if the Curve's orientation is counter-clockwise
+    ///     0 if unable to compute the Curve's orientation.</returns>
+    static member ClosedCurveOrientation(curveGeo:Curve, [<OPT;DEF(Vector3d())>]direction:Vector3d) : int = //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
         let direction0 =if direction.IsZero then Vector3d.Unset else direction
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
         if not <| curve.IsClosed then  0
         else
             let orientation = curve.ClosedCurveOrientation(direction0)
@@ -595,23 +728,35 @@ module AutoOpenCurve =
                                             [<OPT;DEF(false)>]deleteInput:bool,
                                             [<OPT;DEF(0.0)>]minEdgeLength:float,
                                             [<OPT;DEF(0.0)>]maxEdgeLength:float) : Guid =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
-        let angleTolerance0 = toRadians (Util.ifZero1 angleTolerance 0.5 )
-        let tolerance0 = Util.ifZero1 tolerance 0.01
-        let polylineCurve = curve.ToPolyline( 0, 0, angleTolerance0, 0.0, 0.0, tolerance0, minEdgeLength, maxEdgeLength, keepStartPoint=true) //TODO what happens on 0.0 input ?
-        if isNull polylineCurve then RhinoScriptingException.Raise "ConvertCurveToPolyline: Unable to convertCurveToPolyline %A , maxEdgeLength%f, minEdgeLength:%f, deleteInput%b, tolerance%f, angleTolerance %f " curveId   maxEdgeLength minEdgeLength deleteInput tolerance angleTolerance
+        let polyline = RhinoScriptSyntax.ConvertCurveToPolyline(RhinoScriptSyntax.CoerceCurve(curveId), angleTolerance, tolerance, minEdgeLength, maxEdgeLength)
         if deleteInput then
-            if State.Doc.Objects.Replace( curveId, polylineCurve) then
-                curveId
-            else
-                RhinoScriptingException.Raise "ConvertCurveToPolyline: Unable to convertCurveToPolyline %A , maxEdgeLength%f, minEdgeLength:%f, deleteInput%b, tolerance%f, angleTolerance %f " curveId   maxEdgeLength minEdgeLength deleteInput tolerance angleTolerance
+            if not (State.Doc.Objects.Replace(curveId, polyline)) then RhinoScriptingException.Raise "ConvertCurveToPolyline: Unable to replace curve %O" curveId
+            curveId
         else
-            let objectId = State.Doc.Objects.AddCurve( polylineCurve )
-            if System.Guid.Empty= objectId then
-                RhinoScriptingException.Raise "ConvertCurveToPolyline: Unable to convertCurveToPolyline %A , maxEdgeLength%f, minEdgeLength:%f, deleteInput%b, tolerance%f, angleTolerance %f " curveId   maxEdgeLength minEdgeLength deleteInput tolerance angleTolerance
-            else
-                objectId
+            let rc = State.Doc.Objects.AddCurve(polyline)
+            if rc = Guid.Empty then RhinoScriptingException.Raise "ConvertCurveToPolyline: Unable to add curve to document"
+            rc
 
+    /// <summary>Computes ConvertCurveToPolyline from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="curveGeo">(Curve) The input curve geometry.</param>
+    /// <param name="angleTolerance">(float) Optional, default value: <c>5.0</c>
+    ///    The maximum angle between Curve tangents at line endpoints.</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>0.01</c>
+    ///    The distance tolerance at segment midpoints.</param>
+    /// <param name="minEdgeLength">(float) Optional, Minimum segment length</param>
+    /// <param name="maxEdgeLength">(float) Optional, Maximum segment length</param>
+    /// <returns>(PolylineCurve) The resulting geometry; it is not added to a document.</returns>
+    static member ConvertCurveToPolyline(   curveGeo:Curve,
+                                            [<OPT;DEF(0.0)>]angleTolerance:float,
+                                            [<OPT;DEF(0.0)>]tolerance:float,
+                                            [<OPT;DEF(0.0)>]minEdgeLength:float,
+                                            [<OPT;DEF(0.0)>]maxEdgeLength:float) : PolylineCurve =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
+        let angleTolerance0 = toRadians (Util.ifZero1 angleTolerance 0.5)
+        let tolerance0 = Util.ifZero1 tolerance 0.01
+        let polyline = curve.ToPolyline(0, 0, angleTolerance0, 0.0, 0.0, tolerance0, minEdgeLength, maxEdgeLength, keepStartPoint=true)
+        if isNull polyline then RhinoScriptingException.Raise "ConvertCurveToPolyline: Unable to convert curve"
+        polyline
 
     /// <summary>Returns the point on the Curve that is a specified arc length
     ///    from the start of the Curve.</summary>
@@ -623,7 +768,19 @@ module AutoOpenCurve =
     ///    point is calculated from the end of the Curve</param>
     /// <returns>(Point3d) on Curve.</returns>
     static member CurveArcLengthPoint(curveId:Guid, length:float, [<OPT;DEF(true)>]fromStart:bool) : Point3d =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
+        RhinoScriptSyntax.CurveArcLengthPoint(RhinoScriptSyntax.CoerceCurve(curveId), length, fromStart)
+
+    /// <summary>Returns the point on the Curve that is a specified arc length
+    ///    from the start of the Curve. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="length">(float) The arc length from the start of the Curve to evaluate</param>
+    /// <param name="fromStart">(bool) Optional, default value: <c>true</c>
+    ///    If not specified or True, then the arc length point is
+    ///    calculated from the start of the Curve. If False, the arc length
+    ///    point is calculated from the end of the Curve</param>
+    /// <returns>(Point3d) on Curve.</returns>
+    static member CurveArcLengthPoint(curveGeo:Curve, length:float, [<OPT;DEF(true)>]fromStart:bool) : Point3d =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
         let curveLength = curve.GetLength()
         if curveLength >= length then
             let mutable s = 0.0
@@ -638,9 +795,9 @@ module AutoOpenCurve =
                     let pt = dupe.PointAt(t)
                     if not fromStart then dupe.Dispose()
                     pt
-                else RhinoScriptingException.Raise "CurveArcLengthPoint: Unable to curveArcLengthPoint %A, length:%f, fromStart:%b" curveId length fromStart
-            else RhinoScriptingException.Raise "CurveArcLengthPoint: Unable to curveArcLengthPoint %A, length:%f, fromStart:%b" curveId length fromStart
-        else RhinoScriptingException.Raise "CurveArcLengthPoint: Unable to curveArcLengthPoint %A, length:%f, fromStart:%b" curveId length fromStart
+                else RhinoScriptingException.Raise "CurveArcLengthPoint: Unable to curveArcLengthPoint %A, length:%f, fromStart:%b" curveGeo length fromStart
+            else RhinoScriptingException.Raise "CurveArcLengthPoint: Unable to curveArcLengthPoint %A, length:%f, fromStart:%b" curveGeo length fromStart
+        else RhinoScriptingException.Raise "CurveArcLengthPoint: Unable to curveArcLengthPoint %A, length:%f, fromStart:%b" curveGeo length fromStart
 
 
     /// <summary>Returns area of closed planar Curves. The results are based on the
@@ -648,10 +805,17 @@ module AutoOpenCurve =
     /// <param name="curveId">(Guid) The identifier of a closed, planar Curve object</param>
     /// <returns>(float) The area.</returns>
     static member CurveArea(curveId:Guid) : float =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
+        RhinoScriptSyntax.CurveArea(RhinoScriptSyntax.CoerceCurve(curveId))
+
+    /// <summary>Returns area of closed planar Curves. The results are based on the
+    ///    current drawing units. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <returns>(float) The area.</returns>
+    static member CurveArea(curveGeo:Curve) : float =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
         let tol = State.Doc.ModelAbsoluteTolerance
         let mp = AreaMassProperties.Compute(curve, tol)
-        if isNull mp  then RhinoScriptingException.Raise "CurveArea failed on %A" curveId
+        if isNull mp  then RhinoScriptingException.Raise "CurveArea failed on %A" curveGeo
         mp.Area
 
 
@@ -660,10 +824,17 @@ module AutoOpenCurve =
     /// <param name="curveId">(Guid) The identifier of a closed, planar Curve object</param>
     /// <returns>(Point3d ) The 3d centroid point.</returns>
     static member CurveAreaCentroid(curveId:Guid) : Point3d =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
+        RhinoScriptSyntax.CurveAreaCentroid(RhinoScriptSyntax.CoerceCurve(curveId))
+
+    /// <summary>Returns area centroid of closed, planar Curves. The results are based
+    ///    on the current drawing units. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <returns>(Point3d ) The 3d centroid point.</returns>
+    static member CurveAreaCentroid(curveGeo:Curve) : Point3d =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
         let tol = State.Doc.ModelAbsoluteTolerance
         let mp = AreaMassProperties.Compute(curve, tol)
-        if isNull mp  then RhinoScriptingException.Raise "CurveAreaCentroid failed on %A" curveId
+        if isNull mp  then RhinoScriptingException.Raise "CurveAreaCentroid failed on %A" curveGeo
         mp.Centroid
 
 
@@ -747,23 +918,34 @@ module AutoOpenCurve =
     ///    A positive tolerance value, or None for the doc default</param>
     /// <returns>(Guid ResizeArray) The identifiers of the new objects.</returns>
     static member CurveBooleanDifference(curveA:Guid, curveB:Guid, [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray =
-        let curve0 = RhinoScriptSyntax.CoerceCurve curveA
-        let curve1 = RhinoScriptSyntax.CoerceCurve curveB
+        let curves = RhinoScriptSyntax.CurveBooleanDifference(RhinoScriptSyntax.CoerceCurve(curveA), RhinoScriptSyntax.CoerceCurve(curveB), tolerance)
+        let ids = ResizeArray<Guid>()
+        for curve in curves do
+            let rc = State.Doc.Objects.AddCurve(curve)
+            curve.Dispose()
+            if rc = Guid.Empty then RhinoScriptingException.Raise "CurveBooleanDifference: Unable to add curve to document"
+            ids.Add(rc)
+        State.Doc.Views.Redraw()
+        ids
+
+    /// <summary>Computes CurveBooleanDifference from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="curveA">(Curve) The input geometry.</param>
+    /// <param name="curveB">(Curve) The input geometry.</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
+    ///    A positive tolerance value, or None for the doc default</param>
+    /// <returns>(Curve ResizeArray) The resulting geometry; it is not added to a document.</returns>
+    static member CurveBooleanDifference(curveA:Curve, curveB:Curve, [<OPT;DEF(0.0)>]tolerance:float) : Curve ResizeArray =
+        let curve0 = RhinoScriptSyntax.DirectCurveInput(curveA, -1)
+        let curve1 = RhinoScriptSyntax.DirectCurveInput(curveB, -1)
         let tolerance = Util.ifZero2 State.Doc.ModelAbsoluteTolerance tolerance
         let outCurves = Curve.CreateBooleanDifference(curve0, curve1, tolerance)
-        let curves = ResizeArray()
+
+        let curves = ResizeArray<Curve>()
         if notNull outCurves then
             for curve in outCurves do
-                if notNull curve && curve.IsValid then
-                    let rc = State.Doc.Objects.AddCurve(curve)
-                    curve.Dispose()
-                    if rc = Guid.Empty then RhinoScriptingException.Raise "CurveBooleanDifference: Unable to add curve to document.  curveA:'%A' curveB:'%A'" curveA curveB
-                    curves.Add(rc)
-            State.Doc.Views.Redraw()
-            curves
-        else
-            RhinoScriptingException.Raise "CurveBooleanDifference: Unable to add curve to document.  curveA:'%A' curveB:'%A'" curveA curveB
-
+                if notNull curve && curve.IsValid then curves.Add(curve)
+        else RhinoScriptingException.Raise "CurveBooleanDifference: Unable to compute boolean result"
+        curves
 
     /// <summary>Calculates the intersection of two closed, planar Curves and adds
     ///    the results to the document. Note, Curves must be coplanar.</summary>
@@ -773,23 +955,34 @@ module AutoOpenCurve =
     ///    A positive tolerance value, or None for the doc default</param>
     /// <returns>(Guid ResizeArray) The identifiers of the new objects.</returns>
     static member CurveBooleanIntersection(curveA:Guid, curveB:Guid, [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray =
-        let curve0 = RhinoScriptSyntax.CoerceCurve curveA
-        let curve1 = RhinoScriptSyntax.CoerceCurve curveB
+        let curves = RhinoScriptSyntax.CurveBooleanIntersection(RhinoScriptSyntax.CoerceCurve(curveA), RhinoScriptSyntax.CoerceCurve(curveB), tolerance)
+        let ids = ResizeArray<Guid>()
+        for curve in curves do
+            let rc = State.Doc.Objects.AddCurve(curve)
+            curve.Dispose()
+            if rc = Guid.Empty then RhinoScriptingException.Raise "CurveBooleanIntersection: Unable to add curve to document"
+            ids.Add(rc)
+        State.Doc.Views.Redraw()
+        ids
+
+    /// <summary>Computes CurveBooleanIntersection from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="curveA">(Curve) The input geometry.</param>
+    /// <param name="curveB">(Curve) The input geometry.</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
+    ///    A positive tolerance value, or None for the doc default</param>
+    /// <returns>(Curve ResizeArray) The resulting geometry; it is not added to a document.</returns>
+    static member CurveBooleanIntersection(curveA:Curve, curveB:Curve, [<OPT;DEF(0.0)>]tolerance:float) : Curve ResizeArray =
+        let curve0 = RhinoScriptSyntax.DirectCurveInput(curveA, -1)
+        let curve1 = RhinoScriptSyntax.DirectCurveInput(curveB, -1)
         let tolerance = Util.ifZero2 State.Doc.ModelAbsoluteTolerance tolerance
         let outCurves = Curve.CreateBooleanIntersection(curve0, curve1, tolerance)
-        let curves = ResizeArray()
+
+        let curves = ResizeArray<Curve>()
         if notNull outCurves then
             for curve in outCurves do
-                if notNull curve && curve.IsValid then
-                    let rc = State.Doc.Objects.AddCurve(curve)
-                    curve.Dispose()
-                    if rc = Guid.Empty then RhinoScriptingException.Raise "CurveBooleanIntersection: Unable to add curve to document.  curveA:'%A' curveB:'%A'" curveA curveB
-                    curves.Add(rc)
-            State.Doc.Views.Redraw()
-            curves
-        else
-            RhinoScriptingException.Raise "CurveBooleanIntersection: Unable to add curve to document.  curveA:'%A' curveB:'%A'" curveA curveB
-
+                if notNull curve && curve.IsValid then curves.Add(curve)
+        else RhinoScriptingException.Raise "CurveBooleanIntersection: Unable to compute boolean result"
+        curves
 
     /// <summary>Calculate the union of two or more closed, planar Curves and
     ///    add the results to the document. Note, Curves must be coplanar.</summary>
@@ -798,25 +991,36 @@ module AutoOpenCurve =
     ///    A positive tolerance value, or None for the doc default</param>
     /// <returns>(Guid ResizeArray) The identifiers of the new objects.</returns>
     static member CurveBooleanUnion(curveIds:Guid seq, [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray =
+        let curves = RhinoScriptSyntax.CurveBooleanUnion((curveIds |> Seq.map RhinoScriptSyntax.CoerceCurve), tolerance)
+        let ids = ResizeArray<Guid>()
+        for curve in curves do
+            let rc = State.Doc.Objects.AddCurve(curve)
+            curve.Dispose()
+            if rc = Guid.Empty then RhinoScriptingException.Raise "CurveBooleanUnion: Unable to add curve to document"
+            ids.Add(rc)
+        State.Doc.Views.Redraw()
+        ids
+
+    /// <summary>Computes CurveBooleanUnion from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="curveInputs">(Curve seq) The input objects.</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
+    ///    A positive tolerance value, or None for the doc default</param>
+    /// <returns>(Curve ResizeArray) The resulting geometry; it is not added to a document.</returns>
+    static member CurveBooleanUnion(curveInputs:Curve seq, [<OPT;DEF(0.0)>]tolerance:float) : Curve ResizeArray =
         let inCurves = ResizeArray()
-        for objectId in curveIds do
-            let curve = RhinoScriptSyntax.CoerceCurve objectId
+        for objectId in curveInputs do
+            let curve = RhinoScriptSyntax.DirectCurveInput(objectId, -1)
             inCurves.Add(curve)
 
-        if inCurves.Count < 2 then RhinoScriptingException.Raise "CurveBooleanUnion:curveIds must have at least 2 curves %A" curveIds
+        if inCurves.Count < 2 then RhinoScriptingException.Raise "CurveBooleanUnion:curveInputs must have at least 2 curves %A" curveInputs
         let tolerance = Util.ifZero2 State.Doc.ModelAbsoluteTolerance tolerance
         let outCurves = Curve.CreateBooleanUnion(inCurves, tolerance)
-        let curves = ResizeArray()
+
+        let curves = ResizeArray<Curve>()
         if notNull outCurves then
             for curve in outCurves do
-                if notNull curve && curve.IsValid then
-                    let rc = State.Doc.Objects.AddCurve(curve)
-                    curve.Dispose()
-                    if rc = Guid.Empty then RhinoScriptingException.Raise "CurveBooleanUnion: Unable to add curve to document.  curveIds:'%s'" (Pretty.str curveIds)
-                    curves.Add(rc)
-            State.Doc.Views.Redraw()
+                if notNull curve && curve.IsValid then curves.Add(curve)
         curves
-
 
     /// <summary>Intersects a Curve object with a brep object. Note, unlike the
     ///    CurveSurfaceIntersection function, this function works on trimmed Surfaces.</summary>
@@ -826,11 +1030,21 @@ module AutoOpenCurve =
     ///    Distance tolerance at segment midpoints.</param>
     /// <returns>(Point3d ResizeArray * Curve ResizeArray) List of points and List of Curves.</returns>
     static member CurveBrepIntersect(curveId:Guid, brepId:Guid, [<OPT;DEF(0.0)>]tolerance:float) : Point3d ResizeArray * Curve ResizeArray=
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
-        let brep = RhinoScriptSyntax.CoerceBrep(brepId)
+        RhinoScriptSyntax.CurveBrepIntersect(RhinoScriptSyntax.CoerceCurve(curveId), RhinoScriptSyntax.CoerceBrep(brepId), tolerance)
+
+    /// <summary>Intersects a Curve object with a brep object. Note, unlike the
+    ///    CurveSurfaceIntersection function, this function works on trimmed Surfaces. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="brepInput">(Brep) The input geometry.</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
+    ///    Distance tolerance at segment midpoints.</param>
+    /// <returns>(Point3d ResizeArray * Curve ResizeArray) List of points and List of Curves.</returns>
+    static member CurveBrepIntersect(curveGeo:Curve, brepInput:Brep, [<OPT;DEF(0.0)>]tolerance:float) : Point3d ResizeArray * Curve ResizeArray=
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
+        let brep = (brepInput)
         let tolerance0 = Util.ifZero2 State.Doc.ModelAbsoluteTolerance tolerance
         let rc, outCurves, outPoints = Intersect.Intersection.CurveBrep(curve, brep, tolerance0)
-        if not <| rc then  RhinoScriptingException.Raise "CurveBrepIntersect: Intersection failed. curveId:'%s' brepId:'%s' tolerance:'%A'" (Pretty.str curveId) (Pretty.str brepId) tolerance
+        if not <| rc then  RhinoScriptingException.Raise "CurveBrepIntersect: Intersection failed. curveGeo:'%s' brepInput:'%s' tolerance:'%A'" (Pretty.str curveGeo) (Pretty.str brepInput) tolerance
 
         let curves = ResizeArray(0)
         let points = ResizeArray(0)
@@ -839,7 +1053,7 @@ module AutoOpenCurve =
                 curves.Add(curve)
                 //let rc = State.Doc.Objects.AddCurve(curve)
                 //curve.Dispose()
-                //if rc = Guid.Empty then RhinoScriptingException.Raise "CurveBrepIntersect: Unable to add curve to document. curveId:'%s' brepId:'%s' tolerance:'%A'" (Pretty.str curveId) brepId tolerance
+                //if rc = Guid.Empty then RhinoScriptingException.Raise "CurveBrepIntersect: Unable to add curve to document. curveGeo:'%s' brepInput:'%s' tolerance:'%A'" (Pretty.str curveGeo) brepInput tolerance
                 //curves.Add(rc)
         for point in outPoints do
             if point.IsValid then
@@ -863,17 +1077,25 @@ module AutoOpenCurve =
     ///      [2]    The 3-D point that is closest to the test Curve.</returns>
     static member CurveClosestObject(curveId:Guid, objectIds:Guid seq) : Guid * Point3d * Point3d =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
-        let geometry = ResizeArray()
-        for curveId in objectIds do
-            let rhobj = RhinoScriptSyntax.CoerceRhinoObject(curveId)
-            geometry.Add( rhobj.Geometry )
-        if Seq.isEmpty geometry then RhinoScriptingException.Raise "CurveClosestObject: objectIds must contain at least one item. curveId:'%s' objectIds:'%s'" (Pretty.str curveId) (Pretty.str objectIds)
+        let objects = objectIds |> Seq.map (fun id -> id, RhinoScriptSyntax.CoerceGeometry(id)) |> Seq.toArray
+        let geometry, objectPoint, curvePoint = RhinoScriptSyntax.CurveClosestObject(curve, objects |> Seq.map snd)
+        let objectId = objects |> Array.find (fun (_, candidate) -> Object.ReferenceEquals(candidate, geometry)) |> fst
+        objectId, objectPoint, curvePoint
+
+    /// <summary>Computes CurveClosestObject from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="objectInputs">(GeometryBase seq) The input objects.</param>
+    /// <returns>(GeometryBase * Point3d * Point3d) The resulting geometry; it is not added to a document.</returns>
+    static member CurveClosestObject(curveGeo:Curve, objectInputs:GeometryBase seq) : GeometryBase * Point3d * Point3d =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
+        let geometry = ResizeArray<GeometryBase>(objectInputs)
+        if geometry.Count = 0 then RhinoScriptingException.Raise "CurveClosestObject: Objects must contain at least one item"
         let curvePoint = ref Point3d.Unset
-        let geomPoint  = ref Point3d.Unset
+        let geomPoint = ref Point3d.Unset
         let whichGeom = ref 0
-        let success = curve.ClosestPoints(geometry, curvePoint, geomPoint, whichGeom)
-        if success then  objectIds|> Seq.item !whichGeom, !geomPoint, !curvePoint
-        else RhinoScriptingException.Raise "CurveClosestObject failed  curveId:'%s' objectIds:'%A'" (Pretty.str curveId) objectIds
+        if curve.ClosestPoints(geometry, curvePoint, geomPoint, whichGeom) then
+            geometry.[!whichGeom], !geomPoint, !curvePoint
+        else RhinoScriptingException.Raise "CurveClosestObject: Closest point calculation failed"
 
     /// <summary>Returns the 3D point locations on the Curve and finite line where they are closest to
     ///    each other. Note, this function provides similar functionality to that of
@@ -882,12 +1104,21 @@ module AutoOpenCurve =
     /// <param name="line">(Line) a Line Geometry</param>
     /// <returns>(Point3d * Point3d) first point on Curve, second point on Line.</returns>
     static member CurveLineClosestPoint(curveId:Guid, line:Line) : Point3d * Point3d =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
+        RhinoScriptSyntax.CurveLineClosestPoint(RhinoScriptSyntax.CoerceCurve(curveId), line)
+
+    /// <summary>Returns the 3D point locations on the Curve and finite line where they are closest to
+    ///    each other. Note, this function provides similar functionality to that of
+    ///    Rhino's ClosestPt command. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="line">(Line) a Line Geometry</param>
+    /// <returns>(Point3d * Point3d) first point on Curve, second point on Line.</returns>
+    static member CurveLineClosestPoint(curveGeo:Curve, line:Line) : Point3d * Point3d =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
         let curvePoint = ref Point3d.Unset
         let linePoint  = ref Point3d.Unset
         let success = curve.ClosestPoints(line.ToNurbsCurve(), curvePoint, linePoint)
         if success then  !linePoint, !curvePoint
-        else RhinoScriptingException.Raise "CurveLineClosestPoint failed  curveId:'%s' Line:'%A'" (Pretty.str curveId) line
+        else RhinoScriptingException.Raise "CurveLineClosestPoint failed  curveGeo:'%s' Line:'%A'" (Pretty.str curveGeo) line
 
 
     /// <summary>Returns parameter of the point on a Curve that is closest to a test point.</summary>
@@ -897,10 +1128,19 @@ module AutoOpenCurve =
     ///    Curve segment index if `curveId` identifies a Polycurve</param>
     /// <returns>(float) The parameter of the closest point on the Curve.</returns>
     static member CurveClosestParameter(curveId:Guid, point:Point3d, [<OPT;DEF(-1)>]segmentIndex:int) : float =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.CurveClosestParameter(RhinoScriptSyntax.CoerceCurve(curveId), point, segmentIndex)
+
+    /// <summary>Returns parameter of the point on a Curve that is closest to a test point. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="point">(Point3d) Sampling point</param>
+    /// <param name="segmentIndex">(int) Optional,
+    ///    Curve segment index if `curveId` identifies a Polycurve</param>
+    /// <returns>(float) The parameter of the closest point on the Curve.</returns>
+    static member CurveClosestParameter(curveGeo:Curve, point:Point3d, segmentIndex:int) : float =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let t = ref 0.
         let rc = curve.ClosestPoint(point, t)
-        if not <| rc then RhinoScriptingException.Raise "CurveClosestParameter failed. curveId:'%s' segmentIndex:'%d'" (Pretty.str curveId) segmentIndex
+        if not <| rc then RhinoScriptingException.Raise "CurveClosestParameter failed. curveGeo:'%s' segmentIndex:'%d'" (Pretty.str curveGeo) segmentIndex
         !t
 
     /// <summary>Returns parameter of the point on a Curve that is closest to a test point.</summary>
@@ -921,9 +1161,18 @@ module AutoOpenCurve =
     ///    Curve segment index if `curveId` identifies a Polycurve</param>
     /// <returns>(Point3d) The closest point on the Curve.</returns>
     static member CurveClosestPoint(curveId:Guid, point:Point3d, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.CurveClosestPoint(RhinoScriptSyntax.CoerceCurve(curveId), point, segmentIndex)
+
+    /// <summary>Returns the point on a Curve that is closest to a test point. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="point">(Point3d) Sampling point</param>
+    /// <param name="segmentIndex">(int) Optional,
+    ///    Curve segment index if `curveId` identifies a Polycurve</param>
+    /// <returns>(Point3d) The closest point on the Curve.</returns>
+    static member CurveClosestPoint(curveGeo:Curve, point:Point3d, segmentIndex:int) : Point3d =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let rc, t = curve.ClosestPoint(point)
-        if not <| rc then RhinoScriptingException.Raise "CurveClosestPoint failed. curveId:'%s' segmentIndex:'%d'" (Pretty.str curveId) segmentIndex
+        if not <| rc then RhinoScriptingException.Raise "CurveClosestPoint failed. curveGeo:'%s' segmentIndex:'%d'" (Pretty.str curveGeo) segmentIndex
         curve.PointAt(t)
 
     /// <summary>Returns the point on a Curve that is closest to a test point.</summary>
@@ -943,9 +1192,18 @@ module AutoOpenCurve =
     /// <param name="interval">(float) The distance between contour Curves</param>
     /// <returns>(Point3d array) A list of 3D points, one for each contour.</returns>
     static member CurveContourPoints(curveId:Guid, startPoint:Point3d, endPoint:Point3d, interval:float) : array<Point3d> =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
+        RhinoScriptSyntax.CurveContourPoints(RhinoScriptSyntax.CoerceCurve(curveId), startPoint, endPoint, interval)
+
+    /// <summary>Returns the 3D point locations calculated by contouring a Curve object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="startPoint">(Point3d) 3D starting point of a center line</param>
+    /// <param name="endPoint">(Point3d) 3D ending point of a center line</param>
+    /// <param name="interval">(float) The distance between contour Curves</param>
+    /// <returns>(Point3d array) A list of 3D points, one for each contour.</returns>
+    static member CurveContourPoints(curveGeo:Curve, startPoint:Point3d, endPoint:Point3d, interval:float) : array<Point3d> =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
         if startPoint.DistanceTo(endPoint)<RhinoMath.ZeroTolerance then
-            RhinoScriptingException.Raise "CurveContourPoints: Start && ende point are too close to define a line. curveId:'%s' startPoint:'%A' endPoint:'%A'" (Pretty.str curveId) startPoint endPoint
+            RhinoScriptingException.Raise "CurveContourPoints: Start && ende point are too close to define a line. curveGeo:'%s' startPoint:'%A' endPoint:'%A'" (Pretty.str curveGeo) startPoint endPoint
         curve.DivideAsContour( startPoint, endPoint, interval)
 
 
@@ -960,13 +1218,26 @@ module AutoOpenCurve =
     ///    [3] = radius of curvature
     ///    [4] = curvature vector.</returns>
     static member CurveCurvature(curveId:Guid, parameter:float) : Point3d * Vector3d * Point3d * float * Vector3d =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
+        RhinoScriptSyntax.CurveCurvature(RhinoScriptSyntax.CoerceCurve(curveId), parameter)
+
+    /// <summary>Returns the curvature of a Curve at a parameter. See the Rhino help for
+    ///    details on Curve curvature. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="parameter">(float) Parameter to evaluate</param>
+    /// <returns>(Point3d * Vector3d * Point3d * float * Vector3d) of curvature information
+    ///    [0] = point at specified parameter
+    ///    [1] = tangent vector
+    ///    [2] = center of radius of curvature
+    ///    [3] = radius of curvature
+    ///    [4] = curvature vector.</returns>
+    static member CurveCurvature(curveGeo:Curve, parameter:float) : Point3d * Vector3d * Point3d * float * Vector3d =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
         let point = curve.PointAt(parameter)
         let tangent = curve.TangentAt(parameter)
-        if tangent.IsTiny(1e-10) then  RhinoScriptingException.Raise "CurveCurvature: failed on tangent that is too small %A" curveId
+        if tangent.IsTiny(1e-10) then  RhinoScriptingException.Raise "CurveCurvature: failed on tangent that is too small %A" curveGeo
         let cv = curve.CurvatureAt(parameter)
         let k = cv.Length
-        if k<RhinoMath.SqrtEpsilon then  RhinoScriptingException.Raise "CurveCurvature: failed on tangent that is too small %A" curveId
+        if k<RhinoMath.SqrtEpsilon then  RhinoScriptingException.Raise "CurveCurvature: failed on tangent that is too small %A" curveGeo
         let rv = cv / (k*k)
         let circle = Circle(point, tangent, point + 2.0*rv)
         let center = point + rv
@@ -1011,8 +1282,46 @@ module AutoOpenCurve =
     ///        If the event type is Overlap (2), then the end value of the
     ///        second Curve parameter range.</returns>
     static member CurveCurveIntersection(curveA:Guid, [<OPT;DEF(Guid())>]curveB:Guid, [<OPT;DEF(0.0)>]tolerance:float) : (int*Point3d*Point3d*Point3d*Point3d*float*float*float*float) ResizeArray =
-        let curve1 = RhinoScriptSyntax.CoerceCurve curveA
-        let curve2 = if curveB= Guid.Empty then curve1 else RhinoScriptSyntax.CoerceCurve curveB
+        RhinoScriptSyntax.CurveCurveIntersection(RhinoScriptSyntax.CoerceCurve(curveA), (if curveB = Guid.Empty then null else RhinoScriptSyntax.CoerceCurve(curveB)), tolerance)
+
+    /// <summary>Calculates intersection of two Curve objects. Uses the supplied geometry directly.</summary>
+    /// <param name="curveA">(Curve) The input geometry.</param>
+    /// <param name="curveB">(Curve) Optional, default value: <c>null</c>. The second curve; null intersects the first curve with itself.</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
+    ///    Absolute tolerance in drawing units. If omitted,
+    ///    the document's current absolute tolerance is used</param>
+    /// <returns>( a ResizeArray of int*Point3d*Point3d*Point3d*Point3d*float*float*float*float)
+    ///    List of tuples: containing intersection information .
+    ///    The list will contain one or more of the following elements:
+    ///      Element Type     Description
+    ///      [n][0]  Number   The intersection event type, either Point (1) or Overlap (2).
+    ///      [n][1]  Point3d  If the event type is Point (1), then the intersection point
+    ///        on the first Curve. If the event type is Overlap (2), then
+    ///        intersection start point on the first Curve.
+    ///      [n][2]  Point3d  If the event type is Point (1), then the intersection point
+    ///        on the first Curve. If the event type is Overlap (2), then
+    ///        intersection end point on the first Curve.
+    ///      [n][3]  Point3d  If the event type is Point (1), then the intersection point
+    ///        on the second Curve. If the event type is Overlap (2), then
+    ///        intersection start point on the second Curve.
+    ///      [n][4]  Point3d  If the event type is Point (1), then the intersection point
+    ///        on the second Curve. If the event type is Overlap (2), then
+    ///        intersection end point on the second Curve.
+    ///      [n][5]  Number   If the event type is Point (1), then the first Curve parameter.
+    ///        If the event type is Overlap (2), then the start value of the
+    ///        first Curve parameter range.
+    ///      [n][6]  Number   If the event type is Point (1), then the first Curve parameter.
+    ///        If the event type is Overlap (2), then the end value of the
+    ///        first Curve parameter range.
+    ///      [n][7]  Number   If the event type is Point (1), then the second Curve parameter.
+    ///        If the event type is Overlap (2), then the start value of the
+    ///        second Curve parameter range.
+    ///      [n][8]  Number   If the event type is Point (1), then the second Curve parameter.
+    ///        If the event type is Overlap (2), then the end value of the
+    ///        second Curve parameter range.</returns>
+    static member CurveCurveIntersection(curveA:Curve, [<OPT;DEF(null:Curve)>]curveB:Curve, [<OPT;DEF(0.0)>]tolerance:float) : (int*Point3d*Point3d*Point3d*Point3d*float*float*float*float) ResizeArray =
+        let curve1 = RhinoScriptSyntax.DirectCurveInput(curveA, -1)
+        let curve2 = if isNull curveB then curve1 else RhinoScriptSyntax.DirectCurveInput(curveB, -1)
         let tolerance0 = Util.ifZero1 tolerance State.Doc.ModelAbsoluteTolerance
         let mutable rc = null
         if curveB<>curveA then
@@ -1037,7 +1346,14 @@ module AutoOpenCurve =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(int) The degree of the Curve.</returns>
     static member CurveDegree(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : int =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.CurveDegree(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the degree of a Curve object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(int) The degree of the Curve.</returns>
+    static member CurveDegree(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : int =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         curve.Degree
 
 
@@ -1052,8 +1368,21 @@ module AutoOpenCurve =
     ///    [4] = CurveB parameter at minimum overlap distance point
     ///    [5] = minimum distance between Curves.</returns>
     static member CurveDeviation(curveA:Guid, curveB:Guid) : float * float * float * float * float * float =
-        let curveA = RhinoScriptSyntax.CoerceCurve curveA
-        let curveB = RhinoScriptSyntax.CoerceCurve curveB
+        RhinoScriptSyntax.CurveDeviation(RhinoScriptSyntax.CoerceCurve(curveA), RhinoScriptSyntax.CoerceCurve(curveB))
+
+    /// <summary>Returns the minimum and maximum deviation between two Curve objects. Uses the supplied geometry directly.</summary>
+    /// <param name="curveA">(Curve) The input geometry.</param>
+    /// <param name="curveB">(Curve) The input geometry.</param>
+    /// <returns>(float * float * float * float * float * float) of deviation information
+    ///    [0] = CurveA parameter at maximum overlap distance point
+    ///    [1] = CurveB parameter at maximum overlap distance point
+    ///    [2] = maximum overlap distance
+    ///    [3] = CurveA parameter at minimum overlap distance point
+    ///    [4] = CurveB parameter at minimum overlap distance point
+    ///    [5] = minimum distance between Curves.</returns>
+    static member CurveDeviation(curveA:Curve, curveB:Curve) : float * float * float * float * float * float =
+        let curveA = RhinoScriptSyntax.DirectCurveInput(curveA, -1)
+        let curveB = RhinoScriptSyntax.DirectCurveInput(curveB, -1)
         let tol = State.Doc.ModelAbsoluteTolerance
         let ok, maxa, maxb, maxd, mina, minb, mind = Curve.GetDistancesBetweenCurves(curveA, curveB, tol)
         if not ok then  RhinoScriptingException.Raise "CurveDeviation failed for %A; %A" curveB curveA
@@ -1067,7 +1396,15 @@ module AutoOpenCurve =
     ///    The Curve segment if CurveId identifies a PolyCurve</param>
     /// <returns>(int) The dimension of the Curve .</returns>
     static member CurveDim(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : int =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.CurveDim(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the dimension of a Curve object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional,
+    ///    The Curve segment if CurveId identifies a PolyCurve</param>
+    /// <returns>(int) The dimension of the Curve .</returns>
+    static member CurveDim(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : int =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         curve.Dimension
 
 
@@ -1079,8 +1416,18 @@ module AutoOpenCurve =
     /// <param name="curveB">(Guid) Identifier of second Curve object</param>
     /// <returns>(bool) True if the Curve directions match, otherwise False.</returns>
     static member CurveDirectionsMatch(curveA:Guid, curveB:Guid) : bool =
-        let curve0 = RhinoScriptSyntax.CoerceCurve curveA
-        let curve1 = RhinoScriptSyntax.CoerceCurve curveB
+        RhinoScriptSyntax.CurveDirectionsMatch(RhinoScriptSyntax.CoerceCurve(curveA), RhinoScriptSyntax.CoerceCurve(curveB))
+
+    /// <summary>Tests if two Curve objects are generally in the same direction or if they
+    ///    would be more in the same direction if one of them were flipped. When testing
+    ///    Curve directions, both Curves must be either open or closed - you cannot test
+    ///    one open Curve and one closed Curve. Uses the supplied geometry directly.</summary>
+    /// <param name="curveA">(Curve) The input geometry.</param>
+    /// <param name="curveB">(Curve) The input geometry.</param>
+    /// <returns>(bool) True if the Curve directions match, otherwise False.</returns>
+    static member CurveDirectionsMatch(curveA:Curve, curveB:Curve) : bool =
+        let curve0 = RhinoScriptSyntax.DirectCurveInput(curveA, -1)
+        let curve1 = RhinoScriptSyntax.DirectCurveInput(curveB, -1)
         Curve.DoDirectionsMatch(curve0, curve1)
 
 
@@ -1097,7 +1444,22 @@ module AutoOpenCurve =
     ///    5        G2 - Continuous unit tangent and curvature</param>
     /// <returns>(Point3d ResizeArray) 3D points where the Curve is discontinuous.</returns>
     static member CurveDiscontinuity(curveId:Guid, style:int) : Point3d ResizeArray =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
+        RhinoScriptSyntax.CurveDiscontinuity(RhinoScriptSyntax.CoerceCurve(curveId), style)
+
+    /// <summary>Search for a derivative, tangent, or curvature discontinuity in
+    ///    a Curve object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="style">(int) The type of continuity to test for. The types of
+    ///    continuity are as follows:
+    ///    Value    Description
+    ///    1        C0 - Continuous function
+    ///    2        C1 - Continuous first derivative
+    ///    3        C2 - Continuous first and second derivative
+    ///    4        G1 - Continuous unit tangent
+    ///    5        G2 - Continuous unit tangent and curvature</param>
+    /// <returns>(Point3d ResizeArray) 3D points where the Curve is discontinuous.</returns>
+    static member CurveDiscontinuity(curveGeo:Curve, style:int) : Point3d ResizeArray =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
         let dom = curve.Domain
         let mutable t0 = dom.Min
         let t1 = dom.Max
@@ -1119,7 +1481,15 @@ module AutoOpenCurve =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(Interval) The domain of the Curve.</returns>
     static member CurveDomain(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Interval =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.CurveDomain(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the domain of a Curve object
+    ///    as an indexable object with two elements. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(Interval) The domain of the Curve.</returns>
+    static member CurveDomain(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : Interval =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         curve.Domain
 
 
@@ -1130,9 +1500,18 @@ module AutoOpenCurve =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index is `curveId` identifies a PolyCurve</param>
     /// <returns>(Collections.Point3dList) Curve edit points.</returns>
     static member CurveEditPoints(curveId:Guid,[<OPT;DEF(-1)>]segmentIndex:int) : Collections.Point3dList =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.CurveEditPoints(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the Edit-, or Greville-Points of a Curve object.
+    ///    For each Curve control point, there is a corresponding edit point.
+    /// see rs.CurveEditParameters for parameters, not points Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index is `curveId` identifies a PolyCurve</param>
+    /// <returns>(Collections.Point3dList) Curve edit points.</returns>
+    static member CurveEditPoints(curveGeo:Curve,[<OPT;DEF(-1)>]segmentIndex:int) : Collections.Point3dList =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let nc = curve.ToNurbsCurve()
-        if isNull nc then  RhinoScriptingException.Raise "CurveEditPoints failed for %A" curveId
+        if isNull nc then  RhinoScriptingException.Raise "CurveEditPoints failed for %A" curveGeo
         nc.GrevillePoints()
 
 
@@ -1142,9 +1521,17 @@ module AutoOpenCurve =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index is `curveId` identifies a PolyCurve</param>
     /// <returns>(Collections.Point3dList)  A list of Curve parameters</returns>
     static member CurveEditParameters(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : float[] =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.CurveEditParameters(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the Edit-, or Greville-Parameters of a Curve object.
+    ///    For each Curve control point, there is a corresponding edit point parameter. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index is `curveId` identifies a PolyCurve</param>
+    /// <returns>(Collections.Point3dList)  A list of Curve parameters</returns>
+    static member CurveEditParameters(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : float[] =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let nc = curve.ToNurbsCurve()
-        if isNull nc then  RhinoScriptingException.Raise "CurveEditParameters failed for %A" curveId
+        if isNull nc then  RhinoScriptingException.Raise "CurveEditParameters failed for %A" curveGeo
         nc.GrevilleParameters()
 
     /// <summary>Returns the end point of a Curve object.</summary>
@@ -1152,7 +1539,14 @@ module AutoOpenCurve =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(Point3d) The 3d endpoint of the Curve.</returns>
     static member CurveEndPoint(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.CurveEndPoint(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the end point of a Curve object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(Point3d) The 3d endpoint of the Curve.</returns>
+    static member CurveEndPoint(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         curve.PointAtEnd
 
     /// <summary>Returns the tangent at end point of a Curve object
@@ -1161,7 +1555,15 @@ module AutoOpenCurve =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(Vector3d) The tangent, same as Curve.TangentAtEnd property .</returns>
     static member CurveEndTangent(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Vector3d =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.CurveEndTangent(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the tangent at end point of a Curve object
+    /// pointing away from the Curve . Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(Vector3d) The tangent, same as Curve.TangentAtEnd property .</returns>
+    static member CurveEndTangent(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : Vector3d =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         curve.TangentAtEnd
 
     /// <summary>Returns the tangent at start point of a Curve object
@@ -1170,7 +1572,15 @@ module AutoOpenCurve =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(Vector3d) The tangent, same as Curve.TangentAtStart property .</returns>
     static member CurveStartTangent(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Vector3d =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.CurveStartTangent(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the tangent at start point of a Curve object
+    /// pointing in direction of  the Curve . Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(Vector3d) The tangent, same as Curve.TangentAtStart property .</returns>
+    static member CurveStartTangent(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : Vector3d =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         curve.TangentAtStart
 
     /// <summary>Find points at which to cut a pair of Curves so that a fillet of a
@@ -1197,13 +1607,39 @@ module AutoOpenCurve =
                                     radius:float,
                                     [<OPT;DEF(Point3d())>]basePointA:Point3d,
                                     [<OPT;DEF(Point3d())>]basePointB:Point3d) : Point3d * Point3d * Plane = //TODO make overload instead, this may leak  see draw vector and transform point!
+        RhinoScriptSyntax.CurveFilletPoints(RhinoScriptSyntax.CoerceCurve(curveA), RhinoScriptSyntax.CoerceCurve(curveB), radius, basePointA, basePointB)
+
+    /// <summary>Find points at which to cut a pair of Curves so that a fillet of a
+    ///    specified radius fits. A fillet point is a pair of points (point0, point1)
+    ///    such that there is a circle of radius tangent to Curve Curve0 at point0 and
+    ///    tangent to Curve Curve1 at point1. Of all possible fillet points, this
+    ///    function returns the one which is the closest to the base point basePointA,
+    ///    basePointB. Distance from the base point is measured by the sum of arc
+    ///    lengths along the two Curves. Uses the supplied geometry directly.</summary>
+    /// <param name="curveA">(Curve) The input geometry.</param>
+    /// <param name="curveB">(Curve) The input geometry.</param>
+    /// <param name="radius">(float) The fillet radius</param>
+    /// <param name="basePointA">(Point3d) Optional. The base point on the first Curve.
+    ///    If omitted, the starting point of the Curve is used</param>
+    /// <param name="basePointB">(Point3d) Optional. The base point on the second Curve. If omitted,
+    ///    the starting point of the Curve is used</param>
+    /// <returns>(Point3d * Point3d * Plane)
+    ///    . The list elements are as follows:
+    ///      [0]    A point on the first Curve at which to cut (point).
+    ///      [1]    A point on the second Curve at which to cut (point).
+    ///      [2]    The fillet Plane.</returns>
+    static member CurveFilletPoints(curveA:Curve,
+                                    curveB:Curve,
+                                    radius:float,
+                                    [<OPT;DEF(Point3d())>]basePointA:Point3d,
+                                    [<OPT;DEF(Point3d())>]basePointB:Point3d) : Point3d * Point3d * Plane = //TODO make overload instead, this may leak  see draw vector and transform point!
         //  [<OPT;DEF(true)>]returnPoints:bool)
         //<param name="returnPoints">(bool) Optional, default value: <c>true</c>
         //If True (Default), then fillet points are
         //  returned. Otherwise, a fillet curve is created and                       // TODO not Implemented
         //  it's identifier is returned</param>
-        let curve0 = RhinoScriptSyntax.CoerceCurve curveA
-        let curve1 = RhinoScriptSyntax.CoerceCurve curveB
+        let curve0 = RhinoScriptSyntax.DirectCurveInput(curveA, -1)
+        let curve1 = RhinoScriptSyntax.DirectCurveInput(curveB, -1)
         let basePointA = if basePointA = Point3d.Origin then Point3d.Unset else basePointA
         let basePointB = if basePointB = Point3d.Origin then Point3d.Unset else basePointB
 
@@ -1241,8 +1677,17 @@ module AutoOpenCurve =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(Plane) The Plane at the specified parameter.</returns>
     static member CurveFrame(curveId:Guid, parameter:float, [<OPT;DEF(-1)>]segmentIndex:int) : Plane =
+        RhinoScriptSyntax.CurveFrame(RhinoScriptSyntax.CoerceCurve(curveId), parameter, segmentIndex)
+
+    /// <summary>Returns the Plane at a parameter of a Curve. The Plane is based on the
+    ///    tangent and curvature vectors at a parameter. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="parameter">(float) Parameter to evaluate</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(Plane) The Plane at the specified parameter.</returns>
+    static member CurveFrame(curveGeo:Curve, parameter:float, [<OPT;DEF(-1)>]segmentIndex:int) : Plane =
         let mutable para = parameter
-        let  curve = RhinoScriptSyntax.CoerceCurve curveId
+        let  curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
         let  domain = curve.Domain
         if not <| domain.IncludesParameter(parameter) then
             let  tol = State.Doc.ModelAbsoluteTolerance
@@ -1251,10 +1696,10 @@ module AutoOpenCurve =
             elif parameter<domain.Min && (domain.Min-para)<=tol then
                 para <- domain.Min
             else
-                RhinoScriptingException.Raise "CurveFrame failed. curveId:'%s' parameter:'%A' segmentIndex:'%A'" (Pretty.str curveId) parameter segmentIndex
+                RhinoScriptingException.Raise "CurveFrame failed. curveGeo:'%s' parameter:'%A' segmentIndex:'%A'" (Pretty.str curveGeo) parameter segmentIndex
         let  rc, frame = curve.FrameAt(para)
         if rc && frame.IsValid then  frame
-        else RhinoScriptingException.Raise "CurveFrame failed. curveId:'%s' parameter:'%A' segmentIndex:'%A'" (Pretty.str curveId) parameter segmentIndex
+        else RhinoScriptingException.Raise "CurveFrame failed. curveGeo:'%s' parameter:'%A' segmentIndex:'%A'" (Pretty.str curveGeo) parameter segmentIndex
 
 
     /// <summary>Returns the knot count of a Curve object.</summary>
@@ -1262,9 +1707,16 @@ module AutoOpenCurve =
     /// <param name="segmentIndex">(int) Optional, The Curve segment if `curveId` identifies a PolyCurve</param>
     /// <returns>(int) The number of knots.</returns>
     static member CurveKnotCount(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : int =
-        let  curve = RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex)
+        RhinoScriptSyntax.CurveKnotCount(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the knot count of a Curve object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment if `curveId` identifies a PolyCurve</param>
+    /// <returns>(int) The number of knots.</returns>
+    static member CurveKnotCount(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : int =
+        let  curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let  nc = curve.ToNurbsCurve()
-        if isNull nc then  RhinoScriptingException.Raise "CurveKnotCount failed. curveId:'%s' segmentIndex:'%A'" (Pretty.str curveId) segmentIndex
+        if isNull nc then  RhinoScriptingException.Raise "CurveKnotCount failed. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
         nc.Knots.Count
 
 
@@ -1273,9 +1725,16 @@ module AutoOpenCurve =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(float ResizeArray) knot values.</returns>
     static member CurveKnots(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : ResizeArray<float> =
-        let  curve = RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex)
+        RhinoScriptSyntax.CurveKnots(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the knots, or knot vector, of a Curve object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(float ResizeArray) knot values.</returns>
+    static member CurveKnots(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : ResizeArray<float> =
+        let  curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let  nc = curve.ToNurbsCurve()
-        if isNull nc then  RhinoScriptingException.Raise "CurveKnots failed. curveId:'%s' segmentIndex:'%A'" (Pretty.str curveId) segmentIndex
+        if isNull nc then  RhinoScriptingException.Raise "CurveKnots failed. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
         let knots = ResizeArray(nc.Knots.Count)
         for i = 0 to nc.Knots.Count - 1 do
             knots.Add(nc.Knots.[i])
@@ -1290,7 +1749,18 @@ module AutoOpenCurve =
     ///    entire Curve is returned</param>
     /// <returns>(float) The length of the Curve.</returns>
     static member CurveLength(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int, [<OPT;DEF(Interval())>]subDomain:Interval) : float =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.CurveLength(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex, subDomain)
+
+    /// <summary>Returns the length of a Curve object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <param name="subDomain">(Interval) Optional, List of two numbers identifying the sub-domain of the
+    ///    Curve on which the calculation will be performed. The two parameters
+    ///    (sub-domain) must be non-decreasing. If omitted, the length of the
+    ///    entire Curve is returned</param>
+    /// <returns>(float) The length of the Curve.</returns>
+    static member CurveLength(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int, [<OPT;DEF(Interval())>]subDomain:Interval) : float =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         if subDomain.T0 = 0.0 && subDomain.T1 = 0.0 then curve.GetLength()
         else curve.GetLength(subDomain)
 
@@ -1302,16 +1772,25 @@ module AutoOpenCurve =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(Vector3d) The direction of the Curve.</returns>
     static member CurveDirection(curveId:Guid, [<OPT;DEF(false)>]allowNonLinear:bool,[<OPT;DEF(-1)>]segmentIndex:int) : Vector3d =
-        let  curve = RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex)
+        RhinoScriptSyntax.CurveDirection(RhinoScriptSyntax.CoerceCurve(curveId), allowNonLinear, segmentIndex)
+
+    /// <summary>Returns the average unitized direction of a Curve object between start and end point,
+    ///    Optionally allows non linear Curves too. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="allowNonLinear">(bool) Optional, allow non linear Curves, Default Value <c>False</c> </param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(Vector3d) The direction of the Curve.</returns>
+    static member CurveDirection(curveGeo:Curve, [<OPT;DEF(false)>]allowNonLinear:bool,[<OPT;DEF(-1)>]segmentIndex:int) : Vector3d =
+        let  curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         if allowNonLinear || curve.IsLinear(RhinoMath.ZeroTolerance) then
-            if curve.IsClosed || curve.IsClosable(State.Doc.ModelAbsoluteTolerance) then RhinoScriptingException.Raise "CurveDirection failed on closed or closable curve. curveId:'%s' allowNonLinear '%A' segmentIndex:'%A'" (Pretty.str curveId) allowNonLinear segmentIndex
+            if curve.IsClosed || curve.IsClosable(State.Doc.ModelAbsoluteTolerance) then RhinoScriptingException.Raise "CurveDirection failed on closed or closable curve. curveGeo:'%s' allowNonLinear '%A' segmentIndex:'%A'" (Pretty.str curveGeo) allowNonLinear segmentIndex
             let v = curve.PointAtEnd - curve.PointAtStart
             if v.Unitize() then v
             else
-                RhinoScriptingException.Raise "CurveDirection failed. start and end are the same point. curveId:'%s' allowNonLinear '%A' segmentIndex:'%A'" (Pretty.str curveId) allowNonLinear segmentIndex
+                RhinoScriptingException.Raise "CurveDirection failed. start and end are the same point. curveGeo:'%s' allowNonLinear '%A' segmentIndex:'%A'" (Pretty.str curveGeo) allowNonLinear segmentIndex
 
         else
-            RhinoScriptingException.Raise "CurveDirection failed. curveId:'%s' allowNonLinear '%A' segmentIndex:'%A'" (Pretty.str curveId) allowNonLinear segmentIndex
+            RhinoScriptingException.Raise "CurveDirection failed. curveGeo:'%s' allowNonLinear '%A' segmentIndex:'%A'" (Pretty.str curveGeo) allowNonLinear segmentIndex
 
 
     /// <summary>Returns the mid point of a Curve object.</summary>
@@ -1319,10 +1798,17 @@ module AutoOpenCurve =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(Point3d) The 3D midpoint of the Curve.</returns>
     static member CurveMidPoint(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
-        let  curve = RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex)
+        RhinoScriptSyntax.CurveMidPoint(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the mid point of a Curve object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(Point3d) The 3D midpoint of the Curve.</returns>
+    static member CurveMidPoint(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
+        let  curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let  rc, t = curve.NormalizedLengthParameter(0.5)
         if rc then  curve.PointAt(t)
-        else RhinoScriptingException.Raise "CurveMidPoint failed. curveId:'%s' segmentIndex:'%A'" (Pretty.str curveId) segmentIndex
+        else RhinoScriptingException.Raise "CurveMidPoint failed. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
 
 
     /// <summary>Returns the normal direction of the Plane in which a planar Curve object lies.</summary>
@@ -1330,12 +1816,19 @@ module AutoOpenCurve =
     /// <param name="segmentIndex">(int) Optional, The Curve segment if CurveId identifies a PolyCurve</param>
     /// <returns>(Vector3d) The 3D normal vector.</returns>
     static member CurveNormal(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Vector3d =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.CurveNormal(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the normal direction of the Plane in which a planar Curve object lies. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment if CurveId identifies a PolyCurve</param>
+    /// <returns>(Vector3d) The 3D normal vector.</returns>
+    static member CurveNormal(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : Vector3d =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let tol = State.Doc.ModelAbsoluteTolerance
         let plane = ref Plane.WorldXY
         let rc = curve.TryGetPlane(plane, tol)
         if rc then  (!plane).Normal
-        else RhinoScriptingException.Raise "CurveNormal failed. curveId:'%s' segmentIndex:'%A'" (Pretty.str curveId) segmentIndex
+        else RhinoScriptingException.Raise "CurveNormal failed. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
 
 
     /// <summary>Converts a Curve parameter to a normalized Curve parameter;
@@ -1344,7 +1837,15 @@ module AutoOpenCurve =
     /// <param name="parameter">(float) The Curve parameter to convert</param>
     /// <returns>(float) normalized Curve parameter.</returns>
     static member CurveNormalizedParameter(curveId:Guid, parameter:float) : float =
-        let  curve = RhinoScriptSyntax.CoerceCurve curveId
+        RhinoScriptSyntax.CurveNormalizedParameter(RhinoScriptSyntax.CoerceCurve(curveId), parameter)
+
+    /// <summary>Converts a Curve parameter to a normalized Curve parameter;
+    ///    one that ranges between 0-1. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="parameter">(float) The Curve parameter to convert</param>
+    /// <returns>(float) normalized Curve parameter.</returns>
+    static member CurveNormalizedParameter(curveGeo:Curve, parameter:float) : float =
+        let  curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
         curve.Domain.NormalizedParameterAt(parameter)
 
 
@@ -1354,7 +1855,15 @@ module AutoOpenCurve =
     /// <param name="parameter">(float) The normalized Curve parameter to convert</param>
     /// <returns>(float) Curve parameter.</returns>
     static member CurveParameter(curveId:Guid, parameter:float) : float =
-        let curve = RhinoScriptSyntax.CoerceCurve curveId
+        RhinoScriptSyntax.CurveParameter(RhinoScriptSyntax.CoerceCurve(curveId), parameter)
+
+    /// <summary>Converts a normalized Curve parameter to a Curve parameter;
+    ///    one within the Curve's domain. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="parameter">(float) The normalized Curve parameter to convert</param>
+    /// <returns>(float) Curve parameter.</returns>
+    static member CurveParameter(curveGeo:Curve, parameter:float) : float =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
         curve.Domain.ParameterAt(parameter)
 
 
@@ -1364,9 +1873,17 @@ module AutoOpenCurve =
     /// <param name="parameter">(float) Parameter to evaluate</param>
     /// <returns>(Plane) Plane.</returns>
     static member CurvePerpFrame(curveId:Guid, parameter:float) : Plane =
-        let  curve = RhinoScriptSyntax.CoerceCurve curveId
+        RhinoScriptSyntax.CurvePerpFrame(RhinoScriptSyntax.CoerceCurve(curveId), parameter)
+
+    /// <summary>Returns the perpendicular Plane at a parameter of a Curve. The result
+    ///    is relatively parallel (zero-twisting) Plane. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="parameter">(float) Parameter to evaluate</param>
+    /// <returns>(Plane) Plane.</returns>
+    static member CurvePerpFrame(curveGeo:Curve, parameter:float) : Plane =
+        let  curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
         let  rc, plane = curve.PerpendicularFrameAt(parameter)
-        if rc then  plane else RhinoScriptingException.Raise "CurvePerpFrame failed. curveId:'%s' parameter:'%f'"  (Pretty.str curveId) parameter
+        if rc then  plane else RhinoScriptingException.Raise "CurvePerpFrame failed. curveGeo:'%s' parameter:'%f'"  (Pretty.str curveGeo) parameter
 
 
     /// <summary>Returns the Plane in which a planar Curve lies. Note, this function works
@@ -1375,12 +1892,20 @@ module AutoOpenCurve =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(Plane) The Plane in which the Curve lies.</returns>
     static member CurvePlane(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Plane =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.CurvePlane(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the Plane in which a planar Curve lies. Note, this function works
+    ///    only on planar Curves. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(Plane) The Plane in which the Curve lies.</returns>
+    static member CurvePlane(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : Plane =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let tol = State.Doc.ModelAbsoluteTolerance
         let plane = ref Plane.WorldXY
         let rc = curve.TryGetPlane(plane, tol)
         if rc then  !plane
-        else RhinoScriptingException.Raise "CurvePlane failed. curveId:'%s' segmentIndex:'%A'" (Pretty.str curveId) segmentIndex
+        else RhinoScriptingException.Raise "CurvePlane failed. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
 
 
     /// <summary>Returns the control points count of a Curve object.</summary>
@@ -1388,10 +1913,17 @@ module AutoOpenCurve =
     /// <param name="segmentIndex">(int) Optional, The Curve segment if `curveId` identifies a PolyCurve</param>
     /// <returns>(int) Number of control points.</returns>
     static member CurvePointCount(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : int =
-        let curve = RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex)
+        RhinoScriptSyntax.CurvePointCount(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the control points count of a Curve object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment if `curveId` identifies a PolyCurve</param>
+    /// <returns>(int) Number of control points.</returns>
+    static member CurvePointCount(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : int =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let mutable nc = curve.ToNurbsCurve()
         if notNull nc then  nc.Points.Count
-        else RhinoScriptingException.Raise "CurvePointCount failed. curveId:'%s' segmentIndex:'%A'" (Pretty.str curveId) segmentIndex
+        else RhinoScriptingException.Raise "CurvePointCount failed. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
 
     /// <summary>Returns the control points, or control vertices, of a Curve object.
     ///    If the Curve is a rational NURBS Curve, the euclidean control vertices
@@ -1422,7 +1954,16 @@ module AutoOpenCurve =
     /// <param name="segmentIndex">(int) Optional, The Curve segment if `curveId` identifies a PolyCurve</param>
     /// <returns>(Point3d ResizeArray) The control points, or control vertices, of a Curve object.</returns>
     static member CurvePoints(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d ResizeArray =
-        RhinoScriptSyntax.CurvePoints(RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex))
+        RhinoScriptSyntax.CurvePoints(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the control points, or control vertices, of a Curve object.
+    ///    If the Curve is a rational NURBS Curve, the euclidean control vertices
+    ///    are returned. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) The Curve segment if `curveId` identifies a PolyCurve</param>
+    /// <returns>(Point3d ResizeArray) The control points, or control vertices, of a Curve object.</returns>
+    static member CurvePoints(curveGeo:Curve, segmentIndex:int) : Point3d ResizeArray =
+        RhinoScriptSyntax.CurvePoints(RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex))
 
     /// <summary>Returns the radius of curvature at a point on a Curve.</summary>
     /// <param name="curveId">(Guid) Identifier of the Curve object</param>
@@ -1430,13 +1971,21 @@ module AutoOpenCurve =
     /// <param name="segmentIndex">(int) Optional, The Curve segment if CurveId identifies a PolyCurve</param>
     /// <returns>(float) The radius of curvature at the point on the Curve.</returns>
     static member CurveRadius(curveId:Guid, testPoint:Point3d, [<OPT;DEF(-1)>]segmentIndex:int) : float =
-        let curve = RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex)
+        RhinoScriptSyntax.CurveRadius(RhinoScriptSyntax.CoerceCurve(curveId), testPoint, segmentIndex)
+
+    /// <summary>Returns the radius of curvature at a point on a Curve. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="testPoint">(Point3d) Sampling point</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment if CurveId identifies a PolyCurve</param>
+    /// <returns>(float) The radius of curvature at the point on the Curve.</returns>
+    static member CurveRadius(curveGeo:Curve, testPoint:Point3d, [<OPT;DEF(-1)>]segmentIndex:int) : float =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let mutable rc, t = curve.ClosestPoint(testPoint)//, 0.0)
-        if not <| rc then  RhinoScriptingException.Raise "CurveRadius failed. curveId:'%s' testPoint:'%A' segmentIndex:'%A'" (Pretty.str curveId) testPoint segmentIndex
+        if not <| rc then  RhinoScriptingException.Raise "CurveRadius failed. curveGeo:'%s' testPoint:'%A' segmentIndex:'%A'" (Pretty.str curveGeo) testPoint segmentIndex
         let mutable v = curve.CurvatureAt( t )
         let mutable k = v.Length
         if k>RhinoMath.ZeroTolerance then  1.0/k
-        else RhinoScriptingException.Raise "CurveRadius failed. curveId:'%s' testPoint:'%A' segmentIndex:'%A'" (Pretty.str curveId) testPoint segmentIndex
+        else RhinoScriptingException.Raise "CurveRadius failed. curveGeo:'%s' testPoint:'%A' segmentIndex:'%A'" (Pretty.str curveGeo) testPoint segmentIndex
 
 
     /// <summary>Adjusts the seam, or start/end, point of a closed Curve.</summary>
@@ -1465,7 +2014,14 @@ module AutoOpenCurve =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(Point3d) The 3D starting point of the Curve.</returns>
     static member CurveStartPoint(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.CurveStartPoint(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns the start point of a Curve object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(Point3d) The 3D starting point of the Curve.</returns>
+    static member CurveStartPoint(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         curve.PointAtStart
 
     /// <summary>Sets the start point of a Curve object.</summary>
@@ -1526,12 +2082,59 @@ module AutoOpenCurve =
     ///        If the event type is Overlap(2), then the V Surface parameter
     ///        for Curve at (n, 6).</returns>
     static member CurveSurfaceIntersection(curveId:Guid, surfaceId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(0.0)>]angleTolerance:float) : (int*Point3d*Point3d*Point3d*Point3d*float*float*float*float*float*float) ResizeArray =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
-        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        RhinoScriptSyntax.CurveSurfaceIntersection(RhinoScriptSyntax.CoerceCurve(curveId), RhinoScriptSyntax.CoerceSurface(surfaceId), tolerance, angleTolerance)
+
+    /// <summary>Calculates intersection of a Curve object with a Surface object.
+    ///    Note, this function works on the untrimmed portion of the Surface. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="surfaceGeo">(Surface) The input geometry.</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
+    ///    The absolute tolerance in drawing units.</param>
+    /// <param name="angleTolerance">(float) Optional, default value: <c>State.Doc.ModelAngleToleranceRadians</c>
+    ///    Angle tolerance in degrees. The angle
+    ///    tolerance is used to determine when the Curve is tangent to the
+    ///    Surface.</param>
+    /// <returns>(ResizeArray of int*Point3d*Point3d*Point3d*Point3d*float*float*float*float) of intersection information .
+    ///    The list will contain one or more of the following elements:
+    ///      Element Type     Description
+    ///      [n][0]  Number   The intersection event type, either Point(1) or Overlap(2).
+    ///      [n][1]  Point3d  If the event type is Point(1), then the intersection point
+    ///        on the first Curve. If the event type is Overlap(2), then
+    ///        intersection start point on the first Curve.
+    ///      [n][2]  Point3d  If the event type is Point(1), then the intersection point
+    ///        on the first Curve. If the event type is Overlap(2), then
+    ///        intersection end point on the first Curve.
+    ///      [n][3]  Point3d  If the event type is Point(1), then the intersection point
+    ///        on the second Curve. If the event type is Overlap(2), then
+    ///        intersection start point on the Surface.
+    ///      [n][4]  Point3d  If the event type is Point(1), then the intersection point
+    ///        on the second Curve. If the event type is Overlap(2), then
+    ///        intersection end point on the Surface.
+    ///      [n][5]  Number   If the event type is Point(1), then the first Curve parameter.
+    ///        If the event type is Overlap(2), then the start value of the
+    ///        first Curve parameter range.
+    ///      [n][6]  Number   If the event type is Point(1), then the first Curve parameter.
+    ///        If the event type is Overlap(2), then the end value of the
+    ///        Curve parameter range.
+    ///      [n][7]  Number   If the event type is Point(1), then the U Surface parameter.
+    ///        If the event type is Overlap(2), then the U Surface parameter
+    ///        for Curve at (n, 5).
+    ///      [n][8]  Number   If the event type is Point(1), then the V Surface parameter.
+    ///        If the event type is Overlap(2), then the V Surface parameter
+    ///        for Curve at (n, 5).
+    ///      [n][9]  Number   If the event type is Point(1), then the U Surface parameter.
+    ///        If the event type is Overlap(2), then the U Surface parameter
+    ///        for Curve at (n, 6).
+    ///      [n][10] Number   If the event type is Point(1), then the V Surface parameter.
+    ///        If the event type is Overlap(2), then the V Surface parameter
+    ///        for Curve at (n, 6).</returns>
+    static member CurveSurfaceIntersection(curveGeo:Curve, surfaceGeo:Surface, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(0.0)>]angleTolerance:float) : (int*Point3d*Point3d*Point3d*Point3d*float*float*float*float*float*float) ResizeArray =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
+        let surface = (surfaceGeo)
         let tolerance0 = Util.ifZero1 tolerance State.Doc.ModelAbsoluteTolerance
         let angleTolerance0 = Util.ifZero1 (toRadians(angleTolerance)) State.Doc.ModelAngleToleranceRadians
         let  rc = Intersect.Intersection.CurveSurface(curve, surface, tolerance0, angleTolerance0)
-        if isNull rc then RhinoScriptingException.Raise "CurveSurfaceIntersection failed. (surfaceId:%A) (curveId:%A) (angleTolerance:%f) (tolerance:%f) " surfaceId curveId angleTolerance tolerance
+        if isNull rc then RhinoScriptingException.Raise "CurveSurfaceIntersection failed. (surfaceGeo:%A) (curveGeo:%A) (angleTolerance:%f) (tolerance:%f) " surfaceGeo curveGeo angleTolerance tolerance
         let events = ResizeArray()
         for i = 0 to rc.Count - 1 do
             let eventType = if rc.[i].IsOverlap then 2 else 1
@@ -1548,11 +2151,19 @@ module AutoOpenCurve =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(Vector3d) A 3D vector.</returns>
     static member CurveTangent(curveId:Guid, parameter:float, [<OPT;DEF(-1)>]segmentIndex:int) : Vector3d =
-        let curve = RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex)
+        RhinoScriptSyntax.CurveTangent(RhinoScriptSyntax.CoerceCurve(curveId), parameter, segmentIndex)
+
+    /// <summary>Returns a 3D vector that is the tangent to a Curve at a parameter. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="parameter">(float) Parameter to evaluate</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(Vector3d) A 3D vector.</returns>
+    static member CurveTangent(curveGeo:Curve, parameter:float, [<OPT;DEF(-1)>]segmentIndex:int) : Vector3d =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         if curve.Domain.IncludesParameter(parameter) then
             curve.TangentAt(parameter)
         else
-            RhinoScriptingException.Raise "CurveTangent failed. curveId:'%s' parameter:'%A' segmentIndex:'%A'" (Pretty.str curveId) parameter segmentIndex
+            RhinoScriptingException.Raise "CurveTangent failed. curveGeo:'%s' parameter:'%A' segmentIndex:'%A'" (Pretty.str curveGeo) parameter segmentIndex
 
 
     /// <summary>Returns list of weights that are assigned to the control points of a Curve.</summary>
@@ -1560,11 +2171,18 @@ module AutoOpenCurve =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(float ResizeArray) The weight values of the Curve.</returns>
     static member CurveWeights(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) :  float ResizeArray =
+        RhinoScriptSyntax.CurveWeights(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    /// <summary>Returns list of weights that are assigned to the control points of a Curve. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(float ResizeArray) The weight values of the Curve.</returns>
+    static member CurveWeights(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) :  float ResizeArray =
         let nc =
-            match RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex) with
+            match RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex) with
             | :? NurbsCurve as nc -> nc
             | c -> c.ToNurbsCurve()
-        if isNull nc then  RhinoScriptingException.Raise "CurveWeights failed. curveId:'%s' segmentIndex:'%A'" (Pretty.str curveId) segmentIndex
+        if isNull nc then  RhinoScriptingException.Raise "CurveWeights failed. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
         let weights = ResizeArray(nc.Points.Count)
         for i = 0 to nc.Points.Count-1 do weights.Add(nc.Points.[i].Weight)
         weights
@@ -1584,11 +2202,7 @@ module AutoOpenCurve =
     /// <param name="segments">(int) The number of segments</param>
     /// <returns>(Point3d array) Array containing points at divisions.</returns>
     static member DivideCurveIntoPoints(curveId:Guid, segments:int) : Point3d array =
-        let  curve = RhinoScriptSyntax.CoerceCurve curveId
-        let pts = ref (Array.zeroCreate (segments + 1))
-        let rc = curve.DivideByCount(segments, includeEnds=true, points=pts)
-        if isNull rc then  RhinoScriptingException.Raise "DivideCurveIntoPoints failed. curveId:'%s' segments:'%A'" (Pretty.str curveId) segments
-        !pts
+        RhinoScriptSyntax.DivideCurveIntoPoints(RhinoScriptSyntax.CoerceCurve(curveId), segments)
 
     /// <summary>Divides a Curve Geometry into a specified number of segments.</summary>
     /// <param name="curve">(Geometry.Curve) Curve geometry</param>
@@ -1604,11 +2218,7 @@ module AutoOpenCurve =
     /// <param name="segments">(int) The number of segments</param>
     /// <returns>( float array ) array containing 3D division parameters.</returns>
     static member DivideCurve(curveId:Guid, segments:int) :  float array =
-        let  curve = RhinoScriptSyntax.CoerceCurve curveId
-        let rc = curve.DivideByCount(segments, includeEnds=true)
-        if isNull rc then  RhinoScriptingException.Raise "DivideCurve failed. curveId:'%s' segments:'%A'" (Pretty.str curveId) segments
-        rc
-
+        RhinoScriptSyntax.DivideCurve(RhinoScriptSyntax.CoerceCurve(curveId), segments)
 
     /// <summary>Divides a Curve Geometry such that the linear distance between the points is equal.</summary>
     /// <param name="curve">(Geometry.Curve) Curve geometry</param>
@@ -1630,16 +2240,7 @@ module AutoOpenCurve =
     /// <param name="distance">(float) Linear distance between division points</param>
     /// <returns>(Point3d array) array containing 3D division points.</returns>
     static member DivideCurveEquidistant(curveId:Guid, distance:float) : array<Point3d> =
-        let  curve = RhinoScriptSyntax.CoerceCurve curveId
-        let  points = curve.DivideEquidistant(distance)
-        if isNull points then
-            let len = curve.GetLength()
-            if len < distance then
-                RhinoScriptingException.Raise "DivideCurveEquidistant failed on too short curve. curveId:'%s' distance:%f, curveLength=%f" (Pretty.str curveId) distance len
-            else
-                RhinoScriptingException.Raise "DivideCurveEquidistant failed. curveId:'%s' distance:%f, curveLength=%f" (Pretty.str curveId) distance len
-        points
-
+        RhinoScriptSyntax.DivideCurveEquidistant(RhinoScriptSyntax.CoerceCurve(curveId), distance)
 
     /// <summary>Divides a Curve Geometry into segments of a specified length.
     /// If length is more than Curve length it fails.</summary>
@@ -1664,17 +2265,7 @@ module AutoOpenCurve =
     /// <param name="length">(float) The length of each segment</param>
     /// <returns>(Point3d ResizeArray) a list containing division points.</returns>
     static member DivideCurveLengthIntoPoints(curveId:Guid, length:float) : Point3d ResizeArray =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
-        let rc = curve.DivideByLength(length, includeEnds=true)
-        if isNull rc then
-            let len = curve.GetLength()
-            if len < length then
-                RhinoScriptingException.Raise "DivideCurveLengthIntoPoints failed on too short curve. curveId:'%s' dived-length:%f, curveLength=%f" (Pretty.str curveId) length len
-            else
-                RhinoScriptingException.Raise "DivideCurveLengthIntoPoints failed. curveId:'%s' dived-length:%f, curveLength=%f" (Pretty.str curveId) length len
-        let pts = ResizeArray()
-        for r in rc do pts.Add(curve.PointAt(r))
-        pts
+        RhinoScriptSyntax.DivideCurveLengthIntoPoints(RhinoScriptSyntax.CoerceCurve(curveId), length)
 
     /// <summary>Divides a Curve Geometry into segments of a specified length.
     /// If length is more than Curve length it fails.</summary>
@@ -1697,24 +2288,21 @@ module AutoOpenCurve =
     /// <param name="length">(float) The length of each segment</param>
     /// <returns>( float array) a list containing 3D division parameters.</returns>
     static member DivideCurveLength(curveId:Guid, length:float) :  float [] =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
-        let rc = curve.DivideByLength(length, includeEnds=true)
-        if isNull rc then
-            let len = curve.GetLength()
-            if len < length then
-                RhinoScriptingException.Raise "DivideCurveLength failed on too short curve. curveId:'%s' dived-length:%f, curveLength=%f" (Pretty.str curveId) length len
-            else
-                RhinoScriptingException.Raise "DivideCurveLength failed. curveId:'%s' dived-length:%f, curveLength=%f" (Pretty.str curveId) length len
-        rc
-
+        RhinoScriptSyntax.DivideCurveLength(RhinoScriptSyntax.CoerceCurve(curveId), length)
 
     /// <summary>Returns the center point of an elliptical-shaped Curve object.</summary>
     /// <param name="curveId">(Guid) Identifier of the Curve object</param>
     /// <returns>(Point3d) The 3D center point of the ellipse.</returns>
     static member EllipseCenterPoint(curveId:Guid) : Point3d =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
+        RhinoScriptSyntax.EllipseCenterPoint(RhinoScriptSyntax.CoerceCurve(curveId))
+
+    /// <summary>Returns the center point of an elliptical-shaped Curve object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <returns>(Point3d) The 3D center point of the ellipse.</returns>
+    static member EllipseCenterPoint(curveGeo:Curve) : Point3d =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
         let rc, ellipse = curve.TryGetEllipse()
-        if not <| rc then  RhinoScriptingException.Raise "EllipseCenterPoint: Curve is not an ellipse. curveId:'%s'" (Pretty.str curveId)
+        if not <| rc then  RhinoScriptingException.Raise "EllipseCenterPoint: Curve is not an ellipse. curveGeo:'%s'" (Pretty.str curveGeo)
         ellipse.Plane.Origin
 
 
@@ -1722,9 +2310,15 @@ module AutoOpenCurve =
     /// <param name="curveId">(Guid) Identifier of the Curve object</param>
     /// <returns>(Point3d * Point3d * Point3d * Point3d) Four points identifying the quadrants of the ellipse.</returns>
     static member EllipseQuadPoints(curveId:Guid) : Point3d * Point3d * Point3d * Point3d =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
+        RhinoScriptSyntax.EllipseQuadPoints(RhinoScriptSyntax.CoerceCurve(curveId))
+
+    /// <summary>Returns the quadrant points of an elliptical-shaped Curve object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <returns>(Point3d * Point3d * Point3d * Point3d) Four points identifying the quadrants of the ellipse.</returns>
+    static member EllipseQuadPoints(curveGeo:Curve) : Point3d * Point3d * Point3d * Point3d =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
         let rc, ellipse = curve.TryGetEllipse()
-        if not <| rc then  RhinoScriptingException.Raise "EllipseQuadPoints: Curve is not an ellipse. curveId:'%s'" (Pretty.str curveId)
+        if not <| rc then  RhinoScriptingException.Raise "EllipseQuadPoints: Curve is not an ellipse. curveGeo:'%s'" (Pretty.str curveGeo)
         let origin = ellipse.Plane.Origin;
         let xAxis = ellipse.Radius1 * ellipse.Plane.XAxis;
         let yAxis = ellipse.Radius2 * ellipse.Plane.YAxis;
@@ -1737,7 +2331,15 @@ module AutoOpenCurve =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(Point3d) a 3-D point.</returns>
     static member EvaluateCurve(curveId:Guid, t:float, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.EvaluateCurve(RhinoScriptSyntax.CoerceCurve(curveId), t, segmentIndex)
+
+    /// <summary>Evaluates a Curve at a parameter and returns a 3D point. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="t">(float) The parameter to evaluate</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(Point3d) a 3-D point.</returns>
+    static member EvaluateCurve(curveGeo:Curve, t:float, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         curve.PointAt(t)
 
 
@@ -1749,16 +2351,19 @@ module AutoOpenCurve =
     ///    Delete input objects after exploding if True</param>
     /// <returns>(Guid ResizeArray) identifying the newly created Curve objects.</returns>
     static member ExplodeCurve(curveId:Guid, [<OPT;DEF(false)>]deleteInput:bool) : Guid ResizeArray =
-        let rc = ResizeArray()
-        let curve = RhinoScriptSyntax.CoerceCurve curveId
+        let pieces = RhinoScriptSyntax.ExplodeCurve(RhinoScriptSyntax.CoerceCurve(curveId))
+        let ids = pieces |> RArr.mapSeq State.Doc.Objects.AddCurve
+        if deleteInput && pieces.Count > 0 then State.Doc.Objects.Delete(curveId, quiet=true) |> ignore<bool>
+        if ids.Count > 0 then State.Doc.Views.Redraw()
+        ids
+
+    /// <summary>Computes ExplodeCurve from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="curveGeo">(Curve) The input curve geometry.</param>
+    /// <returns>(Curve ResizeArray) The resulting geometry; it is not added to a document.</returns>
+    static member ExplodeCurve(curveGeo:Curve) : Curve ResizeArray =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
         let pieces = curve.DuplicateSegments()
-        if notNull pieces then
-            for piece in pieces do
-                rc.Add(State.Doc.Objects.AddCurve(piece))
-            if deleteInput then
-                State.Doc.Objects.Delete(curveId, quiet=true) |> ignore<bool>
-        if rc.Count>0 then  State.Doc.Views.Redraw()
-        rc
+        if isNull pieces then ResizeArray<Curve>() else ResizeArray(pieces)
 
     /// <summary>Explodes, or un-joins, several curves Curve. PolyCurves will be exploded into Curve
     ///    segments. Polylines will be exploded into line segments. ExplodeCurves will
@@ -1768,18 +2373,21 @@ module AutoOpenCurve =
     ///    Delete input objects after exploding if True</param>
     /// <returns>(Guid ResizeArray) identifying the newly created Curve objects.</returns>
     static member ExplodeCurves(curveIds:Guid seq, [<OPT;DEF(false)>]deleteInput:bool) : Guid ResizeArray =
-        let rc = ResizeArray()
+        let ids = ResizeArray<Guid>()
         for curveId in curveIds do
-            let curve = RhinoScriptSyntax.CoerceCurve curveId
-            let pieces = curve.DuplicateSegments()
-            if notNull pieces then
-                for piece in pieces do
-                    rc.Add(State.Doc.Objects.AddCurve(piece))
-                if deleteInput then
-                    State.Doc.Objects.Delete(curveId, quiet=true) |> ignore<bool>
-        if rc.Count>0 then  State.Doc.Views.Redraw()
-        rc
+            let pieces = RhinoScriptSyntax.ExplodeCurve(RhinoScriptSyntax.CoerceCurve(curveId))
+            for piece in pieces do ids.Add(State.Doc.Objects.AddCurve(piece))
+            if deleteInput && pieces.Count > 0 then State.Doc.Objects.Delete(curveId, quiet=true) |> ignore<bool>
+        if ids.Count > 0 then State.Doc.Views.Redraw()
+        ids
 
+    /// <summary>Computes ExplodeCurves from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="curveInputs">(Curve seq) The input objects.</param>
+    /// <returns>(Curve ResizeArray) The resulting geometry; it is not added to a document.</returns>
+    static member ExplodeCurves(curveInputs:Curve seq) : Curve ResizeArray =
+        let pieces = ResizeArray<Curve>()
+        for curve in curveInputs do pieces.AddRange(RhinoScriptSyntax.ExplodeCurve(curve))
+        pieces
 
     /// <summary>Extends a non-closed Curve object by a line, arc, or smooth extension
     ///    until it intersects a collection of objects.</summary>
@@ -1801,39 +2409,54 @@ module AutoOpenCurve =
                                 boundaryCurveIds:Guid seq,
                                 [<OPT;DEF(false)>]replaceInput:bool) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
+        let newCurve = RhinoScriptSyntax.ExtendCurve(curve, extensionType, side, boundaryCurveIds |> Seq.map RhinoScriptSyntax.CoerceGeometry)
+        if replaceInput then
+            if not (State.Doc.Objects.Replace(curveId, newCurve)) then RhinoScriptingException.Raise "ExtendCurve: Unable to replace curve %O" curveId
+            State.Doc.Views.Redraw()
+            curveId
+        else
+            let rc = State.Doc.Objects.AddCurve(newCurve)
+            State.Doc.Views.Redraw()
+            rc
+
+    /// <summary>Computes ExtendCurve from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="curveGeo">(Curve) The input curve geometry.</param>
+    /// <param name="extensionType">(int)
+    ///    0 = line
+    ///    1 = arc
+    ///    2 = smooth</param>
+    /// <param name="side">(int)
+    ///    0 = extend from the start of the Curve
+    ///    1 = extend from the end of the Curve
+    ///    2 = extend from both the start and the end of the Curve</param>
+    /// <param name="boundaryCurves">(GeometryBase seq) The input objects.</param>
+    /// <returns>(Curve) The resulting geometry; it is not added to a document.</returns>
+    static member ExtendCurve(  curveGeo:Curve,
+                                extensionType:int,
+                                side:int,
+                                boundaryCurves:GeometryBase seq) : Curve =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
         let mutable extensionTypet = CurveExtensionStyle.Line
         if extensionType = 0   then extensionTypet <- CurveExtensionStyle.Line
         elif extensionType = 1 then extensionTypet <- CurveExtensionStyle.Arc
         elif extensionType = 2 then extensionTypet <- CurveExtensionStyle.Smooth
-        else RhinoScriptingException.Raise "ExtendCurve ExtensionType must be 0, 1, or 2. curveId:'%s' extensionType:'%A' side:'%A' boundaryCurveIds:'%s'" (Pretty.str curveId) extensionType side  (Pretty.str boundaryCurveIds)
+        else RhinoScriptingException.Raise "ExtendCurve ExtensionType must be 0, 1, or 2. curveGeo:'%s' extensionType:'%A' side:'%A' boundaryCurves:'%s'" (Pretty.str curveGeo) extensionType side  (Pretty.str boundaryCurves)
 
         let sidet =
             match side with
             |0  -> CurveEnd.Start
             |1  -> CurveEnd.End
             |2  -> CurveEnd.Both
-            |_  -> RhinoScriptingException.Raise "ExtendCurve Side must be 0, 1, or 2. curveId:'%s' extensionType:'%A' side:'%A' boundaryCurveIds:'%s'" (Pretty.str curveId) extensionType side  (Pretty.str boundaryCurveIds)
+            |_  -> RhinoScriptingException.Raise "ExtendCurve Side must be 0, 1, or 2. curveGeo:'%s' extensionType:'%A' side:'%A' boundaryCurves:'%s'" (Pretty.str curveGeo) extensionType side  (Pretty.str boundaryCurves)
 
         let rhobjs = ResizeArray()
-        for o in boundaryCurveIds do rhobjs.Add(RhinoScriptSyntax.CoerceRhinoObject o)
+        for o in boundaryCurves do rhobjs.Add(o)
 
-        if rhobjs.Count=0 then  RhinoScriptingException.Raise "ExtendCurve boundaryCurveIds failed. They must contain at least one item. curveId:'%s' extensionType:'%A' side:'%A' boundaryCurveIds:'%s'" (Pretty.str curveId) extensionType side (Pretty.str boundaryCurveIds)
-        let geometry = rhobjs|> RArr.map (fun o -> o.Geometry)
+        if rhobjs.Count=0 then  RhinoScriptingException.Raise "ExtendCurve boundaryCurves failed. They must contain at least one item. curveGeo:'%s' extensionType:'%A' side:'%A' boundaryCurves:'%s'" (Pretty.str curveGeo) extensionType side (Pretty.str boundaryCurves)
+        let geometry = rhobjs
         let newCurve = curve.Extend(sidet, extensionTypet, geometry)
-        if notNull newCurve && newCurve.IsValid then
-            if replaceInput then
-                if State.Doc.Objects.Replace(curveId, newCurve) then
-                    State.Doc.Views.Redraw()
-                    curveId
-                else
-                    RhinoScriptingException.Raise "ExtendCurve failed. curveId:'%s' extensionType:'%A' side:'%A' boundaryCurveIds:'%s'" (Pretty.str curveId) extensionType side  (Pretty.str boundaryCurveIds)
-            else
-                let g= State.Doc.Objects.AddCurve(newCurve)
-                State.Doc.Views.Redraw()
-                g
-        else
-            RhinoScriptingException.Raise "ExtendCurve failed. curveId:'%s' extensionType:'%A' side:'%A' boundaryCurveIds:'%s'" (Pretty.str curveId) extensionType side  (Pretty.str boundaryCurveIds)
-
+        if isNull newCurve || not newCurve.IsValid then RhinoScriptingException.Raise "ExtendCurve: Unable to extend curve"
+        newCurve
 
     /// <summary>Extends a non-closed Curve by a line, arc, or smooth extension for a specified distance.</summary>
     /// <param name="curveId">(Guid) Curve to extend</param>
@@ -1851,31 +2474,46 @@ module AutoOpenCurve =
                                         extensionType:int,
                                         side:int,
                                         length:float) : Guid =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
+        let newCurve = RhinoScriptSyntax.ExtendCurveLength(RhinoScriptSyntax.CoerceCurve(curveId), extensionType, side, length)
+        if not (State.Doc.Objects.Replace(curveId, newCurve)) then RhinoScriptingException.Raise "ExtendCurveLength: Unable to replace curve %O" curveId
+        State.Doc.Views.Redraw()
+        curveId
+
+    /// <summary>Computes ExtendCurveLength from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="curveGeo">(Curve) The input curve geometry.</param>
+    /// <param name="extensionType">(int)
+    ///    0 = line
+    ///    1 = arc
+    ///    2 = smooth</param>
+    /// <param name="side">(int)
+    ///    0 = extend from start of the Curve
+    ///    1 = extend from end of the Curve
+    ///    2 = Extend from both ends</param>
+    /// <param name="length">(float) Distance to extend</param>
+    /// <returns>(Curve) The resulting geometry; it is not added to a document.</returns>
+    static member ExtendCurveLength(    curveGeo:Curve,
+                                        extensionType:int,
+                                        side:int,
+                                        length:float) : Curve =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
         let mutable extensionTypet = CurveExtensionStyle.Line
         if extensionType   = 0 then extensionTypet <- CurveExtensionStyle.Line
         elif extensionType = 1 then extensionTypet <- CurveExtensionStyle.Arc
         elif extensionType = 2 then extensionTypet <- CurveExtensionStyle.Smooth
-        else RhinoScriptingException.Raise "ExtendCurveLength ExtensionType must be 0, 1, or 2. curveId:'%s' extensionType:'%A' side:'%A' length:'%A'" (Pretty.str curveId) extensionType side length
+        else RhinoScriptingException.Raise "ExtendCurveLength ExtensionType must be 0, 1, or 2. curveGeo:'%s' extensionType:'%A' side:'%A' length:'%A'" (Pretty.str curveGeo) extensionType side length
 
         let sideT =
             match side with
             |0  -> CurveEnd.Start
             |1  -> CurveEnd.End
             |2  -> CurveEnd.Both
-            |_  -> RhinoScriptingException.Raise "ExtendCurveLength Side must be 0, 1, or 2. curveId:'%s' extensionType:'%A' side:'%A' length:'%A'" (Pretty.str curveId) extensionType side length
+            |_  -> RhinoScriptingException.Raise "ExtendCurveLength Side must be 0, 1, or 2. curveGeo:'%s' extensionType:'%A' side:'%A' length:'%A'" (Pretty.str curveGeo) extensionType side length
 
         let newCurve =
             if length<0. then curve.Trim(sideT, -length)
             else curve.Extend(sideT, length, extensionTypet)
-
-        if notNull newCurve && newCurve.IsValid then
-            if State.Doc.Objects.Replace(curveId, newCurve) then
-                State.Doc.Views.Redraw()
-                curveId
-            else RhinoScriptingException.Raise "ExtendCurveLength failed. curveId:'%s' extensionType:'%A' side:'%A' length:'%A'" (Pretty.str curveId) extensionType side length
-        else RhinoScriptingException.Raise "ExtendCurveLength failed. curveId:'%s' extensionType:'%A' side:'%A' length:'%A'" (Pretty.str curveId) extensionType side length
-
+        if isNull newCurve || not newCurve.IsValid then RhinoScriptingException.Raise "ExtendCurveLength: Unable to extend curve"
+        newCurve
 
     /// <summary>Extends a non-closed Curve by smooth extension to a point.</summary>
     /// <param name="curveId">(Guid) Curve to extend</param>
@@ -1893,30 +2531,46 @@ module AutoOpenCurve =
                                     side:int,
                                     point:Point3d,
                                     [<OPT;DEF(-1)>]extensionType:int) : Guid =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
+        let newCurve = RhinoScriptSyntax.ExtendCurvePoint(RhinoScriptSyntax.CoerceCurve(curveId), side, point, extensionType)
+        if not (State.Doc.Objects.Replace(curveId, newCurve)) then RhinoScriptingException.Raise "ExtendCurvePoint: Unable to replace curve %O" curveId
+        State.Doc.Views.Redraw()
+        curveId
+
+    /// <summary>Computes ExtendCurvePoint from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="curveGeo">(Curve) The input curve geometry.</param>
+    /// <param name="side">(int)
+    ///    0 = extend from start of the Curve
+    ///    1 = extend from end of the Curve
+    ///    2 = extend from both the start and the end of the Curve</param>
+    /// <param name="point">(Point3d) Point to extend to</param>
+    /// <param name="extensionType">(int) Optional, default value: <c>2</c> ( CurveExtensionStyle.Smooth))
+    ///    0 = line
+    ///    1 = arc
+    ///    2 = smooth</param>
+    /// <returns>(Curve) The resulting geometry; it is not added to a document.</returns>
+    static member ExtendCurvePoint( curveGeo:Curve,
+                                    side:int,
+                                    point:Point3d,
+                                    [<OPT;DEF(-1)>]extensionType:int) : Curve =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
         let extensionTypet =
             match extensionType with
             | -1 ->  CurveExtensionStyle.Smooth
             |  0 ->  CurveExtensionStyle.Line
             |  1 ->  CurveExtensionStyle.Arc
             |  2 ->  CurveExtensionStyle.Smooth
-            |  _ ->  RhinoScriptingException.Raise "ExtendCurvePoint ExtensionType must be 0, 1, or 2. curveId:'%s' side:'%A' point:'%A' extensionType:'%A'" (Pretty.str curveId) side point extensionType
+            |  _ ->  RhinoScriptingException.Raise "ExtendCurvePoint ExtensionType must be 0, 1, or 2. curveGeo:'%s' side:'%A' point:'%A' extensionType:'%A'" (Pretty.str curveGeo) side point extensionType
 
         let sidet =
             match side with
             | 0  -> CurveEnd.Start
             | 1  -> CurveEnd.End
             | 2  -> CurveEnd.Both
-            | _  -> RhinoScriptingException.Raise "ExtendCurvePoint Side must be 0, 1, or 2. curveId:'%s' side:'%A' point:'%A' extensionType:'%A'" (Pretty.str curveId) side point extensionType
+            | _  -> RhinoScriptingException.Raise "ExtendCurvePoint Side must be 0, 1, or 2. curveGeo:'%s' side:'%A' point:'%A' extensionType:'%A'" (Pretty.str curveGeo) side point extensionType
 
         let newCurve = curve.Extend(sidet, extensionTypet, point)
-        if notNull newCurve && newCurve.IsValid then
-            if State.Doc.Objects.Replace( curveId, newCurve ) then
-                State.Doc.Views.Redraw()
-                curveId
-            else RhinoScriptingException.Raise "ExtendCurvePoint failed. curveId:'%s' side:'%A' point:'%A'" (Pretty.str curveId) side point
-        else RhinoScriptingException.Raise "ExtendCurvePoint failed. curveId:'%s' side:'%A' point:'%A'" (Pretty.str curveId) side point
-
+        if isNull newCurve || not newCurve.IsValid then RhinoScriptingException.Raise "ExtendCurvePoint: Unable to extend curve"
+        newCurve
 
     /// <summary>Fairs a Curve. Fair works best on degree 3 (cubic) Curves. Fair attempts
     ///    to remove large curvature variations while limiting the geometry changes to
@@ -1963,22 +2617,37 @@ module AutoOpenCurve =
                             [<OPT;DEF(0.0)>]distanceTolerance:float,
                             [<OPT;DEF(-1.0)>]angleTolerance:float) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
-        let distanceTolerance0 = Util.ifZero1 distanceTolerance State.Doc.ModelAbsoluteTolerance
-        let angleTolerance0 = if  angleTolerance < 0.0 then  State.Doc.ModelAngleToleranceRadians else toRadians angleTolerance
-        let nc = curve.Fit(degree, distanceTolerance0, angleTolerance0)
-        if notNull nc then
-            let rhobj = RhinoScriptSyntax.CoerceRhinoObject(curveId)
-            let mutable rc = Guid.Empty
-            if notNull rhobj then
-                rc <- State.Doc.Objects.AddCurve(nc, rhobj.Attributes)
-            else
-                rc <- State.Doc.Objects.AddCurve(nc)
-            if rc = Guid.Empty then  RhinoScriptingException.Raise "FitCurve: Unable to add curve to document. curveId:'%s' degree:'%A' distanceTolerance:'%A' angleTolerance:'%A'" (Pretty.str curveId) degree distanceTolerance angleTolerance
-            State.Doc.Views.Redraw()
-            rc
-        else
-            RhinoScriptingException.Raise "FitCurve failed. curveId:'%s' degree:'%A' distanceTolerance:'%A' angleTolerance:'%A'" (Pretty.str curveId) degree distanceTolerance angleTolerance
+        let fitted = RhinoScriptSyntax.FitCurve(curve, degree, distanceTolerance, angleTolerance)
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(curveId)
+        let rc = State.Doc.Objects.AddCurve(fitted, rhobj.Attributes)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "FitCurve: Unable to add curve to document"
+        State.Doc.Views.Redraw()
+        rc
 
+    /// <summary>Computes FitCurve from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="curveGeo">(Curve) The input curve geometry.</param>
+    /// <param name="degree">(int) Optional, default value: <c>3</c>
+    ///    The Curve degree, which must be greater than 1.
+    ///    The default is 3</param>
+    /// <param name="distanceTolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
+    ///    The fitting tolerance.</param>
+    /// <param name="angleTolerance">(float) Optional, default value: <c>State.Doc.ModelAngleToleranceRadians</c>
+    ///    The kink smoothing tolerance in degrees. If
+    ///    angleTolerance is 0.0, all kinks are smoothed. If angleTolerance
+    ///    is bigger than  0.0, kinks smaller than angleTolerance are smoothed. If
+    ///    angleTolerance is not specified or smaller than 0.0, the document angle
+    ///    tolerance is used for the kink smoothing</param>
+    /// <returns>(Curve) The resulting geometry; it is not added to a document.</returns>
+    static member FitCurve( curveGeo:Curve,
+                            [<OPT;DEF(3)>]degree:int,
+                            [<OPT;DEF(0.0)>]distanceTolerance:float,
+                            [<OPT;DEF(-1.0)>]angleTolerance:float) : Curve =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
+        let distanceTolerance0 = Util.ifZero1 distanceTolerance State.Doc.ModelAbsoluteTolerance
+        let angleTolerance0 = if angleTolerance < 0.0 then State.Doc.ModelAngleToleranceRadians else toRadians angleTolerance
+        let fitted = curve.Fit(degree, distanceTolerance0, angleTolerance0)
+        if isNull fitted then RhinoScriptingException.Raise "FitCurve: Unable to fit curve"
+        fitted
 
     /// <summary>Inserts a knot into a Curve object.</summary>
     /// <param name="curveId">(Guid) Identifier of the Curve object</param>
@@ -2019,8 +2688,19 @@ module AutoOpenCurve =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(bool) True or False.</returns>
     static member IsArc(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
+        RhinoScriptSyntax.IsArc((RhinoScriptSyntax.TryCoerceGeometry(curveId) |> Option.defaultValue null), tolerance, segmentIndex)
+
+    /// <summary>Checks if an object is an open arc Curve. Returns false for any other Rhino object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(GeometryBase) The input geometry.</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>RhinoMath.ZeroTolerance</c>
+    ///    If the Curve is not a circle, then the tolerance used
+    ///    to determine whether or not the NURBS form of the Curve has the
+    ///    properties of a arc.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsArc(curveGeo:GeometryBase, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
         let tol = Util.ifZero2 RhinoMath.ZeroTolerance tolerance
-        match RhinoScriptSyntax.TryCoerceCurve(curveId, segmentIndex) with
+        match RhinoScriptSyntax.TryDirectCurveInput(curveGeo, segmentIndex) with
         |None -> false
         |Some curve  -> curve.IsArc(tol) && not curve.IsClosed
 
@@ -2033,8 +2713,18 @@ module AutoOpenCurve =
     ///    properties of a circle.</param>
     /// <returns>(bool) True or False.</returns>
     static member IsCircle(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float) : bool =
+        RhinoScriptSyntax.IsCircle((RhinoScriptSyntax.TryCoerceGeometry(curveId) |> Option.defaultValue null), tolerance)
+
+    /// <summary>Checks if an object is a circle Curve.  Returns false for any other Rhino object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(GeometryBase) The input geometry.</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>RhinoMath.ZeroTolerance</c>
+    ///    If the Curve is not a circle, then the tolerance used
+    ///    to determine whether or not the NURBS form of the Curve has the
+    ///    properties of a circle.</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsCircle(curveGeo:GeometryBase, [<OPT;DEF(0.0)>]tolerance:float) : bool =
         let tol = Util.ifZero2 RhinoMath.ZeroTolerance tolerance
-        match RhinoScriptSyntax.TryCoerceCurve curveId with
+        match RhinoScriptSyntax.TryDirectCurveInput(curveGeo, -1) with
         |None -> false
         |Some curve  -> curve.IsCircle(tol)
 
@@ -2043,7 +2733,13 @@ module AutoOpenCurve =
     /// <param name="curveId">(Guid) The object's identifier</param>
     /// <returns>(bool) True or False.</returns>
     static member IsCurve(curveId:Guid) : bool =
-        match RhinoScriptSyntax.TryCoerceCurve curveId with
+        RhinoScriptSyntax.IsCurve((RhinoScriptSyntax.TryCoerceGeometry(curveId) |> Option.defaultValue null))
+
+    /// <summary>Checks if an object is a Curve. Returns false for any other Rhino object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(GeometryBase) The input geometry.</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsCurve(curveGeo:GeometryBase) : bool =
+        match RhinoScriptSyntax.TryDirectCurveInput(curveGeo, -1) with
         |None -> false
         |Some _  -> true
 
@@ -2056,8 +2752,18 @@ module AutoOpenCurve =
     ///    Maximum allowable distance between start point and end point.</param>
     /// <returns>(bool) True or False.</returns>
     static member IsCurveClosable(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float) : bool =
+        RhinoScriptSyntax.IsCurveClosable((RhinoScriptSyntax.TryCoerceGeometry(curveId) |> Option.defaultValue null), tolerance)
+
+    /// <summary>Decide if it makes sense to close off the Curve by moving the end point
+    ///    to the start point based on start-end gap size and length of Curve as
+    ///    approximated by chord defined by 6 points. Returns false for any other Rhino object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(GeometryBase) The input geometry.</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
+    ///    Maximum allowable distance between start point and end point.</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsCurveClosable(curveGeo:GeometryBase, [<OPT;DEF(0.0)>]tolerance:float) : bool =
         let tolerance0 = Util.ifZero2 State.Doc.ModelAbsoluteTolerance tolerance
-        match RhinoScriptSyntax.TryCoerceCurve curveId with
+        match RhinoScriptSyntax.TryDirectCurveInput(curveGeo, -1) with
         |None -> false
         |Some curve  -> curve.IsClosable(tolerance0)
 
@@ -2066,7 +2772,13 @@ module AutoOpenCurve =
     /// <param name="curveId">(Guid) The object's identifier</param>
     /// <returns>(bool) If Curve is Closed True,  otherwise False.</returns>
     static member IsCurveClosed(curveId:Guid) : bool =
-        match RhinoScriptSyntax.TryCoerceCurve curveId with
+        RhinoScriptSyntax.IsCurveClosed((RhinoScriptSyntax.TryCoerceGeometry(curveId) |> Option.defaultValue null))
+
+    /// <summary>Checks if an object is a closed Curve object. Returns false for any other Rhino object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(GeometryBase) The input geometry.</param>
+    /// <returns>(bool) If Curve is Closed True,  otherwise False.</returns>
+    static member IsCurveClosed(curveGeo:GeometryBase) : bool =
+        match RhinoScriptSyntax.TryDirectCurveInput(curveGeo, -1) with
         |None -> false
         |Some curve  -> curve.IsClosed
 
@@ -2077,8 +2789,16 @@ module AutoOpenCurve =
     /// <param name="tolerance">(float) Optional, default value: <c>RhinoMath.ZeroTolerance</c></param>
     /// <returns>(bool) True or False.</returns>
     static member IsCurveInPlane(curveId:Guid, plane:Plane, [<OPT;DEF(0.0)>]tolerance:float) : bool =
+        RhinoScriptSyntax.IsCurveInPlane((RhinoScriptSyntax.TryCoerceGeometry(curveId) |> Option.defaultValue null), plane, tolerance)
+
+    /// <summary>Test a Curve to see if it lies in a specific Plane. Returns false for any other Rhino object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(GeometryBase) The input geometry.</param>
+    /// <param name="plane">(Plane) Plane to test</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>RhinoMath.ZeroTolerance</c></param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsCurveInPlane(curveGeo:GeometryBase, plane:Plane, [<OPT;DEF(0.0)>]tolerance:float) : bool =
         let tolerance0 = Util.ifZero2 RhinoMath.ZeroTolerance tolerance
-        match RhinoScriptSyntax.TryCoerceCurve curveId with
+        match RhinoScriptSyntax.TryDirectCurveInput(curveGeo, -1) with
         |None -> false
         |Some curve  -> curve.IsInPlane(plane, tolerance0)
 
@@ -2089,8 +2809,16 @@ module AutoOpenCurve =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
     static member IsCurveLinear(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
+        RhinoScriptSyntax.IsCurveLinear((RhinoScriptSyntax.TryCoerceGeometry(curveId) |> Option.defaultValue null), tolerance, segmentIndex)
+
+    /// <summary>Checks if an object is a linear Curve. Returns false for any other Rhino object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(GeometryBase) The input geometry.</param>    ///
+    /// <param name="tolerance">(float) Optional, default value: <c>RhinoMath.ZeroTolerance</c></param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(bool) True or False indicating success or failure.</returns>
+    static member IsCurveLinear(curveGeo:GeometryBase, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
         let tolerance0 = Util.ifZero2 RhinoMath.ZeroTolerance tolerance
-        match  RhinoScriptSyntax.TryCoerceCurve(curveId, segmentIndex) with
+        match  RhinoScriptSyntax.TryDirectCurveInput(curveGeo, segmentIndex) with
         |None -> false
         |Some curve  -> curve.IsLinear(tolerance0)
 
@@ -2101,7 +2829,15 @@ module AutoOpenCurve =
     ///    The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(bool) True or False.</returns>
     static member IsCurvePeriodic(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
-        match RhinoScriptSyntax.TryCoerceCurve(curveId, segmentIndex) with
+        RhinoScriptSyntax.IsCurvePeriodic((RhinoScriptSyntax.TryCoerceGeometry(curveId) |> Option.defaultValue null), segmentIndex)
+
+    /// <summary>Checks if an object is a periodic Curve object. Returns false for any other Rhino object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(GeometryBase) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional,
+    ///    The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsCurvePeriodic(curveGeo:GeometryBase, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
+        match RhinoScriptSyntax.TryDirectCurveInput(curveGeo, segmentIndex) with
         |None -> false
         |Some curve  -> curve.IsPeriodic
 
@@ -2112,8 +2848,16 @@ module AutoOpenCurve =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
     static member IsCurvePlanar(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
+        RhinoScriptSyntax.IsCurvePlanar((RhinoScriptSyntax.TryCoerceGeometry(curveId) |> Option.defaultValue null), tolerance, segmentIndex)
+
+    /// <summary>Checks if an object is a planar Curve. Returns false for any other Rhino object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(GeometryBase) The input geometry.</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>RhinoMath.ZeroTolerance</c></param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(bool) True or False indicating success or failure.</returns>
+    static member IsCurvePlanar(curveGeo:GeometryBase, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
         let tol = Util.ifZero2 RhinoMath.ZeroTolerance tolerance
-        match RhinoScriptSyntax.TryCoerceCurve(curveId, segmentIndex) with
+        match RhinoScriptSyntax.TryDirectCurveInput(curveGeo, segmentIndex) with
         |None -> false
         |Some curve  -> curve.IsPlanar(tol)
 
@@ -2123,7 +2867,14 @@ module AutoOpenCurve =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
     static member IsCurveRational(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
-        match RhinoScriptSyntax.TryCoerceCurve(curveId, segmentIndex) with
+        RhinoScriptSyntax.IsCurveRational((RhinoScriptSyntax.TryCoerceGeometry(curveId) |> Option.defaultValue null), segmentIndex)
+
+    /// <summary>Checks if an object is a rational NURBS Curve. Returns false for any other Rhino object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(GeometryBase) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(bool) True or False indicating success or failure.</returns>
+    static member IsCurveRational(curveGeo:GeometryBase, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
+        match RhinoScriptSyntax.TryDirectCurveInput(curveGeo, segmentIndex) with
         |None -> false
         |Some c  ->
             match c with
@@ -2138,8 +2889,17 @@ module AutoOpenCurve =
     ///    The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
     static member IsEllipse(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
+        RhinoScriptSyntax.IsEllipse((RhinoScriptSyntax.TryCoerceGeometry(curveId) |> Option.defaultValue null), tolerance, segmentIndex)
+
+    /// <summary>Checks if an object is an elliptical-shaped Curve. Returns false for any other Rhino object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(GeometryBase) The input geometry.</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>RhinoMath.ZeroTolerance</c></param>
+    /// <param name="segmentIndex">(int) Optional,
+    ///    The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(bool) True or False indicating success or failure.</returns>
+    static member IsEllipse(curveGeo:GeometryBase, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
         let tol = Util.ifZero2 RhinoMath.ZeroTolerance tolerance
-        match RhinoScriptSyntax.TryCoerceCurve(curveId,segmentIndex) with
+        match RhinoScriptSyntax.TryDirectCurveInput(curveGeo, segmentIndex) with
         |None -> false
         |Some curve  -> curve.IsEllipse(tol)
 
@@ -2151,8 +2911,17 @@ module AutoOpenCurve =
     ///    The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
     static member IsLine(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
+        RhinoScriptSyntax.IsLine((RhinoScriptSyntax.TryCoerceGeometry(curveId) |> Option.defaultValue null), tolerance, segmentIndex)
+
+    /// <summary>Checks if an object is a line Curve. Returns false for any other Rhino object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(GeometryBase) The input geometry.</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>RhinoMath.ZeroTolerance</c></param>
+    /// <param name="segmentIndex">(int) Optional,
+    ///    The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(bool) True or False indicating success or failure.</returns>
+    static member IsLine(curveGeo:GeometryBase, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
         let tol = Util.ifZero2 RhinoMath.ZeroTolerance tolerance
-        match RhinoScriptSyntax.TryCoerceCurve(curveId, segmentIndex) with
+        match RhinoScriptSyntax.TryDirectCurveInput(curveGeo, segmentIndex) with
         |None -> false
         |Some c  ->
             match c with
@@ -2172,8 +2941,17 @@ module AutoOpenCurve =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
     static member IsPointOnCurve(curveId:Guid, point:Point3d, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
+        RhinoScriptSyntax.IsPointOnCurve(RhinoScriptSyntax.CoerceCurve(curveId), point, tolerance, segmentIndex)
+
+    /// <summary>Checks if a point is on a Curve. Returns false for any other Rhino object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="point">(Point3d) The test point</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>RhinoMath.SqrtEpsilon</c></param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(bool) True or False indicating success or failure.</returns>
+    static member IsPointOnCurve(curveGeo:Curve, point:Point3d, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
         let tol = Util.ifZero2 RhinoMath.SqrtEpsilon tolerance
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let t = ref 0.0
         curve.ClosestPoint(point, t, tol)
 
@@ -2183,8 +2961,15 @@ module AutoOpenCurve =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(bool) True or False.</returns>
     static member IsPolyCurve(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
+        RhinoScriptSyntax.IsPolyCurve((RhinoScriptSyntax.TryCoerceGeometry(curveId) |> Option.defaultValue null), segmentIndex)
+
+    /// <summary>Checks if an object is a PolyCurve Curve. Returns false for any other Rhino object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(GeometryBase) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsPolyCurve(curveGeo:GeometryBase, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
         // TODO can a PolyCurve be nested in a PolyCurve ?
-        match RhinoScriptSyntax.TryCoerceCurve(curveId, segmentIndex) with
+        match RhinoScriptSyntax.TryDirectCurveInput(curveGeo, segmentIndex) with
         |None               -> false
         |Some c  ->
             match c with
@@ -2198,7 +2983,15 @@ module AutoOpenCurve =
     /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
     /// <returns>(bool) True or False.</returns>
     static member IsPolyline(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
-        match RhinoScriptSyntax.TryCoerceCurve(curveId, segmentIndex) with
+        RhinoScriptSyntax.IsPolyline((RhinoScriptSyntax.TryCoerceGeometry(curveId) |> Option.defaultValue null), segmentIndex)
+
+    /// <summary>Checks if an object is a Polyline Curve object or a nurbs cure with degree 1 and moer than 2 points
+    /// Lines return false. Returns false for any other Rhino object. Uses the supplied geometry directly.</summary>
+    /// <param name="curveGeo">(GeometryBase) The input geometry.</param>
+    /// <param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a PolyCurve</param>
+    /// <returns>(bool) True or False.</returns>
+    static member IsPolyline(curveGeo:GeometryBase, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
+        match RhinoScriptSyntax.TryDirectCurveInput(curveGeo, segmentIndex) with
         |None               -> false
         |Some c  ->
             match c with
@@ -2217,22 +3010,27 @@ module AutoOpenCurve =
     ///    tolerance is used</param>
     /// <returns>(Guid ResizeArray) Object objectId representing the new Curves.</returns>
     static member JoinCurves(curveIds:Guid seq, [<OPT;DEF(false)>]deleteInput:bool, [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray =
-        let curves = curveIds  |> RArr.mapSeq  RhinoScriptSyntax.CoerceCurve
-        if curves.Count = 0 then
-            RhinoScriptingException.Raise "JoinCurves: curveIds must contain at least two items.  curveIds:'%s' deleteInput:'%A' tolerance:'%A'" (Pretty.str curveIds) deleteInput tolerance
-        let tolerance0 = Util.ifZero1 tolerance (2.1 * State.Doc.ModelAbsoluteTolerance)
-        let newCurves = Curve.JoinCurves(curves, tolerance0)
-        if isNull newCurves then
-            RhinoScriptingException.Raise "JoinCurves failed on curveIds:'%s' deleteInput:'%A' tolerance:'%A'" (Pretty.str curveIds) deleteInput tolerance
-
-        let rc = newCurves  |> RArr.mapSeq  State.Doc.Objects.AddCurve
+        let curveIds = Seq.toArray curveIds
+        let curves = RhinoScriptSyntax.JoinCurves(curveIds |> Seq.map RhinoScriptSyntax.CoerceCurve, tolerance)
+        let ids = curves |> RArr.mapSeq State.Doc.Objects.AddCurve
         if deleteInput then
-            for objectId in curveIds do
-                State.Doc.Objects.Delete(objectId, quiet=false) |> ignore<bool>
+            for objectId in curveIds do State.Doc.Objects.Delete(objectId, quiet=false) |> ignore<bool>
         State.Doc.Views.Redraw()
-        rc
+        ids
 
-
+    /// <summary>Computes JoinCurves from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="curveInputs">(Curve seq) The input objects.</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>2.1 * State.Doc.ModelAbsoluteTolerance</c>
+    ///    Join tolerance. If omitted, 2.1 * document absolute
+    ///    tolerance is used</param>
+    /// <returns>(Curve ResizeArray) The resulting geometry; it is not added to a document.</returns>
+    static member JoinCurves(curveInputs:Curve seq, [<OPT;DEF(0.0)>]tolerance:float) : Curve ResizeArray =
+        let curves = curveInputs |> Seq.map (fun curve -> RhinoScriptSyntax.DirectCurveInput(curve, -1)) |> Seq.toArray
+        if curves.Length = 0 then RhinoScriptingException.Raise "JoinCurves: Curves must contain at least two items"
+        let tolerance0 = Util.ifZero1 tolerance (2.1 * State.Doc.ModelAbsoluteTolerance)
+        let joined = Curve.JoinCurves(curves, tolerance0)
+        if isNull joined then RhinoScriptingException.Raise "JoinCurves: Unable to join curves"
+        ResizeArray(joined)
 
     /// <summary>Returns a line that was fit through an array of 3D points.</summary>
     /// <param name="points">(Point3d seq) A list of at least two 3D points</param>
@@ -2250,23 +3048,29 @@ module AutoOpenCurve =
     ///    Delete the input Curve. If omitted, the input Curve will not be deleted</param>
     /// <returns>(Guid) objectId of the new or modified Curve.</returns>
     static member MakeCurveNonPeriodic(curveId:Guid, [<OPT;DEF(false)>]deleteInput:bool) : Guid =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
-        if not <| curve.IsPeriodic then  RhinoScriptingException.Raise "MakeCurveNonPeriodic failed.1  curveId:'%s' deleteInput:'%A'" (Pretty.str curveId) deleteInput
-        let nc = curve.ToNurbsCurve()
-        if isNull nc  then  RhinoScriptingException.Raise "MakeCurveNonPeriodic failed.2  curveId:'%s' deleteInput:'%A'" (Pretty.str curveId) deleteInput
-        if not <| nc.Knots.ClampEnd( CurveEnd.Both ) then RhinoScriptingException.Raise "MakeCurveNonPeriodic failed. curveId:'%s' deleteInput:'%A'" (Pretty.str curveId) deleteInput
+        let curve = RhinoScriptSyntax.MakeCurveNonPeriodic(RhinoScriptSyntax.CoerceCurve(curveId))
         if deleteInput then
-            let rc = State.Doc.Objects.Replace(curveId, nc)
-            if not <| rc then  RhinoScriptingException.Raise "MakeCurveNonPeriodic failed.3  curveId:'%s' deleteInput:'%A'" (Pretty.str curveId) deleteInput
+            if not (State.Doc.Objects.Replace(curveId, curve)) then RhinoScriptingException.Raise "MakeCurveNonPeriodic: Unable to replace curve %O" curveId
             State.Doc.Views.Redraw()
             curveId
         else
             let rhobj = RhinoScriptSyntax.CoerceRhinoObject(curveId)
-            let rc = State.Doc.Objects.AddCurve(nc, rhobj.Attributes)
-            if rc = Guid.Empty then  RhinoScriptingException.Raise "MakeCurveNonPeriodic failed.4  curveId:'%s' deleteInput:'%A'" (Pretty.str curveId) deleteInput
+            let rc = State.Doc.Objects.AddCurve(curve, rhobj.Attributes)
+            if rc = Guid.Empty then RhinoScriptingException.Raise "MakeCurveNonPeriodic: Unable to add curve to document"
             State.Doc.Views.Redraw()
             rc
 
+    /// <summary>Computes MakeCurveNonPeriodic from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="curveGeo">(Curve) The input curve geometry.</param>
+    /// <returns>(NurbsCurve) The resulting geometry; it is not added to a document.</returns>
+    static member MakeCurveNonPeriodic(curveGeo:Curve) : NurbsCurve =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
+        if not curve.IsPeriodic then RhinoScriptingException.Raise "MakeCurveNonPeriodic: Curve must be periodic"
+        use duplicate = curve.DuplicateCurve()
+        let result = duplicate.ToNurbsCurve()
+        if isNull result || not (result.Knots.ClampEnd(CurveEnd.Both)) then
+            RhinoScriptingException.Raise "MakeCurveNonPeriodic: Unable to clamp curve knots"
+        result
 
     /// <summary>Creates an average Curve from two Curves.</summary>
     /// <param name="curve0">(Guid) identifiers of first Curve</param>
@@ -2275,32 +3079,45 @@ module AutoOpenCurve =
     ///    Angle tolerance used to match kinks between Curves</param>
     /// <returns>(Guid) objectId of the new or modified Curve.</returns>
     static member MeanCurve(curve0:Guid, curve1:Guid, [<OPT;DEF(0.0)>]tolerance:float) : Guid =
-        let curve0 = RhinoScriptSyntax.CoerceCurve curve0
-        let curve1 = RhinoScriptSyntax.CoerceCurve curve1
-        let  tolerance = if tolerance = 0.0 then RhinoMath.UnsetValue else abs (tolerance)
-        let crv = Curve.CreateMeanCurve(curve0, curve1, tolerance)
-        if notNull crv then
-            let rc = State.Doc.Objects.AddCurve(crv)
-            State.Doc.Views.Redraw()
-            rc
-        else
-            RhinoScriptingException.Raise "MeanCurve failed.  curve1:'%A' curve0:'%A' tolerance:'%f'" curve1 curve0 tolerance
+        let curve = RhinoScriptSyntax.MeanCurve(RhinoScriptSyntax.CoerceCurve(curve0), RhinoScriptSyntax.CoerceCurve(curve1), tolerance)
+        let rc = State.Doc.Objects.AddCurve(curve)
+        State.Doc.Views.Redraw()
+        rc
 
+    /// <summary>Computes MeanCurve from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="curve0">(Curve) The input geometry.</param>
+    /// <param name="curve1">(Curve) The input geometry.</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
+    ///    Angle tolerance used to match kinks between Curves</param>
+    /// <returns>(Curve) The resulting geometry; it is not added to a document.</returns>
+    static member MeanCurve(curve0:Curve, curve1:Curve, [<OPT;DEF(0.0)>]tolerance:float) : Curve =
+        let curve0 = RhinoScriptSyntax.DirectCurveInput(curve0, -1)
+        let curve1 = RhinoScriptSyntax.DirectCurveInput(curve1, -1)
+        let tolerance = if tolerance = 0.0 then RhinoMath.UnsetValue else abs tolerance
+        let curve = Curve.CreateMeanCurve(curve0, curve1, tolerance)
+        if isNull curve then RhinoScriptingException.Raise "MeanCurve: Unable to create mean curve"
+        curve
 
     /// <summary>Creates a polygon Mesh object based on a closed Polyline Curve object.
     ///    The created Mesh object is added to the document.</summary>
     /// <param name="polylineId">(Guid) Identifier of the Polyline Curve object</param>
     /// <returns>(Guid) identifier of the new Mesh object.</returns>
     static member MeshPolyline(polylineId:Guid) : Guid =
-        let curve = RhinoScriptSyntax.CoerceCurve polylineId
-        let ispolyline, polyline = curve.TryGetPolyline()
-        if not <| ispolyline then  RhinoScriptingException.Raise "MeshPolyline failed.  polylineId:'%s'" (Pretty.str polylineId)
-        let mesh = Mesh.CreateFromClosedPolyline(polyline)
-        if isNull mesh then  RhinoScriptingException.Raise "MeshPolyline failed.  polylineId:'%s'" (Pretty.str polylineId)
-        let rc = State.Doc.Objects.AddMesh(mesh)
+        let geometry = RhinoScriptSyntax.MeshPolyline(RhinoScriptSyntax.CoerceCurve(polylineId))
+        let rc = State.Doc.Objects.AddMesh(geometry)
         State.Doc.Views.Redraw()
         rc
 
+    /// <summary>Computes MeshPolyline from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="polylineInput">(Curve) The input geometry.</param>
+    /// <returns>(Mesh) The resulting geometry; it is not added to a document.</returns>
+    static member MeshPolyline(polylineInput:Curve) : Mesh =
+        let curve = RhinoScriptSyntax.DirectCurveInput(polylineInput, -1)
+        let ispolyline, polyline = curve.TryGetPolyline()
+        if not <| ispolyline then  RhinoScriptingException.Raise "MeshPolyline failed.  polylineInput:'%s'" (Pretty.str polylineInput)
+        let mesh = Mesh.CreateFromClosedPolyline(polyline)
+        if isNull mesh then  RhinoScriptingException.Raise "MeshPolyline failed.  polylineInput:'%s'" (Pretty.str polylineInput)
+        mesh
 
     /// <summary>Offsets a Curve by a distance. The offset Curve will be added to Rhino.</summary>
     /// <param name="curveId">(Guid) Identifier of a Curve object</param>
@@ -2318,15 +3135,33 @@ module AutoOpenCurve =
     ///    4 = Chamfer</param>
     /// <returns>(Guid ResizeArray) list of ids for the new Curves.</returns>
     static member OffsetCurve(curveId:Guid, direction:Point3d, distance:float, [<OPT;DEF(Vector3d())>]normal:Vector3d, [<OPT;DEF(1)>]style:int) : Guid ResizeArray = //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
+        let curves = RhinoScriptSyntax.OffsetCurve(RhinoScriptSyntax.CoerceCurve(curveId), direction, distance, normal, style)
+        let ids = curves |> RArr.mapSeq State.Doc.Objects.AddCurve
+        ids
+
+    /// <summary>Computes OffsetCurve from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="direction">(Point3d) Point describing direction of the offset</param>
+    /// <param name="distance">(float) Distance of the offset</param>
+    /// <param name="normal">(Vector3d) Optional, default value: <c>Vector3d.ZAxis</c>
+    ///    Normal of the Plane in which the offset will occur.
+    ///    If omitted, the WorldXY Plane will be used</param>
+    /// <param name="style">(int) Optional, default value: <c>1</c>
+    ///    The corner style. If omitted, the style is sharp.
+    ///    0 = None
+    ///    1 = Sharp
+    ///    2 = Round
+    ///    3 = Smooth
+    ///    4 = Chamfer</param>
+    /// <returns>(Curve ResizeArray) The resulting geometry; it is not added to a document.</returns>
+    static member OffsetCurve(curveGeo:Curve, direction:Point3d, distance:float, [<OPT;DEF(Vector3d())>]normal:Vector3d, [<OPT;DEF(1)>]style:int) : Curve ResizeArray = //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
         let normal0 = if normal.IsZero then Vector3d.ZAxis else normal
-        let curve = RhinoScriptSyntax.CoerceCurve curveId
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let stylee:CurveOffsetCornerStyle = EnumOfValue style
         let curves = curve.Offset(direction, normal0, distance, tolerance, stylee)
-        if isNull curves then  RhinoScriptingException.Raise "OffsetCurve failed. curveId:'%s' direction:'%A' distance:'%A' normal:'%A' style:%d" (Pretty.str curveId) direction distance normal style
-        let rc =  curves |> RArr.mapSeq State.Doc.Objects.AddCurve
-        rc
-
+        if isNull curves then  RhinoScriptingException.Raise "OffsetCurve failed. curveGeo:'%s' direction:'%A' distance:'%A' normal:'%A' style:%d" (Pretty.str curveGeo) direction distance normal style
+        ResizeArray(curves)
 
     /// <summary>Offset a Curve on a Surface. The source Curve must lie on the Surface.
     ///    The offset Curve or Curves will be added to Rhino.</summary>
@@ -2335,13 +3170,22 @@ module AutoOpenCurve =
     /// <param name="parameter">(Point2d))  U, V parameter that the Curve will be offset through</param>
     /// <returns>(Guid ResizeArray) identifiers of the new Curves.</returns>
     static member OffsetCurveOnSurfaceUV(curveId:Guid, surfaceId:Guid, parameter:Point2d) : Guid ResizeArray =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
-        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let curves = RhinoScriptSyntax.OffsetCurveOnSurfaceUV(RhinoScriptSyntax.CoerceCurve(curveId), RhinoScriptSyntax.CoerceSurface(surfaceId), parameter)
+        let ids = curves |> RArr.mapSeq State.Doc.Objects.AddCurve
+        ids
+
+    /// <summary>Computes OffsetCurveOnSurfaceUV from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="surfaceGeo">(Surface) The input geometry.</param>
+    /// <param name="parameter">(Point2d))  U, V parameter that the Curve will be offset through</param>
+    /// <returns>(Curve ResizeArray) The resulting geometry; it is not added to a document.</returns>
+    static member OffsetCurveOnSurfaceUV(curveGeo:Curve, surfaceGeo:Surface, parameter:Point2d) : Curve ResizeArray =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
+        let surface = (surfaceGeo)
         let tol = State.Doc.ModelAbsoluteTolerance
         let curves = curve.OffsetOnSurface(surface, parameter, tol)
-        if isNull curves then  RhinoScriptingException.Raise "OffsetCurveOnSurfaceUV failed. curveId:'%s' surfaceId:'%s' parameter:'%A'" (Pretty.str curveId) (Pretty.str surfaceId) parameter
-        let rc = curves  |> RArr.mapSeq  State.Doc.Objects.AddCurve
-        rc
+        if isNull curves then  RhinoScriptingException.Raise "OffsetCurveOnSurfaceUV failed. curveGeo:'%s' surfaceGeo:'%s' parameter:'%A'" (Pretty.str curveGeo) (Pretty.str surfaceGeo) parameter
+        ResizeArray(curves)
 
     /// <summary>Offset a Curve on a Surface. The source Curve must lie on the Surface.
     ///    The offset Curve or Curves will be added to Rhino Document.</summary>
@@ -2351,17 +3195,25 @@ module AutoOpenCurve =
     ///    will offset to the left and a negative value will offset to the right</param>
     /// <returns>(Guid ResizeArray) identifiers of the new Curves.</returns>
     static member OffsetCurveOnSurface(curveId:Guid, surfaceId:Guid, distance:float) : Guid ResizeArray =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
-        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let curves = RhinoScriptSyntax.OffsetCurveOnSurface(RhinoScriptSyntax.CoerceCurve(curveId), RhinoScriptSyntax.CoerceSurface(surfaceId), distance)
+        let ids = curves |> RArr.mapSeq State.Doc.Objects.AddCurve
+        State.Doc.Views.Redraw()
+        ids
+
+    /// <summary>Computes OffsetCurveOnSurface from geometry without modifying the document. Inputs are not modified.</summary>
+    /// <param name="curveGeo">(Curve) The input geometry.</param>
+    /// <param name="surfaceGeo">(Surface) The input geometry.</param>
+    /// <param name="distance">(float)) The distance of the offset. Based on the Curve's direction, a positive value
+    ///    will offset to the left and a negative value will offset to the right</param>
+    /// <returns>(Curve ResizeArray) The resulting geometry; it is not added to a document.</returns>
+    static member OffsetCurveOnSurface(curveGeo:Curve, surfaceGeo:Surface, distance:float) : Curve ResizeArray =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
+        let surface = (surfaceGeo)
         let tol = State.Doc.ModelAbsoluteTolerance
         let curves = curve.OffsetOnSurface(surface, distance, tol)
-        if isNull curves then  RhinoScriptingException.Raise "OffsetCurveOnSurface failed. curveId:'%s' surfaceId:'%s' distance:'%A'" (Pretty.str curveId) (Pretty.str surfaceId) distance
+        if isNull curves then  RhinoScriptingException.Raise "OffsetCurveOnSurface failed. curveGeo:'%s' surfaceGeo:'%s' distance:'%A'" (Pretty.str curveGeo) (Pretty.str surfaceGeo) distance
         let curves = curves  |> RArr.mapSeq (fun curve -> curve.ExtendOnSurface(Rhino.Geometry.CurveEnd.Both, surface) )//https://github.com/mcneel/rhinoscriptsyntax/pull/186
-        let rc = curves  |> RArr.mapSeq  State.Doc.Objects.AddCurve
-        State.Doc.Views.Redraw()
-        rc
-
-
+        curves
 
     ///<summary>Determines the relationship between the regions bounded by two coplanar simple closed Curves.</summary>
     ///<param name="curveA">(Guid) identifier of the first  planar, closed Curve</param>
@@ -2375,8 +3227,22 @@ module AutoOpenCurve =
     ///    2 = the region bounded by CurveA is inside of CurveB
     ///    3 = the region bounded by CurveB is inside of CurveA.</returns>
     static member PlanarClosedCurveContainment(curveA:Guid, curveB:Guid, [<OPT;DEF(Plane())>]plane:Plane, [<OPT;DEF(0.0)>]tolerance:float) : int =
-        let curveA = RhinoScriptSyntax.CoerceCurve curveA
-        let curveB = RhinoScriptSyntax.CoerceCurve curveB
+        RhinoScriptSyntax.PlanarClosedCurveContainment(RhinoScriptSyntax.CoerceCurve(curveA), RhinoScriptSyntax.CoerceCurve(curveB), plane, tolerance)
+
+    ///<summary>Determines the relationship between the regions bounded by two coplanar simple closed Curves. Uses the supplied geometry directly.</summary>
+    ///<param name="curveA">(Curve) The input geometry.</param>
+    ///<param name="curveB">(Curve) The input geometry.</param>
+    ///<param name="plane">(Plane) Optional, default value: <c>Plane.WorldXY</c>
+    ///    Test Plane. If omitted, the Plane.WorldXY Plane is used</param>
+    ///<param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c></param>
+    ///<returns>(int) a number identifying the relationship
+    ///    0 = the regions bounded by the Curves are disjoint
+    ///    1 = the two Curves intersect
+    ///    2 = the region bounded by CurveA is inside of CurveB
+    ///    3 = the region bounded by CurveB is inside of CurveA.</returns>
+    static member PlanarClosedCurveContainment(curveA:Curve, curveB:Curve, [<OPT;DEF(Plane())>]plane:Plane, [<OPT;DEF(0.0)>]tolerance:float) : int =
+        let curveA = RhinoScriptSyntax.DirectCurveInput(curveA, -1)
+        let curveB = RhinoScriptSyntax.DirectCurveInput(curveB, -1)
         let tolerance0 = Util.ifZero2 State.Doc.ModelAbsoluteTolerance tolerance
         let plane0 = if plane.IsValid then plane else Plane.WorldXY
         let rc = Curve.PlanarClosedCurveRelationship(curveA, curveB, plane0, tolerance0)
@@ -2391,8 +3257,18 @@ module AutoOpenCurve =
     ///<param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c></param>
     ///<returns>(bool) True if the Curves intersect; otherwise False.</returns>
     static member PlanarCurveCollision(curveA:Guid, curveB:Guid, [<OPT;DEF(Plane())>]plane:Plane, [<OPT;DEF(0.0)>]tolerance:float) : bool =
-        let curveA = RhinoScriptSyntax.CoerceCurve curveA
-        let curveB = RhinoScriptSyntax.CoerceCurve curveB
+        RhinoScriptSyntax.PlanarCurveCollision(RhinoScriptSyntax.CoerceCurve(curveA), RhinoScriptSyntax.CoerceCurve(curveB), plane, tolerance)
+
+    ///<summary>Determines if two coplanar Curves intersect. Uses the supplied geometry directly.</summary>
+    ///<param name="curveA">(Curve) The input geometry.</param>
+    ///<param name="curveB">(Curve) The input geometry.</param>
+    ///<param name="plane">(Plane) Optional, default value: <c>Plane.WorldXY</c>
+    ///    Test Plane. If omitted, the Plane.WorldXY Plane is used</param>
+    ///<param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c></param>
+    ///<returns>(bool) True if the Curves intersect; otherwise False.</returns>
+    static member PlanarCurveCollision(curveA:Curve, curveB:Curve, [<OPT;DEF(Plane())>]plane:Plane, [<OPT;DEF(0.0)>]tolerance:float) : bool =
+        let curveA = RhinoScriptSyntax.DirectCurveInput(curveA, -1)
+        let curveB = RhinoScriptSyntax.DirectCurveInput(curveB, -1)
         let tolerance0 = Util.ifZero2 State.Doc.ModelAbsoluteTolerance tolerance
         let plane0 = if plane.IsValid then plane else Plane.WorldXY
         Curve.PlanarCurveCollision(curveA, curveB, plane0, tolerance0)
@@ -2410,7 +3286,21 @@ module AutoOpenCurve =
     ///    1 = point is inside of the Curve
     ///    2 = point is on the Curve.</returns>
     static member PointInPlanarClosedCurve(point:Point3d, curve:Guid, [<OPT;DEF(Plane())>]plane:Plane, [<OPT;DEF(0.0)>]tolerance:float) : int =
-        let curve = RhinoScriptSyntax.CoerceCurve curve
+        RhinoScriptSyntax.PointInPlanarClosedCurve(point, RhinoScriptSyntax.CoerceCurve(curve), plane, tolerance)
+
+    ///<summary>Determines if a point is inside of a closed Curve, on a closed Curve, or
+    ///    outside of a closed Curve. Uses the supplied geometry directly.</summary>
+    ///<param name="point">(Point3d) Text point</param>
+    ///<param name="curve">(Curve) The input geometry.</param>
+    ///<param name="plane">(Plane) Optional, default value: <c>Plane.WorldXY</c>
+    ///    Plane containing the closed Curve and point. If omitted, Plane.WorldXY  is used</param>
+    ///<param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c></param>
+    ///<returns>(int) number identifying the result
+    ///    0 = point is outside of the Curve
+    ///    1 = point is inside of the Curve
+    ///    2 = point is on the Curve.</returns>
+    static member PointInPlanarClosedCurve(point:Point3d, curve:Curve, [<OPT;DEF(Plane())>]plane:Plane, [<OPT;DEF(0.0)>]tolerance:float) : int =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curve, -1)
         let tolerance0 = Util.ifZero2 State.Doc.ModelAbsoluteTolerance tolerance
         let plane0 = if plane.IsValid then plane else Plane.WorldXY
         let rc = curve.Contains(point, plane0, tolerance0)
@@ -2427,10 +3317,18 @@ module AutoOpenCurve =
     ///    If `curveId` identifies a PolyCurve object, then `segmentIndex` identifies the Curve segment of the PolyCurve to query</param>
     ///<returns>(int) The number of Curve segments in a PolyCurve.</returns>
     static member PolyCurveCount(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : int =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.PolyCurveCount(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    ///<summary>Returns the number of Curve segments that make up a PolyCurve. Uses the supplied geometry directly.</summary>
+    ///<param name="curveGeo">(Curve) The input geometry.</param>
+    ///<param name="segmentIndex">(int) Optional,
+    ///    If `curveId` identifies a PolyCurve object, then `segmentIndex` identifies the Curve segment of the PolyCurve to query</param>
+    ///<returns>(int) The number of Curve segments in a PolyCurve.</returns>
+    static member PolyCurveCount(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : int =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         match curve with
         | :? PolyCurve as curve ->  curve.SegmentCount
-        | _ -> RhinoScriptingException.Raise "PolyCurveCount: CurveId does not reference a PolyCurve. curveId:'%s' segmentIndex:'%A'" (Pretty.str curveId) segmentIndex
+        | _ -> RhinoScriptingException.Raise "PolyCurveCount: CurveId does not reference a PolyCurve. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
 
 
     ///<summary>Returns the vertices of a Polyline Curve.</summary>
@@ -2439,13 +3337,21 @@ module AutoOpenCurve =
     ///    If CurveId identifies a PolyCurve object, then segmentIndex identifies the Curve segment of the PolyCurve to query</param>
     ///<returns>(Point3d ResizeArray) an list of Point3d vertex points.</returns>
     static member PolylineVertices(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d ResizeArray =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        RhinoScriptSyntax.PolylineVertices(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
+
+    ///<summary>Returns the vertices of a Polyline Curve. Uses the supplied geometry directly.</summary>
+    ///<param name="curveGeo">(Curve) The input geometry.</param>
+    ///<param name="segmentIndex">(int) Optional,
+    ///    If CurveId identifies a PolyCurve object, then segmentIndex identifies the Curve segment of the PolyCurve to query</param>
+    ///<returns>(Point3d ResizeArray) an list of Point3d vertex points.</returns>
+    static member PolylineVertices(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d ResizeArray =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let rc, polyline = curve.TryGetPolyline()
         if rc then
             let pts = ResizeArray(polyline.Count)
             for pt in polyline do pts.Add(pt)
             pts
-        else RhinoScriptingException.Raise "PolylineVertices: CurveId does not <| reference a polyline. curveId:'%s' segmentIndex:'%A'" (Pretty.str curveId) segmentIndex
+        else RhinoScriptingException.Raise "PolylineVertices: CurveId does not <| reference a polyline. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
 
 
     ///<summary>Projects one or more Curves onto one or more Surfaces or Meshes.</summary>
@@ -2454,14 +3360,22 @@ module AutoOpenCurve =
     ///<param name="direction">(Vector3d) Projection direction</param>
     ///<returns>(Guid ResizeArray) list of identifiers for the resulting Curves.</returns>
     static member ProjectCurveToMesh(curveIds:Guid seq, meshIds:Guid seq, direction:Vector3d) : Guid ResizeArray =
-        let curves = curveIds |> RArr.mapSeq RhinoScriptSyntax.CoerceCurve
-        let meshes =  meshIds |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
-        let tolerance = State.Doc.ModelAbsoluteTolerance
-        let newCurves = Curve.ProjectToMesh(curves, meshes, direction, tolerance)
-        let ids =  newCurves  |> RArr.mapSeq  State.Doc.Objects.AddCurve
-        if ids.Count >0 then  State.Doc.Views.Redraw()
+        let curves = RhinoScriptSyntax.ProjectCurveToMesh((curveIds |> Seq.map RhinoScriptSyntax.CoerceCurve), (meshIds |> Seq.map RhinoScriptSyntax.CoerceMesh), direction)
+        let ids = curves |> RArr.mapSeq State.Doc.Objects.AddCurve
+        if ids.Count > 0 then State.Doc.Views.Redraw()
         ids
 
+    ///<summary>Computes ProjectCurveToMesh from geometry without modifying the document. Inputs are not modified.</summary>
+    ///<param name="curveInputs">(Curve seq) The input objects.</param>
+    ///<param name="meshInputs">(Mesh seq) The input objects.</param>
+    ///<param name="direction">(Vector3d) Projection direction</param>
+    ///<returns>(Curve ResizeArray) The resulting curves, without adding them to the document.</returns>
+    static member ProjectCurveToMesh(curveInputs:Curve seq, meshInputs:Mesh seq, direction:Vector3d) : Curve ResizeArray =
+        let curves = curveInputs |> RArr.mapSeq id
+        let meshes =  meshInputs |> RArr.mapSeq id
+        let tolerance = State.Doc.ModelAbsoluteTolerance
+        let newCurves = Curve.ProjectToMesh(curves, meshes, direction, tolerance)
+        ResizeArray(newCurves)
 
     ///<summary>Projects one or more Curves onto one or more Surfaces or Polysurfaces.</summary>
     ///<param name="curveIds">(Guid seq) Identifiers of Curves to project</param>
@@ -2469,14 +3383,22 @@ module AutoOpenCurve =
     ///<param name="direction">(Vector3d) Projection direction</param>
     ///<returns>(Guid ResizeArray) list of identifiers.</returns>
     static member ProjectCurveToSurface(curveIds:Guid seq, surfaceIds:Guid seq, direction:Vector3d) : Guid ResizeArray =
-        let curves = curveIds  |> RArr.mapSeq  RhinoScriptSyntax.CoerceCurve
-        let breps = surfaceIds  |> RArr.mapSeq  RhinoScriptSyntax.CoerceBrep
-        let tolerance = State.Doc.ModelAbsoluteTolerance
-        let newCurves = Curve.ProjectToBrep(curves, breps, direction, tolerance)
-        let ids = newCurves  |> RArr.mapSeq  State.Doc.Objects.AddCurve
-        if ids.Count > 0 then  State.Doc.Views.Redraw()
+        let curves = RhinoScriptSyntax.ProjectCurveToSurface((curveIds |> Seq.map RhinoScriptSyntax.CoerceCurve), (surfaceIds |> Seq.map RhinoScriptSyntax.CoerceBrep), direction)
+        let ids = curves |> RArr.mapSeq State.Doc.Objects.AddCurve
+        if ids.Count > 0 then State.Doc.Views.Redraw()
         ids
 
+    ///<summary>Computes ProjectCurveToSurface from geometry without modifying the document. Inputs are not modified.</summary>
+    ///<param name="curveInputs">(Curve seq) The input objects.</param>
+    ///<param name="surfaceInputs">(Brep seq) The input objects.</param>
+    ///<param name="direction">(Vector3d) Projection direction</param>
+    ///<returns>(Curve ResizeArray) The resulting curves, without adding them to the document.</returns>
+    static member ProjectCurveToSurface(curveInputs:Curve seq, surfaceInputs:Brep seq, direction:Vector3d) : Curve ResizeArray =
+        let curves = curveInputs  |> RArr.mapSeq  id
+        let breps = surfaceInputs  |> RArr.mapSeq  id
+        let tolerance = State.Doc.ModelAbsoluteTolerance
+        let newCurves = Curve.ProjectToBrep(curves, breps, direction, tolerance)
+        ResizeArray(newCurves)
 
     ///<summary>Rebuilds a Curve to a given degree and control point count. For more
     ///    information, see the Rhino help for the Rebuild command.</summary>
@@ -2580,16 +3502,22 @@ module AutoOpenCurve =
     ///    Delete the input Curve</param>
     ///<returns>(Guid ResizeArray) list of new Curves.</returns>
     static member SplitCurve(curveId:Guid, parameter:float seq, [<OPT;DEF(true)>]deleteInput:bool) : Guid ResizeArray =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
-        let newcurves = curve.Split(parameter)
-        if isNull newcurves then  RhinoScriptingException.Raise "SplitCurve failed. curveId:'%s' parameter:'%A' deleteInput:'%A'" (Pretty.str curveId) parameter deleteInput
+        let curves = RhinoScriptSyntax.SplitCurve(RhinoScriptSyntax.CoerceCurve(curveId), parameter)
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(curveId)
-        let rc =  newcurves |> RArr.mapArr (fun crv ->  State.Doc.Objects.AddCurve(crv, rhobj.Attributes) )
-        if deleteInput then
-            State.Doc.Objects.Delete(curveId, quiet=true)|> ignore<bool>
+        let ids = curves |> RArr.mapSeq (fun curve -> State.Doc.Objects.AddCurve(curve, rhobj.Attributes))
+        if deleteInput then State.Doc.Objects.Delete(curveId, quiet=true) |> ignore<bool>
         State.Doc.Views.Redraw()
-        rc
+        ids
 
+    ///<summary>Computes SplitCurve from geometry without modifying the document. Inputs are not modified.</summary>
+    ///<param name="curveGeo">(Curve) The input curve geometry.</param>
+    ///<param name="parameter">(float seq) One or more parameters to split the Curve at</param>
+    ///<returns>(Curve ResizeArray) The resulting curves, without adding them to the document.</returns>
+    static member SplitCurve(curveGeo:Curve, parameter:float seq) : Curve ResizeArray =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
+        let curves = curve.Split(parameter)
+        if isNull curves then RhinoScriptingException.Raise "SplitCurve: Unable to split curve"
+        ResizeArray(curves)
 
     ///<summary>Trims a Curve by removing portions of the Curve outside a specified interval.</summary>
     ///<param name="curveId">(Guid) The Curve to trim</param>
@@ -2602,16 +3530,26 @@ module AutoOpenCurve =
     ///    Delete the input Curve. If omitted the input Curve is deleted</param>
     ///<returns>(Guid) identifier of the new Curve.</returns>
     static member TrimCurve(curveId:Guid, interval:float * float, [<OPT;DEF(true)>]deleteInput:bool) : Guid  =
-        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
-        let newCurve = curve.Trim(fst interval, snd interval)
-        if isNull newCurve then  RhinoScriptingException.Raise "TrimCurve failed. curveId:'%s' interval:'%A' deleteInput:'%A'" (Pretty.str curveId) interval deleteInput
+        let curve = RhinoScriptSyntax.TrimCurve(RhinoScriptSyntax.CoerceCurve(curveId), interval)
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(curveId)
-        let rc = State.Doc.Objects.AddCurve(newCurve, rhobj.Attributes)
-        if deleteInput then
-            State.Doc.Objects.Delete(curveId, quiet=true)|> ignore<bool>
+        let rc = State.Doc.Objects.AddCurve(curve, rhobj.Attributes)
+        if deleteInput then State.Doc.Objects.Delete(curveId, quiet=true) |> ignore<bool>
         State.Doc.Views.Redraw()
         rc
 
+    ///<summary>Computes TrimCurve from geometry without modifying the document. Inputs are not modified.</summary>
+    ///<param name="curveGeo">(Curve) The input curve geometry.</param>
+    ///<param name="interval">(float * float) Two numbers identifying the interval to keep. Portions of
+    ///    the Curve before domain[0] and after domain[1] will be removed. If the
+    ///    input Curve is open, the interval must be increasing. If the input
+    ///    Curve is closed and the interval is decreasing, then the portion of
+    ///    the Curve across the start and end of the Curve is returned</param>
+    ///<returns>(Curve) The trimmed curve, without adding it to the document.</returns>
+    static member TrimCurve(curveGeo:Curve, interval:float * float) : Curve =
+        let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
+        let trimmed = curve.Trim(fst interval, snd interval)
+        if isNull trimmed then RhinoScriptingException.Raise "TrimCurve: Unable to trim curve"
+        trimmed
 
     ///<summary>Changes the degree of a Curve object. For more information see the Rhino help file for the ChangeDegree command.</summary>
     ///<param name="curveId">(Guid) The object's identifier</param>
@@ -2642,8 +3580,31 @@ module AutoOpenCurve =
     ///    The number of samples points to use if method is 2. The default is 10</param>
     ///<returns>(Guid ResizeArray) The identifiers of the new tween objects.</returns>
     static member AddTweenCurves(fromCurveId:Guid, toCurveId:Guid, [<OPT;DEF(1)>]numberOfCurves:int, [<OPT;DEF(0)>]method:int, [<OPT;DEF(10)>]sampleNumber:int) : Guid ResizeArray =
-        let curve0 = RhinoScriptSyntax.CoerceCurve fromCurveId
-        let curve1 = RhinoScriptSyntax.CoerceCurve toCurveId
+        let curves = RhinoScriptSyntax.MakeTweenCurves(RhinoScriptSyntax.CoerceCurve(fromCurveId), RhinoScriptSyntax.CoerceCurve(toCurveId), numberOfCurves, method, sampleNumber)
+        let ids = ResizeArray<Guid>()
+        for curve in curves do
+            let rc = State.Doc.Objects.AddCurve(curve)
+            if rc = Guid.Empty then RhinoScriptingException.Raise "AddTweenCurves: Unable to add curve to document"
+            ids.Add(rc)
+        State.Doc.Views.Redraw()
+        ids
+
+    ///<summary>Computes MakeTweenCurves from geometry without modifying the document. Inputs are not modified.</summary>
+    ///<param name="fromCurve">(Curve) The input geometry.</param>
+    ///<param name="toCurve">(Curve) The input geometry.</param>
+    ///<param name="numberOfCurves">(int) Optional, default value: <c>1</c>
+    ///    The number of Curves to create. The default is 1</param>
+    ///<param name="method">(int) Optional, default value: <c>0</c>
+    ///    The method for refining the output Curves, where:
+    ///    0: (Default) Uses the control points of the Curves for matching. So the first control point of first Curve is matched to first control point of the second Curve.
+    ///    1: Refits the output Curves like using the FitCurve method. Both the input Curve and the output Curve will have the same structure. The resulting Curves are usually more complex than input unless input Curves are compatible.
+    ///    2: Input Curves are divided to the specified number of points on the Curve, corresponding points define new points that output Curves go through. If you are making one tween Curve, the method essentially does the following: divides the two Curves into an equal number of points, finds the midpoint between the corresponding points on the Curves, and interpolates the tween Curve through those points</param>
+    ///<param name="sampleNumber">(int) Optional, default value: <c>10</c>
+    ///    The number of samples points to use if method is 2. The default is 10</param>
+    ///<returns>(Curve ResizeArray) The resulting curves, without adding them to the document.</returns>
+    static member MakeTweenCurves(fromCurve:Curve, toCurve:Curve, [<OPT;DEF(1)>]numberOfCurves:int, [<OPT;DEF(0)>]method:int, [<OPT;DEF(10)>]sampleNumber:int) : Curve ResizeArray =
+        let curve0 = RhinoScriptSyntax.DirectCurveInput(fromCurve, -1)
+        let curve1 = RhinoScriptSyntax.DirectCurveInput(toCurve, -1)
         let mutable outCurves = Array.empty
         let tolerance = State.Doc.ModelAbsoluteTolerance
         if method = 0 then
@@ -2651,16 +3612,10 @@ module AutoOpenCurve =
             outCurves <- Curve.CreateTweenCurvesWithMatching(curve0, curve1, numberOfCurves, tolerance)
         elif method = 2 then
             outCurves <- Curve.CreateTweenCurvesWithSampling(curve0, curve1, numberOfCurves, sampleNumber, tolerance)
-        else RhinoScriptingException.Raise "AddTweenCurves Method must be 0, 1, or 2.  fromCurveId:'%s' toCurveId:'%s' numberOfCurves:'%A' method:'%A' sampleNumber:'%A'"  (Pretty.str fromCurveId) (Pretty.str toCurveId) numberOfCurves method sampleNumber
-        let curves = ResizeArray()
+        else RhinoScriptingException.Raise "MakeTweenCurves Method must be 0, 1, or 2.  fromCurve:'%s' toCurve:'%s' numberOfCurves:'%A' method:'%A' sampleNumber:'%A'"  (Pretty.str fromCurve) (Pretty.str toCurve) numberOfCurves method sampleNumber
+        let curves = ResizeArray<Curve>()
         if notNull outCurves then
             for curve in outCurves do
-                if notNull curve && curve.IsValid then
-                    let rc = State.Doc.Objects.AddCurve(curve)
-                    //curve.Dispose()
-                    if rc = Guid.Empty then  RhinoScriptingException.Raise "AddTweenCurves: Unable to add curve to document.  fromCurveId:'%s' toCurveId:'%s' numberOfCurves:'%A' method:'%A' sampleNumber:'%A'" (Pretty.str fromCurveId) (Pretty.str toCurveId) numberOfCurves method sampleNumber
-                    curves.Add(rc)
-            State.Doc.Views.Redraw()
+                if notNull curve && curve.IsValid then curves.Add(curve)
         curves
-
 
