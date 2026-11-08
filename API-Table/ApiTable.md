@@ -171,7 +171,7 @@ From [Src/Scripting_Application.fs](../Src/Scripting_Application.fs).
 | `PlugIns` | `?types: int = 0 * ?status: int = 0 -> string array` | Returns an array of registered Rhino plug-ins. |
 | `ProjectOsnaps` | `unit -> bool` | Get status of object snap projection. |
 | `ProjectOsnaps` | `enable: bool -> unit` | Enables or disables object snap projection. |
-| `Prompt` | `message: string -> unit` | Change Rhino's command window prompt. |
+| `Prompt` | `?message: string = "" -> unit` | Change Rhino's command window prompt. |
 | `ScreenSize` | `unit -> int * int` | Returns current width and height, of the screen of the primary monitor. |
 | `SdkVersion` | `unit -> int` | Returns version of the Rhino SDK supported by the executing Rhino. |
 | `SearchPathCount` | `unit -> int` | Returns the number of path items in Rhino's search path list. |

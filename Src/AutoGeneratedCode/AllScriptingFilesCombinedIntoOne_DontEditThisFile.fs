@@ -3080,9 +3080,9 @@ type RhinoScriptSyntax private () =
 
 
     /// <summary>Change Rhino's command window prompt.</summary>
-    /// <param name="message">(string) The new prompt on the commandline</param>
+    /// <param name="message">(string) Optional, default value: <c>""</c>. The new prompt; omit to clear it.</param>
     /// <returns>(unit) void, nothing.</returns>
-    static member Prompt(message:string) : unit =
+    static member Prompt([<OPT;DEF("")>]message:string) : unit =
         RhinoSync.DoSync (fun () ->
             RhinoApp.SetCommandPrompt(message))
 
