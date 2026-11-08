@@ -2,7 +2,7 @@
 
 All public types, members and functions of Rhino.Scripting, with the first sentence of their summary.
 
-- The 1574 static members of `RhinoScriptSyntax`, 1038 names with their overloads, have one table per source file,
+- The 1660 static members of `RhinoScriptSyntax`, 1038 names with their overloads, have one table per source file,
   e.g. [Curve](#curve) for `Src/Scripting_Curve.fs`. Scripts usually call them through an alias, `type rs = RhinoScriptSyntax`.
 - Overloads of the same name are in the order of the source.
 - Geometry-only `Make...` methods are listed immediately after their corresponding document-adding `Add...` methods.
@@ -16,10 +16,10 @@ Generated from the sources by `API-Table/ApiTable.fsx`. Do not edit by hand.
 
 **RhinoScriptSyntax**
 
-- [Header](#header), 10 members
+- [Header](#header), 34 members
 - [Application](#application), 79 members
 - [Block](#block), 28 members
-- [Coerce](#coerce), 51 members
+- [Coerce](#coerce), 103 members
 - [Curve](#curve), 247 members
 - [Dimension](#dimension), 70 members
 - [Document](#document), 51 members
@@ -42,7 +42,7 @@ Generated from the sources by `API-Table/ApiTable.fsx`. Do not edit by hand.
 - [Transformation](#transformation), 29 members
 - [UserData](#userdata), 21 members
 - [UserInterface](#userinterface), 42 members
-- [Utility](#utility), 31 members
+- [Utility](#utility), 41 members
 - [Views](#views), 78 members
 
 **Other types, modules and extensions**
@@ -72,8 +72,32 @@ From [Src/Scripting_Header.fs](../Src/Scripting_Header.fs).
 
 | Name | Signature | Summary |
 |:--|:--|:--|
-| `Add` | `geo: 'T * layerIndex: int * ?objectName: string = "" * ?userTextKeysAndValues: (string * string) seq = null * ?stringSafetyCheck: bool = true * ?collapseParents: bool = false -> Guid` | Adds any geometry object (struct or class) to the Rhino document. |
-| `Add` | `geo: 'T * ?layer: string = "" * ?objectName: string = "" * ?userTextKeysAndValues: (string * string) seq = null * ?layerColor: Color = Drawing.Color() * ?stringSafetyCheck: bool = true * ?collapseParents: bool = false -> Guid` | Adds any geometry object (struct or class) to the Rhino document. |
+| `Add` | `geo: GeometryBase * layerIndex: int * ?objectName: string = "" * ?userTextKeysAndValues: (string * string) seq = null * ?stringSafetyCheck: bool = true * ?collapseParents: bool = false -> Guid` | Adds any geometry object that is a subclass of GeometryBase to the Rhino document, such as a Curve, Brep, Mesh or Point. |
+| `Add` | `geo: GeometryBase * ?layer: string = "" * ?objectName: string = "" * ?userTextKeysAndValues: (string * string) seq = null * ?layerColor: Color = Drawing.Color() * ?stringSafetyCheck: bool = true * ?collapseParents: bool = false -> Guid` | Adds any geometry object that is a subclass of GeometryBase to the Rhino document, such as a Curve, Brep, Mesh or Point. |
+| `Add` | `geo: Point3d * layerIndex: int * ?objectName: string = "" * ?userTextKeysAndValues: (string * string) seq = null * ?stringSafetyCheck: bool = true * ?collapseParents: bool = false -> Guid` | Adds a Point3d to the Rhino document as a point object. |
+| `Add` | `geo: Point3d * ?layer: string = "" * ?objectName: string = "" * ?userTextKeysAndValues: (string * string) seq = null * ?layerColor: Color = Drawing.Color() * ?stringSafetyCheck: bool = true * ?collapseParents: bool = false -> Guid` | Adds a Point3d to the Rhino document as a point object. |
+| `Add` | `geo: Point3f * layerIndex: int * ?objectName: string = "" * ?userTextKeysAndValues: (string * string) seq = null * ?stringSafetyCheck: bool = true * ?collapseParents: bool = false -> Guid` | Adds a Point3f to the Rhino document as a point object. |
+| `Add` | `geo: Point3f * ?layer: string = "" * ?objectName: string = "" * ?userTextKeysAndValues: (string * string) seq = null * ?layerColor: Color = Drawing.Color() * ?stringSafetyCheck: bool = true * ?collapseParents: bool = false -> Guid` | Adds a Point3f to the Rhino document as a point object. |
+| `Add` | `geo: Line * layerIndex: int * ?objectName: string = "" * ?userTextKeysAndValues: (string * string) seq = null * ?stringSafetyCheck: bool = true * ?collapseParents: bool = false -> Guid` | Adds a Line to the Rhino document as a line curve. |
+| `Add` | `geo: Line * ?layer: string = "" * ?objectName: string = "" * ?userTextKeysAndValues: (string * string) seq = null * ?layerColor: Color = Drawing.Color() * ?stringSafetyCheck: bool = true * ?collapseParents: bool = false -> Guid` | Adds a Line to the Rhino document as a line curve. |
+| `Add` | `geo: Arc * layerIndex: int * ?objectName: string = "" * ?userTextKeysAndValues: (string * string) seq = null * ?stringSafetyCheck: bool = true * ?collapseParents: bool = false -> Guid` | Adds an Arc to the Rhino document as an arc curve. |
+| `Add` | `geo: Arc * ?layer: string = "" * ?objectName: string = "" * ?userTextKeysAndValues: (string * string) seq = null * ?layerColor: Color = Drawing.Color() * ?stringSafetyCheck: bool = true * ?collapseParents: bool = false -> Guid` | Adds an Arc to the Rhino document as an arc curve. |
+| `Add` | `geo: Circle * layerIndex: int * ?objectName: string = "" * ?userTextKeysAndValues: (string * string) seq = null * ?stringSafetyCheck: bool = true * ?collapseParents: bool = false -> Guid` | Adds a Circle to the Rhino document as a curve. |
+| `Add` | `geo: Circle * ?layer: string = "" * ?objectName: string = "" * ?userTextKeysAndValues: (string * string) seq = null * ?layerColor: Color = Drawing.Color() * ?stringSafetyCheck: bool = true * ?collapseParents: bool = false -> Guid` | Adds a Circle to the Rhino document as a curve. |
+| `Add` | `geo: Ellipse * layerIndex: int * ?objectName: string = "" * ?userTextKeysAndValues: (string * string) seq = null * ?stringSafetyCheck: bool = true * ?collapseParents: bool = false -> Guid` | Adds an Ellipse to the Rhino document as a curve. |
+| `Add` | `geo: Ellipse * ?layer: string = "" * ?objectName: string = "" * ?userTextKeysAndValues: (string * string) seq = null * ?layerColor: Color = Drawing.Color() * ?stringSafetyCheck: bool = true * ?collapseParents: bool = false -> Guid` | Adds an Ellipse to the Rhino document as a curve. |
+| `Add` | `geo: Polyline * layerIndex: int * ?objectName: string = "" * ?userTextKeysAndValues: (string * string) seq = null * ?stringSafetyCheck: bool = true * ?collapseParents: bool = false -> Guid` | Adds a Polyline to the Rhino document as a polyline curve. |
+| `Add` | `geo: Polyline * ?layer: string = "" * ?objectName: string = "" * ?userTextKeysAndValues: (string * string) seq = null * ?layerColor: Color = Drawing.Color() * ?stringSafetyCheck: bool = true * ?collapseParents: bool = false -> Guid` | Adds a Polyline to the Rhino document as a polyline curve. |
+| `Add` | `geo: Box * layerIndex: int * ?objectName: string = "" * ?userTextKeysAndValues: (string * string) seq = null * ?stringSafetyCheck: bool = true * ?collapseParents: bool = false -> Guid` | Adds a Box to the Rhino document. |
+| `Add` | `geo: Box * ?layer: string = "" * ?objectName: string = "" * ?userTextKeysAndValues: (string * string) seq = null * ?layerColor: Color = Drawing.Color() * ?stringSafetyCheck: bool = true * ?collapseParents: bool = false -> Guid` | Adds a Box to the Rhino document. |
+| `Add` | `geo: BoundingBox * layerIndex: int * ?objectName: string = "" * ?userTextKeysAndValues: (string * string) seq = null * ?stringSafetyCheck: bool = true * ?collapseParents: bool = false -> Guid` | Adds a BoundingBox to the Rhino document as a box. |
+| `Add` | `geo: BoundingBox * ?layer: string = "" * ?objectName: string = "" * ?userTextKeysAndValues: (string * string) seq = null * ?layerColor: Color = Drawing.Color() * ?stringSafetyCheck: bool = true * ?collapseParents: bool = false -> Guid` | Adds a BoundingBox to the Rhino document as a box. |
+| `Add` | `geo: Sphere * layerIndex: int * ?objectName: string = "" * ?userTextKeysAndValues: (string * string) seq = null * ?stringSafetyCheck: bool = true * ?collapseParents: bool = false -> Guid` | Adds a Sphere to the Rhino document. |
+| `Add` | `geo: Sphere * ?layer: string = "" * ?objectName: string = "" * ?userTextKeysAndValues: (string * string) seq = null * ?layerColor: Color = Drawing.Color() * ?stringSafetyCheck: bool = true * ?collapseParents: bool = false -> Guid` | Adds a Sphere to the Rhino document. |
+| `Add` | `geo: Cylinder * layerIndex: int * ?objectName: string = "" * ?userTextKeysAndValues: (string * string) seq = null * ?stringSafetyCheck: bool = true * ?collapseParents: bool = false -> Guid` | Adds a Cylinder to the Rhino document as a NURBS surface. |
+| `Add` | `geo: Cylinder * ?layer: string = "" * ?objectName: string = "" * ?userTextKeysAndValues: (string * string) seq = null * ?layerColor: Color = Drawing.Color() * ?stringSafetyCheck: bool = true * ?collapseParents: bool = false -> Guid` | Adds a Cylinder to the Rhino document as a NURBS surface. |
+| `Add` | `geo: Cone * layerIndex: int * ?objectName: string = "" * ?userTextKeysAndValues: (string * string) seq = null * ?stringSafetyCheck: bool = true * ?collapseParents: bool = false -> Guid` | Adds a Cone to the Rhino document as a NURBS surface. |
+| `Add` | `geo: Cone * ?layer: string = "" * ?objectName: string = "" * ?userTextKeysAndValues: (string * string) seq = null * ?layerColor: Color = Drawing.Color() * ?stringSafetyCheck: bool = true * ?collapseParents: bool = false -> Guid` | Adds a Cone to the Rhino document as a NURBS surface. |
 | `Clamp` | `minVal: float * maxVal: float * value: float -> float` | Clamps a value between a lower and an upper bound. |
 | `Doc` | `RhinoDoc` | The current active Rhino document (= the file currently open) |
 | `EscapeTest` | `unit -> unit` | Tests to see if the user has pressed the escape key. |
@@ -210,57 +234,109 @@ From [Src/Scripting_Coerce.fs](../Src/Scripting_Coerce.fs).
 
 | Name | Signature | Summary |
 |:--|:--|:--|
-| `Coerce2dPoint` | `point: 'T -> Point2d` | Convert input into a Rhino.Geometry.Point2d if possible. |
-| `Coerce3dPoint` | `pt: 'T -> Point3d` | Converts input into a Rhino.Geometry.Point3d if possible. |
-| `Coerce3dVector` | `vec: 'T -> Vector3d` | Convert input into a Rhino.Geometry.Vector3d if possible. |
+| `Coerce2dPoint` | `point: Point2d -> Point2d` | Returns the given Point2d. |
+| `Coerce2dPoint` | `point: Point3d -> Point2d` | Converts a Point3d into a Rhino.Geometry.Point2d by dropping its Z coordinate. |
+| `Coerce2dPoint` | `x: float * y: float -> Point2d` | Converts two floats into a Rhino.Geometry.Point2d. |
+| `Coerce3dPoint` | `point: Point3d -> Point3d` | Returns the given Point3d. |
+| `Coerce3dPoint` | `point: Point3f -> Point3d` | Converts a Point3f into a Rhino.Geometry.Point3d. |
+| `Coerce3dPoint` | `x: float * y: float * z: float -> Point3d` | Converts three floats into a Rhino.Geometry.Point3d. |
+| `Coerce3dPoint` | `xyz: float seq -> Point3d` | Converts a sequence of exactly three floats into a Rhino.Geometry.Point3d. |
+| `Coerce3dPoint` | `point: string -> Point3d` | Parses a string into a Rhino.Geometry.Point3d. |
+| `Coerce3dPoint` | `objectId: Guid -> Point3d` | Gets the location of a point object in the document. |
+| `Coerce3dPoint` | `pointObject: PointObject -> Point3d` | Gets the location of a PointObject. |
+| `Coerce3dPoint` | `textDot: TextDot -> Point3d` | Gets the location of a TextDot. |
+| `Coerce3dVector` | `vector: Vector3d -> Vector3d` | Returns the given Vector3d. |
+| `Coerce3dVector` | `vector: Vector3f -> Vector3d` | Converts a Vector3f into a Rhino.Geometry.Vector3d. |
+| `Coerce3dVector` | `x: float * y: float * z: float -> Vector3d` | Converts three floats into a Rhino.Geometry.Vector3d. |
+| `Coerce3dVector` | `xyz: float seq -> Vector3d` | Converts a sequence of exactly three floats into a Rhino.Geometry.Vector3d. |
+| `Coerce3dVector` | `vector: string -> Vector3d` | Parses a string into a Rhino.Geometry.Vector3d. |
+| `Coerce3dVector` | `lineId: Guid -> Vector3d` | Gets the direction of a linear curve object in the document, from its start to its end point. |
 | `CoerceAnnotation` | `objectId: Guid -> AnnotationObjectBase` | Attempt to get Rhino Annotation Base Object. |
-| `CoerceArc` | `arc: 'T -> Arc` | Attempt to get Rhino Arc Geometry using the current Documents Absolute Tolerance. does not return circles as arcs. |
+| `CoerceArc` | `arc: Arc -> Arc` | Returns the given Arc. |
+| `CoerceArc` | `curve: Curve -> Arc` | Gets an Arc from a Curve using the current Documents Absolute Tolerance. |
+| `CoerceArc` | `objectId: Guid -> Arc` | Gets an Arc from a curve object using the current Documents Absolute Tolerance. |
 | `CoerceBlockInstanceObject` | `objectId: Guid -> InstanceObject` | Returns the Rhino Block instance object for a given Id. |
 | `CoerceBrep` | `objectId: Guid -> Brep` | Attempt to get Polysurface geometry from the document with a given objectId. |
-| `CoerceCircle` | `circ: 'T -> Circle` | Attempt to get Rhino Circle Geometry using the current Documents Absolute Tolerance. |
-| `CoerceColor` | `color: 'T -> Color` | Attempt to get a System.Drawing.Color also works on natural language color strings see Drawing.ColorTranslator.FromHtml. |
+| `CoerceCircle` | `circle: Circle -> Circle` | Returns the given Circle. |
+| `CoerceCircle` | `curve: Curve -> Circle` | Gets a Circle from a Curve using the current Documents Absolute Tolerance. |
+| `CoerceCircle` | `objectId: Guid -> Circle` | Gets a Circle from a curve object using the current Documents Absolute Tolerance. |
+| `CoerceColor` | `color: Color -> Color` | Converts a System.Drawing.Color into its ARGB form, so that it is not a named color any more. |
+| `CoerceColor` | `red: int * green: int * blue: int -> Color` | Creates a System.Drawing.Color from red, green and blue values. |
+| `CoerceColor` | `red: int * green: int * blue: int * alpha: int -> Color` | Creates a System.Drawing.Color from red, green, blue and alpha values. |
+| `CoerceColor` | `color: string -> Color` | Parses a System.Drawing.Color from a string, also works on natural language color strings, see Drawing.ColorTranslator.FromHtml. |
 | `CoerceCurve` | `objectId: Guid * ?segmentIndex: int = -1 -> Curve` | Attempt to get Curve geometry from the document with a given objectId. |
 | `CoerceDetailView` | `objectId: Guid -> DetailView` | Attempt to get Detail view rectangle Geometry. |
 | `CoerceDetailViewObject` | `objectId: Guid -> DetailViewObject` | Attempt to get Detail view rectangle Object. |
-| `CoerceEllipse` | `ellipse: 'T -> Ellipse` | Attempt to get Rhino Ellipse Geometry using the current Documents Absolute Tolerance. |
+| `CoerceEllipse` | `ellipse: Ellipse -> Ellipse` | Returns the given Ellipse. |
+| `CoerceEllipse` | `curve: Curve -> Ellipse` | Gets an Ellipse from a Curve using the current Documents Absolute Tolerance. |
+| `CoerceEllipse` | `objectId: Guid -> Ellipse` | Gets an Ellipse from a curve object using the current Documents Absolute Tolerance. |
 | `CoerceGeometry` | `objectId: Guid -> GeometryBase` | Attempt to get GeometryBase from a given input. |
-| `CoerceGuid` | `input: 'T -> Guid` | Attempt to get a Guid from input. |
+| `CoerceGuid` | `objectId: Guid -> Guid` | Checks that a Guid is not empty. |
+| `CoerceGuid` | `input: string -> Guid` | Parses a Guid from a string. |
+| `CoerceGuid` | `rhinoObject: RhinoObject -> Guid` | Gets the Guid of a RhinoObject. |
+| `CoerceGuid` | `objRef: ObjRef -> Guid` | Gets the Guid of the object an ObjRef refers to. |
 | `CoerceHatch` | `objectId: Guid -> Hatch` | Attempt to get Hatch Geometry. |
 | `CoerceHatchObject` | `objectId: Guid -> HatchObject` | Attempt to get Rhino Hatch Object. |
 | `CoerceLayer` | `name: string -> Layer` | Attempt to get Rhino LayerObject from the document for a given full name. |
 | `CoerceLayer` | `layerId: Guid -> Layer` | Attempt to get Rhino LayerObject from the document with a given objectId. |
 | `CoerceLeader` | `objectId: Guid -> LeaderObject` | Attempt to get Rhino Leader Annotation Object. |
 | `CoerceLight` | `objectId: Guid -> Light` | Attempt to get Rhino LightObject from the document with a given objectId. |
-| `CoerceLine` | `line: 'T -> Line` | Attempt to get Rhino Line Geometry using the current Documents Absolute Tolerance. |
+| `CoerceLine` | `line: Line -> Line` | Returns the given Line. |
+| `CoerceLine` | `curve: Curve -> Line` | Gets a Line from a Curve that is linear within the current Documents Absolute Tolerance. |
+| `CoerceLine` | `objectId: Guid -> Line` | Gets a Line from a curve object that is linear within the current Documents Absolute Tolerance. |
+| `CoerceLine` | `startPoint: Point3d * endPoint: Point3d -> Line` | Gets a Line from its start and end point. |
 | `CoerceLinearDimension` | `objectId: Guid -> LinearDimensionObject` | Attempt to get Rhino LinearDimension Annotation Object. |
 | `CoerceMesh` | `objectId: Guid -> Mesh` | Attempt to get Mesh geometry from the document with a given objectId. |
 | `CoerceNurbsSurface` | `objectId: Guid -> NurbsSurface` | Attempt to get Surface geometry from the document with a given objectId. |
-| `CoercePageView` | `input: 'T -> RhinoPageView` | Attempt to get Rhino Page (or Layout) View Object from the name of the Layout. |
-| `CoercePlane` | `plane: 'T -> Plane` | Convert input into a Rhino.Geometry.Plane if possible. |
+| `CoercePageView` | `viewId: Guid -> RhinoPageView` | Gets a Rhino Page (or Layout) View from its Guid. |
+| `CoercePageView` | `pageName: string -> RhinoPageView` | Gets a Rhino Page (or Layout) View from the name of the Layout. |
+| `CoercePlane` | `plane: Plane -> Plane` | Returns the given Plane. |
+| `CoercePlane` | `origin: Point3d -> Plane` | Creates a Plane parallel to the World XY plane at the given origin. |
+| `CoercePlane` | `x: float * y: float * z: float -> Plane` | Creates a Plane parallel to the World XY plane at the given origin. |
 | `CoercePointCloud` | `objectId: Guid -> PointCloud` | Attempt to get Rhino PointCloud Geometry. |
 | `CoercePointObject` | `objectId: Guid -> PointObject` | Attempt to get Rhino Point Object. |
-| `CoercePolyline` | `poly: 'T -> Polyline` | Attempt to get Rhino Polyline Geometry. |
+| `CoercePolyline` | `polyline: Polyline -> Polyline` | Returns the given Polyline. |
+| `CoercePolyline` | `curve: Curve -> Polyline` | Gets a Polyline from a Curve. |
+| `CoercePolyline` | `objectId: Guid -> Polyline` | Gets a Polyline from a curve object. |
 | `CoerceRhinoObject` | `objectId: Guid -> RhinoObject` | Attempt to get a RhinoObject from the document with a given objectId. |
 | `CoerceSurface` | `objectId: Guid -> Surface` | Attempt to get Surface geometry from the document with a given objectId. |
 | `CoerceTextDot` | `objectId: Guid -> TextDot` | Attempt to get TextDot Geometry. |
 | `CoerceTextEntity` | `objectId: Guid -> TextEntity` | Attempt to get TextEntity Geometry (for the text Object use rs.CoerceTextObject) . |
 | `CoerceTextObject` | `objectId: Guid -> TextObject` | Attempt to get Rhino TextObject Annotation Object. |
-| `CoerceView` | `input: 'T -> RhinoView` | Attempt to get Rhino View Object from the name of the view, can be a standard or page view. |
-| `CoerceXform` | `xForm: 'T -> Transform` | Convert input into a Rhino.Geometry.Transform Transformation Matrix if possible. |
-| `TryCoerceArc` | `arc: 'T -> Arc option` | Attempt to get Rhino Arc Geometry using the current Documents Absolute Tolerance. does not return circles as arcs. |
+| `CoerceView` | `viewId: Guid -> RhinoView` | Gets a Rhino View from its Guid, it can be a standard or page view. |
+| `CoerceView` | `viewName: string -> RhinoView` | Gets a Rhino View from its name, it can be a standard or page view. |
+| `CoerceXform` | `xForm: Transform -> Transform` | Returns the given Transform. |
+| `CoerceXform` | `xForm: 'a seq -> Transform` | Converts a 4x4 matrix of floats into a Rhino.Geometry.Transform Transformation Matrix. |
+| `CoerceXform` | `xForm: float array2d -> Transform` | Converts a 4x4 matrix of floats into a Rhino.Geometry.Transform Transformation Matrix. |
+| `TryCoerceArc` | `arc: Arc -> Arc option` | Returns the given Arc. |
+| `TryCoerceArc` | `curve: Curve -> Arc option` | Attempt to get an Arc from a Curve using the current Documents Absolute Tolerance. |
+| `TryCoerceArc` | `objectId: Guid -> Arc option` | Attempt to get an Arc from a curve object using the current Documents Absolute Tolerance. |
 | `TryCoerceBrep` | `objectId: Guid -> Brep option` | Attempt to get a Polysurface or Brep class from given Guid. |
-| `TryCoerceCircle` | `cir: 'T -> Circle option` | Attempt to get Rhino Circle Geometry using the current Documents Absolute Tolerance. |
+| `TryCoerceCircle` | `circle: Circle -> Circle option` | Returns the given Circle. |
+| `TryCoerceCircle` | `curve: Curve -> Circle option` | Attempt to get a Circle from a Curve using the current Documents Absolute Tolerance. |
+| `TryCoerceCircle` | `objectId: Guid -> Circle option` | Attempt to get a Circle from a curve object using the current Documents Absolute Tolerance. |
 | `TryCoerceCurve` | `objectId: Guid * ?segmentIndex: int = -1 -> Curve option` | Attempt to get Curve geometry from the document with a given objectId. |
-| `TryCoerceEllipse` | `cir: 'T -> Ellipse option` | Attempt to get Rhino Ellipse Geometry using the current Documents Absolute Tolerance. |
+| `TryCoerceEllipse` | `ellipse: Ellipse -> Ellipse option` | Returns the given Ellipse. |
+| `TryCoerceEllipse` | `curve: Curve -> Ellipse option` | Attempt to get an Ellipse from a Curve using the current Documents Absolute Tolerance. |
+| `TryCoerceEllipse` | `objectId: Guid -> Ellipse option` | Attempt to get an Ellipse from a curve object using the current Documents Absolute Tolerance. |
 | `TryCoerceGeometry` | `objectId: Guid -> GeometryBase option` | Attempt to get GeometryBase from a given Guid. |
-| `TryCoerceGuid` | `input: 'T -> Guid option` | Attempt to get a Guid from input. |
+| `TryCoerceGuid` | `objectId: Guid -> Guid option` | Attempt to get a Guid that is not empty. |
+| `TryCoerceGuid` | `input: string -> Guid option` | Attempt to parse a Guid from a string. |
+| `TryCoerceGuid` | `rhinoObject: RhinoObject -> Guid option` | Attempt to get the Guid of a RhinoObject. |
+| `TryCoerceGuid` | `objRef: ObjRef -> Guid option` | Attempt to get the Guid of the object an ObjRef refers to. |
 | `TryCoerceLight` | `objectId: Guid -> Light option` | Attempt to get Rhino LightObject from the document with a given objectId. |
-| `TryCoerceLine` | `line: 'T -> Line option` | Attempt to get Rhino Line Geometry using the current Documents Absolute Tolerance. |
+| `TryCoerceLine` | `line: Line -> Line option` | Returns the given Line. |
+| `TryCoerceLine` | `curve: Curve -> Line option` | Attempt to get a Line from a Curve that is linear within the current Documents Absolute Tolerance. |
+| `TryCoerceLine` | `objectId: Guid -> Line option` | Attempt to get a Line from a curve object that is linear within the current Documents Absolute Tolerance. |
+| `TryCoerceLine` | `startPoint: Point3d * endPoint: Point3d -> Line option` | Gets a Line from its start and end point. |
 | `TryCoerceMesh` | `objectId: Guid -> Mesh option` | Attempt to get Mesh class from given Guid. |
-| `TryCoercePolyline` | `poly: 'T -> Polyline option` | Attempt to get Rhino Polyline Geometry. |
+| `TryCoercePolyline` | `polyline: Polyline -> Polyline option` | Returns the given Polyline. |
+| `TryCoercePolyline` | `curve: Curve -> Polyline option` | Attempt to get a Polyline from a Curve. |
+| `TryCoercePolyline` | `objectId: Guid -> Polyline option` | Attempt to get a Polyline from a curve object. |
 | `TryCoerceRhinoObject` | `objectId: Guid -> RhinoObject option` | Attempt to get a RhinoObject from the document with a given objectId. |
 | `TryCoerceSurface` | `objectId: Guid -> Surface option` | Attempt to get Surface class from given Guid. |
-| `TryCoerceView` | `input: 'T -> Option<RhinoView>` | Attempt to get Rhino View Object from the name of the view, can be a standard or page view. |
+| `TryCoerceView` | `viewId: Guid -> Option<RhinoView>` | Attempt to get a Rhino View from its Guid, it can be a standard or page view. |
+| `TryCoerceView` | `viewName: string -> Option<RhinoView>` | Attempt to get a Rhino View from its name, it can be a standard or page view. |
 
 ## Curve
 
@@ -1735,11 +1811,21 @@ From [Src/Scripting_Utility.fs](../Src/Scripting_Utility.fs).
 | `CreateColor` | `red: byte * green: byte * blue: byte -> Color` | Creates a RGB color from red, green and blue values as Bytes. |
 | `CreateInterval` | `start: float * ende: float -> Interval` | Converts input into a Rhino.Geometry.Interval. |
 | `CreatePlane` | `origin: Point3d * ?xAxis: Vector3d = Vector3d() * ?yAxis: Vector3d = Vector3d() -> Plane` | Converts input into a Rhino.Geometry.Plane object if possible. |
-| `CreatePoint` | `point: 'T -> Point3d` | Converts 'point' into a Rhino.Geometry.Point3d if possible. |
-| `CreatePoint` | `x: 'T * y: 'T * z: 'T -> Point3d` | Converts x, y and z into a Rhino.Geometry.Point3d if possible. |
-| `CreateVector` | `vector: 'T -> Vector3d` | Converts 'Vector' into a Rhino.Geometry.Vector3d if possible. |
-| `CreateVector` | `x: 'T * y: 'T * z: 'T -> Vector3d` | Converts x, y and z into a Rhino.Geometry.Vector3d if possible. |
-| `CreateXform` | `xForm: float seq seq -> Transform` | Converts input into a Rhino.Geometry.Transform object if possible. |
+| `CreatePoint` | `point: Point3d -> Point3d` | Returns the given Point3d. |
+| `CreatePoint` | `point: Point3f -> Point3d` | Converts a Point3f into a Rhino.Geometry.Point3d. |
+| `CreatePoint` | `x: float * y: float * z: float -> Point3d` | Converts x, y and z into a Rhino.Geometry.Point3d. |
+| `CreatePoint` | `xyz: float seq -> Point3d` | Converts a sequence of exactly three floats into a Rhino.Geometry.Point3d. |
+| `CreatePoint` | `point: string -> Point3d` | Parses a string into a Rhino.Geometry.Point3d. |
+| `CreatePoint` | `objectId: Guid -> Point3d` | Gets the location of a point object in the document. |
+| `CreatePoint` | `pointObject: PointObject -> Point3d` | Gets the location of a PointObject. |
+| `CreatePoint` | `textDot: TextDot -> Point3d` | Gets the location of a TextDot. |
+| `CreateVector` | `vector: Vector3d -> Vector3d` | Returns the given Vector3d. |
+| `CreateVector` | `vector: Vector3f -> Vector3d` | Converts a Vector3f into a Rhino.Geometry.Vector3d. |
+| `CreateVector` | `x: float * y: float * z: float -> Vector3d` | Converts x, y and z into a Rhino.Geometry.Vector3d. |
+| `CreateVector` | `xyz: float seq -> Vector3d` | Converts a sequence of exactly three floats into a Rhino.Geometry.Vector3d. |
+| `CreateVector` | `vector: string -> Vector3d` | Parses a string into a Rhino.Geometry.Vector3d. |
+| `CreateVector` | `lineId: Guid -> Vector3d` | Gets the direction of a linear curve object in the document, from its start to its end point. |
+| `CreateXform` | `xForm: 'a seq -> Transform` | Converts input into a Rhino.Geometry.Transform object if possible. |
 | `CullDuplicateNumbers` | `numbers: float seq * ?tolerance: float = 0.0 -> ResizeArray<float>` | Removes duplicates from an array of numbers. |
 | `CullDuplicatePoints` | `points: Point3d seq * ?tolerance: float = 0.0 -> Point3d array` | Removes duplicates from a list of 3D points. |
 | `Distance` | `point1: Point3d * point2: Point3d -> float` | Measures distance between two 3D points. |

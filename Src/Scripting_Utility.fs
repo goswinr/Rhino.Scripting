@@ -351,33 +351,97 @@ module AutoOpenUtility =
         RhinoScriptSyntax.Coerce3dPoint point
 
 
-    /// <summary>Converts 'point' into a Rhino.Geometry.Point3d if possible.</summary>
-    /// <param name="point">('T) any value that can be converted or parsed to a point</param>
-    /// <returns>(Point3d) a Rhino.Geometry.Point3d.</returns>
-    static member CreatePoint(point:'T ) : Point3d =
+    /// <summary>Returns the given Point3d. This overload exists so that CreatePoint accepts a Point3d too.</summary>
+    /// <param name="point">(Point3d) The point.</param>
+    /// <returns>(Point3d) The same point.</returns>
+    static member CreatePoint(point:Point3d) : Point3d =
+        point
+
+    /// <summary>Converts a Point3f into a Rhino.Geometry.Point3d.</summary>
+    /// <param name="point">(Point3f) The single precision point.</param>
+    /// <returns>(Point3d) The double precision point.</returns>
+    static member CreatePoint(point:Point3f) : Point3d =
         RhinoScriptSyntax.Coerce3dPoint point
 
-    /// <summary>Converts x, y and z into a Rhino.Geometry.Point3d if possible.</summary>
-    /// <param name="x">('T) any value that can be converted or parsed to X coordinate</param>
-    /// <param name="y">('T) any value that can be converted or parsed to Y coordinate</param>
-    /// <param name="z">('T) any value that can be converted or parsed to Z coordinate</param>
-    /// <returns>(Point3d) a Rhino.Geometry.Point3d.</returns>
-    static member CreatePoint(x:'T, y:'T, z:'T ) : Point3d =
-        RhinoScriptSyntax.Coerce3dPoint ((x, y, z))
+    /// <summary>Converts x, y and z into a Rhino.Geometry.Point3d.</summary>
+    /// <param name="x">(float) The X coordinate.</param>
+    /// <param name="y">(float) The Y coordinate.</param>
+    /// <param name="z">(float) The Z coordinate.</param>
+    /// <returns>(Point3d) The point.</returns>
+    static member CreatePoint(x:float, y:float, z:float) : Point3d =
+        Point3d(x, y, z)
+
+    /// <summary>Converts a sequence of exactly three floats into a Rhino.Geometry.Point3d.</summary>
+    /// <param name="xyz">(float seq) The X, Y and Z coordinates.</param>
+    /// <returns>(Point3d) The point. Raises a RhinoScriptingException if the sequence is null or does not have exactly three items.</returns>
+    static member CreatePoint(xyz:seq<float>) : Point3d =
+        RhinoScriptSyntax.Coerce3dPoint xyz
+
+    /// <summary>Parses a string into a Rhino.Geometry.Point3d.</summary>
+    /// <param name="point">(string) Three numbers separated by commas, like "1, 2, 3",
+    ///    or by semicolons if the decimal separator is a comma, like "1,5; 2,5; 3,5".</param>
+    /// <returns>(Point3d) The point. Raises a RhinoScriptingException if the string can not be parsed.</returns>
+    static member CreatePoint(point:string) : Point3d =
+        RhinoScriptSyntax.Coerce3dPoint point
+
+    /// <summary>Gets the location of a point object in the document.</summary>
+    /// <param name="objectId">(Guid) The identifier of a point object.</param>
+    /// <returns>(Point3d) The location of the point. Raises a RhinoScriptingException if the object does not exist or is not a point.</returns>
+    static member CreatePoint(objectId:Guid) : Point3d =
+        RhinoScriptSyntax.Coerce3dPoint objectId
+
+    /// <summary>Gets the location of a PointObject.</summary>
+    /// <param name="pointObject">(DocObjects.PointObject) The point object.</param>
+    /// <returns>(Point3d) The location of the point. Raises a RhinoScriptingException if the PointObject is null.</returns>
+    static member CreatePoint(pointObject:DocObjects.PointObject) : Point3d =
+        RhinoScriptSyntax.Coerce3dPoint pointObject
+
+    /// <summary>Gets the location of a TextDot.</summary>
+    /// <param name="textDot">(TextDot) The TextDot.</param>
+    /// <returns>(Point3d) The location of the TextDot. Raises a RhinoScriptingException if the TextDot is null.</returns>
+    static member CreatePoint(textDot:TextDot) : Point3d =
+        RhinoScriptSyntax.Coerce3dPoint textDot
 
 
-    /// <summary>Converts 'Vector' into a Rhino.Geometry.Vector3d if possible.</summary>
-    /// <param name="vector">('T) any value that can be converted or parsed to a Vector</param>
-    /// <returns>(Vector3d) a Rhino.Geometry.Vector3d.</returns>
-    static member CreateVector(vector:'T ) : Vector3d =
+    /// <summary>Returns the given Vector3d. This overload exists so that CreateVector accepts a Vector3d too.</summary>
+    /// <param name="vector">(Vector3d) The vector.</param>
+    /// <returns>(Vector3d) The same vector.</returns>
+    static member CreateVector(vector:Vector3d) : Vector3d =
+        vector
+
+    /// <summary>Converts a Vector3f into a Rhino.Geometry.Vector3d.</summary>
+    /// <param name="vector">(Vector3f) The single precision vector.</param>
+    /// <returns>(Vector3d) The double precision vector.</returns>
+    static member CreateVector(vector:Vector3f) : Vector3d =
         RhinoScriptSyntax.Coerce3dVector vector
-    /// <summary>Converts x, y and z into a Rhino.Geometry.Vector3d if possible.</summary>
-    /// <param name="x">('T) any value that can be converted or parsed to X coordinate</param>
-    /// <param name="y">('T) any value that can be converted or parsed to Y coordinate</param>
-    /// <param name="z">('T) any value that can be converted or parsed to Z coordinate</param>
-    /// <returns>(Vector3d) a Rhino.Geometry.Vector3d.</returns>
-    static member CreateVector(x:'T, y:'T, z:'T ) : Vector3d =
-        RhinoScriptSyntax.Coerce3dVector ((x, y, z))
+
+    /// <summary>Converts x, y and z into a Rhino.Geometry.Vector3d.</summary>
+    /// <param name="x">(float) The X component.</param>
+    /// <param name="y">(float) The Y component.</param>
+    /// <param name="z">(float) The Z component.</param>
+    /// <returns>(Vector3d) The vector.</returns>
+    static member CreateVector(x:float, y:float, z:float) : Vector3d =
+        Vector3d(x, y, z)
+
+    /// <summary>Converts a sequence of exactly three floats into a Rhino.Geometry.Vector3d.</summary>
+    /// <param name="xyz">(float seq) The X, Y and Z components.</param>
+    /// <returns>(Vector3d) The vector. Raises a RhinoScriptingException if the sequence is null or does not have exactly three items.</returns>
+    static member CreateVector(xyz:seq<float>) : Vector3d =
+        RhinoScriptSyntax.Coerce3dVector xyz
+
+    /// <summary>Parses a string into a Rhino.Geometry.Vector3d.</summary>
+    /// <param name="vector">(string) Three numbers separated by commas, like "1, 2, 3",
+    ///    or by semicolons if the decimal separator is a comma, like "1,5; 2,5; 3,5".</param>
+    /// <returns>(Vector3d) The vector. Raises a RhinoScriptingException if the string can not be parsed.</returns>
+    static member CreateVector(vector:string) : Vector3d =
+        RhinoScriptSyntax.Coerce3dVector vector
+
+    /// <summary>Gets the direction of a linear curve object in the document, from its start to its end point.</summary>
+    /// <param name="lineId">(Guid) The identifier of a curve object that is linear within the current Documents Absolute Tolerance.</param>
+    /// <returns>(Vector3d) The direction of the line, its length is the length of the line.
+    ///    Raises a RhinoScriptingException if the object does not exist, is not a curve, or is not linear.</returns>
+    static member CreateVector(lineId:Guid) : Vector3d =
+        RhinoScriptSyntax.Coerce3dVector lineId
 
 
 
@@ -396,9 +460,9 @@ module AutoOpenUtility =
 
 
     /// <summary>Converts input into a Rhino.Geometry.Transform object if possible.</summary>
-    /// <param name="xForm">(float seq seq) The transform. This can be seen as a 4x4 matrix, given as nested lists</param>
+    /// <param name="xForm">(float seq seq) The transform. This can be seen as a 4x4 matrix, given row by row as nested lists or arrays</param>
     /// <returns>(Transform) A Rhino.Geometry.Transform. result[0, 3] gives access to the first row, last column.</returns>
-    static member CreateXform(xForm:seq<seq<float>>) : Transform =
+    static member CreateXform(xForm:seq<#seq<float>>) : Transform =
         RhinoScriptSyntax.CoerceXform(xForm) // TODO verify row, column order !!
 
 
