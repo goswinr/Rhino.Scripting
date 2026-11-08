@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- JoinSurfacesAll returns every joined result, restoring RhinoPython's return_all mode while JoinSurfaces continues to require one result; document inputs are retained if adding any result fails.
 - MatchMaterial accepts a material-table index as well as a source object identifier, restoring the index-based RhinoPython operation.
 - GetObjectRef returns the picked ObjRef, retaining selected subobject information; GetObject keeps its Guid return and shares the picking implementation.
 - MeshArea accepts collections of mesh identifiers or geometry and returns their total area, retaining the documented scalar return design.

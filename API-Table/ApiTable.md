@@ -2,7 +2,7 @@
 
 All public types, members and functions of Rhino.Scripting, with the first sentence of their summary.
 
-- The 1683 static members of `RhinoScriptSyntax`, 1040 names with their overloads, have one table per source file,
+- The 1685 static members of `RhinoScriptSyntax`, 1041 names with their overloads, have one table per source file,
   e.g. [Curve](#curve) for `Src/Scripting_Curve.fs`. Scripts usually call them through an alias, `type rs = RhinoScriptSyntax`.
 - Overloads of the same name are in the order of the source.
 - Geometry-only `Make...` methods are listed immediately after their corresponding document-adding `Add...` methods.
@@ -37,7 +37,7 @@ Generated from the sources by `API-Table/ApiTable.fsx`. Do not edit by hand.
 - [Plane](#plane), 21 members
 - [PointVector](#pointvector), 37 members
 - [Selection](#selection), 26 members
-- [Surface](#surface), 212 members
+- [Surface](#surface), 214 members
 - [Toolbar](#toolbar), 15 members
 - [Transformation](#transformation), 29 members
 - [UserData](#userdata), 21 members
@@ -1586,6 +1586,8 @@ From [Src/Scripting_Surface.fs](../Src/Scripting_Surface.fs).
 | `IsTorus` | `surfaceGeo: Surface -> bool` | Determines if a Surface is a portion of a torus. |
 | `JoinSurfaces` | `objectIds: Guid seq * ?deleteInput: bool = false -> Guid` | Joins two or more Surface or Polysurface objects together to form one Polysurface object. |
 | `JoinSurfaces` | `geometryObjects: Brep seq -> Brep` | Joins two or more Surface or Polysurface objects together to form one Polysurface object. |
+| `JoinSurfacesAll` | `geometryObjects: Brep seq -> ResizeArray<Brep>` | Joins surfaces and returns every resulting Brep, including disconnected results. |
+| `JoinSurfacesAll` | `objectIds: Guid seq * ?deleteInput: bool = false -> ResizeArray<Guid>` | Joins surface objects and adds every resulting Brep, including disconnected results. |
 | `MakeSurfacePeriodic` | `surfaceId: Guid * direction: int * ?deleteInput: bool = false -> Guid` | Makes an existing Surface a periodic NURBS Surface. |
 | `MakeSurfacePeriodic` | `surfaceGeo: Surface * direction: int -> Surface` | Makes an existing Surface a periodic NURBS Surface. |
 | `OffsetSurface` | `surfaceId: Guid * distance: float * ?tolerance: float = 0.0 * ?bothSides: bool = false * ?createSolid: bool = false -> Guid` | Offsets a trimmed or untrimmed Surface by a distance. |

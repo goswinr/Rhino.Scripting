@@ -19166,6 +19166,42 @@ type RhinoScriptSyntax private () =
         joined.[0]
 
 
+    /// <summary>Joins surfaces and returns every resulting Brep, including disconnected results.</summary>
+    /// <param name="geometryObjects">(Brep seq) At least two surfaces or polysurfaces.</param>
+    /// <returns>(Brep ResizeArray) The joined results. The caller owns and must dispose the returned geometry.</returns>
+    static member JoinSurfacesAll(geometryObjects:Brep seq) : Brep ResizeArray =
+        let breps = geometryObjects |> Seq.toArray
+        if breps.Length < 2 then RhinoScriptingException.Raise "JoinSurfacesAll: at least two Breps are required."
+        let joined = Brep.JoinBreps(breps, State.Doc.ModelAbsoluteTolerance * 2.1)
+        if isNull joined || joined.Length = 0 then RhinoScriptingException.Raise "JoinSurfacesAll: operation produced no results."
+        ResizeArray(joined)
+
+    /// <summary>Joins surface objects and adds every resulting Brep, including disconnected results.</summary>
+    /// <param name="objectIds">(Guid seq) Identifiers of at least two surfaces or polysurfaces.</param>
+    /// <param name="deleteInput">(bool) Optional, default value: <c>false</c>. Delete inputs only after all results have been added.</param>
+    /// <returns>(Guid ResizeArray) Identifiers of all results, corresponding to RhinoPython JoinSurfaces with return_all=True.</returns>
+    static member JoinSurfacesAll(objectIds:Guid seq, [<OPT;DEF(false)>]deleteInput:bool) : Guid ResizeArray =
+        let objectIds = objectIds |> Seq.toArray
+        let breps = objectIds |> Seq.map RhinoScriptSyntax.CoerceBrep
+        let joined = RhinoScriptSyntax.JoinSurfacesAll(breps)
+        let ids = ResizeArray<Guid>()
+        try
+            try
+                for brep in joined do
+                    let id = State.Doc.Objects.AddBrep(brep)
+                    if id = Guid.Empty then RhinoScriptingException.Raise "JoinSurfacesAll: unable to add a result to the document."
+                    ids.Add(id)
+            with _ ->
+                for id in ids do State.Doc.Objects.Delete(id, true) |> ignore<bool>
+                reraise()
+        finally
+            for brep in joined do brep.Dispose()
+        if deleteInput then
+            for id in objectIds do State.Doc.Objects.Delete(id, true) |> ignore<bool>
+        State.Doc.Views.Redraw()
+        ids
+
+
     /// <summary>Makes an existing Surface a periodic NURBS Surface.</summary>
     /// <param name="surfaceId">(Guid) The Surface's identifier</param>
     /// <param name="direction">(int) The direction to make periodic, either
