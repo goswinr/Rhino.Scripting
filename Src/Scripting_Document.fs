@@ -578,6 +578,28 @@ module AutoOpenDocument =
         RhinoMath.UnitScale(fromSystem, toSystem)
 
 
+    /// <summary>Returns the scale factor for changing between unit systems.</summary>
+    /// <param name="toSystem">(Rhino.UnitSystem) The destination unit system.</param>
+    /// <param name="fromSystem">(Rhino.UnitSystem) The source unit system.</param>
+    /// <returns>(float) The scale factor from the source units to the destination units.</returns>
+    static member UnitScale(toSystem:Rhino.UnitSystem, fromSystem:Rhino.UnitSystem) : float =
+        RhinoScriptSyntax.UnitScale(int toSystem, int fromSystem)
+
+    /// <summary>Returns the scale factor for changing between unit systems.</summary>
+    /// <param name="toSystem">(Rhino.UnitSystem) The destination unit system.</param>
+    /// <param name="fromSystem">(int) The source unit-system value.</param>
+    /// <returns>(float) The scale factor from the source units to the destination units.</returns>
+    static member UnitScale(toSystem:Rhino.UnitSystem, fromSystem:int) : float =
+        RhinoScriptSyntax.UnitScale(int toSystem, fromSystem)
+
+    /// <summary>Returns the scale factor for changing between unit systems.</summary>
+    /// <param name="toSystem">(int) The destination unit-system value.</param>
+    /// <param name="fromSystem">(Rhino.UnitSystem) The source unit system.</param>
+    /// <returns>(float) The scale factor from the source units to the destination units.</returns>
+    static member UnitScale(toSystem:int, fromSystem:Rhino.UnitSystem) : float =
+        RhinoScriptSyntax.UnitScale(toSystem, int fromSystem)
+
+
     /// <summary>Return the document's unit system. See Rhino's DocumentProperties
     /// command (Units and Page Units Window) for details.</summary>
     /// <returns>(int) The current unit system
@@ -749,4 +771,10 @@ module AutoOpenDocument =
     /// <returns>(float) The scale factor from the current model units.</returns>
     static member UnitScale(toSystem:int) : float =
         RhinoScriptSyntax.UnitScale(toSystem, int State.Doc.ModelUnitSystem)
+
+    /// <summary>Returns the scale factor from the document model units to another unit system.</summary>
+    /// <param name="toSystem">(Rhino.UnitSystem) The destination unit system.</param>
+    /// <returns>(float) The scale factor from the current model units.</returns>
+    static member UnitScale(toSystem:Rhino.UnitSystem) : float =
+        RhinoScriptSyntax.UnitScale(int toSystem)
 
