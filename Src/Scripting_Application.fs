@@ -742,9 +742,9 @@ module AutoOpenApplication =
 
 
     /// <summary>Sets Rhino's status bar message pane.</summary>
-    /// <param name="message">(string) The message to display</param>
+    /// <param name="message">(string) Optional, default value: <c>""</c>. The message; omit to clear it.</param>
     /// <returns>(unit) void, nothing.</returns>
-    static member StatusBarMessage(message:string) : unit =
+    static member StatusBarMessage([<OPT;DEF("")>]message:string) : unit =
         RhinoSync.DoSync (fun () ->
             UI.StatusBar.SetMessagePane(message))
 
