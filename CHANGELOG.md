@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - MeshTextureCoordinates, like in RhinoPython
 - XformScale overloads with a Plane, to scale about the Plane's origin along the Plane's axes, like in RhinoPython
 ### Changed
+- The Python parity review in API-Table/PythonParityReview.md records retained F# API designs and the fixes made; XML docs clarify cylinder inputs, plane/sphere point results, active linetype counts and local bitmap validation.
 - IsHatch, IsBlockInstance, IsPoint, IsPointCloud, IsText, IsTextDot, IsClippingPlane, IsBrep, IsPolysurface and IsPolysurfaceClosed return false for missing object identifiers, like in RhinoPython.
 - IsObjectSolid returns false for geometry that cannot be solid, like in RhinoPython.
 - GetObjectGrip and GetObjectGrips raise RhinoUserInteractionException on cancellation, and ObjectGripLocations reports a point count mismatch instead of silently doing nothing, unlike RhinoPython.

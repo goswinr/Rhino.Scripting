@@ -51,7 +51,7 @@ module AutoOpenMaterial =
             materialindex
 
 
-    /// <summary>Copies the definition of a source material to a destination material.</summary>
+    /// <summary>Copies the definition of a source material to a destination material. The same in-range index succeeds without changing the material.</summary>
     /// <param name="sourceIndex">(int) Source index of material to copy.</param>
     /// <param name="destinationIndex">(int) Destination index of material to copy to.</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
@@ -126,7 +126,7 @@ module AutoOpenMaterial =
 
     /// <summary>Modifies a material's bump bitmap filename.</summary>
     /// <param name="materialIndex">(int) Zero based material index.</param>
-    /// <param name="filename">(string) The bump bitmap filename.</param>
+    /// <param name="filename">(string) The bump bitmap filename. The file must exist locally; Rhino search-path resolution is not used.</param>
     /// <returns>(unit) void, nothing.</returns>
     static member MaterialBump(materialIndex:int, filename:string) : unit = //SET
         if materialIndex < 0 || materialIndex >= State.Doc.Materials.Count  then RhinoScriptingException.Raise "MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
@@ -174,7 +174,7 @@ module AutoOpenMaterial =
 
     /// <summary>Modifies a material's environment bitmap filename.</summary>
     /// <param name="materialIndex">(int) Zero based material index.</param>
-    /// <param name="filename">(string) The environment bitmap filename</param>
+    /// <param name="filename">(string) The environment bitmap filename. The file must exist locally; Rhino search-path resolution is not used.</param>
     /// <returns>(unit) void, nothing.</returns>
     static member MaterialEnvironmentMap(materialIndex:int, filename:string) : unit = //SET
         if materialIndex < 0 || materialIndex >= State.Doc.Materials.Count  then RhinoScriptingException.Raise "MaterialEnvironmentMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
@@ -269,7 +269,7 @@ module AutoOpenMaterial =
 
     /// <summary>Modifies a material's texture bitmap filename.</summary>
     /// <param name="materialIndex">(int) Zero based material index.</param>
-    /// <param name="filename">(string) The texture bitmap filename.</param>
+    /// <param name="filename">(string) The texture bitmap filename. The file must exist locally; Rhino search-path resolution is not used.</param>
     /// <returns>(unit) void, nothing.</returns>
     static member MaterialTexture(materialIndex:int, filename:string) : unit = //SET
         if materialIndex < 0 || materialIndex >= State.Doc.Materials.Count  then RhinoScriptingException.Raise "MaterialTexture failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
@@ -321,7 +321,7 @@ module AutoOpenMaterial =
 
     /// <summary>Modifies a material's transparency bitmap filename.</summary>
     /// <param name="materialIndex">(int) Zero based material index.</param>
-    /// <param name="filename">(string) The transparency bitmap filename.</param>
+    /// <param name="filename">(string) The transparency bitmap filename. The file must exist locally; Rhino search-path resolution is not used.</param>
     /// <returns>(unit) void, nothing.</returns>
     static member MaterialTransparencyMap(materialIndex:int, filename:string) : unit = //SET
         if materialIndex < 0 || materialIndex >= State.Doc.Materials.Count  then RhinoScriptingException.Raise "MaterialTransparencyMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename

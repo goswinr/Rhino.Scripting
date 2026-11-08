@@ -1,4 +1,4 @@
-﻿namespace Rhino.Scripting
+namespace Rhino.Scripting
 
 open Rhino
 open System.ComponentModel
@@ -44,7 +44,7 @@ module AutoOpenUtility =
     /// <summary>Measures the angle between two points.</summary>
     /// <param name="point1">(Point3d) Point1 of input points</param>
     /// <param name="point2">(Point3d) Point2 of input points</param>
-    /// <param name="plane">(Plane) Optional, default value: <c>Plane.WorldX</c>
+    /// <param name="plane">(Plane) Optional, default value: <c>Plane.WorldXY</c>
     ///    If a Plane is provided, angle calculation is with respect to this Plane</param>
     /// <returns>(float * float * float * float * float) containing the following elements:
     ///    element 0 = the X, Y angle in degrees

@@ -131,11 +131,9 @@ module AutoOpenSurface =
 
 
     /// <summary>Adds a cylinder-shaped Polysurface to the document.</summary>
-    /// <param name="basis">(Plane) The 3D basis point of the cylinder or the basis Plane of the cylinder</param>
-    /// <param name="height">(float) If basis is a point, then height is a 3D height point of the
-    ///    cylinder. The height point defines the height and direction of the
-    ///    cylinder. If basis is a Plane, then height is the numeric height value
-    ///    of the cylinder</param>
+    /// <param name="basis">(Plane) The cylinder base plane; its origin is the base center and its normal is the axis.</param>
+    /// <param name="height">(float) Numeric height along the base plane normal.
+    ///    For two endpoints, construct the base plane with their direction and use their distance as height.</param>
     /// <param name="radius">(float) Radius of the cylinder</param>
     /// <param name="cap">(bool) Optional, default value: <c>true</c>
     ///    Cap the cylinder</param>

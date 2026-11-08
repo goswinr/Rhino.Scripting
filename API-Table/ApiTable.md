@@ -1099,7 +1099,7 @@ From [Src/Scripting_Linetype.fs](../Src/Scripting_Linetype.fs).
 |:--|:--|:--|
 | `IsLinetype` | `name: string -> bool` | Verifies the existence of a linetype in the document. |
 | `IsLinetypeReference` | `name: string -> bool` | Checks if an existing linetype is from a reference file. |
-| `LinetypeCount` | `unit -> int` | Returns the number of linetypes in the document. |
+| `LinetypeCount` | `unit -> int` | Returns the number of active, non-deleted linetypes in the document. |
 | `LinetypeNames` | `unit -> ResizeArray<string>` | Returns names of all linetypes in the document. |
 | `LinetypeNames` | `sort: bool -> ResizeArray<string>` | Returns the names, optionally sorted in ordinal order, like in RhinoPython. |
 

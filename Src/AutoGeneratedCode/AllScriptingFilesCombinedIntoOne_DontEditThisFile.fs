@@ -11900,7 +11900,7 @@ type RhinoScriptSyntax private () =
         lt.IsReference
 
 
-    /// <summary>Returns the number of linetypes in the document.</summary>
+    /// <summary>Returns the number of active, non-deleted linetypes in the document.</summary>
     /// <returns>(int) The number of linetypes in the document.</returns>
     static member LinetypeCount() : int =
         State.Doc.Linetypes.ActiveCount
@@ -11965,7 +11965,7 @@ type RhinoScriptSyntax private () =
             materialindex
 
 
-    /// <summary>Copies the definition of a source material to a destination material.</summary>
+    /// <summary>Copies the definition of a source material to a destination material. The same in-range index succeeds without changing the material.</summary>
     /// <param name="sourceIndex">(int) Source index of material to copy.</param>
     /// <param name="destinationIndex">(int) Destination index of material to copy to.</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
@@ -12040,7 +12040,7 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Modifies a material's bump bitmap filename.</summary>
     /// <param name="materialIndex">(int) Zero based material index.</param>
-    /// <param name="filename">(string) The bump bitmap filename.</param>
+    /// <param name="filename">(string) The bump bitmap filename. The file must exist locally; Rhino search-path resolution is not used.</param>
     /// <returns>(unit) void, nothing.</returns>
     static member MaterialBump(materialIndex:int, filename:string) : unit = //SET
         if materialIndex < 0 || materialIndex >= State.Doc.Materials.Count  then RhinoScriptingException.Raise "MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
@@ -12088,7 +12088,7 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Modifies a material's environment bitmap filename.</summary>
     /// <param name="materialIndex">(int) Zero based material index.</param>
-    /// <param name="filename">(string) The environment bitmap filename</param>
+    /// <param name="filename">(string) The environment bitmap filename. The file must exist locally; Rhino search-path resolution is not used.</param>
     /// <returns>(unit) void, nothing.</returns>
     static member MaterialEnvironmentMap(materialIndex:int, filename:string) : unit = //SET
         if materialIndex < 0 || materialIndex >= State.Doc.Materials.Count  then RhinoScriptingException.Raise "MaterialEnvironmentMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
@@ -12183,7 +12183,7 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Modifies a material's texture bitmap filename.</summary>
     /// <param name="materialIndex">(int) Zero based material index.</param>
-    /// <param name="filename">(string) The texture bitmap filename.</param>
+    /// <param name="filename">(string) The texture bitmap filename. The file must exist locally; Rhino search-path resolution is not used.</param>
     /// <returns>(unit) void, nothing.</returns>
     static member MaterialTexture(materialIndex:int, filename:string) : unit = //SET
         if materialIndex < 0 || materialIndex >= State.Doc.Materials.Count  then RhinoScriptingException.Raise "MaterialTexture failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
@@ -12235,7 +12235,7 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Modifies a material's transparency bitmap filename.</summary>
     /// <param name="materialIndex">(int) Zero based material index.</param>
-    /// <param name="filename">(string) The transparency bitmap filename.</param>
+    /// <param name="filename">(string) The transparency bitmap filename. The file must exist locally; Rhino search-path resolution is not used.</param>
     /// <returns>(unit) void, nothing.</returns>
     static member MaterialTransparencyMap(materialIndex:int, filename:string) : unit = //SET
         if materialIndex < 0 || materialIndex >= State.Doc.Materials.Count  then RhinoScriptingException.Raise "MaterialTransparencyMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
@@ -15520,8 +15520,8 @@ type RhinoScriptSyntax private () =
     /// <returns>(int * Plane * float) of intersection results
     ///    Element  Type      Description
     ///    [0]      number     The type of intersection, where 0 = point and 1 = circle.
-    ///    [1]      Plane      If a point intersection, the a Point3d identifying the 3-D intersection location is Plane.Origin
-    ///                        If a circle intersection, then the circle's Plane. The origin of the Plane will be the center point of the circle
+    ///    [1]      Plane      For a point intersection, Plane.Origin is the intersection point.
+    ///                        For a circle intersection, this is the circle's plane; its origin is the circle center.
     ///    [2]      number     If a circle intersection, then the radius of the circle.</returns>
     static member PlaneSphereIntersection( plane:Plane,
                                            spherePlane:Plane,
@@ -17097,11 +17097,9 @@ type RhinoScriptSyntax private () =
 
 
     /// <summary>Adds a cylinder-shaped Polysurface to the document.</summary>
-    /// <param name="basis">(Plane) The 3D basis point of the cylinder or the basis Plane of the cylinder</param>
-    /// <param name="height">(float) If basis is a point, then height is a 3D height point of the
-    ///    cylinder. The height point defines the height and direction of the
-    ///    cylinder. If basis is a Plane, then height is the numeric height value
-    ///    of the cylinder</param>
+    /// <param name="basis">(Plane) The cylinder base plane; its origin is the base center and its normal is the axis.</param>
+    /// <param name="height">(float) Numeric height along the base plane normal.
+    ///    For two endpoints, construct the base plane with their direction and use their distance as height.</param>
     /// <param name="radius">(float) Radius of the cylinder</param>
     /// <param name="cap">(bool) Optional, default value: <c>true</c>
     ///    Cap the cylinder</param>
@@ -22720,7 +22718,7 @@ type RhinoScriptSyntax private () =
     /// <summary>Measures the angle between two points.</summary>
     /// <param name="point1">(Point3d) Point1 of input points</param>
     /// <param name="point2">(Point3d) Point2 of input points</param>
-    /// <param name="plane">(Plane) Optional, default value: <c>Plane.WorldX</c>
+    /// <param name="plane">(Plane) Optional, default value: <c>Plane.WorldXY</c>
     ///    If a Plane is provided, angle calculation is with respect to this Plane</param>
     /// <returns>(float * float * float * float * float) containing the following elements:
     ///    element 0 = the X, Y angle in degrees

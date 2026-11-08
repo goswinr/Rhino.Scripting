@@ -1,4 +1,4 @@
-﻿namespace Rhino.Scripting
+namespace Rhino.Scripting
 
 open Rhino
 open System.ComponentModel
@@ -276,8 +276,8 @@ module AutoOpenPlane =
     /// <returns>(int * Plane * float) of intersection results
     ///    Element  Type      Description
     ///    [0]      number     The type of intersection, where 0 = point and 1 = circle.
-    ///    [1]      Plane      If a point intersection, the a Point3d identifying the 3-D intersection location is Plane.Origin
-    ///                        If a circle intersection, then the circle's Plane. The origin of the Plane will be the center point of the circle
+    ///    [1]      Plane      For a point intersection, Plane.Origin is the intersection point.
+    ///                        For a circle intersection, this is the circle's plane; its origin is the circle center.
     ///    [2]      number     If a circle intersection, then the radius of the circle.</returns>
     static member PlaneSphereIntersection( plane:Plane,
                                            spherePlane:Plane,
