@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- UnitSystem setters accept Rhino.UnitSystem enum values for model and page units, preserving the existing integer overloads and validation.
 - UnitScale accepts Rhino.UnitSystem enum values for either unit argument, including mixed enum/integer calls and conversion from the current model units.
 - JoinSurfacesAll returns every joined result, restoring RhinoPython's return_all mode while JoinSurfaces continues to require one result; document inputs are retained if adding any result fails.
 - MatchMaterial accepts a material-table index as well as a source object identifier, restoring the index-based RhinoPython operation.

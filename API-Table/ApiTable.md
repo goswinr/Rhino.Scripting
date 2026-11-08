@@ -2,7 +2,7 @@
 
 All public types, members and functions of Rhino.Scripting, with the first sentence of their summary.
 
-- The 1684 static members of `RhinoScriptSyntax`, 1041 names with their overloads, have one table per source file,
+- The 1686 static members of `RhinoScriptSyntax`, 1041 names with their overloads, have one table per source file,
   e.g. [Curve](#curve) for `Src/Scripting_Curve.fs`. Scripts usually call them through an alias, `type rs = RhinoScriptSyntax`.
 - Overloads of the same name are in the order of the source.
 - Geometry-only `Make...` methods are listed immediately after their corresponding document-adding `Add...` methods.
@@ -22,7 +22,7 @@ Generated from the sources by `API-Table/ApiTable.fsx`. Do not edit by hand.
 - [Coerce](#coerce), 103 members
 - [Curve](#curve), 247 members
 - [Dimension](#dimension), 70 members
-- [Document](#document), 66 members
+- [Document](#document), 68 members
 - [Geometry](#geometry), 101 members
 - [Grips](#grips), 17 members
 - [Group](#group), 20 members
@@ -738,8 +738,10 @@ From [Src/Scripting_Document.fs](../Src/Scripting_Document.fs).
 | `UnitScale` | `toSystem: UnitSystem -> float` | Returns the scale factor from the document model units to another unit system. |
 | `UnitSystem` | `unit -> int` | Return the document's unit system. |
 | `UnitSystem` | `unitSystem: int * ?scale: bool = false -> unit` | Set the document's unit system. |
+| `UnitSystem` | `unitSystem: UnitSystem * ?scale: bool = false -> unit` | Sets the document model unit system, optionally scaling existing geometry. |
 | `UnitSystem` | `modelUnits: bool -> int` | Returns the model or page unit system. |
 | `UnitSystem` | `unitSystem: int * scale: bool * modelUnits: bool -> unit` | Sets the model or page unit system, optionally scaling existing geometry. |
+| `UnitSystem` | `unitSystem: UnitSystem * scale: bool * modelUnits: bool -> unit` | Sets the model or page unit system, optionally scaling existing geometry. |
 | `UnitSystemName` | `?capitalize: bool = false * ?singular: bool = true * ?abbreviate: bool = false * ?modelUnits: bool = true -> string` | Returns the name of the current unit system. |
 
 ## Geometry

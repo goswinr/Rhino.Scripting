@@ -673,6 +673,14 @@ module AutoOpenDocument =
 
 
 
+    /// <summary>Sets the document model unit system, optionally scaling existing geometry.</summary>
+    /// <param name="unitSystem">(Rhino.UnitSystem) The new unit system. Uses the same validation as the integer overload.</param>
+    /// <param name="scale">(bool) Optional, default value: <c>false</c>. True to scale existing geometry for the new units.</param>
+    /// <returns>(unit) void, nothing.</returns>
+    static member UnitSystem(unitSystem:Rhino.UnitSystem, [<OPT;DEF(false)>]scale:bool) : unit = //SET
+        RhinoScriptSyntax.UnitSystem(int unitSystem, scale)
+
+
     /// <summary>Returns the name of the current unit system.</summary>
     /// <param name="capitalize">(bool) Optional, default value: <c>false</c>
     ///    Capitalize the first character of the units system name (e.g. return "Millimeter" instead of "millimeter"). The default is not to capitalize the first character (false)</param>
@@ -765,6 +773,15 @@ module AutoOpenDocument =
                 RhinoScriptingException.Raise "UnitSystem: unit system must be from 0 through 25, got %d" unitSystem
             let units : UnitSystem = LanguagePrimitives.EnumOfValue (byte unitSystem)
             State.Doc.AdjustPageUnitSystem(units, scale)
+
+    /// <summary>Sets the model or page unit system, optionally scaling existing geometry.</summary>
+    /// <param name="unitSystem">(Rhino.UnitSystem) The new unit system. Uses the same validation as the integer overload.</param>
+    /// <param name="scale">(bool) True to scale existing geometry for the new units.</param>
+    /// <param name="modelUnits">(bool) True for model units; False for page units.</param>
+    /// <returns>(unit) void, nothing.</returns>
+    static member UnitSystem(unitSystem:Rhino.UnitSystem, scale:bool, modelUnits:bool) : unit = //SET
+        RhinoScriptSyntax.UnitSystem(int unitSystem, scale, modelUnits)
+
 
     /// <summary>Returns the scale factor from the document model units to another unit system.</summary>
     /// <param name="toSystem">(int) The destination unit system, using the values documented by the two-argument overload.</param>
