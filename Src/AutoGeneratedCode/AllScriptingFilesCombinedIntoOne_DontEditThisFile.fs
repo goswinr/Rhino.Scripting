@@ -3406,6 +3406,15 @@ type RhinoScriptSyntax private () =
 
 
 
+    /// <summary>Returns the names, optionally sorted in ordinal order, like in RhinoPython.</summary>
+    /// <param name="sort">(bool) True to sort the names; False to preserve document order.</param>
+    /// <returns>(string ResizeArray) The names.</returns>
+    static member BlockNames(sort:bool) : string ResizeArray =
+        let names = RhinoScriptSyntax.BlockNames()
+        if sort then names.Sort(StringComparer.Ordinal)
+        names
+
+
     /// <summary>Returns number of objects that make up a block definition.</summary>
     /// <param name="blockName">(string) Name of an existing block definition</param>
     /// <returns>(int) The number of objects that make up a block definition.</returns>

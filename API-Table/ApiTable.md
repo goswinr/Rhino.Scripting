@@ -2,7 +2,7 @@
 
 All public types, members and functions of Rhino.Scripting, with the first sentence of their summary.
 
-- The 1660 static members of `RhinoScriptSyntax`, 1038 names with their overloads, have one table per source file,
+- The 1661 static members of `RhinoScriptSyntax`, 1038 names with their overloads, have one table per source file,
   e.g. [Curve](#curve) for `Src/Scripting_Curve.fs`. Scripts usually call them through an alias, `type rs = RhinoScriptSyntax`.
 - Overloads of the same name are in the order of the source.
 - Geometry-only `Make...` methods are listed immediately after their corresponding document-adding `Add...` methods.
@@ -18,7 +18,7 @@ Generated from the sources by `API-Table/ApiTable.fsx`. Do not edit by hand.
 
 - [Header](#header), 34 members
 - [Application](#application), 79 members
-- [Block](#block), 28 members
+- [Block](#block), 29 members
 - [Coerce](#coerce), 103 members
 - [Curve](#curve), 247 members
 - [Dimension](#dimension), 70 members
@@ -211,6 +211,7 @@ From [Src/Scripting_Block.fs](../Src/Scripting_Block.fs).
 | `BlockInstances` | `blockName: string * ?whereToLook: int = 0 -> ResizeArray<Guid>` | Returns the identifiers of the inserted instances of a block. |
 | `BlockInstanceXform` | `objectId: Guid -> Transform` | Returns the location of a block instance relative to the world coordinate system origin (0, 0, 0). |
 | `BlockNames` | `unit -> ResizeArray<string>` | Returns the names of all block definitions in the document. |
+| `BlockNames` | `sort: bool -> ResizeArray<string>` | Returns the names, optionally sorted in ordinal order, like in RhinoPython. |
 | `BlockObjectCount` | `blockName: string -> int` | Returns number of objects that make up a block definition. |
 | `BlockObjects` | `blockName: string -> ResizeArray<Guid>` | Returns identifiers of the objects that make up a block definition. |
 | `BlockPath` | `blockName: string -> string` | Returns path to the source of a linked or embedded block definition. |
