@@ -181,7 +181,7 @@ From [Src/Scripting_Application.fs](../Src/Scripting_Application.fs).
 | `Snap` | `enable: bool -> unit` | Enables or disables Rhino's grid snap modeling aid. |
 | `StatusBarDistance` | `?distance: float = 0.0 -> unit` | Sets Rhino's status bar distance pane. |
 | `StatusBarMessage` | `?message: string = "" -> unit` | Sets Rhino's status bar message pane. |
-| `StatusBarPoint` | `point: Point3d -> unit` | Sets Rhino's status bar point coordinate pane. |
+| `StatusBarPoint` | `?point: Point3d = Point3d() -> unit` | Sets Rhino's status bar point coordinate pane. |
 | `StatusBarProgressMeterHide` | `unit -> unit` | Hide the progress meter. |
 | `StatusBarProgressMeterShow` | `label: string * lower: int * upper: int * ?embedLabel: bool = true * ?showPercent: bool = true -> bool` | Start the Rhino status bar progress meter. |
 | `StatusBarProgressMeterUpdate` | `position: int * ?absolute: bool = true -> unit` | Set the current position of the progress meter. |

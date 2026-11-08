@@ -37,6 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - IsDimension, IsLeader and the other dimension checks return false for objects that don't exist, instead of raising an exception, like in RhinoPython
 - IsCone, IsCylinder, IsPlaneSurface and IsPointLight, IsSpotLight and the other light type checks return false for objects of another type or that don't exist, instead of raising an exception, like in RhinoPython
 ### Fixed
+- StatusBarPoint can be called without a value, like in RhinoPython.
 - StatusBarMessage can be called without a value, like in RhinoPython.
 - StatusBarDistance can be called without a value, like in RhinoPython.
 - SendKeystrokes can be called without a value, like in RhinoPython.

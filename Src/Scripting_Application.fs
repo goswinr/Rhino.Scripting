@@ -750,9 +750,9 @@ module AutoOpenApplication =
 
 
     /// <summary>Sets Rhino's status bar point coordinate pane.</summary>
-    /// <param name="point">(Point3d) The 3d coordinates of the status bar</param>
+    /// <param name="point">(Point3d) Optional, default value: <c>Point3d.Origin</c>. The coordinates to display.</param>
     /// <returns>(unit) void, nothing.</returns>
-    static member StatusBarPoint(point:Point3d) : unit =
+    static member StatusBarPoint([<OPT;DEF(Point3d())>]point:Point3d) : unit =
         RhinoSync.DoSync (fun () ->
             UI.StatusBar.SetPointPane(point))
 
