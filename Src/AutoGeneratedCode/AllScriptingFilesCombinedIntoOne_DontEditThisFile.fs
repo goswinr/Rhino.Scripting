@@ -16124,13 +16124,13 @@ type RhinoScriptSyntax private () =
     /// <param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select the picked objects. If False, the objects that are
     ///    picked are not selected</param>
-    /// <param name="objectsToSelectFrom">(Guid seq) Optional, List of objects that are allowed to be selected. If set customFilter will be ignored</param>
+    /// <param name="objectsToSelectFrom">(Guid seq) Optional, List of objects that are allowed to be selected. If customFilter is also supplied, both filters must accept the object</param>
     /// <param name="minimumCount">(int) Optional, default value: <c>1</c>
     ///    Minimum count of objects allowed to be selected</param>
     /// <param name="maximumCount">(int) Optional, default value: <c>0</c>
     ///    Maximum count of objects allowed to be selected</param>
     /// <param name="printCount">(bool) Optional, default value: <c>false</c> Print object count to command window.</param>
-    /// <param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, Will be ignored if 'objects' are set. Calls a custom function in the script and passes
+    /// <param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, Calls a custom function in the script and passes
     ///    the Rhino Object, Geometry, and component index and returns true or false indicating if the object can be selected</param>
     /// <returns>(Guid ResizeArray) List of identifiers of the picked objects.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
@@ -16151,7 +16151,9 @@ type RhinoScriptSyntax private () =
             use go = new Input.Custom.GetObject()
             if notNull objectsToSelectFrom then
                 let s = System.Collections.Generic.HashSet(objectsToSelectFrom)
-                go.SetCustomGeometryFilter(fun rhinoObject _ _ -> s.Contains(rhinoObject.Id))
+                go.SetCustomGeometryFilter(fun rhinoObject geometry componentIndex ->
+                    s.Contains(rhinoObject.Id) &&
+                    (isNull customFilter || customFilter.Invoke(rhinoObject, geometry, componentIndex)))
             elif notNull customFilter then
                 go.SetCustomGeometryFilter(customFilter)
             go.SetCommandPrompt(message )
