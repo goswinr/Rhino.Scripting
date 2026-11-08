@@ -167,9 +167,15 @@ module AutoOpenLine =
                                     [<OPT;DEF(false)>]copy:bool)  : Guid =
 
         let line = RhinoScriptSyntax.CoerceLine(lineId)
-        let transformed = RhinoScriptSyntax.LineTransform(line, xForm)
-        if copy then State.Ot.AddLine(transformed)
-        else lineId
+        let rc =
+            if copy then
+                State.Ot.AddLine(RhinoScriptSyntax.LineTransform(line, xForm))
+            else
+                // transform the document object itself, this keeps its Guid, attributes and curve type
+                State.Doc.Objects.Transform(lineId, xForm, deleteOriginal=true)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "LineTransform unable to transform line object %s with %A, copy:%b" (Pretty.str lineId) xForm copy
+        State.Doc.Views.Redraw()
+        rc
 
 
     /// <summary>Transforms a line geometry and returns the transformed line.</summary>

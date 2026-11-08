@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Breaking: Parameter names ending in Id or Ids are reserved for Guid inputs; direct geometry parameters use names such as curveGeo, surfaceGeo and geometryObject, and non-Guid coercion inputs use descriptive names.
 - The API table lists each Make factory immediately after its matching Add methods.
-- Breaking: Geometry-only Add-prefixed overloads are now named Make (for example MakeHatch and MakePlanarSrf) and return geometry without adding it to the document; Add-prefixed methods retain document insertion and identifier results.
+- Breaking: AddHatch and AddHatches with Curve geometry, and AddPlanarSrf with a Polyline, a Curve or a Curve seq, are renamed to MakeHatch, MakeHatches and MakePlanarSrf; they added the result to the document and returned its Guid, now they return the new geometry without adding it, use e.g. rs.Add(rs.MakePlanarSrf(curve)) to add it; the Add methods with Guid inputs still add to the document.
 - Guid overloads share geometry calculations with the direct overloads and handle document insertion, replacement, deletion, attributes and redraws.
 - Breaking: Add, CreatePoint, CreateVector and the Coerce and TryCoerce functions for Guids, lines, arcs, circles, ellipses, polylines, views, points, vectors, planes, transforms and colors have one overload per accepted input type instead of a generic parameter that was checked at runtime, so a wrong input type is a compile error now
 - Breaking: these functions take coordinates and color values as separate arguments, like Coerce3dPoint(1, 2, 3) or CoerceColor(255, 0, 0), a tuple value like CoerceColor(rgb) does not compile any more
@@ -30,6 +30,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - IsDimension, IsLeader and the other dimension checks return false for objects that don't exist, instead of raising an exception, like in RhinoPython
 - IsCone, IsCylinder, IsPlaneSurface and IsPointLight, IsSpotLight and the other light type checks return false for objects of another type or that don't exist, instead of raising an exception, like in RhinoPython
 ### Fixed
+- MirrorObject and MirrorObjects mirror about the vertical plane through the start and end point, like in RhinoPython, instead of about the plane perpendicular to the line between them; they raise an exception if the two points are vertically above each other
+- ExtractSurface removes the extracted faces from the Polysurface only if copy is false, like in RhinoPython, it was the other way round; if all faces are extracted the Polysurface is deleted
+- TextObjectStyle sets the font style of a text object, it changed nothing before
+- CurveCurveIntersection without a second curve does a self-intersection test, like in RhinoPython, instead of reporting the whole curve as an overlap with itself
+- LineTransform with copy=false transforms the line object in the document, before it returned the Guid without changing the object
+- TrimBrep replaces the object with the trimmed piece also if only one piece is retained, like in RhinoPython, instead of keeping the untrimmed object and adding the piece as a new object without its attributes
+- CurveFrame uses the segmentIndex of a PolyCurve, like in RhinoPython, it was ignored before
 - ShrinkTrimmedSurface checks ShrinkFaces correctly, raising on failure instead of success.
 - PointClosestObject uses the initialized result in the shared object implementation, avoiding a null-reference exception when comparing distances.
 - DimStyleTextAlignment returns the documented values 1, 2 or 3, instead of the index of the text location

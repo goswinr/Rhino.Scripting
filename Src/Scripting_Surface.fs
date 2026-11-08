@@ -1410,10 +1410,13 @@ module AutoOpenSurface =
         let faceIndices = faceIndices |> Seq.sortDescending |> Seq.toArray
         let faces = RhinoScriptSyntax.ExtractSurface(brep, faceIndices)
         let ids = faces |> RArr.mapSeq State.Doc.Objects.AddBrep
-        if copy then
+        if not copy then
             let remaining = brep.DuplicateBrep()
             for index in faceIndices do remaining.Faces.RemoveAt(index)
-            State.Doc.Objects.Replace(objectId, remaining) |> ignore<bool>
+            if remaining.Faces.Count = 0 then
+                State.Doc.Objects.Delete(objectId, quiet=true) |> ignore<bool> // all faces were extracted
+            else
+                State.Doc.Objects.Replace(objectId, remaining) |> ignore<bool>
         State.Doc.Views.Redraw()
         ids
 
@@ -3421,14 +3424,19 @@ module AutoOpenSurface =
         let objectIdGeometry = RhinoScriptSyntax.CoerceBrep(objectId)
         let cutterGeometry = RhinoScriptSyntax.CoerceBrep(cutter)
         let breps = RhinoScriptSyntax.TrimBrep(objectIdGeometry, cutterGeometry, tolerance)
+        RhinoScriptSyntax.trimBrepReplaceInDoc(objectId, breps)
+
+
+    /// Shared by the TrimBrep overloads with an object identifier, like in RhinoPython:
+    /// replaces the trimmed object with the first retained piece and adds the other pieces with the same attributes.
+    static member private trimBrepReplaceInDoc(objectId:Guid, breps:Brep ResizeArray) : Guid ResizeArray =
         let ids = ResizeArray<Guid>()
-        if breps.Count > 1 then
+        if breps.Count > 0 then
             let attributes = (RhinoScriptSyntax.CoerceRhinoObject(objectId)).Attributes
-            State.Doc.Objects.Replace(objectId, breps.[0]) |> ignore<bool>
+            if not (State.Doc.Objects.Replace(objectId, breps.[0])) then
+                RhinoScriptingException.Raise "TrimBrep: unable to replace object %s with the trimmed Brep" (Pretty.str objectId)
             ids.Add(objectId)
             for index = 1 to breps.Count - 1 do ids.Add(State.Doc.Objects.AddBrep(breps.[index], attributes))
-        else
-            for brep in breps do ids.Add(State.Doc.Objects.AddBrep(brep))
         State.Doc.Views.Redraw()
         ids
 
@@ -3443,16 +3451,7 @@ module AutoOpenSurface =
                             [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray =
         let objectIdGeometry = RhinoScriptSyntax.CoerceBrep(objectId)
         let breps = RhinoScriptSyntax.TrimBrep(objectIdGeometry, cutter, tolerance)
-        let ids = ResizeArray<Guid>()
-        if breps.Count > 1 then
-            let attributes = (RhinoScriptSyntax.CoerceRhinoObject(objectId)).Attributes
-            State.Doc.Objects.Replace(objectId, breps.[0]) |> ignore<bool>
-            ids.Add(objectId)
-            for index = 1 to breps.Count - 1 do ids.Add(State.Doc.Objects.AddBrep(breps.[index], attributes))
-        else
-            for brep in breps do ids.Add(State.Doc.Objects.AddBrep(brep))
-        State.Doc.Views.Redraw()
-        ids
+        RhinoScriptSyntax.trimBrepReplaceInDoc(objectId, breps)
 
 
     /// <summary>Trims a Surface or Polysurface using an oriented cutter brep or Surface. Returns geometry without adding it.</summary>

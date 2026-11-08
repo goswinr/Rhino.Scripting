@@ -3811,7 +3811,8 @@ type RhinoScriptSyntax private () =
             let rc, t = curve1.ClosestPoint(basePointB)
             if not <| rc then RhinoScriptingException.Raise "MakeFilletCurve ClosestPoint failed.  curveA:'%A' curveB:'%A' radius:'%A' basePointA:'%A' basePointB:'%A'" curveA curveB radius basePointA basePointB
             crv1T <- t
-        let mutable arc = Curve.CreateFillet(curve0, curve1, radius, crv0T, crv1T)
+        let arc = Curve.CreateFillet(curve0, curve1, radius, crv0T, crv1T)
+        if not arc.IsValid then RhinoScriptingException.Raise "MakeFilletCurve: Unable to create a fillet arc.  curveA:'%A' curveB:'%A' radius:'%A' basePointA:'%A' basePointB:'%A'" curveA curveB radius basePointA basePointB
         new ArcCurve(arc)
 
     /// <summary>Adds an interpolated curve object that lies on a specified surface. Note, this function will not create periodic curves, but it will create closed curves.</summary>
@@ -4879,11 +4880,14 @@ type RhinoScriptSyntax private () =
     ///        If the event type is Overlap (2), then the end value of the
     ///        second Curve parameter range.</returns>
     static member CurveCurveIntersection(curveA:Guid, [<OPT;DEF(Guid())>]curveB:Guid, [<OPT;DEF(0.0)>]tolerance:float) : (int*Point3d*Point3d*Point3d*Point3d*float*float*float*float) ResizeArray =
-        RhinoScriptSyntax.CurveCurveIntersection(RhinoScriptSyntax.CoerceCurve(curveA), (if curveB = Guid.Empty then null else RhinoScriptSyntax.CoerceCurve(curveB)), tolerance)
+        let curve1 = RhinoScriptSyntax.CoerceCurve(curveA)
+        let curve2 = if curveB = Guid.Empty || curveB = curveA then null else RhinoScriptSyntax.CoerceCurve(curveB)
+        RhinoScriptSyntax.CurveCurveIntersection(curve1, curve2, tolerance)
 
     /// <summary>Calculates intersection of two Curve objects. Uses the supplied geometry directly.</summary>
     /// <param name="curveA">(Curve) The input geometry.</param>
-    /// <param name="curveB">(Curve) Optional, default value: <c>null</c>. The second curve; null intersects the first curve with itself.</param>
+    /// <param name="curveB">(Curve) Optional, default value: <c>null</c>. The second curve.
+    ///    If omitted, or if it is the same Curve object as curveA, then a self-intersection test will be performed on curveA</param>
     /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
     ///    Absolute tolerance in drawing units. If omitted,
     ///    the document's current absolute tolerance is used</param>
@@ -4918,13 +4922,13 @@ type RhinoScriptSyntax private () =
     ///        second Curve parameter range.</returns>
     static member CurveCurveIntersection(curveA:Curve, [<OPT;DEF(null:Curve)>]curveB:Curve, [<OPT;DEF(0.0)>]tolerance:float) : (int*Point3d*Point3d*Point3d*Point3d*float*float*float*float) ResizeArray =
         let curve1 = RhinoScriptSyntax.DirectCurveInput(curveA, -1)
-        let curve2 = if isNull curveB then curve1 else RhinoScriptSyntax.DirectCurveInput(curveB, -1)
         let tolerance0 = Util.ifZero1 tolerance State.Doc.ModelAbsoluteTolerance
-        let mutable rc = null
-        if curveB<>curveA then
-            rc <- Intersect.Intersection.CurveCurve(curve1, curve2, tolerance0, State.Doc.ModelAbsoluteTolerance)
-        else
-            rc <- Intersect.Intersection.CurveSelf(curve1, tolerance0)
+        let rc =
+            if isNull curveB || obj.ReferenceEquals(curveA, curveB) then
+                Intersect.Intersection.CurveSelf(curve1, tolerance0)
+            else
+                let curve2 = RhinoScriptSyntax.DirectCurveInput(curveB, -1)
+                Intersect.Intersection.CurveCurve(curve1, curve2, tolerance0, State.Doc.ModelAbsoluteTolerance)
         if isNull rc then RhinoScriptingException.Raise "CurveCurveIntersection failed on %A; %A tolerance %f" curveB curveA tolerance
         let events = ResizeArray()
         for i =0 to rc.Count-1 do
@@ -5284,7 +5288,7 @@ type RhinoScriptSyntax private () =
     /// <returns>(Plane) The Plane at the specified parameter.</returns>
     static member CurveFrame(curveGeo:Curve, parameter:float, [<OPT;DEF(-1)>]segmentIndex:int) : Plane =
         let mutable para = parameter
-        let  curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
+        let  curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let  domain = curve.Domain
         if not <| domain.IncludesParameter(parameter) then
             let  tol = State.Doc.ModelAbsoluteTolerance
@@ -9771,6 +9775,7 @@ type RhinoScriptSyntax private () =
             |0 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=false, italic=false)
             |_ -> (RhinoScriptingException.Raise "TextObjectStyle failed.  objectId:'%s' bad style:%d" (Pretty.str objectId) style)
         if isNull f then RhinoScriptingException.Raise "TextObjectStyle failed.  objectId:'%s' style:%d not available for %s" (Pretty.str objectId) style fontdata.QuartetName
+        annotation.Font <- f
         if not <| State.Doc.Objects.Replace(objectId, annotation) then
             RhinoScriptingException.Raise "TextObjectStyle failed.  objectId:'%s' bad style:%d" (Pretty.str objectId) style
         State.Doc.Views.Redraw()
@@ -10481,7 +10486,8 @@ type RhinoScriptSyntax private () =
 
 
 
-    /// <summary>Creates one or more new Hatch objects from a list of closed planar Curves.</summary>
+    /// <summary>Creates one or more new Hatch objects from a list of closed planar Curves.
+    ///    The Hatch geometry refers to a Hatch pattern of the document, so the default Hatch patterns are added to the document if missing.</summary>
     /// <param name="curves">(Curve seq) Geometry of the closed planar Curves that define the boundary of the Hatch objects</param>
     /// <param name="hatchPattern">(string) Optional. Name of the Hatch pattern to be used by the Hatch object. If omitted, the current Hatch pattern will be used.</param>
     /// <param name="scale">(float) Optional, default value: <c>1.0</c>. Hatch pattern scale factor.</param>
@@ -10493,6 +10499,7 @@ type RhinoScriptSyntax private () =
                               [<OPT;DEF(1.0)>]scale:float,
                               [<OPT;DEF(0.0)>]rotation:float,
                               [<OPT;DEF(0.0)>]tolerance:float) : Hatch ResizeArray =
+        RhinoScriptSyntax.InitHatchPatterns()
         let mutable index = State.Doc.HatchPatterns.CurrentHatchPatternIndex
         if notNull hatchPattern then
             let patternInstance = State.Doc.HatchPatterns.FindName(hatchPattern)
@@ -10525,7 +10532,6 @@ type RhinoScriptSyntax private () =
                               [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray =
         let curves  = curveIds |> RArr.mapSeq RhinoScriptSyntax.CoerceCurve
         try
-            RhinoScriptSyntax.InitHatchPatterns()
             let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance
             let hatches = RhinoScriptSyntax.MakeHatches(curves, hatchPattern, scale, rotation, tolerance)
             let ids = ResizeArray()
@@ -11684,9 +11690,15 @@ type RhinoScriptSyntax private () =
                                     [<OPT;DEF(false)>]copy:bool)  : Guid =
 
         let line = RhinoScriptSyntax.CoerceLine(lineId)
-        let transformed = RhinoScriptSyntax.LineTransform(line, xForm)
-        if copy then State.Ot.AddLine(transformed)
-        else lineId
+        let rc =
+            if copy then
+                State.Ot.AddLine(RhinoScriptSyntax.LineTransform(line, xForm))
+            else
+                // transform the document object itself, this keeps its Guid, attributes and curve type
+                State.Doc.Objects.Transform(lineId, xForm, deleteOriginal=true)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "LineTransform unable to transform line object %s with %A, copy:%b" (Pretty.str lineId) xForm copy
+        State.Doc.Views.Redraw()
+        rc
 
 
     /// <summary>Transforms a line geometry and returns the transformed line.</summary>
@@ -13435,6 +13447,16 @@ type RhinoScriptSyntax private () =
         xf
 
 
+    /// Computes the mirror matrix shared by document and geometry operations.
+    /// The mirror plane contains the line from startPoint to endPoint and the World Z axis.
+    static member private objectMirrorTransform(functionName:string, startPoint:Point3d, endPoint:Point3d) : Transform =
+        let vec = endPoint - startPoint
+        if vec.IsTiny() then RhinoScriptingException.Raise "%s: Start and end points are too close to each other. startPoint:%s endPoint:%s" functionName startPoint.Pretty endPoint.Pretty
+        let mutable normal = Vector3d.CrossProduct(vec, Vector3d.ZAxis)
+        if not (normal.Unitize()) then RhinoScriptingException.Raise "%s: Start and end points are vertically above each other, so they do not define a mirror plane. startPoint:%s endPoint:%s" functionName startPoint.Pretty endPoint.Pretty
+        Transform.Mirror(startPoint, normal)
+
+
     /// <summary>Moves, scales, or rotates a list of objects given a 4x4 transformation
     ///    matrix. The matrix acts on the left. Use the geometry overload to return transformed duplicates without modifying document objects.</summary>
     /// <param name="objectIds">(Guid seq) List of object identifiers</param>
@@ -13844,12 +13866,7 @@ type RhinoScriptSyntax private () =
                                 startPoint:Point3d,
                                 endPoint:Point3d,
                                 [<OPT;DEF(false)>]copy:bool) : Guid =
-        let vec = endPoint-startPoint
-        if vec.IsTiny() then RhinoScriptingException.Raise "MirrorObject Start and  end points are too close to each other.  objectId:'%s' startPoint:'%A' endPoint:'%A' copy:'%A'" (Pretty.str objectId) startPoint endPoint copy
-        let normal = Plane.WorldXY.Normal
-        let xv = Vector3d.CrossProduct(vec, normal)
-        xv.Unitize() |> ignore<bool>
-        let xf = Transform.Mirror(startPoint, vec)
+        let xf = RhinoScriptSyntax.objectMirrorTransform("MirrorObject", startPoint, endPoint)
         let res = State.Doc.Objects.Transform(objectId, xf, not copy)
         if res = Guid.Empty then RhinoScriptingException.Raise "MirrorObject Cannot apply MirrorObject transform to objectId:'%s' startPoint:'%A' endPoint:'%A' copy:'%A'" (Pretty.str objectId) startPoint endPoint copy
         if copy then RhinoScriptSyntax.putCopiesInNewGroups [res]
@@ -13864,12 +13881,7 @@ type RhinoScriptSyntax private () =
     static member MirrorObject( geometry:GeometryBase,
                                 startPoint:Point3d,
                                 endPoint:Point3d) : GeometryBase =
-        let vec = endPoint-startPoint
-        if vec.IsTiny() then RhinoScriptingException.Raise "MirrorObject Start and  end points are too close to each other.  geometry:'%s' startPoint:'%A' endPoint:'%A'" (Pretty.str geometry) startPoint endPoint
-        let normal = Plane.WorldXY.Normal
-        let xv = Vector3d.CrossProduct(vec, normal)
-        xv.Unitize() |> ignore<bool>
-        let xf = Transform.Mirror(startPoint, vec)
+        let xf = RhinoScriptSyntax.objectMirrorTransform("MirrorObject", startPoint, endPoint)
         RhinoScriptSyntax.TransformObject(geometry, xf)
 
 
@@ -13884,12 +13896,7 @@ type RhinoScriptSyntax private () =
                                  startPoint:Point3d,
                                  endPoint:Point3d,
                                  [<OPT;DEF(false)>]copy:bool) : Guid ResizeArray = //PLURAL
-        let vec = endPoint-startPoint
-        if vec.IsTiny() then RhinoScriptingException.Raise "MirrorObjects Start and  end points are too close to each other.  objectId:'%s' startPoint:'%A' endPoint:'%A' copy:'%A'" (Pretty.str objectIds) startPoint endPoint copy
-        let normal = Plane.WorldXY.Normal
-        let xv = Vector3d.CrossProduct(vec, normal)
-        xv.Unitize() |> ignore<bool>
-        let xf = Transform.Mirror(startPoint, vec)
+        let xf = RhinoScriptSyntax.objectMirrorTransform("MirrorObjects", startPoint, endPoint)
         let rc = ResizeArray()
         for objectId in objectIds do
             let objectId = State.Doc.Objects.Transform(objectId, xf, not copy)
@@ -13907,12 +13914,7 @@ type RhinoScriptSyntax private () =
     static member MirrorObjects(  geometries:GeometryBase seq,
                                  startPoint:Point3d,
                                  endPoint:Point3d) : GeometryBase ResizeArray = //PLURAL
-        let vec = endPoint-startPoint
-        if vec.IsTiny() then RhinoScriptingException.Raise "MirrorObjects Start and  end points are too close to each other.  objectId:'%s' startPoint:'%A' endPoint:'%A'" (Pretty.str geometries) startPoint endPoint
-        let normal = Plane.WorldXY.Normal
-        let xv = Vector3d.CrossProduct(vec, normal)
-        xv.Unitize() |> ignore<bool>
-        let xf = Transform.Mirror(startPoint, vec)
+        let xf = RhinoScriptSyntax.objectMirrorTransform("MirrorObjects", startPoint, endPoint)
         RhinoScriptSyntax.TransformObjects(geometries, xf)
 
 
@@ -18127,10 +18129,13 @@ type RhinoScriptSyntax private () =
         let faceIndices = faceIndices |> Seq.sortDescending |> Seq.toArray
         let faces = RhinoScriptSyntax.ExtractSurface(brep, faceIndices)
         let ids = faces |> RArr.mapSeq State.Doc.Objects.AddBrep
-        if copy then
+        if not copy then
             let remaining = brep.DuplicateBrep()
             for index in faceIndices do remaining.Faces.RemoveAt(index)
-            State.Doc.Objects.Replace(objectId, remaining) |> ignore<bool>
+            if remaining.Faces.Count = 0 then
+                State.Doc.Objects.Delete(objectId, quiet=true) |> ignore<bool> // all faces were extracted
+            else
+                State.Doc.Objects.Replace(objectId, remaining) |> ignore<bool>
         State.Doc.Views.Redraw()
         ids
 
@@ -20138,14 +20143,19 @@ type RhinoScriptSyntax private () =
         let objectIdGeometry = RhinoScriptSyntax.CoerceBrep(objectId)
         let cutterGeometry = RhinoScriptSyntax.CoerceBrep(cutter)
         let breps = RhinoScriptSyntax.TrimBrep(objectIdGeometry, cutterGeometry, tolerance)
+        RhinoScriptSyntax.trimBrepReplaceInDoc(objectId, breps)
+
+
+    /// Shared by the TrimBrep overloads with an object identifier, like in RhinoPython:
+    /// replaces the trimmed object with the first retained piece and adds the other pieces with the same attributes.
+    static member private trimBrepReplaceInDoc(objectId:Guid, breps:Brep ResizeArray) : Guid ResizeArray =
         let ids = ResizeArray<Guid>()
-        if breps.Count > 1 then
+        if breps.Count > 0 then
             let attributes = (RhinoScriptSyntax.CoerceRhinoObject(objectId)).Attributes
-            State.Doc.Objects.Replace(objectId, breps.[0]) |> ignore<bool>
+            if not (State.Doc.Objects.Replace(objectId, breps.[0])) then
+                RhinoScriptingException.Raise "TrimBrep: unable to replace object %s with the trimmed Brep" (Pretty.str objectId)
             ids.Add(objectId)
             for index = 1 to breps.Count - 1 do ids.Add(State.Doc.Objects.AddBrep(breps.[index], attributes))
-        else
-            for brep in breps do ids.Add(State.Doc.Objects.AddBrep(brep))
         State.Doc.Views.Redraw()
         ids
 
@@ -20160,16 +20170,7 @@ type RhinoScriptSyntax private () =
                             [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray =
         let objectIdGeometry = RhinoScriptSyntax.CoerceBrep(objectId)
         let breps = RhinoScriptSyntax.TrimBrep(objectIdGeometry, cutter, tolerance)
-        let ids = ResizeArray<Guid>()
-        if breps.Count > 1 then
-            let attributes = (RhinoScriptSyntax.CoerceRhinoObject(objectId)).Attributes
-            State.Doc.Objects.Replace(objectId, breps.[0]) |> ignore<bool>
-            ids.Add(objectId)
-            for index = 1 to breps.Count - 1 do ids.Add(State.Doc.Objects.AddBrep(breps.[index], attributes))
-        else
-            for brep in breps do ids.Add(State.Doc.Objects.AddBrep(brep))
-        State.Doc.Views.Redraw()
-        ids
+        RhinoScriptSyntax.trimBrepReplaceInDoc(objectId, breps)
 
 
     /// <summary>Trims a Surface or Polysurface using an oriented cutter brep or Surface. Returns geometry without adding it.</summary>

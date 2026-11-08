@@ -214,7 +214,8 @@ module AutoOpenCurve =
             let rc, t = curve1.ClosestPoint(basePointB)
             if not <| rc then RhinoScriptingException.Raise "MakeFilletCurve ClosestPoint failed.  curveA:'%A' curveB:'%A' radius:'%A' basePointA:'%A' basePointB:'%A'" curveA curveB radius basePointA basePointB
             crv1T <- t
-        let mutable arc = Curve.CreateFillet(curve0, curve1, radius, crv0T, crv1T)
+        let arc = Curve.CreateFillet(curve0, curve1, radius, crv0T, crv1T)
+        if not arc.IsValid then RhinoScriptingException.Raise "MakeFilletCurve: Unable to create a fillet arc.  curveA:'%A' curveB:'%A' radius:'%A' basePointA:'%A' basePointB:'%A'" curveA curveB radius basePointA basePointB
         new ArcCurve(arc)
 
     /// <summary>Adds an interpolated curve object that lies on a specified surface. Note, this function will not create periodic curves, but it will create closed curves.</summary>
@@ -1282,11 +1283,14 @@ module AutoOpenCurve =
     ///        If the event type is Overlap (2), then the end value of the
     ///        second Curve parameter range.</returns>
     static member CurveCurveIntersection(curveA:Guid, [<OPT;DEF(Guid())>]curveB:Guid, [<OPT;DEF(0.0)>]tolerance:float) : (int*Point3d*Point3d*Point3d*Point3d*float*float*float*float) ResizeArray =
-        RhinoScriptSyntax.CurveCurveIntersection(RhinoScriptSyntax.CoerceCurve(curveA), (if curveB = Guid.Empty then null else RhinoScriptSyntax.CoerceCurve(curveB)), tolerance)
+        let curve1 = RhinoScriptSyntax.CoerceCurve(curveA)
+        let curve2 = if curveB = Guid.Empty || curveB = curveA then null else RhinoScriptSyntax.CoerceCurve(curveB)
+        RhinoScriptSyntax.CurveCurveIntersection(curve1, curve2, tolerance)
 
     /// <summary>Calculates intersection of two Curve objects. Uses the supplied geometry directly.</summary>
     /// <param name="curveA">(Curve) The input geometry.</param>
-    /// <param name="curveB">(Curve) Optional, default value: <c>null</c>. The second curve; null intersects the first curve with itself.</param>
+    /// <param name="curveB">(Curve) Optional, default value: <c>null</c>. The second curve.
+    ///    If omitted, or if it is the same Curve object as curveA, then a self-intersection test will be performed on curveA</param>
     /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
     ///    Absolute tolerance in drawing units. If omitted,
     ///    the document's current absolute tolerance is used</param>
@@ -1321,13 +1325,13 @@ module AutoOpenCurve =
     ///        second Curve parameter range.</returns>
     static member CurveCurveIntersection(curveA:Curve, [<OPT;DEF(null:Curve)>]curveB:Curve, [<OPT;DEF(0.0)>]tolerance:float) : (int*Point3d*Point3d*Point3d*Point3d*float*float*float*float) ResizeArray =
         let curve1 = RhinoScriptSyntax.DirectCurveInput(curveA, -1)
-        let curve2 = if isNull curveB then curve1 else RhinoScriptSyntax.DirectCurveInput(curveB, -1)
         let tolerance0 = Util.ifZero1 tolerance State.Doc.ModelAbsoluteTolerance
-        let mutable rc = null
-        if curveB<>curveA then
-            rc <- Intersect.Intersection.CurveCurve(curve1, curve2, tolerance0, State.Doc.ModelAbsoluteTolerance)
-        else
-            rc <- Intersect.Intersection.CurveSelf(curve1, tolerance0)
+        let rc =
+            if isNull curveB || obj.ReferenceEquals(curveA, curveB) then
+                Intersect.Intersection.CurveSelf(curve1, tolerance0)
+            else
+                let curve2 = RhinoScriptSyntax.DirectCurveInput(curveB, -1)
+                Intersect.Intersection.CurveCurve(curve1, curve2, tolerance0, State.Doc.ModelAbsoluteTolerance)
         if isNull rc then RhinoScriptingException.Raise "CurveCurveIntersection failed on %A; %A tolerance %f" curveB curveA tolerance
         let events = ResizeArray()
         for i =0 to rc.Count-1 do
@@ -1687,7 +1691,7 @@ module AutoOpenCurve =
     /// <returns>(Plane) The Plane at the specified parameter.</returns>
     static member CurveFrame(curveGeo:Curve, parameter:float, [<OPT;DEF(-1)>]segmentIndex:int) : Plane =
         let mutable para = parameter
-        let  curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
+        let  curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let  domain = curve.Domain
         if not <| domain.IncludesParameter(parameter) then
             let  tol = State.Doc.ModelAbsoluteTolerance

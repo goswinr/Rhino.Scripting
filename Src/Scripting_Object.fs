@@ -115,6 +115,16 @@ module AutoOpenObject =
         xf
 
 
+    /// Computes the mirror matrix shared by document and geometry operations.
+    /// The mirror plane contains the line from startPoint to endPoint and the World Z axis.
+    static member private objectMirrorTransform(functionName:string, startPoint:Point3d, endPoint:Point3d) : Transform =
+        let vec = endPoint - startPoint
+        if vec.IsTiny() then RhinoScriptingException.Raise "%s: Start and end points are too close to each other. startPoint:%s endPoint:%s" functionName startPoint.Pretty endPoint.Pretty
+        let mutable normal = Vector3d.CrossProduct(vec, Vector3d.ZAxis)
+        if not (normal.Unitize()) then RhinoScriptingException.Raise "%s: Start and end points are vertically above each other, so they do not define a mirror plane. startPoint:%s endPoint:%s" functionName startPoint.Pretty endPoint.Pretty
+        Transform.Mirror(startPoint, normal)
+
+
     /// <summary>Moves, scales, or rotates a list of objects given a 4x4 transformation
     ///    matrix. The matrix acts on the left. Use the geometry overload to return transformed duplicates without modifying document objects.</summary>
     /// <param name="objectIds">(Guid seq) List of object identifiers</param>
@@ -524,12 +534,7 @@ module AutoOpenObject =
                                 startPoint:Point3d,
                                 endPoint:Point3d,
                                 [<OPT;DEF(false)>]copy:bool) : Guid =
-        let vec = endPoint-startPoint
-        if vec.IsTiny() then RhinoScriptingException.Raise "MirrorObject Start and  end points are too close to each other.  objectId:'%s' startPoint:'%A' endPoint:'%A' copy:'%A'" (Pretty.str objectId) startPoint endPoint copy
-        let normal = Plane.WorldXY.Normal
-        let xv = Vector3d.CrossProduct(vec, normal)
-        xv.Unitize() |> ignore<bool>
-        let xf = Transform.Mirror(startPoint, vec)
+        let xf = RhinoScriptSyntax.objectMirrorTransform("MirrorObject", startPoint, endPoint)
         let res = State.Doc.Objects.Transform(objectId, xf, not copy)
         if res = Guid.Empty then RhinoScriptingException.Raise "MirrorObject Cannot apply MirrorObject transform to objectId:'%s' startPoint:'%A' endPoint:'%A' copy:'%A'" (Pretty.str objectId) startPoint endPoint copy
         if copy then RhinoScriptSyntax.putCopiesInNewGroups [res]
@@ -544,12 +549,7 @@ module AutoOpenObject =
     static member MirrorObject( geometry:GeometryBase,
                                 startPoint:Point3d,
                                 endPoint:Point3d) : GeometryBase =
-        let vec = endPoint-startPoint
-        if vec.IsTiny() then RhinoScriptingException.Raise "MirrorObject Start and  end points are too close to each other.  geometry:'%s' startPoint:'%A' endPoint:'%A'" (Pretty.str geometry) startPoint endPoint
-        let normal = Plane.WorldXY.Normal
-        let xv = Vector3d.CrossProduct(vec, normal)
-        xv.Unitize() |> ignore<bool>
-        let xf = Transform.Mirror(startPoint, vec)
+        let xf = RhinoScriptSyntax.objectMirrorTransform("MirrorObject", startPoint, endPoint)
         RhinoScriptSyntax.TransformObject(geometry, xf)
 
 
@@ -564,12 +564,7 @@ module AutoOpenObject =
                                  startPoint:Point3d,
                                  endPoint:Point3d,
                                  [<OPT;DEF(false)>]copy:bool) : Guid ResizeArray = //PLURAL
-        let vec = endPoint-startPoint
-        if vec.IsTiny() then RhinoScriptingException.Raise "MirrorObjects Start and  end points are too close to each other.  objectId:'%s' startPoint:'%A' endPoint:'%A' copy:'%A'" (Pretty.str objectIds) startPoint endPoint copy
-        let normal = Plane.WorldXY.Normal
-        let xv = Vector3d.CrossProduct(vec, normal)
-        xv.Unitize() |> ignore<bool>
-        let xf = Transform.Mirror(startPoint, vec)
+        let xf = RhinoScriptSyntax.objectMirrorTransform("MirrorObjects", startPoint, endPoint)
         let rc = ResizeArray()
         for objectId in objectIds do
             let objectId = State.Doc.Objects.Transform(objectId, xf, not copy)
@@ -587,12 +582,7 @@ module AutoOpenObject =
     static member MirrorObjects(  geometries:GeometryBase seq,
                                  startPoint:Point3d,
                                  endPoint:Point3d) : GeometryBase ResizeArray = //PLURAL
-        let vec = endPoint-startPoint
-        if vec.IsTiny() then RhinoScriptingException.Raise "MirrorObjects Start and  end points are too close to each other.  objectId:'%s' startPoint:'%A' endPoint:'%A'" (Pretty.str geometries) startPoint endPoint
-        let normal = Plane.WorldXY.Normal
-        let xv = Vector3d.CrossProduct(vec, normal)
-        xv.Unitize() |> ignore<bool>
-        let xf = Transform.Mirror(startPoint, vec)
+        let xf = RhinoScriptSyntax.objectMirrorTransform("MirrorObjects", startPoint, endPoint)
         RhinoScriptSyntax.TransformObjects(geometries, xf)
 
 

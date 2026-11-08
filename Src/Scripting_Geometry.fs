@@ -1066,6 +1066,7 @@ module AutoOpenGeometry =
             |0 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=false, italic=false)
             |_ -> (RhinoScriptingException.Raise "TextObjectStyle failed.  objectId:'%s' bad style:%d" (Pretty.str objectId) style)
         if isNull f then RhinoScriptingException.Raise "TextObjectStyle failed.  objectId:'%s' style:%d not available for %s" (Pretty.str objectId) style fontdata.QuartetName
+        annotation.Font <- f
         if not <| State.Doc.Objects.Replace(objectId, annotation) then
             RhinoScriptingException.Raise "TextObjectStyle failed.  objectId:'%s' bad style:%d" (Pretty.str objectId) style
         State.Doc.Views.Redraw()

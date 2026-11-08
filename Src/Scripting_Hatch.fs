@@ -46,7 +46,8 @@ module AutoOpenHatch =
 
 
 
-    /// <summary>Creates one or more new Hatch objects from a list of closed planar Curves.</summary>
+    /// <summary>Creates one or more new Hatch objects from a list of closed planar Curves.
+    ///    The Hatch geometry refers to a Hatch pattern of the document, so the default Hatch patterns are added to the document if missing.</summary>
     /// <param name="curves">(Curve seq) Geometry of the closed planar Curves that define the boundary of the Hatch objects</param>
     /// <param name="hatchPattern">(string) Optional. Name of the Hatch pattern to be used by the Hatch object. If omitted, the current Hatch pattern will be used.</param>
     /// <param name="scale">(float) Optional, default value: <c>1.0</c>. Hatch pattern scale factor.</param>
@@ -58,6 +59,7 @@ module AutoOpenHatch =
                               [<OPT;DEF(1.0)>]scale:float,
                               [<OPT;DEF(0.0)>]rotation:float,
                               [<OPT;DEF(0.0)>]tolerance:float) : Hatch ResizeArray =
+        RhinoScriptSyntax.InitHatchPatterns()
         let mutable index = State.Doc.HatchPatterns.CurrentHatchPatternIndex
         if notNull hatchPattern then
             let patternInstance = State.Doc.HatchPatterns.FindName(hatchPattern)
@@ -90,7 +92,6 @@ module AutoOpenHatch =
                               [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray =
         let curves  = curveIds |> RArr.mapSeq RhinoScriptSyntax.CoerceCurve
         try
-            RhinoScriptSyntax.InitHatchPatterns()
             let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance
             let hatches = RhinoScriptSyntax.MakeHatches(curves, hatchPattern, scale, rotation, tolerance)
             let ids = ResizeArray()
