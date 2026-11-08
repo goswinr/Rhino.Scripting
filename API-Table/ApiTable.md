@@ -1923,7 +1923,7 @@ From [Src/Scripting_Views.fs](../Src/Scripting_Views.fs).
 | `ViewProjection` | `view: string -> int` | Return a view's projection mode. |
 | `ViewProjection` | `view: string * mode: int -> unit` | Set a view's projection mode. |
 | `ViewRadius` | `view: string -> float` | Returns the radius of a parallel-projected view. |
-| `ViewRadius` | `view: string * radius: float * mode: bool -> unit` | Sets the radius of a parallel-projected view. |
+| `ViewRadius` | `view: string * radius: float * ?mode: bool = false -> unit` | Sets the radius of a parallel-projected view. |
 | `ViewSize` | `?view: string = null -> int * int` | Returns the width and height in pixels of the specified view. |
 | `ViewSpeedTest` | `?view: string = "" * ?frames: int = 100 * ?freeze: bool = true * ?direction: int = 0 * ?angleDegrees: float = 5.0 -> float` | Test's Rhino's display performance. |
 | `ViewTarget` | `view: string -> Point3d` | Returns the target location of the specified view. |

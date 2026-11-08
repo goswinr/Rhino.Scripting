@@ -1,4 +1,4 @@
-﻿namespace Rhino.Scripting
+namespace Rhino.Scripting
 
 open Rhino
 open System.ComponentModel
@@ -832,12 +832,12 @@ module AutoOpenViews =
     /// when you need an absolute zoom factor for a parallel-projected view.</summary>
     /// <param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     /// <param name="radius">(float) The view radius</param>
-    /// <param name="mode">(bool) Perform a "dolly" magnification by moving the camera
+    /// <param name="mode">(bool) Optional, default value: <c>false</c>. Perform a "dolly" magnification by moving the camera
     ///    towards/away from the target so that the amount of the screen
     ///    subtended by an object changes. true = perform a "zoom"
     ///    magnification by adjusting the "lens" angle</param>
     /// <returns>(unit) void, nothing.</returns>
-    static member ViewRadius(view:string, radius:float, mode:bool) : unit = //SET
+    static member ViewRadius(view:string, radius:float, [<OPT;DEF(false)>]mode:bool) : unit = //SET
         let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         let viewport = view.ActiveViewport
         if not viewport.IsParallelProjection then RhinoScriptingException.Raise "ViewRadius view is not ParallelProjection.  view:'%A'" view
