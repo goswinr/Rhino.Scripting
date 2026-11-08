@@ -8,13 +8,13 @@ This review preserves documented F# API choices where they provide useful static
 
 ## Fixes
 
-Each code change has its own commit, including its changelog entry and regenerated combined source. Public API changes also regenerate the API table. Existing parameterless and scalar overloads were preserved when adding collection or selector overloads.
+Each code change has its own commit, including its changelog entry and regenerated combined source. Public API changes also regenerate the API table. Existing call syntax remains available when adding collection or selector options. BlockNames uses one optional sort argument defaulting to false, so both BlockNames() and BlockNames(true) remain valid calls.
 
 | Commit | Change |
 | --- | --- |
 | `02f7e69` | Preserve unrelated preselected objects in `GetObject`. |
 | `3130f42` | Apply both the allowed-object list and custom geometry filter in `GetObjects`. |
-| `7c222e9` | Add `BlockNames(sort)` without replacing `BlockNames()`. |
+| `7c222e9` | Add BlockNames sorting support, subsequently consolidated into one optional sort argument defaulting to false. |
 | `bf83c78` | Add `DimStyleNames(sort)`. |
 | `4d5903d` | Add `LayerNames(sort)`. |
 | `8b9c68d` | Add `LinetypeNames(sort)`. |

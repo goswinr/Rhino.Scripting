@@ -166,24 +166,15 @@ module AutoOpenBlock =
         instance.InstanceXform
 
 
-    /// <summary>Returns the names of all block definitions in the document.</summary>
+    /// <summary>Returns the names of all block definitions in the document, optionally sorted in ordinal order.</summary>
+    /// <param name="sort">(bool) Optional, default value: <c>false</c>. True to sort the names; False to preserve document order.</param>
     /// <returns>(string ResizeArray) The names of all block definitions in the document.</returns>
-    static member BlockNames() : string ResizeArray =
-        let  instDefList = State.Doc.InstanceDefinitions.GetList(true)
+    static member BlockNames([<OPT;DEF(false)>]sort:bool) : string ResizeArray =
+        let instDefList = State.Doc.InstanceDefinitions.GetList(true)
         let rc = ResizeArray(instDefList.Length)
         for item in instDefList do rc.Add(item.Name)
+        if sort then rc.Sort(StringComparer.Ordinal)
         rc
-
-
-
-
-    /// <summary>Returns the names, optionally sorted in ordinal order, like in RhinoPython.</summary>
-    /// <param name="sort">(bool) True to sort the names; False to preserve document order.</param>
-    /// <returns>(string ResizeArray) The names.</returns>
-    static member BlockNames(sort:bool) : string ResizeArray =
-        let names = RhinoScriptSyntax.BlockNames()
-        if sort then names.Sort(StringComparer.Ordinal)
-        names
 
 
     /// <summary>Returns number of objects that make up a block definition.</summary>
