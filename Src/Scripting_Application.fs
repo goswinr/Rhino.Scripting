@@ -712,11 +712,11 @@ module AutoOpenApplication =
         ApplicationSettings.FileSettings.GetSearchPaths()
 
     /// <summary>Sends a string of printable characters to Rhino's Commandline.</summary>
-    /// <param name="keys">(string) A string of characters to send to the Commandline</param>
+    /// <param name="keys">(string) Optional, default value: <c>""</c>. Characters to send; omit to send only the optional return.</param>
     /// <param name="addReturn">(bool) Optional, default value: <c>true</c>
     ///    Append a return character to the end of the string. If omitted a return character will be added (True)</param>
     /// <returns>(unit) void, nothing.</returns>
-    static member SendKeystrokes(keys:string, [<OPT;DEF(true)>]addReturn:bool) : unit =
+    static member SendKeystrokes([<OPT;DEF("")>]keys:string, [<OPT;DEF(true)>]addReturn:bool) : unit =
         RhinoSync.DoSync (fun () ->
             RhinoApp.SendKeystrokes(keys, addReturn))
 

@@ -176,7 +176,7 @@ From [Src/Scripting_Application.fs](../Src/Scripting_Application.fs).
 | `SdkVersion` | `unit -> int` | Returns version of the Rhino SDK supported by the executing Rhino. |
 | `SearchPathCount` | `unit -> int` | Returns the number of path items in Rhino's search path list. |
 | `SearchPathList` | `unit -> string array` | Returns all of the path items in Rhino's search path list. |
-| `SendKeystrokes` | `keys: string * ?addReturn: bool = true -> unit` | Sends a string of printable characters to Rhino's Commandline. |
+| `SendKeystrokes` | `?keys: string = "" * ?addReturn: bool = true -> unit` | Sends a string of printable characters to Rhino's Commandline. |
 | `Snap` | `unit -> bool` | Get status of Rhino's grid snap modeling aid. |
 | `Snap` | `enable: bool -> unit` | Enables or disables Rhino's grid snap modeling aid. |
 | `StatusBarDistance` | `distance: float -> unit` | Sets Rhino's status bar distance pane. |
