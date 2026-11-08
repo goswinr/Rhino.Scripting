@@ -8,7 +8,7 @@ This review preserves documented F# API choices where they provide useful static
 
 ## Fixes
 
-Each code change has its own commit, including its changelog entry and regenerated combined source. Public API changes also regenerate the API table. Existing call syntax remains available when adding collection or selector options. BlockNames and DimStyleNames each use one optional sort argument defaulting to false, supporting both omitted and explicit sort flags.
+Each code change has its own commit, including its changelog entry and regenerated combined source. Public API changes also regenerate the API table. Existing call syntax remains available when adding collection or selector options. BlockNames, DimStyleNames and LinetypeNames each use one optional sort argument defaulting to false, supporting both omitted and explicit sort flags.
 
 | Commit | Change |
 | --- | --- |
@@ -17,7 +17,7 @@ Each code change has its own commit, including its changelog entry and regenerat
 | `7c222e9` | Add BlockNames sorting support, subsequently consolidated into one optional sort argument defaulting to false. |
 | `bf83c78` | Add DimStyleNames sorting support, subsequently consolidated into one optional sort argument defaulting to false. |
 | `4d5903d` | Add `LayerNames(sort)`. |
-| `8b9c68d` | Add `LinetypeNames(sort)`. |
+| `8b9c68d` | Add LinetypeNames sorting support, subsequently consolidated into one optional sort argument defaulting to false. |
 | `64b619e` | Restore omitted-message support for `Prompt`. |
 | `557a1c7` | Restore omitted-key support for `SendKeystrokes`. |
 | `ac9ae17` | Restore the zero default for `StatusBarDistance`. |

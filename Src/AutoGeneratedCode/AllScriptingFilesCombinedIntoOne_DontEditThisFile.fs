@@ -11891,25 +11891,17 @@ type RhinoScriptSyntax private () =
         State.Doc.Linetypes.ActiveCount
 
 
-    /// <summary>Returns names of all linetypes in the document.</summary>
+    /// <summary>Returns names of all linetypes in the document, optionally sorted in ordinal order.</summary>
+    /// <param name="sort">(bool) Optional, default value: <c>false</c>. True to sort the names; False to preserve document order.</param>
     /// <returns>(string ResizeArray) List of linetype names.</returns>
-    static member LinetypeNames() : string ResizeArray =
+    static member LinetypeNames([<OPT;DEF(false)>]sort:bool) : string ResizeArray =
         let count = State.Doc.Linetypes.Count
         let rc = ResizeArray()
         for i = 0 to count - 1 do
             let linetype = State.Doc.Linetypes.[i]
-            if not linetype.IsDeleted then  rc.Add(linetype.Name)
+            if not linetype.IsDeleted then rc.Add(linetype.Name)
+        if sort then rc.Sort(System.StringComparer.Ordinal)
         rc
-
-
-
-    /// <summary>Returns the names, optionally sorted in ordinal order, like in RhinoPython.</summary>
-    /// <param name="sort">(bool) True to sort the names; False to preserve document order.</param>
-    /// <returns>(string ResizeArray) The names.</returns>
-    static member LinetypeNames(sort:bool) : string ResizeArray =
-        let names = RhinoScriptSyntax.LinetypeNames()
-        if sort then names.Sort(System.StringComparer.Ordinal)
-        names
 
 
     //---End of header marker: don't change: {@$%^&*()*&^%$@}

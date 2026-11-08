@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - UnitScale accepts only the destination unit system and uses the current model units as the source, like in RhinoPython.
 - UnitAbsoluteTolerance, UnitAngleTolerance, UnitDistanceDisplayPrecision, UnitRelativeTolerance and UnitSystem have model/page selector overloads, restoring page-unit access without changing existing model-unit calls.
 - AddDimStyle() creates an automatically named dimension style and returns its name, like in RhinoPython.
-- LinetypeNames accepts a sort flag to return names in ordinal order, like in RhinoPython.
+- LinetypeNames accepts an optional sort flag, defaulting to false, to return names in ordinal order, like in RhinoPython.
 - LayerNames accepts a sort flag to return names in ordinal order, like in RhinoPython.
 - DimStyleNames accepts an optional sort flag, defaulting to false, to return names in ordinal order, like in RhinoPython.
 - BlockNames accepts an optional sort flag, defaulting to false, to return names in ordinal order, like in RhinoPython.
