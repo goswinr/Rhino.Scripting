@@ -734,9 +734,9 @@ module AutoOpenApplication =
 
 
     /// <summary>Sets Rhino's status bar distance pane.</summary>
-    /// <param name="distance">(float) The distance to set the status bar</param>
+    /// <param name="distance">(float) Optional, default value: <c>0.0</c>. The distance to display.</param>
     /// <returns>(unit) void, nothing.</returns>
-    static member StatusBarDistance(distance:float) : unit =
+    static member StatusBarDistance([<OPT;DEF(0.0)>]distance:float) : unit =
         RhinoSync.DoSync (fun () ->
             UI.StatusBar.SetDistancePane(distance))
 
