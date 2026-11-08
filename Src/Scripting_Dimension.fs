@@ -73,12 +73,12 @@ module AutoOpenDimension =
     ///    The 3D points passed will define the plane if no plane is given.
     ///    If there are only two points, the World XY plane is used, except for a vertical segment, which uses a plane containing the segment.</summary>
     /// <param name="points">(Point3d seq) List of (at least 2) 3D points.</param>
-    /// <param name="text">(string) Leader's text.</param>
+    /// <param name="text">(string) Optional, default value: <c>""</c>. Leader text; omit to create a leader without text.</param>
     /// <param name="plane">(Geometry.Plane) Optional, default value: <c>defined by points arg</c>.
     ///    Points will be projected to this plane if provided.</param>
     /// <returns>(Guid) Identifier of the new leader.</returns>
     static member AddLeader( points:Point3d seq,
-                             text:string,
+                             [<OPT;DEF("")>]text:string,
                              [<OPT;DEF(Plane())>]plane:Plane) : Guid =
         let points = points |> Seq.toArray
         if points.Length < 2 then RhinoScriptingException.Raise "AddLeader: at least two points are required"

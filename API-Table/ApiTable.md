@@ -602,7 +602,7 @@ From [Src/Scripting_Dimension.fs](../Src/Scripting_Dimension.fs).
 | `AddAlignedDimension` | `startPoint: Point3d * endPoint: Point3d * pointOnDimensionLine: Point3d * ?style: string = "" -> Guid` | Adds an aligned dimension object to the document. |
 | `AddDimStyle` | `dimStyleName: string -> unit` | Adds a new dimension style to the document. |
 | `AddDimStyle` | `unit -> string` | Adds a dimension style with an automatically generated name and the current default properties. |
-| `AddLeader` | `points: Point3d seq * text: string * ?plane: Plane = Plane() -> Guid` | Adds a leader to the document. |
+| `AddLeader` | `points: Point3d seq * ?text: string = "" * ?plane: Plane = Plane() -> Guid` | Adds a leader to the document. |
 | `AddLinearDimension` | `startPoint: Point3d * endPoint: Point3d * pointOnDimensionLine: Point3d * ?plane: Plane = Plane() -> Guid` | Adds a linear dimension to the document. |
 | `CurrentDimStyle` | `unit -> string` | Returns the current default dimension style. |
 | `CurrentDimStyle` | `dimStyleName: string -> unit` | Changes the current default dimension style. |

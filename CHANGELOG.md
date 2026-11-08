@@ -38,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - IsDimension, IsLeader and the other dimension checks return false for objects that don't exist, instead of raising an exception, like in RhinoPython
 - IsCone, IsCylinder, IsPlaneSurface and IsPointLight, IsSpotLight and the other light type checks return false for objects of another type or that don't exist, instead of raising an exception, like in RhinoPython
 ### Fixed
+- AddLeader accepts omitted text to create a leader without text, like in RhinoPython.
 - CurveFilletPoints defaults its radius to 1.0 when omitted, like in RhinoPython.
 - CurveCurveIntersection uses the same overlap tolerance as RhinoPython instead of substituting the document absolute tolerance.
 - StatusBarPoint can be called without a value, like in RhinoPython.
