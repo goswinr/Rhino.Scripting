@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- LayerNames accepts a sort flag to return names in ordinal order, like in RhinoPython.
 - DimStyleNames accepts a sort flag to return names in ordinal order, like in RhinoPython.
 - BlockNames accepts a sort flag to return names in ordinal order, like in RhinoPython.
 - Direct geometry overloads for methods that previously required object identifiers, including collection inputs; geometry-producing operations take and return raw geometry, while document-object operations retain their Guid APIs.

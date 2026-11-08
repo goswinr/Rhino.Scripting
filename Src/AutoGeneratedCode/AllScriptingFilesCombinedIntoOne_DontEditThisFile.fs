@@ -2212,6 +2212,15 @@ type RhinoScriptSyntax private () =
         rc
 
 
+    /// <summary>Returns the names, optionally sorted in ordinal order, like in RhinoPython.</summary>
+    /// <param name="sort">(bool) True to sort the names; False to preserve document order.</param>
+    /// <returns>(string ResizeArray) The names.</returns>
+    static member LayerNames(sort:bool) : string ResizeArray =
+        let names = RhinoScriptSyntax.LayerNames()
+        if sort then names.Sort(StringComparer.Ordinal)
+        names
+
+
     /// <summary>Returns the current display order index of a layer as displayed in Rhino's
     ///    layer dialog box. A display order index of -1 indicates that the current
     ///    layer dialog filter does not allow the layer to appear in the layer list.</summary>

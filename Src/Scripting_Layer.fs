@@ -1,4 +1,4 @@
-﻿namespace Rhino.Scripting
+namespace Rhino.Scripting
 
 open Rhino
 open System.ComponentModel
@@ -583,6 +583,15 @@ module AutoOpenLayer =
         for layer in State.Doc.Layers do
             if not layer.IsDeleted then rc.Add(layer.FullPath)
         rc
+
+
+    /// <summary>Returns the names, optionally sorted in ordinal order, like in RhinoPython.</summary>
+    /// <param name="sort">(bool) True to sort the names; False to preserve document order.</param>
+    /// <returns>(string ResizeArray) The names.</returns>
+    static member LayerNames(sort:bool) : string ResizeArray =
+        let names = RhinoScriptSyntax.LayerNames()
+        if sort then names.Sort(StringComparer.Ordinal)
+        names
 
 
     /// <summary>Returns the current display order index of a layer as displayed in Rhino's
