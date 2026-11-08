@@ -2,7 +2,7 @@
 
 All public types, members and functions of Rhino.Scripting, with the first sentence of their summary.
 
-- The 1677 static members of `RhinoScriptSyntax`, 1038 names with their overloads, have one table per source file,
+- The 1679 static members of `RhinoScriptSyntax`, 1039 names with their overloads, have one table per source file,
   e.g. [Curve](#curve) for `Src/Scripting_Curve.fs`. Scripts usually call them through an alias, `type rs = RhinoScriptSyntax`.
 - Overloads of the same name are in the order of the source.
 - Geometry-only `Make...` methods are listed immediately after their corresponding document-adding `Add...` methods.
@@ -37,7 +37,7 @@ Generated from the sources by `API-Table/ApiTable.fsx`. Do not edit by hand.
 - [Plane](#plane), 21 members
 - [PointVector](#pointvector), 37 members
 - [Selection](#selection), 25 members
-- [Surface](#surface), 210 members
+- [Surface](#surface), 212 members
 - [Toolbar](#toolbar), 15 members
 - [Transformation](#transformation), 29 members
 - [UserData](#userdata), 21 members
@@ -1566,6 +1566,8 @@ From [Src/Scripting_Surface.fs](../Src/Scripting_Surface.fs).
 | `IsSurfaceClosed` | `surfaceGeo: Surface * direction: int -> bool` | Verifies a Surface object is closed in the specified direction. |
 | `IsSurfaceFliped` | `surfaceId: Guid -> bool` | Returns the normal direction of a Surface. |
 | `IsSurfaceFliped` | `surfaceGeo: Brep -> bool` | Returns the normal direction of a Surface. |
+| `IsSurfaceFlipped` | `surfaceId: Guid -> bool` | Returns whether the normal of a single-face surface is flipped. |
+| `IsSurfaceFlipped` | `surfaceGeo: Brep -> bool` | Returns whether the normal of a single-face surface is flipped. |
 | `IsSurfacePeriodic` | `surfaceId: Guid * direction: int -> bool` | Verifies a Surface object is periodic in the specified direction. |
 | `IsSurfacePeriodic` | `surfaceGeo: Surface * direction: int -> bool` | Verifies a Surface object is periodic in the specified direction. |
 | `IsSurfacePlanar` | `surfaceId: Guid * ?tolerance: float = 0.0 -> bool` | Verifies a Surface object is planar. |

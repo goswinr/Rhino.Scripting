@@ -1613,9 +1613,22 @@ module AutoOpenSurface =
         face.OrientationIsReversed
 
 
+    /// <summary>Returns whether the normal of a single-face surface is flipped.</summary>
+    /// <param name="surfaceId">(Guid) Identifier of the surface object.</param>
+    /// <returns>(bool) True when the surface normal is reversed.</returns>
+    static member IsSurfaceFlipped(surfaceId:Guid) : bool = //GET
+        RhinoScriptSyntax.IsSurfaceFliped(surfaceId)
+
+    /// <summary>Returns whether the normal of a single-face surface is flipped.</summary>
+    /// <param name="surfaceGeo">(Brep) The single-face surface geometry.</param>
+    /// <returns>(bool) True when the surface normal is reversed.</returns>
+    static member IsSurfaceFlipped(surfaceGeo:Brep) : bool = //GET
+        RhinoScriptSyntax.IsSurfaceFliped(surfaceGeo)
+
+
     /// <summary>Changes the normal direction of a Surface. This feature can
     /// also be found in Rhino's Dir command.
-    /// Use RhinoScriptSyntax.IsSurfaceFliped to get State.</summary>
+    /// Use RhinoScriptSyntax.IsSurfaceFlipped to get the orientation.</summary>
     /// <param name="surfaceId">(Guid) Identifier of a Surface object</param>
     /// <param name="flip">(bool) New normal orientation, either flipped(True) or not flipped (False)</param>
     /// <returns>(unit) void, nothing.</returns>
@@ -1631,7 +1644,7 @@ module AutoOpenSurface =
 
     /// <summary>Changes the normal direction of multiple Surface. This feature can
     /// also be found in Rhino's Dir command.
-    /// Use RhinoScriptSyntax.IsSurfaceFliped to get State.</summary>
+    /// Use RhinoScriptSyntax.IsSurfaceFlipped to get the orientation.</summary>
     /// <param name="surfaceIds">(Guid seq) Identifiers of multiple Surface objects</param>
     /// <param name="flip">(bool) New normal orientation, either flipped(True) or not flipped (False)</param>
     /// <returns>(unit) void, nothing.</returns>
