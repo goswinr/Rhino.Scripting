@@ -33,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - IsDimension, IsLeader and the other dimension checks return false for objects that don't exist, instead of raising an exception, like in RhinoPython
 - IsCone, IsCylinder, IsPlaneSurface and IsPointLight, IsSpotLight and the other light type checks return false for objects of another type or that don't exist, instead of raising an exception, like in RhinoPython
 ### Fixed
+- GetObject preserves other preselected objects when select is false, like in RhinoPython.
 - Optional view names and empty view names use the active view in view operations, CreatePreviewImage and screen/world transforms, instead of raising in CoerceView.
 - SplitBrep, PullCurve, JoinCurves and MeshBooleanDifference, MeshBooleanIntersection and MeshBooleanSplit reject empty results and retain their inputs when adding results fails.
 - MakeHatches raises when no hatches can be created, instead of returning an empty list.

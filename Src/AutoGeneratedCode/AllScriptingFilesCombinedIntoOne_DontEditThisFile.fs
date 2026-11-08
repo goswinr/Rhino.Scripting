@@ -16032,13 +16032,11 @@ type RhinoScriptSyntax private () =
             else
                 let objref = go.Object(0)
                 let obj = objref.Object()
-                //let presel = go.ObjectsWerePreselected
+                let presel = go.ObjectsWerePreselected
                 go.Dispose()
-                //if not <| select && not <| preselect then State.Doc.Objects.UnselectAll() |> ignore<int>  State.Doc.Views.Redraw()
-                if select then
-                    obj.Select(select)  |> ignore<int>
-                else
+                if not select && not presel then
                     State.Doc.Objects.UnselectAll() |> ignore<int>
+                obj.Select(select) |> ignore<int>
                 State.Doc.Views.Redraw()
                 obj.Id
         RhinoSync.DoSyncRedrawHideEditor get
