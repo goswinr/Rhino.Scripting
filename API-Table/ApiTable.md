@@ -2,7 +2,7 @@
 
 All public types, members and functions of Rhino.Scripting, with the first sentence of their summary.
 
-- The 1681 static members of `RhinoScriptSyntax`, 1039 names with their overloads, have one table per source file,
+- The 1682 static members of `RhinoScriptSyntax`, 1040 names with their overloads, have one table per source file,
   e.g. [Curve](#curve) for `Src/Scripting_Curve.fs`. Scripts usually call them through an alias, `type rs = RhinoScriptSyntax`.
 - Overloads of the same name are in the order of the source.
 - Geometry-only `Make...` methods are listed immediately after their corresponding document-adding `Add...` methods.
@@ -36,7 +36,7 @@ Generated from the sources by `API-Table/ApiTable.fsx`. Do not edit by hand.
 - [Object](#object), 104 members
 - [Plane](#plane), 21 members
 - [PointVector](#pointvector), 37 members
-- [Selection](#selection), 25 members
+- [Selection](#selection), 26 members
 - [Surface](#surface), 212 members
 - [Toolbar](#toolbar), 15 members
 - [Transformation](#transformation), 29 members
@@ -1435,6 +1435,7 @@ From [Src/Scripting_Selection.fs](../Src/Scripting_Selection.fs).
 | `GetCurveObject` | `?message: string = null * ?preselect: bool = true * ?select: bool = false -> Guid * bool * SelectionMethod * Point3d * float * string` | Prompts user to pick or select a single Curve object. |
 | `GetObject` | `?message: string = null * ?filter: int = 0 * ?preselect: bool = true * ?select: bool = false * ?customFilter: GetObjectGeometryFilter = null * ?subObjects: bool = false -> Guid` | Prompts user to pick, or select, a single object. |
 | `GetObjectEx` | `?message: string = null * ?filter: int = 0 * ?preselect: bool = true * ?select: bool = false * ?objects: Guid seq = null -> Guid * bool * SelectionMethod * Point3d * string` | Prompts user to pick, or select a single object. |
+| `GetObjectRef` | `?message: string = null * ?filter: int = 0 * ?preselect: bool = true * ?select: bool = false * ?customFilter: GetObjectGeometryFilter = null * ?subObjects: bool = false -> ObjRef` | Prompts user to pick a single object or subobject and returns its object reference. |
 | `GetObjects` | `?message: string = "Select objects" * ?filter: int = 0 * ?group: bool = true * ?preselect: bool = true * ?select: bool = false * ?objectsToSelectFrom: Guid seq = null * ?minimumCount: int = 1 * ?maximumCount: int = 0 * ?printCount: bool = false * ?customFilter: GetObjectGeometryFilter = null -> ResizeArray<Guid>` | Prompts user to pick or select one or more objects. |
 | `GetObjectsEx` | `?message: string = "Select objects" * ?filter: int = 0 * ?group: bool = true * ?preselect: bool = true * ?select: bool = false * ?printCount: bool = false * ?objectsToSelectFrom: Guid seq = null -> ResizeArray<Guid * bool * SelectionMethod * Point3d * string>` | Prompts user to pick, or select one or more objects. |
 | `GetPointCoordinates` | `?message: string = "Select Point Objects" * ?preselect: bool = false -> ResizeArray<Point3d>` | Prompts the user to select one or more point objects. |

@@ -114,6 +114,56 @@ module AutoOpenSelection =
         RhinoSync.DoSyncRedrawHideEditor get
 
 
+    /// <summary>Prompts user to pick a single object or subobject and returns its object reference.
+    /// Raises a RhinoUserInteractionException if no object was selected. For example when Esc key was pressed.</summary>
+    /// <param name="message">(string) Optional, A prompt or message</param>
+    /// <param name="filter">(int) Optional, The type(s) of geometry (points, Curves, Surfaces, Meshes,...)
+    ///    that can be selected. Object types can be added together to filter
+    ///    several different kinds of geometry. use the RhinoScriptSyntax.Filter enum to get values, they can be joined with '+'</param>
+    /// <param name="preselect">(bool) Optional, default value: <c>true</c>
+    ///    Allow for the selection of pre-selected objects</param>
+    /// <param name="select">(bool) Optional, default value: <c>false</c>
+    ///    Select the picked objects. If False, the objects that are
+    ///    picked are not selected</param>
+    /// <param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, A custom filter function</param>
+    /// <param name="subObjects">(bool) Optional, default value: <c>false</c>
+    ///    If True, sub-objects can be selected. When this is the
+    ///    case, the returned reference retains the selected component</param>
+    /// <returns>(DocObjects.ObjRef) Reference retaining the selected subobject. The caller must dispose it when finished.
+    /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
+    static member GetObjectRef(        [<OPT;DEF(null:string)>]message:string,
+                                    [<OPT;DEF(0)>]filter:int,
+                                    [<OPT;DEF(true)>]preselect:bool,
+                                    [<OPT;DEF(false)>]select:bool,
+                                    [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter,
+                                    [<OPT;DEF(false)>]subObjects:bool) : DocObjects.ObjRef =
+        let get () =
+            if not  preselect then
+                State.Doc.Objects.UnselectAll() |> ignore<int>
+                State.Doc.Views.Redraw()
+            use go = new Input.Custom.GetObject()
+            if notNull customFilter then go.SetCustomGeometryFilter(customFilter)
+            if notNull message then go.SetCommandPrompt(message)
+            if filter>0 then go.GeometryFilter <- ObjectFilterEnum.GetFilterEnum(filter)
+            go.SubObjectSelect <- subObjects
+            go.GroupSelect <- false
+            go.AcceptNothing(true)
+            let res = go.Get()
+            if res <> Input.GetResult.Object then
+                RhinoUserInteractionException.Raise "No Object was selected in RhinoScriptSyntax.GetObjectRef(message=%A), Interaction result: %A" message res
+            else
+                let objref = go.Object(0)
+                let obj = objref.Object()
+                let presel = go.ObjectsWerePreselected
+                go.Dispose()
+                if not select && not presel then
+                    State.Doc.Objects.UnselectAll() |> ignore<int>
+                if not subObjects then obj.Select(select) |> ignore<int>
+                State.Doc.Views.Redraw()
+                objref
+        RhinoSync.DoSyncRedrawHideEditor get
+
+
     /// <summary>Prompts user to pick, or select, a single object.
     /// Raises a RhinoUserInteractionException if no object was selected. For example when Esc key was pressed.</summary>
     /// <param name="message">(string) Optional, A prompt or message</param>
@@ -128,7 +178,7 @@ module AutoOpenSelection =
     /// <param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, A custom filter function</param>
     /// <param name="subObjects">(bool) Optional, default value: <c>false</c>
     ///    If True, sub-objects can be selected. When this is the
-    ///    case, for tracking  of the sub-object go via the Object Ref</param>
+    ///    case, use GetObjectRef instead to retain the selected component; this method returns only the parent identifier</param>
     /// <returns>(Guid) Identifier of the picked object.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetObject(        [<OPT;DEF(null:string)>]message:string,
@@ -137,31 +187,8 @@ module AutoOpenSelection =
                                     [<OPT;DEF(false)>]select:bool,
                                     [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter,
                                     [<OPT;DEF(false)>]subObjects:bool) : Guid =
-        let get () =
-            if not  preselect then
-                State.Doc.Objects.UnselectAll() |> ignore<int>
-                State.Doc.Views.Redraw()
-            use go = new Input.Custom.GetObject()
-            if notNull customFilter then go.SetCustomGeometryFilter(customFilter)
-            if notNull message then go.SetCommandPrompt(message)
-            if filter>0 then go.GeometryFilter <- ObjectFilterEnum.GetFilterEnum(filter)
-            go.SubObjectSelect <- subObjects
-            go.GroupSelect <- false
-            go.AcceptNothing(true)
-            let res = go.Get()
-            if res <> Input.GetResult.Object then
-                RhinoUserInteractionException.Raise "No Object was selected in RhinoScriptSyntax.GetObject(message=%A), Interaction result: %A" message res
-            else
-                let objref = go.Object(0)
-                let obj = objref.Object()
-                let presel = go.ObjectsWerePreselected
-                go.Dispose()
-                if not select && not presel then
-                    State.Doc.Objects.UnselectAll() |> ignore<int>
-                obj.Select(select) |> ignore<int>
-                State.Doc.Views.Redraw()
-                obj.Id
-        RhinoSync.DoSyncRedrawHideEditor get
+        use objref = RhinoScriptSyntax.GetObjectRef(message, filter, preselect, select, customFilter, subObjects)
+        objref.ObjectId
 
 
     /// <summary>Prompts user to pick, or select a single object.
