@@ -1,4 +1,4 @@
-﻿namespace Rhino.Scripting
+namespace Rhino.Scripting
 
 open Rhino
 open System.ComponentModel
@@ -665,4 +665,82 @@ module AutoOpenDocument =
         State.Doc.GetUnitSystemName(modelUnits, capitalize, singular, abbreviate)
 
 
+
+    /// <summary>Returns the absolute tolerance for model or page units.</summary>
+    /// <param name="modelUnits">(bool) True for model units; False for page units.</param>
+    /// <returns>(float) The absolute tolerance in the selected drawing units.</returns>
+    static member UnitAbsoluteTolerance(modelUnits:bool) : float = //GET
+        if modelUnits then State.Doc.ModelAbsoluteTolerance else State.Doc.PageAbsoluteTolerance
+
+    /// <summary>Sets the absolute tolerance for model or page units.</summary>
+    /// <param name="tolerance">(float) A positive absolute tolerance.</param>
+    /// <param name="modelUnits">(bool) True for model units; False for page units.</param>
+    /// <returns>(unit) void, nothing.</returns>
+    static member UnitAbsoluteTolerance(tolerance:float, modelUnits:bool) : unit = //SET
+        if modelUnits then RhinoScriptSyntax.UnitAbsoluteTolerance(tolerance)
+        elif tolerance > 0.0 then State.Doc.PageAbsoluteTolerance <- tolerance
+        else RhinoScriptingException.Raise "UnitAbsoluteTolerance: tolerance must be positive, got %g" tolerance
+
+    /// <summary>Returns the angle tolerance for model or page units.</summary>
+    /// <param name="modelUnits">(bool) True for model units; False for page units.</param>
+    /// <returns>(float) The angle tolerance in degrees.</returns>
+    static member UnitAngleTolerance(modelUnits:bool) : float = //GET
+        if modelUnits then State.Doc.ModelAngleToleranceDegrees else State.Doc.PageAngleToleranceDegrees
+
+    /// <summary>Sets the angle tolerance for model or page units.</summary>
+    /// <param name="angleToleranceDegrees">(float) A positive angle tolerance in degrees.</param>
+    /// <param name="modelUnits">(bool) True for model units; False for page units.</param>
+    /// <returns>(unit) void, nothing.</returns>
+    static member UnitAngleTolerance(angleToleranceDegrees:float, modelUnits:bool) : unit = //SET
+        if modelUnits then RhinoScriptSyntax.UnitAngleTolerance(angleToleranceDegrees)
+        elif angleToleranceDegrees > 0.0 then State.Doc.PageAngleToleranceDegrees <- angleToleranceDegrees
+        else RhinoScriptingException.Raise "UnitAngleTolerance: tolerance must be positive, got %g" angleToleranceDegrees
+
+    /// <summary>Returns distance display precision for model or page units.</summary>
+    /// <param name="modelUnits">(bool) True for model units; False for page units.</param>
+    /// <returns>(int) The distance display precision.</returns>
+    static member UnitDistanceDisplayPrecision(modelUnits:bool) : int = //GET
+        if modelUnits then State.Doc.ModelDistanceDisplayPrecision else State.Doc.PageDistanceDisplayPrecision
+
+    /// <summary>Sets distance display precision for model or page units.</summary>
+    /// <param name="precision">(int) The distance display precision, from 0 through 20.</param>
+    /// <param name="modelUnits">(bool) True for model units; False for page units.</param>
+    /// <returns>(unit) void, nothing.</returns>
+    static member UnitDistanceDisplayPrecision(precision:int, modelUnits:bool) : unit = //SET
+        if modelUnits then RhinoScriptSyntax.UnitDistanceDisplayPrecision(precision)
+        else State.Doc.PageDistanceDisplayPrecision <- precision
+
+    /// <summary>Returns the relative tolerance for model or page units.</summary>
+    /// <param name="modelUnits">(bool) True for model units; False for page units.</param>
+    /// <returns>(float) The relative tolerance in percent.</returns>
+    static member UnitRelativeTolerance(modelUnits:bool) : float = //GET
+        if modelUnits then State.Doc.ModelRelativeTolerance else State.Doc.PageRelativeTolerance
+
+    /// <summary>Sets the relative tolerance for model or page units.</summary>
+    /// <param name="relativeTolerance">(float) A positive relative tolerance in percent.</param>
+    /// <param name="modelUnits">(bool) True for model units; False for page units.</param>
+    /// <returns>(unit) void, nothing.</returns>
+    static member UnitRelativeTolerance(relativeTolerance:float, modelUnits:bool) : unit = //SET
+        if modelUnits then RhinoScriptSyntax.UnitRelativeTolerance(relativeTolerance)
+        elif relativeTolerance > 0.0 then State.Doc.PageRelativeTolerance <- relativeTolerance
+        else RhinoScriptingException.Raise "UnitRelativeTolerance: tolerance must be positive, got %g" relativeTolerance
+
+    /// <summary>Returns the model or page unit system.</summary>
+    /// <param name="modelUnits">(bool) True for model units; False for page units.</param>
+    /// <returns>(int) The unit system, using the same values as the parameterless getter.</returns>
+    static member UnitSystem(modelUnits:bool) : int = //GET
+        if modelUnits then int State.Doc.ModelUnitSystem else int State.Doc.PageUnitSystem
+
+    /// <summary>Sets the model or page unit system, optionally scaling existing geometry.</summary>
+    /// <param name="unitSystem">(int) The new unit system, from 0 through 25.</param>
+    /// <param name="scale">(bool) True to scale geometry for the new units.</param>
+    /// <param name="modelUnits">(bool) True for model units; False for page units.</param>
+    /// <returns>(unit) void, nothing.</returns>
+    static member UnitSystem(unitSystem:int, scale:bool, modelUnits:bool) : unit = //SET
+        if modelUnits then RhinoScriptSyntax.UnitSystem(unitSystem, scale)
+        else
+            if unitSystem < 0 || unitSystem > 25 then
+                RhinoScriptingException.Raise "UnitSystem: unit system must be from 0 through 25, got %d" unitSystem
+            let units : UnitSystem = LanguagePrimitives.EnumOfValue (byte unitSystem)
+            State.Doc.AdjustPageUnitSystem(units, scale)
 

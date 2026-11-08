@@ -2,7 +2,7 @@
 
 All public types, members and functions of Rhino.Scripting, with the first sentence of their summary.
 
-- The 1665 static members of `RhinoScriptSyntax`, 1038 names with their overloads, have one table per source file,
+- The 1675 static members of `RhinoScriptSyntax`, 1038 names with their overloads, have one table per source file,
   e.g. [Curve](#curve) for `Src/Scripting_Curve.fs`. Scripts usually call them through an alias, `type rs = RhinoScriptSyntax`.
 - Overloads of the same name are in the order of the source.
 - Geometry-only `Make...` methods are listed immediately after their corresponding document-adding `Add...` methods.
@@ -22,7 +22,7 @@ Generated from the sources by `API-Table/ApiTable.fsx`. Do not edit by hand.
 - [Coerce](#coerce), 103 members
 - [Curve](#curve), 247 members
 - [Dimension](#dimension), 72 members
-- [Document](#document), 51 members
+- [Document](#document), 61 members
 - [Geometry](#geometry), 101 members
 - [Grips](#grips), 17 members
 - [Group](#group), 20 members
@@ -719,15 +719,25 @@ From [Src/Scripting_Document.fs](../Src/Scripting_Document.fs).
 | `RenderSettings` | `settings: int -> unit` | Sets render settings. |
 | `UnitAbsoluteTolerance` | `unit -> float` | Returns the document's absolute tolerance. |
 | `UnitAbsoluteTolerance` | `tolerance: float -> unit` | Sets the document's absolute tolerance. |
+| `UnitAbsoluteTolerance` | `modelUnits: bool -> float` | Returns the absolute tolerance for model or page units. |
+| `UnitAbsoluteTolerance` | `tolerance: float * modelUnits: bool -> unit` | Sets the absolute tolerance for model or page units. |
 | `UnitAngleTolerance` | `unit -> float` | Return the document's angle tolerance. |
 | `UnitAngleTolerance` | `angleToleranceDegrees: float -> unit` | Set the document's angle tolerance. |
+| `UnitAngleTolerance` | `modelUnits: bool -> float` | Returns the angle tolerance for model or page units. |
+| `UnitAngleTolerance` | `angleToleranceDegrees: float * modelUnits: bool -> unit` | Sets the angle tolerance for model or page units. |
 | `UnitDistanceDisplayPrecision` | `unit -> int` | Return the document's distance display precision. |
 | `UnitDistanceDisplayPrecision` | `precision: int -> unit` | Set the document's distance display precision. |
+| `UnitDistanceDisplayPrecision` | `modelUnits: bool -> int` | Returns distance display precision for model or page units. |
+| `UnitDistanceDisplayPrecision` | `precision: int * modelUnits: bool -> unit` | Sets distance display precision for model or page units. |
 | `UnitRelativeTolerance` | `unit -> float` | Return the document's relative tolerance. |
 | `UnitRelativeTolerance` | `relativeTolerance: float -> unit` | Set the document's relative tolerance. |
+| `UnitRelativeTolerance` | `modelUnits: bool -> float` | Returns the relative tolerance for model or page units. |
+| `UnitRelativeTolerance` | `relativeTolerance: float * modelUnits: bool -> unit` | Sets the relative tolerance for model or page units. |
 | `UnitScale` | `toSystem: int * fromSystem: int -> float` | Return the scale factor for changing between unit systems. |
 | `UnitSystem` | `unit -> int` | Return the document's unit system. |
 | `UnitSystem` | `unitSystem: int * ?scale: bool = false -> unit` | Set the document's unit system. |
+| `UnitSystem` | `modelUnits: bool -> int` | Returns the model or page unit system. |
+| `UnitSystem` | `unitSystem: int * scale: bool * modelUnits: bool -> unit` | Sets the model or page unit system, optionally scaling existing geometry. |
 | `UnitSystemName` | `?capitalize: bool = false * ?singular: bool = true * ?abbreviate: bool = false * ?modelUnits: bool = true -> string` | Returns the name of the current unit system. |
 
 ## Geometry
