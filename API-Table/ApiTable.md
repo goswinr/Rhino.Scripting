@@ -2,7 +2,7 @@
 
 All public types, members and functions of Rhino.Scripting, with the first sentence of their summary.
 
-- The 1682 static members of `RhinoScriptSyntax`, 1040 names with their overloads, have one table per source file,
+- The 1683 static members of `RhinoScriptSyntax`, 1040 names with their overloads, have one table per source file,
   e.g. [Curve](#curve) for `Src/Scripting_Curve.fs`. Scripts usually call them through an alias, `type rs = RhinoScriptSyntax`.
 - Overloads of the same name are in the order of the source.
 - Geometry-only `Make...` methods are listed immediately after their corresponding document-adding `Add...` methods.
@@ -31,7 +31,7 @@ Generated from the sources by `API-Table/ApiTable.fsx`. Do not edit by hand.
 - [Light](#light), 57 members
 - [Line](#line), 15 members
 - [Linetype](#linetype), 5 members
-- [Material](#material), 25 members
+- [Material](#material), 26 members
 - [Mesh](#mesh), 99 members
 - [Object](#object), 104 members
 - [Plane](#plane), 21 members
@@ -1115,6 +1115,7 @@ From [Src/Scripting_Material.fs](../Src/Scripting_Material.fs).
 | `IsMaterialDefault` | `materialIndex: int -> bool` | Verifies a material is a copy of Rhino's built-in "default" material. |
 | `IsMaterialReference` | `materialIndex: int -> bool` | Verifies a material is referenced from another file. |
 | `MatchMaterial` | `source: Guid * destination: Guid seq -> unit` | Copies the material definition from one material to one or more objects. |
+| `MatchMaterial` | `source: int * destination: Guid seq -> unit` | Assigns a material to destination objects using its material-table index. |
 | `MaterialBump` | `materialIndex: int -> string` | Returns a material's bump bitmap filename. |
 | `MaterialBump` | `materialIndex: int * filename: string -> unit` | Modifies a material's bump bitmap filename. |
 | `MaterialColor` | `materialIndex: int -> Color` | Returns a material's diffuse color. |

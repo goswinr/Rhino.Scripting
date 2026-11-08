@@ -1,4 +1,4 @@
-﻿namespace Rhino.Scripting
+namespace Rhino.Scripting
 
 open Rhino
 open System.ComponentModel
@@ -93,6 +93,14 @@ module AutoOpenMaterial =
     static member MatchMaterial(source:Guid, destination:Guid seq) : unit =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(source)
         let source = rhobj.Attributes.MaterialIndex
+        RhinoScriptSyntax.MatchMaterial(source, destination)
+
+
+    /// <summary>Assigns a material to destination objects using its material-table index.</summary>
+    /// <param name="source">(int) Index of an existing, non-deleted material.</param>
+    /// <param name="destination">(Guid seq) Identifiers of the destination objects.</param>
+    /// <returns>(unit) void, nothing.</returns>
+    static member MatchMaterial(source:int, destination:Guid seq) : unit =
         if source < 0 || source >= State.Doc.Materials.Count || State.Doc.Materials.[source].IsDeleted then RhinoScriptingException.Raise "MatchMaterial failed.  source:'%A' destination:'%A'" source destination
 
         for objectId in destination do
