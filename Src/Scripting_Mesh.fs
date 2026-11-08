@@ -458,7 +458,8 @@ module AutoOpenMesh =
         let rc = ResizeArray()
         for mesh in newmeshes do
             let objectId = State.Doc.Objects.AddMesh(mesh)
-            if objectId <> Guid.Empty then rc.Add(objectId)
+            if objectId = Guid.Empty then RhinoScriptingException.Raise "MeshBooleanDifference: unable to add result to document; inputs were retained"
+            rc.Add(objectId)
         if deleteInput then
             for objectId in Seq.append input0 input1 do State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
         State.Doc.Views.Redraw()
@@ -475,7 +476,7 @@ module AutoOpenMesh =
         let meshes1 = input1 |> RArr.mapSeq (fun mesh -> mesh.DuplicateMesh())
         if meshes0.Count = 0 || meshes1.Count = 0 then RhinoScriptingException.Raise "MeshBooleanDifference: No meshes to work with."
         let meshes = Mesh.CreateBooleanDifference(meshes0, meshes1)
-        if isNull meshes then RhinoScriptingException.Raise "MeshBooleanDifference: Boolean operation failed."
+        if isNull meshes || meshes.Length = 0 then RhinoScriptingException.Raise "MeshBooleanDifference: Boolean operation failed."
         ResizeArray(meshes)
 
 
@@ -496,7 +497,8 @@ module AutoOpenMesh =
         let rc = ResizeArray()
         for mesh in newmeshes do
             let objectId = State.Doc.Objects.AddMesh(mesh)
-            if objectId <> Guid.Empty then rc.Add(objectId)
+            if objectId = Guid.Empty then RhinoScriptingException.Raise "MeshBooleanIntersection: unable to add result to document; inputs were retained"
+            rc.Add(objectId)
         if deleteInput then
             for objectId in Seq.append input0 input1 do State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
         State.Doc.Views.Redraw()
@@ -513,7 +515,7 @@ module AutoOpenMesh =
         let meshes1 = input1 |> RArr.mapSeq (fun mesh -> mesh.DuplicateMesh())
         if meshes0.Count = 0 || meshes1.Count = 0 then RhinoScriptingException.Raise "MeshBooleanIntersection: No meshes to work with."
         let meshes = Mesh.CreateBooleanIntersection(meshes0, meshes1)
-        if isNull meshes then RhinoScriptingException.Raise "MeshBooleanIntersection: Boolean operation failed."
+        if isNull meshes || meshes.Length = 0 then RhinoScriptingException.Raise "MeshBooleanIntersection: Boolean operation failed."
         ResizeArray(meshes)
 
 
@@ -534,7 +536,8 @@ module AutoOpenMesh =
         let rc = ResizeArray()
         for mesh in newmeshes do
             let objectId = State.Doc.Objects.AddMesh(mesh)
-            if objectId <> Guid.Empty then rc.Add(objectId)
+            if objectId = Guid.Empty then RhinoScriptingException.Raise "MeshBooleanSplit: unable to add result to document; inputs were retained"
+            rc.Add(objectId)
         if deleteInput then
             for objectId in Seq.append input0 input1 do State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
         State.Doc.Views.Redraw()
@@ -551,7 +554,7 @@ module AutoOpenMesh =
         let meshes1 = input1 |> RArr.mapSeq (fun mesh -> mesh.DuplicateMesh())
         if meshes0.Count = 0 || meshes1.Count = 0 then RhinoScriptingException.Raise "MeshBooleanSplit: No meshes to work with."
         let meshes = Mesh.CreateBooleanSplit(meshes0, meshes1)
-        if isNull meshes then RhinoScriptingException.Raise "MeshBooleanSplit: Boolean operation failed."
+        if isNull meshes || meshes.Length = 0 then RhinoScriptingException.Raise "MeshBooleanSplit: Boolean operation failed."
         ResizeArray(meshes)
 
 
@@ -946,12 +949,7 @@ module AutoOpenMesh =
     /// <returns>(Guid ResizeArray) Polyline Curve identifiers.</returns>
     static member MeshOutline(objectIds:Guid seq, [<OPT;DEF(null:string)>]view:string) : Guid ResizeArray =
         let meshes = objectIds |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
-        let viewport =
-            if isNull view then null
-            else
-                let rhinoView = State.Doc.Views.Find(view, compareCase=false)
-                if isNull rhinoView then RhinoScriptingException.Raise "MeshOutline: did not find view named '%A'" view
-                rhinoView.MainViewport
+        let viewport = (RhinoScriptSyntax.CoerceViewOrActive(view)).ActiveViewport
         let outlines = RhinoScriptSyntax.MeshOutline(meshes, viewport)
         let rc = outlines |> RArr.mapSeq (fun curve -> State.Doc.Objects.AddCurve(curve))
         State.Doc.Views.Redraw()
@@ -964,9 +962,10 @@ module AutoOpenMesh =
     /// <returns>(PolylineCurve ResizeArray) New outline Curves.</returns>
     /// <remarks>Returns new geometry without adding it to a document.</remarks>
     static member MeshOutline(meshes:Mesh seq, [<OPT;DEF(null:Rhino.Display.RhinoViewport)>]view:Rhino.Display.RhinoViewport) : PolylineCurve ResizeArray =
+        let view = if isNull view then (RhinoScriptSyntax.CoerceViewOrActive(null)).ActiveViewport else view
         let rc = ResizeArray()
         for mesh in meshes do
-            let polylines = if isNull view then mesh.GetOutlines(Plane.WorldXY) else mesh.GetOutlines(view)
+            let polylines = mesh.GetOutlines(view)
             if notNull polylines then
                 for polyline in polylines do rc.Add(new PolylineCurve(polyline))
         rc
@@ -1181,8 +1180,7 @@ module AutoOpenMesh =
         let count = mesh.Vertices.Count
         let rc = ResizeArray()
         for i = 0 to count - 1 do
-            let vertex = mesh.Vertices.[i]
-            rc.Add(Point3d(vertex))
+            rc.Add(mesh.Vertices.Point3dAt(i))
         rc
 
 

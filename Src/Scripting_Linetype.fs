@@ -33,7 +33,7 @@ module AutoOpenLinetype =
     /// <summary>Returns the number of linetypes in the document.</summary>
     /// <returns>(int) The number of linetypes in the document.</returns>
     static member LinetypeCount() : int =
-        State.Doc.Linetypes.Count
+        State.Doc.Linetypes.ActiveCount
 
 
     /// <summary>Returns names of all linetypes in the document.</summary>

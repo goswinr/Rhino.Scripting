@@ -106,7 +106,7 @@ module AutoOpenSelection =
                 let viewname = go.View().ActiveViewport.Name
                 let obj = go.Object(0).Object()
                 go.Dispose()
-                if not <| select && not <| preselect then
+                if not select && not presel then
                     State.Doc.Objects.UnselectAll()|> ignore<int>
                     State.Doc.Views.Redraw()
                 obj.Select(select)  |> ignore<int>
@@ -383,7 +383,7 @@ module AutoOpenSelection =
     /// <summary>Prompts the user to select one or more point objects.</summary>
     /// <param name="message">(string) Optional, default value: <c>"Select Point Objects"</c>
     ///    A prompt message</param>
-    /// <param name="preselect">(bool) Optional, default value: <c>true</c>
+    /// <param name="preselect">(bool) Optional, default value: <c>false</c>
     ///    Allow for the selection of pre-selected objects. If omitted, pre-selected objects are not accepted</param>
     /// <returns>(Point3d ResizeArray) List of 3d points.</returns>
     static member GetPointCoordinates(  [<OPT;DEF("Select Point Objects")>] message:string,
@@ -526,7 +526,7 @@ module AutoOpenSelection =
         let rhobjs = State.Doc.Objects.GetObjectList(settings)
         let rc = ResizeArray()
         for obj in rhobjs do
-            if obj.IsSelected(false) <> 0 && obj.IsSelectable() then
+            if obj.IsSelected(false) = 0 && obj.IsSelectable() then
                 rc.Add(obj.Id)
                 obj.Select(true) |> ignore<int> // TODO needs sync ? apparently not needed!
             else
@@ -552,9 +552,9 @@ module AutoOpenSelection =
                 let obj = State.Doc.Objects.Find(serialnumber)
                 if notNull obj && not <| obj.IsDeleted then
                     rc.Add(obj.Id)
-                if select then obj.Select(true) |> ignore<int> // TODO needs sync ? apparently not needed!
+                    if select then obj.Select(true) |> ignore<int> // TODO needs sync ? apparently not needed!
                 serialnumber <- serialnumber + 1u
-                if select && rc.Count > 1 then State.Doc.Views.Redraw()
+            if select && rc.Count > 0 then State.Doc.Views.Redraw()
             rc
 
 
@@ -574,10 +574,9 @@ module AutoOpenSelection =
         settings.IncludeLights <- includeLights
         settings.IncludeGrips <- includeGrips
         settings.DeletedObjects <- false
-        let rhobjs = State.Doc.Objects.GetObjectList(settings)
-        if isNull rhobjs || Seq.isEmpty rhobjs then
-            RhinoScriptingException.Raise "LastObject failed.  select:'%A' includeLights:'%A' includeGrips:'%A'" select includeLights includeGrips
-        let firstobj = Seq.last rhobjs
+        let firstobj =
+            State.Doc.Objects.GetObjectList(settings)
+            |> Seq.fold (fun _ obj -> obj) null
         if isNull firstobj then
             RhinoScriptingException.Raise "LastObject failed.  select:'%A' includeLights:'%A' includeGrips:'%A'" select includeLights includeGrips
         if select then
@@ -605,7 +604,8 @@ module AutoOpenSelection =
         settings.DeletedObjects <- false
         State.Doc.Objects.GetObjectList(settings)
         |> Seq.skipWhile (fun obj -> obj.Id <> objectId)
-        |> Seq.skip 1
+        |> Seq.mapi (fun index obj -> index, obj)
+        |> Seq.choose (fun (index, obj) -> if index > 0 then Some obj else None)
         |> Seq.tryHead
         |> Option.defaultWith ( fun () -> RhinoScriptingException.Raise "NextObject not found for %A" (Pretty.str objectId))
         |> fun obj ->
@@ -708,7 +708,7 @@ module AutoOpenSelection =
         settings.IncludeLights <- includeLights
         settings.NameFilter <- name
         settings.ReferenceObjects <- includeReferences
-        let objects = State.Doc.Objects.GetObjectList(settings)
+        let objects = State.Doc.Objects.GetObjectList(settings) |> Seq.toArray
         let ids = objects  |> RArr.mapSeq _.Id
         if ids.Count>0 && select then
             for rhobj in objects do rhobj.Select(true) |> ignore<int> // TODO needs sync ? apparently not needed!
@@ -882,10 +882,10 @@ module AutoOpenSelection =
                               [<OPT;DEF(true)>]inWindow:bool) : Guid ResizeArray =
 
         let pick () =
-            let view = if notNull view then RhinoScriptSyntax.CoerceView(view) else State.Doc.Views.ActiveView
+            let view = RhinoScriptSyntax.CoerceViewOrActive(view)
             let viewport = view.MainViewport
-            let screen1 = Point2d(corner1)
-            let screen2 = Point2d(corner2)
+            let screen1 = corner1
+            let screen2 = corner2
             let xf = viewport.GetTransform(DocObjects.CoordinateSystem.World, DocObjects.CoordinateSystem.Screen)
             screen1.Transform(xf)
             screen2.Transform(xf)
@@ -913,7 +913,6 @@ module AutoOpenSelection =
 
             let rc = ResizeArray()
             if notNull objects then
-                let rc = ResizeArray()
                 for rhobjr in objects do
                     let rhobj = rhobjr.Object()
                     rc.Add(rhobj.Id)

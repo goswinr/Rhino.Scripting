@@ -62,8 +62,8 @@ module AutoOpenLayer =
                     | _ -> RhinoScriptingException.Raise "AddLayer Bad value vor Locked: %d, it may be 0, 1 or 2" locked
 
         if isNull name then
-            //State.Doc.Layers.[UtilLayer.createDefaultLayer(col, true, false)].FullPath
-            UtilLayer.createDefaultLayer(col, true, false)
+            //State.Doc.Layers.[UtilLayer.createDefaultLayer(col, visible <> 0, locked = 1)].FullPath
+            UtilLayer.createDefaultLayer(col, visible <> 0, locked = 1)
         else
             let names = if isNull parent then name else parent+ "::" + name
             let fOrC  = UtilLayer.getOrCreateLayer(names, col, vis, loc, allowAllUnicode, collapseParents)
@@ -180,8 +180,7 @@ module AutoOpenLayer =
     /// <param name="layer">(string) The name of an existing layer to make current</param>
     /// <returns>(unit) void, nothing.</returns>
     static member CurrentLayer(layer:string) : unit = //SET
-        let i = State.Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
-        if i = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "CurrentLayer: could not FindByFullPath Layer from name'%s'" layer
+        let i = (RhinoScriptSyntax.CoerceLayer(layer)).Index
         if not<|  State.Doc.Layers.SetCurrentLayerIndex(i, quiet=true) then RhinoScriptingException.Raise "CurrentLayer Set CurrentLayer to %s failed" layer
 
     /// <summary>Removes an existing layer from the document. The layer to be removed
@@ -192,8 +191,7 @@ module AutoOpenLayer =
     /// <param name="layer">(string) The name of an existing empty layer</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
     static member DeleteLayer(layer:string) : bool =
-        let i = State.Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
-        if i = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "DeleteLayer: could not FindByFullPath Layer from name'%s'" layer
+        let i = (RhinoScriptSyntax.CoerceLayer(layer)).Index
         State.Doc.Layers.Delete(i, quiet=true)
 
 
@@ -203,8 +201,7 @@ module AutoOpenLayer =
     /// <param name="expand">(bool) True to expand, False to collapse</param>
     /// <returns>(unit) void, nothing.</returns>
     static member ExpandLayer(layer:string, expand:bool) : unit =
-        let i = State.Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
-        if i = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "ExpandLayer: could not FindByFullPath Layer from name'%s'" layer
+        let i = (RhinoScriptSyntax.CoerceLayer(layer)).Index
         let layer = State.Doc.Layers.[i]
         if layer.IsExpanded <> expand then
             layer.IsExpanded <- expand
@@ -216,7 +213,7 @@ module AutoOpenLayer =
     /// <returns>(bool) True on success, otherwise False.</returns>
     static member IsLayer(layer:string) : bool =
         let i = State.Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
-        i <> RhinoMath.UnsetIntIndex
+        i <> RhinoMath.UnsetIntIndex || notNull (State.Doc.Layers.FindName(layer))
 
 
     /// <summary>Checks if the objects on a layer can be changed (normal).</summary>
@@ -746,8 +743,9 @@ module AutoOpenLayer =
             let rec collapse (l:DocObjects.Layer) =
                 if l.IsExpanded then
                     l.IsExpanded <- false
-                for child in l.GetChildren() do
-                    collapse child
+                let children = l.GetChildren()
+                if notNull children then
+                    for child in children do collapse child
             collapse layer
         else
             if layer.IsExpanded then
@@ -765,12 +763,13 @@ module AutoOpenLayer =
             let rec expand (l:DocObjects.Layer) =
                 if not l.IsExpanded then
                     l.IsExpanded <- true
-                for child in l.GetChildren() do
-                    expand child
+                let children = l.GetChildren()
+                if notNull children then
+                    for child in children do expand child
             expand layer
         else
-            if layer.IsExpanded then
-                layer.IsExpanded <- false
+            if not layer.IsExpanded then
+                layer.IsExpanded <- true
 
     /// <summary>Expand all parent layers in UI if this layer is hidden by a collapsed parent layer.</summary>
     /// <param name="layerName">(string) full or short layer name</param>

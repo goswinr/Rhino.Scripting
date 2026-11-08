@@ -659,7 +659,7 @@ module AutoOpenSurface =
                               [<OPT;DEF(0)>]rebuild:int,
                               [<OPT;DEF(0.0)>]refit:float,
                               [<OPT;DEF(false)>]closed:bool) : Brep ResizeArray =
-        if loftType<0 || loftType>4 then RhinoScriptingException.Raise "MakeLoftSrf: LoftType must be 0-4.  geometryObjects:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" (Pretty.str geometryObjects) start ende loftType rebuild refit closed
+        if loftType<0 || loftType>3 then RhinoScriptingException.Raise "MakeLoftSrf: LoftType must be 0-3.  geometryObjects:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" (Pretty.str geometryObjects) start ende loftType rebuild refit closed
         if rebuild<>0 && refit<>0.0 then RhinoScriptingException.Raise "MakeLoftSrf: set either rebuild or refit to a value ! not both.  geometryObjects:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" (Pretty.str geometryObjects) start ende loftType rebuild refit closed
         let curves  = geometryObjects |> RArr.mapSeq (fun geometry -> geometry)
         if Seq.length(curves)<2 then RhinoScriptingException.Raise "MakeLoftSrf failed.  geometryObjects:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" (Pretty.str geometryObjects) start ende loftType rebuild refit closed
@@ -1882,7 +1882,7 @@ module AutoOpenSurface =
     static member IsPolysurface(objectId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
         | Some geometry -> RhinoScriptSyntax.IsPolysurface(geometry)
-        | None -> RhinoScriptingException.Raise "IsPolysurface: %A is not an object in State.Doc.Objects table" objectId
+        | None -> false
 
     /// <summary>Verifies an object is a Polysurface or Extrusion. Polysurfaces consist of two or more Surfaces joined together. Uses the supplied objects directly.</summary>
     /// <param name="geometryObject">(GeometryBase) The object</param>
@@ -1917,7 +1917,7 @@ module AutoOpenSurface =
     static member IsBrep(objectId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
         | Some geometry -> RhinoScriptSyntax.IsBrep(geometry)
-        | None -> RhinoScriptingException.Raise "IsBrep: %A is not an object in State.Doc.Objects table" objectId
+        | None -> false
 
     /// <summary>Verifies an object is a Brep. That is a trimmed surface or a polysurface but not an extrusion. Uses the supplied objects directly.</summary>
     /// <param name="geometryObject">(GeometryBase) The object</param>
@@ -1935,7 +1935,7 @@ module AutoOpenSurface =
     static member IsPolysurfaceClosed(objectId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
         | Some geometry -> RhinoScriptSyntax.IsPolysurfaceClosed(geometry)
-        | None -> RhinoScriptingException.Raise "IsPolysurfaceClosed: %A is not an object in State.Doc.Objects table" objectId
+        | None -> false
 
     /// <summary>Verifies a Guid refers to a closed Polysurface or closed Extrusion. If the Polysurface fully encloses
     ///    a volume, it is considered a solid. Uses the supplied objects directly.</summary>
@@ -2226,7 +2226,7 @@ module AutoOpenSurface =
     ///    will be added to Rhino.</summary>
     /// <param name="surfaceId">(Guid) The Surface's identifier</param>
     /// <param name="distance">(float) The distance to offset</param>
-    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
+    /// <param name="tolerance">(float) Optional, default value: <c>0.0</c>
     ///    The offset tolerance. Use 0.0 to make a loose offset. Otherwise, the
     ///    document's absolute tolerance is usually sufficient</param>
     /// <param name="bothSides">(bool) Optional, default value: <c>false</c>
@@ -2250,7 +2250,7 @@ module AutoOpenSurface =
     /// <summary>Offsets a trimmed or untrimmed Surface by a distance. The result is returned as a new Brep. Returns geometry without adding it.</summary>
     /// <param name="surfaceGeo">(Brep) The Surface</param>
     /// <param name="distance">(float) The distance to offset</param>
-    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
+    /// <param name="tolerance">(float) Optional, default value: <c>0.0</c>
     ///    The offset tolerance. Use 0.0 to make a loose offset. Otherwise, the
     ///    document's absolute tolerance is usually sufficient</param>
     /// <param name="bothSides">(bool) Optional, default value: <c>false</c>
@@ -2267,7 +2267,6 @@ module AutoOpenSurface =
         let mutable face = null
         if (1 = brep.Faces.Count) then face <- brep.Faces.[0]
         if face|> isNull  then RhinoScriptingException.Raise "OffsetSurface failed.  surfaceGeo:'%s' distance:'%A' tolerance:'%A' bothSides:'%A' createSolid:'%A'" (Pretty.str surfaceGeo) distance tolerance bothSides createSolid
-        let tolerance= Util.ifZero1 tolerance State.Doc.ModelAbsoluteTolerance
         let newbrep = Brep.CreateFromOffsetFace(face, distance, tolerance, bothSides, createSolid)
         if newbrep|> isNull  then RhinoScriptingException.Raise "OffsetSurface failed.  surfaceGeo:'%s' distance:'%A' tolerance:'%A' bothSides:'%A' createSolid:'%A'" (Pretty.str surfaceGeo) distance tolerance bothSides createSolid
         newbrep
@@ -2285,7 +2284,10 @@ module AutoOpenSurface =
         let surfaceGeometry = RhinoScriptSyntax.CoerceBrep(surface)
         let curveGeometry = RhinoScriptSyntax.CoerceCurve(curve)
         let curves = RhinoScriptSyntax.PullCurve(surfaceGeometry, curveGeometry)
-        let ids = curves |> RArr.mapSeq State.Doc.Objects.AddCurve
+        let ids = curves |> RArr.mapSeq (fun geometry ->
+            let id = State.Doc.Objects.AddCurve(geometry)
+            if id = Guid.Empty then RhinoScriptingException.Raise "PullCurve: unable to add result to document; input was retained"
+            id)
         if deleteInput then State.Doc.Objects.Delete(curve, true) |> ignore<bool>
         State.Doc.Views.Redraw()
         ids
@@ -2298,7 +2300,7 @@ module AutoOpenSurface =
     static member PullCurve( surface:Brep,
                              curve:Curve) : Curve ResizeArray =
         let curves = Curve.PullToBrepFace(curve, surface.Faces.[0], State.Doc.ModelAbsoluteTolerance)
-        if isNull curves then RhinoScriptingException.Raise "PullCurve: operation failed."
+        if isNull curves || curves.Length = 0 then RhinoScriptingException.Raise "PullCurve: operation failed."
         ResizeArray(curves)
 
 
@@ -2401,7 +2403,9 @@ module AutoOpenSurface =
         let ray = Ray3d(startPoint, direction)
         let breps = surfaceGeos |> RArr.mapSeq (fun geometry -> geometry)
         if breps.Count = 0 then RhinoScriptingException.Raise "ShootRay failed.  surfaceGeos:'%A' startPoint:'%A' direction:'%A' reflections:'%A'"  surfaceGeos startPoint direction reflections
-        Intersect.Intersection.RayShoot(ray, Seq.cast breps, reflections)
+        let hits = Intersect.Intersection.RayShoot(ray, Seq.cast breps, reflections)
+        if isNull hits || hits.Length = 0 then [||]
+        else Array.append [|startPoint|] hits
 
 
     /// <summary>Creates the shortest possible Curve(geodesic) between two points on a
@@ -2484,8 +2488,11 @@ module AutoOpenSurface =
         let brepIdGeometry = RhinoScriptSyntax.CoerceBrep(brepId)
         let cutterIdGeometry = RhinoScriptSyntax.CoerceBrep(cutterId)
         let pieces = RhinoScriptSyntax.SplitBrep(brepIdGeometry, cutterIdGeometry)
+        let ids = pieces |> RArr.mapSeq (fun geometry ->
+            let id = State.Doc.Objects.AddBrep(geometry)
+            if id = Guid.Empty then RhinoScriptingException.Raise "SplitBrep: unable to add result to document; input was retained"
+            id)
         if deleteInput then State.Doc.Objects.Delete(brepId, true) |> ignore<bool>
-        let ids = pieces |> RArr.mapSeq State.Doc.Objects.AddBrep
         State.Doc.Views.Redraw()
         ids
 
@@ -2497,7 +2504,7 @@ module AutoOpenSurface =
     static member SplitBrep( brepGeo:Brep,
                              cutterGeo:Brep) : Brep ResizeArray =
         let pieces = brepGeo.Split(cutterGeo, State.Doc.ModelAbsoluteTolerance)
-        if isNull pieces then RhinoScriptingException.Raise "SplitBrep: operation failed."
+        if isNull pieces || pieces.Length = 0 then RhinoScriptingException.Raise "SplitBrep: operation failed."
         ResizeArray(pieces)
 
 
@@ -2939,8 +2946,8 @@ module AutoOpenSurface =
         let surface = surfaceGeo
         let success, point, der = surface.Evaluate(parameter|> fst, parameter|> snd, derivative)
         if not success then RhinoScriptingException.Raise "SurfaceEvaluate failed.  surfaceGeo:'%s' parameter:'%A' derivative:'%A'" (Pretty.str surfaceGeo) parameter derivative
-        let rc = ResizeArray(der.Length)
-        if der.Length > 0 then
+        let rc = ResizeArray()
+        if notNull der then
           for d in der do rc.Add(d)
         point, rc
 
@@ -3047,7 +3054,7 @@ module AutoOpenSurface =
             | _ -> RhinoScriptingException.Raise "SurfaceIsocurveDensity Get failed.  surfaceId:'%s' density:'%A'" (Pretty.str surfaceId) density
         State.Doc.Views.Redraw()
 
-    /// <summary>Returns the control point count of a Surface
+    /// <summary>Returns the knot count of a Surface
     ///    SurfaceId = the Surface's identifier.</summary>
     /// <param name="surfaceId">(Guid) The Surface object's identifier</param>
     /// <returns>(int * int) a list containing (U count, V count).</returns>
@@ -3055,7 +3062,7 @@ module AutoOpenSurface =
         let surfaceIdObject = RhinoScriptSyntax.CoerceSurface(surfaceId)
         RhinoScriptSyntax.SurfaceKnotCount(surfaceIdObject)
 
-    /// <summary>Returns the control point count of a Surface
+    /// <summary>Returns the knot count of a Surface
     ///    SurfaceId = the Surface's identifier. Uses the supplied objects directly.</summary>
     /// <param name="surfaceGeo">(Surface) The Surface object</param>
     /// <returns>(int * int) a list containing (U count, V count).</returns>
@@ -3255,22 +3262,16 @@ module AutoOpenSurface =
     /// <param name="geometryObject">(GeometryBase) The Surface</param>
     /// <returns>(float) The volume.</returns>
     static member SurfaceVolume(geometryObject:GeometryBase) : float =
-        let tryGetBrep (value:GeometryBase) =
-            let geometry = value
-            match geometry with | :? Brep as brep -> Some brep | :? Extrusion as extrusion -> Some (extrusion.ToBrep(true)) | _ -> None
-        let tryGetSurface (value:GeometryBase) =
-            let geometry = value
-            match geometry with | :? Surface as surface -> Some surface | :? Brep as brep when brep.Faces.Count = 1 -> Some (brep.Faces.[0] :> Surface) | _ -> None
-        geometryObject
-        |> tryGetBrep
-        |> Option.map VolumeMassProperties.Compute
-        |> Option.orElseWith (fun () ->
-            geometryObject
-            |> tryGetSurface
-            |> Option.map VolumeMassProperties.Compute
-            )
-        |> Option.defaultWith (fun () -> RhinoScriptingException.Raise "SurfaceVolume failed on %A" (Pretty.str geometryObject))
-        |> fun amp -> amp.Volume
+        use brep =
+            match geometryObject with
+            | :? Brep as brep -> brep.DuplicateBrep()
+            | :? Extrusion as extrusion -> extrusion.ToBrep(true)
+            | :? Surface as surface -> surface.ToBrep()
+            | _ -> RhinoScriptingException.Raise "SurfaceVolume: expected a closed surface or polysurface"
+        if isNull brep || not brep.IsSolid then RhinoScriptingException.Raise "SurfaceVolume: surface or polysurface is not closed"
+        use mp = VolumeMassProperties.Compute(brep)
+        if isNull mp then RhinoScriptingException.Raise "SurfaceVolume: unable to compute volume"
+        mp.Volume
 
 
     /// <summary>Calculates volume centroid of a closed Surface or Polysurface.</summary>

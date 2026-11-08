@@ -173,12 +173,10 @@ module AutoOpenPlane =
                 let c = intersection.PointA2
                 let d = intersection.PointB
                 let e = intersection.PointB2
-                let f = intersection.ParameterA
-                let g = intersection.ParameterB
-                let h = intersection.OverlapA.[0]
-                let i = intersection.OverlapA.[1]
-                let j = intersection.OverlapB.[0]
-                let k = intersection.OverlapB.[1]
+                let f = if intersection.IsOverlap then intersection.OverlapA.T0 else intersection.ParameterA
+                let g = if intersection.IsOverlap then intersection.OverlapA.T1 else intersection.ParameterA
+                let _, h, i = plane.ClosestParameter(b)
+                let _, j, k = plane.ClosestParameter(c)
                 rc.Add( (a, b, c, d, e, f, g, h, i, j, k))
             rc
         else

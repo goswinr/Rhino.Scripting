@@ -80,7 +80,7 @@ module AutoOpenViews =
     ///    active view is saved</param>
     /// <returns>(unit) void, nothing.</returns>
     static member AddNamedView(name:string, [<OPT;DEF("")>]view:string) : unit =
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         if isNull name then RhinoScriptingException.Raise "AddNamedView: Name = null.  view:'%A'"  view
         let viewportId = view.MainViewport.Id
         let index = State.Doc.NamedViews.Add(name, viewportId)
@@ -119,7 +119,7 @@ module AutoOpenViews =
     /// <param name="view">(string) Title of the view to set current</param>
     /// <returns>(unit) void, nothing.</returns>
     static member CurrentView(view:string) : unit = //SET
-        State.Doc.Views.ActiveView <- RhinoScriptSyntax.CoerceView(view)
+        State.Doc.Views.ActiveView <- RhinoScriptSyntax.CoerceViewOrActive(view)
 
 
 
@@ -149,8 +149,9 @@ module AutoOpenViews =
     /// <returns>(unit) void, nothing.</returns>
     static member DetailLock(detailId:Guid, lock:bool) : unit = //SET
         let detail =
-            try State.Doc.Objects.FindId(detailId) :?> DocObjects.DetailViewObject
-            with _ ->  RhinoScriptingException.Raise "DetailLock: Setting it failed. detailId is a %s  lock:'%A'" (Pretty.str detailId)  lock
+            match State.Doc.Objects.FindId(detailId) with
+            | :? DocObjects.DetailViewObject as detail -> detail
+            | _ -> RhinoScriptingException.Raise "DetailLock: no detail view with id %A" detailId
         if lock <> detail.DetailGeometry.IsProjectionLocked then
             detail.DetailGeometry.IsProjectionLocked <- lock
             detail.CommitChanges() |> ignore<bool>
@@ -198,9 +199,8 @@ module AutoOpenViews =
     /// <returns>(bool) True if detail is a detail view, False if detail is not a detail view.</returns>
     static member IsDetail(layout:string, detail:string) : bool =
         let view = RhinoScriptSyntax.CoercePageView(layout)
-        let det = RhinoScriptSyntax.CoerceView(detail)
-        view.GetDetailViews()
-        |> Array.exists (fun v -> v.Name = det.ActiveViewport.Name) // TODO test
+        let details = view.GetDetailViews()
+        notNull details && (details |> Array.exists (fun v -> String.Equals(v.Viewport.Name, detail, StringComparison.OrdinalIgnoreCase)))
 
 
     /// <summary>Checks if a view is a page layout view.</summary>
@@ -253,7 +253,7 @@ module AutoOpenViews =
     ///    view is used</param>
     /// <returns>(bool) True of False.</returns>
     static member IsViewMaximized([<OPT;DEF("")>]view:string) : bool =
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         view.Maximized
 
 
@@ -261,7 +261,7 @@ module AutoOpenViews =
     /// <param name="view">(string) Title of the view</param>
     /// <returns>(bool) True of False.</returns>
     static member IsViewPerspective(view:string) : bool =
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         view.MainViewport.IsPerspectiveProjection
 
 
@@ -270,7 +270,7 @@ module AutoOpenViews =
     ///    active view is used</param>
     /// <returns>(bool) True of False.</returns>
     static member IsViewTitleVisible([<OPT;DEF("")>]view:string) : bool =
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         view.TitleVisible
 
 
@@ -278,7 +278,7 @@ module AutoOpenViews =
     /// <param name="view">(string) View to verify</param>
     /// <returns>(bool) True or False.</returns>
     static member IsWallpaper(view:string) : bool =
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         view.MainViewport.WallpaperFilename.Length > 0
 
 
@@ -287,7 +287,7 @@ module AutoOpenViews =
     ///    active view is used</param>
     /// <returns>(unit).</returns>
     static member MaximizeRestoreView([<OPT;DEF("")>]view:string) : unit =
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         view.Maximized <- not view.Maximized
 
 
@@ -338,7 +338,7 @@ module AutoOpenViews =
     ///    active view is used</param>
     /// <returns>(string) name of the restored named construction Plane.</returns>
     static member RestoreNamedCPlane(cplaneName:string, [<OPT;DEF("")>]view:string) : string =
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         let index = State.Doc.NamedConstructionPlanes.Find(cplaneName)
         if index<0 then RhinoScriptingException.Raise "RestoreNamedCPlane failed.  cplaneName:'%A' view:'%A'" cplaneName view
         let cplane = State.Doc.NamedConstructionPlanes.[index]
@@ -357,7 +357,7 @@ module AutoOpenViews =
     static member RestoreNamedView( namedView:string,
                                     [<OPT;DEF("")>]view:string,
                                     [<OPT;DEF(false)>]restoreBitmap:bool) : unit =
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         let index = State.Doc.NamedViews.FindByName(namedView)
         if index<0 then RhinoScriptingException.Raise "RestoreNamedView failed.  namedView:'%A' view:'%A' restoreBitmap:'%A'" namedView view restoreBitmap
         let viewinfo = State.Doc.NamedViews.[index]
@@ -382,8 +382,9 @@ module AutoOpenViews =
     static member RotateCamera( direction:int,
                                 angle:float,
                                 [<OPT;DEF("")>]view:string) : unit =
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         let viewport = view.ActiveViewport
+        if direction < 0 || direction > 3 then RhinoScriptingException.Raise "RotateCamera: direction must be 0, 1, 2 or 3"
         let mutable angle = RhinoMath.ToRadians( abs(angle))
         let targetdistance = (viewport.CameraLocation-viewport.CameraTarget)*viewport.CameraZ
         let mutable axis = viewport.CameraY
@@ -421,7 +422,7 @@ module AutoOpenViews =
     static member RotateView( direction:int,
                               angle:float,
                               [<OPT;DEF("")>]view:string) : unit =
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         let viewport = view.ActiveViewport
         let mutable angle =  RhinoMath.ToRadians( abs(angle))
         if ApplicationSettings.ViewSettings.RotateReverseKeyboard then angle <- -angle
@@ -456,7 +457,7 @@ module AutoOpenViews =
     /// <param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     /// <returns>(bool) The grid display state.</returns>
     static member ShowGrid(view:string) : bool = //GET
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         let viewport = view.ActiveViewport
         match RhinoScriptSyntax.gridDisplayModeOverride viewport with
         | None      -> viewport.ConstructionGridVisible
@@ -469,7 +470,7 @@ module AutoOpenViews =
     /// <param name="show">(bool) The grid state to set</param>
     /// <returns>(unit) void, nothing.</returns>
     static member ShowGrid(view:string, show:bool) : unit = //SET
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         let viewport = view.ActiveViewport
         match RhinoScriptSyntax.gridDisplayModeOverride viewport with
         | None ->
@@ -490,7 +491,7 @@ module AutoOpenViews =
     /// <param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     /// <returns>(bool) The grid axes display state.</returns>
     static member ShowGridAxes(view:string) : bool = //GET
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         let viewport = view.ActiveViewport
         match RhinoScriptSyntax.gridDisplayModeOverride viewport with
         | None      -> viewport.ConstructionAxesVisible
@@ -503,7 +504,7 @@ module AutoOpenViews =
     /// <param name="show">(bool) The state to set</param>
     /// <returns>(unit) void, nothing.</returns>
     static member ShowGridAxes(view:string, show:bool) : unit = //SET
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         let viewport = view.ActiveViewport
         match RhinoScriptSyntax.gridDisplayModeOverride viewport with
         | None ->
@@ -522,7 +523,7 @@ module AutoOpenViews =
     /// <param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     /// <returns>(bool) The state to View Title visibility.</returns>
     static member ShowViewTitle(view:string) : bool = //GET
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         view.TitleVisible
 
     /// <summary>Shows or hides the title window of a view.</summary>
@@ -530,7 +531,7 @@ module AutoOpenViews =
     /// <param name="show">(bool) The state to set</param>
     /// <returns>(unit) void, nothing.</returns>
     static member ShowViewTitle(view:string, show:bool) : unit = //SET
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         view.TitleVisible <- show
 
 
@@ -540,7 +541,7 @@ module AutoOpenViews =
     /// <param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     /// <returns>(bool) The world axes display state.</returns>
     static member ShowWorldAxes(view:string) : bool = //GET
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         let viewport = view.ActiveViewport
         match RhinoScriptSyntax.gridDisplayModeOverride viewport with
         | None      -> viewport.WorldAxesVisible
@@ -553,7 +554,7 @@ module AutoOpenViews =
     /// <param name="show">(bool) The state to set</param>
     /// <returns>(unit) void, nothing.</returns>
     static member ShowWorldAxes(view:string, show:bool) : unit = //SET
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         let viewport = view.ActiveViewport
         match RhinoScriptSyntax.gridDisplayModeOverride viewport with
         | None ->
@@ -579,9 +580,9 @@ module AutoOpenViews =
     static member TiltView( direction:int,
                             angle:float,
                             [<OPT;DEF("")>]view:string) : unit =
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         let viewport = view.ActiveViewport
-        let mutable angle = angle
+        let mutable angle = RhinoMath.ToRadians(abs angle)
         if ApplicationSettings.ViewSettings.RotateReverseKeyboard then angle <- -angle
         let axis = viewport.CameraLocation - viewport.CameraTarget
         if direction = 0 then viewport.Rotate(angle, axis, viewport.CameraLocation) |> ignore<bool>
@@ -594,7 +595,7 @@ module AutoOpenViews =
     /// <param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     /// <returns>(Point3d) The current camera location.</returns>
     static member ViewCamera(view:string) : Point3d = //GET
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         view.ActiveViewport.CameraLocation
 
     /// <summary>Sets the camera location of the specified view.</summary>
@@ -602,7 +603,7 @@ module AutoOpenViews =
     /// <param name="cameraLocation">(Point3d) A 3D point identifying the new camera location</param>
     /// <returns>(unit) void, nothing.</returns>
     static member ViewCamera(view:string, cameraLocation:Point3d) : unit = //SET
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         view.ActiveViewport.SetCameraLocation(cameraLocation, true)
         view.Redraw()
 
@@ -613,7 +614,7 @@ module AutoOpenViews =
     /// <param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     /// <returns>(float) The current lens length.</returns>
     static member ViewCameraLens(view:string) : float = //GET
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         view.ActiveViewport.Camera35mmLensLength
 
     /// <summary>Sets the 35mm camera lens length of the specified perspective
@@ -622,7 +623,7 @@ module AutoOpenViews =
     /// <param name="length">(float) The new 35mm camera lens length</param>
     /// <returns>(unit) void, nothing.</returns>
     static member ViewCameraLens(view:string, length:float) : unit = //SET
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         view.ActiveViewport.Camera35mmLensLength <- length
         view.Redraw()
 
@@ -632,7 +633,7 @@ module AutoOpenViews =
     /// <param name="view">(string) Optional, Title of the view. If omitted, the current active view is used</param>
     /// <returns>(Plane) The view's camera Plane.</returns>
     static member ViewCameraPlane([<OPT;DEF("")>]view:string) : Plane =
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         let rc, frame = view.ActiveViewport.GetCameraFrame()
         if not rc then RhinoScriptingException.Raise "ViewCameraPlane failed.  view:'%A'" view
         frame
@@ -642,7 +643,7 @@ module AutoOpenViews =
     /// <param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     /// <returns>(Point3d * Point3d) The 3d points containing the current camera and target locations.</returns>
     static member ViewCameraTarget(view:string) : Point3d * Point3d = //GET
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         view.ActiveViewport.CameraLocation, view.ActiveViewport.CameraTarget
 
     /// <summary>Sets the camera and target positions of the specified view.</summary>
@@ -651,7 +652,7 @@ module AutoOpenViews =
     /// <param name="target">(Point3d) 3d point identifying the new target location</param>
     /// <returns>(unit) void, nothing.</returns>
     static member ViewCameraTarget(view:string, camera:Point3d, target:Point3d) : unit = //SET
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         view.ActiveViewport.SetCameraLocations(target, camera)
         view.Redraw()
 
@@ -660,7 +661,7 @@ module AutoOpenViews =
     /// <param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     /// <returns>(Vector3d) The current camera up direction.</returns>
     static member ViewCameraUp(view:string) : Vector3d = //GET
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         view.ActiveViewport.CameraUp
 
     /// <summary>Sets the camera up direction of a specified.</summary>
@@ -668,7 +669,7 @@ module AutoOpenViews =
     /// <param name="upVector">(Vector3d) 3D vector identifying the new camera up direction</param>
     /// <returns>(unit) void, nothing.</returns>
     static member ViewCameraUp(view:string, upVector:Vector3d) : unit = //SET
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         view.ActiveViewport.CameraUp <- upVector
         view.Redraw()
 
@@ -678,7 +679,7 @@ module AutoOpenViews =
     /// <param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     /// <returns>(Plane) The current construction Plane.</returns>
     static member ViewCPlane(view:string) : Plane = //GET
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         view.ActiveViewport.ConstructionPlane()
 
     /// <summary>Set a view's construction Plane.</summary>
@@ -686,7 +687,7 @@ module AutoOpenViews =
     /// <param name="plane">(Plane) The new construction Plane if setting</param>
     /// <returns>(unit) void, nothing.</returns>
     static member ViewCPlane(view:string, plane:Plane) : unit = //SET
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         view.ActiveViewport.SetConstructionPlane(plane)
         view.Redraw()
 
@@ -696,7 +697,7 @@ module AutoOpenViews =
     /// <param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     /// <returns>(string) The current mode.</returns>
     static member ViewDisplayMode(view:string) : string = //GET
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         let current = view.ActiveViewport.DisplayMode
         current.EnglishName
 
@@ -705,7 +706,7 @@ module AutoOpenViews =
     /// <param name="mode">(string) Name of a display mode</param>
     /// <returns>(string) If mode is not specified, the current mode.</returns>
     static member ViewDisplayMode(view:string, mode:string) : unit = //SET
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         let desc = Display.DisplayModeDescription.FindByName(mode)
         if notNull desc then
             view.ActiveViewport.DisplayMode <- desc
@@ -773,7 +774,7 @@ module AutoOpenViews =
     /// <param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     /// <returns>(Point3d * Point3d * Point3d * Point3d) Four Point3d that define the corners of the rectangle (counter-clockwise order).</returns>
     static member ViewNearCorners([<OPT;DEF("")>]view:string) : Point3d * Point3d * Point3d * Point3d =
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         let rc = view.ActiveViewport.GetNearRect()
         rc.[0], rc.[1], rc.[3], rc.[2]
 
@@ -785,7 +786,7 @@ module AutoOpenViews =
     ///    2 = perspective
     ///    3 = two point perspective.</returns>
     static member ViewProjection(view:string) : int = //GET
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         let viewport = view.ActiveViewport
         let mutable rc = 2
         if viewport.IsParallelProjection then rc <- 1
@@ -800,12 +801,15 @@ module AutoOpenViews =
     ///    3 = two point perspective</param>
     /// <returns>(unit) void, nothing.</returns>
     static member ViewProjection(view:string, mode:int) : unit = //SET
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         let viewport = view.ActiveViewport
-        if mode = 1 then viewport.ChangeToParallelProjection(true) |> ignore<bool>
-        elif mode = 2 then viewport.ChangeToPerspectiveProjection(true, 35.)|> ignore<bool>
-        elif mode = 3 then viewport.ChangeToTwoPointPerspectiveProjection(35.)       |> ignore<bool>
-        view.Redraw()
+        if mode < 1 || mode > 3 then RhinoScriptingException.Raise "ViewProjection: mode must be 1, 2 or 3"
+        let current = if viewport.IsTwoPointPerspectiveProjection then 3 elif viewport.IsParallelProjection then 1 else 2
+        if mode <> current then
+            if mode = 1 then viewport.ChangeToParallelProjection(true) |> ignore<bool>
+            elif mode = 2 then viewport.ChangeToPerspectiveProjection(true, 50.0) |> ignore<bool>
+            else viewport.ChangeToTwoPointPerspectiveProjection(50.0) |> ignore<bool>
+            view.Redraw()
 
 
 
@@ -814,7 +818,7 @@ module AutoOpenViews =
     /// <param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     /// <returns>(float) The current view radius for the specified view.</returns>
     static member ViewRadius(view:string) : float = //GET
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         let viewport = view.ActiveViewport
         if not viewport.IsParallelProjection then RhinoScriptingException.Raise "ViewRadius view is not ParallelProjection.  view:'%A'" view
         // let ok, a, b, c, d, e, f = viewport.GetFrustum()
@@ -834,7 +838,7 @@ module AutoOpenViews =
     ///    magnification by adjusting the "lens" angle</param>
     /// <returns>(unit) void, nothing.</returns>
     static member ViewRadius(view:string, radius:float, mode:bool) : unit = //SET
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         let viewport = view.ActiveViewport
         if not viewport.IsParallelProjection then RhinoScriptingException.Raise "ViewRadius view is not ParallelProjection.  view:'%A'" view
         // let ok, a, b, c, d, e, f = viewport.GetFrustum()
@@ -853,7 +857,7 @@ module AutoOpenViews =
     /// <param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     /// <returns>(int * int ) of two numbers identifying width and height.</returns>
     static member ViewSize([<OPT;DEF(null:string)>]view:string) : int * int =
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         let cr = view.ClientRectangle
         cr.Width, cr.Height
 
@@ -878,7 +882,7 @@ module AutoOpenViews =
                                  [<OPT;DEF(true)>]freeze:bool,
                                  [<OPT;DEF(0)>]direction:int,
                                  [<OPT;DEF(5.0)>]angleDegrees:float) : float =
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         let angleradians = toRadians(angleDegrees)
         view.SpeedTest(frames, freeze, direction, angleradians)
 
@@ -887,7 +891,7 @@ module AutoOpenViews =
     /// <param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     /// <returns>(Point3d) The current target location.</returns>
     static member ViewTarget(view:string) : Point3d = //GET
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         let viewport = view.ActiveViewport
         viewport.CameraTarget
 
@@ -896,7 +900,7 @@ module AutoOpenViews =
     /// <param name="target">(Point3d) 3d point identifying the new target location</param>
     /// <returns>(unit) void, nothing.</returns>
     static member ViewTarget(view:string, target:Point3d) : unit = //SET
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         let viewport = view.ActiveViewport
         viewport.SetCameraTarget(target, true)
         view.Redraw()
@@ -915,7 +919,7 @@ module AutoOpenViews =
     /// wallpaper bitmap, pass an empty string "".</summary>
     /// <returns>(string option) The current wallpaper bitmap filename. Or an empty string if none found.</returns>
     static member Wallpaper(view:string) : string= //GET
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         let f= view.ActiveViewport.WallpaperFilename
         if isNull f then "" else f
 
@@ -925,7 +929,7 @@ module AutoOpenViews =
     /// <param name="filename">(string) Name of the bitmap file to set as wallpaper</param>
     /// <returns>(unit) void, nothing.</returns>
     static member Wallpaper(view:string, filename:string) : unit = //SET
-        let viewo = RhinoScriptSyntax.CoerceView(view)
+        let viewo = RhinoScriptSyntax.CoerceViewOrActive(view)
         if not <| viewo.ActiveViewport.SetWallpaper(filename, grayscale=false) then
             RhinoScriptingException.Raise "Wallpaper failed to set wallpaper to %s in view %s" filename view
         viewo.Redraw()
@@ -936,7 +940,7 @@ module AutoOpenViews =
     /// <param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     /// <returns>(bool) The current gray-scale display option.</returns>
     static member WallpaperGrayScale(view:string) : bool = //GET
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         view.ActiveViewport.WallpaperGrayscale
 
     /// <summary>Sets the gray-scale display option of the wallpaper bitmap in a
@@ -945,7 +949,7 @@ module AutoOpenViews =
     /// <param name="grayscale">(bool) Display the wallpaper in gray(True) or color (False)</param>
     /// <returns>(unit) void, nothing.</returns>
     static member WallpaperGrayScale(view:string, grayscale:bool) : unit = //SET
-        let viewo = RhinoScriptSyntax.CoerceView(view)
+        let viewo = RhinoScriptSyntax.CoerceViewOrActive(view)
         let filename = viewo.ActiveViewport.WallpaperFilename
         if not <| viewo.ActiveViewport.SetWallpaper(filename, grayscale) then
             RhinoScriptingException.Raise "WallpaperGrayScale failed to set wallpaper to %s in view %s" filename view
@@ -957,7 +961,7 @@ module AutoOpenViews =
     /// <param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     /// <returns>(bool) The current hidden state.</returns>
     static member WallpaperHidden(view:string) : bool = //GET
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         not view.ActiveViewport.WallpaperVisible
 
 
@@ -966,7 +970,7 @@ module AutoOpenViews =
     /// <param name="hidden">(bool) Show or hide the wallpaper</param>
     /// <returns>(unit) void, nothing.</returns>
     static member WallpaperHidden(view:string, hidden:bool) : unit = //SET
-        let view = RhinoScriptSyntax.CoerceView(view)
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         let filename = view.ActiveViewport.WallpaperFilename
         let gray = view.ActiveViewport.WallpaperGrayscale
         view.ActiveViewport.SetWallpaper(filename, gray, not hidden) |> ignore<bool>
@@ -993,7 +997,7 @@ module AutoOpenViews =
               for view in views do
                 view.ActiveViewport.ZoomBoundingBox(boundingBox) |> ignore<bool>
           else
-              let view = RhinoScriptSyntax.CoerceView(view)
+              let view = RhinoScriptSyntax.CoerceViewOrActive(view)
               view.ActiveViewport.ZoomBoundingBox(boundingBox) |> ignore<bool>
           State.Doc.Views.Redraw()
 
@@ -1014,7 +1018,7 @@ module AutoOpenViews =
             for view in views do
                 view.ActiveViewport.ZoomExtents()|> ignore<bool>
         else
-            let view = RhinoScriptSyntax.CoerceView(view)
+            let view = RhinoScriptSyntax.CoerceViewOrActive(view)
             view.ActiveViewport.ZoomExtents()|> ignore<bool>
         State.Doc.Views.Redraw()
 
@@ -1035,6 +1039,6 @@ module AutoOpenViews =
             for view in views do
                 view.ActiveViewport.ZoomExtentsSelected()|> ignore<bool>
         else
-            let view = RhinoScriptSyntax.CoerceView(view)
+            let view = RhinoScriptSyntax.CoerceViewOrActive(view)
             view.ActiveViewport.ZoomExtentsSelected()|> ignore<bool>
         State.Doc.Views.Redraw()

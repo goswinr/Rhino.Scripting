@@ -54,7 +54,7 @@ module AutoOpenGrips =
             let rc = Input.RhinoGet.GetGrip(grip, message)
             let grip = !grip
             if rc <> Commands.Result.Success || isNull grip then
-                RhinoScriptingException.Raise "GetObjectGrip User failed to select a Grip for : %s " message
+                RhinoUserInteractionException.Raise "GetObjectGrip User failed to select a Grip for : %s " message
             else
                 if select then
                     grip.Select(true, true)|> ignore<int>
@@ -85,6 +85,7 @@ module AutoOpenGrips =
             let re = Input.RhinoGet.GetGrips(grips, message)
             let grips = !grips
             let rc = ResizeArray()
+            if re <> Commands.Result.Success || isNull grips then RhinoUserInteractionException.Raise "GetObjectGrips: user cancelled grip selection"
             if re = Commands.Result.Success && notNull grips then
                 for grip in grips do
                     let objectId = grip.OwnerId
@@ -104,7 +105,7 @@ module AutoOpenGrips =
         let grips = rhobj.GetGrips()
         if isNull grips then Result.Error "rhobj.GetGrips() is null"
         else
-            if grips.Length <= index then Result.Error "rhobj.GetGrips() failed:  grips.Length <= index "
+            if index < 0 || grips.Length <= index then Result.Error "rhobj.GetGrips() failed:  grips.Length <= index "
             else
                 let grip = grips.[index]
                 let ng =
@@ -115,7 +116,7 @@ module AutoOpenGrips =
                 if notNull ng && enable then
                     ng.Select(true) |> ignore<int> // TODO needs sync ? apparently not needed!
                     State.Doc.Views.Redraw()
-                Ok ng
+                if isNull ng then Error "there is no neighboring grip" else Ok ng
 
 
     /// <summary>Returns the next grip index from a specified grip index of an object.</summary>
@@ -208,6 +209,8 @@ module AutoOpenGrips =
                 grip.CurrentLocation <- pt
             State.Doc.Objects.GripUpdate(rhobj, true)|> ignore<DocObjects.RhinoObject>
             State.Doc.Views.Redraw()
+        else
+            RhinoScriptingException.Raise "ObjectGripLocations: point count must match grip count"
 
 
 

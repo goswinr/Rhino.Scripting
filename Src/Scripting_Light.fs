@@ -47,7 +47,7 @@ module AutoOpenLight =
             let mutable radius = 0.5
             let units = State.Doc.ModelUnitSystem
             if units <> UnitSystem.None then
-                let scale = RhinoMath.UnitScale(UnitSystem.Millimeters, units)
+                let scale = RhinoMath.UnitScale(UnitSystem.Inches, units)
                 radius <- radius * scale
             width <- radius
         let light = new Light()

@@ -43,8 +43,9 @@ module AutoOpenGroup =
     /// <param name="objectIds">(Guid seq) List of Guids representing the object identifiers.</param>
     /// <returns>(unit) void, nothing.</returns>
     static member GroupObjects(objectIds:Guid seq) : unit =
+        let objectIds = Seq.toArray objectIds
+        if objectIds.Length < 2 then RhinoScriptingException.Raise "GroupObjects needs at least two objects but has %d" objectIds.Length
         let index = State.Doc.Groups.Add()
-        if objectIds |> Seq.hasMaximumItems 1 then RhinoScriptingException.Raise "GroupObjects needs to have more than one objects but has %d" (Seq.length objectIds)
         if not <|  State.Doc.Groups.AddToGroup(index, objectIds) then RhinoScriptingException.Raise "GroupObjects failed on %A"  objectIds
         //State.Doc.Groups.GroupName(index)
 
@@ -53,9 +54,10 @@ module AutoOpenGroup =
     /// <param name="groupName">(string) The name of the group to create.</param>
     /// <returns>(unit) void, nothing.</returns>
     static member GroupObjects(objectIds:Guid seq, groupName:string) : unit =
-        let index = State.Doc.Groups.Add( groupName )
-        if index < 0 then RhinoScriptingException.Raise "GroupObjects failed to create group with name '%s' for %d objects" groupName (Seq.length objectIds)
-        if objectIds |> Seq.hasMaximumItems 1 then RhinoScriptingException.Raise "GroupObjects to '%s' needs to have more than one objects but has %d" groupName (Seq.length objectIds)
+        let objectIds = Seq.toArray objectIds
+        if objectIds.Length < 2 then RhinoScriptingException.Raise "GroupObjects to '%s' needs at least two objects but has %d" groupName objectIds.Length
+        let index = State.Doc.Groups.Add(groupName)
+        if index < 0 then RhinoScriptingException.Raise "GroupObjects failed to create group with name '%s'" groupName
         if not <|  State.Doc.Groups.AddToGroup(index, objectIds) then RhinoScriptingException.Raise "GroupObjects failed on %A"  objectIds
         //State.Doc.Groups.GroupName(index)
 
@@ -84,9 +86,9 @@ module AutoOpenGroup =
         State.Doc.Groups.Count
 
 
-    /// <summary>Returns the names of all the groups in the document
-    ///    None if no names exist in the document.</summary>
-    /// <returns>(string array) The names of all the groups in the document. None if no names exist in the document.</returns>
+    /// <summary>Returns the names of all the groups in the document.
+    ///    Returns an empty array if no names exist in the document.</summary>
+    /// <returns>(string array) The names of all the groups in the document. An empty array if no names exist in the document.</returns>
     static member GroupNames() : string array =
         let names = State.Doc.Groups.GroupNames(true)
         if names|> isNull  then [| |]
@@ -116,7 +118,7 @@ module AutoOpenGroup =
     static member IsGroupEmpty(groupName:string) : bool =
         let index = State.Doc.Groups.Find(groupName)
         if index<0 then RhinoScriptingException.Raise "IsGroupEmpty: Can't check IsGroupEmpty, group '%s' not found" groupName
-        State.Doc.Groups.GroupObjectCount(index)>0
+        State.Doc.Groups.GroupObjectCount(index) = 0
 
 
     /// <summary>Locks a group of objects. Locked objects are visible and they can be
@@ -205,7 +207,7 @@ module AutoOpenGroup =
     /// <summary>Returns the top most group name that an object is assigned.
     ///   This function primarily applies to objects that are members of nested groups.</summary>
     /// <param name="objId">(Guid) id of the object to query </param>
-    /// <returns>(int) The top group's name. Fails if object is not in a group.</returns>
+    /// <returns>(string) The top group's name. Fails if object is not in a group.</returns>
     static member ObjectTopGroup(objId:Guid) : string =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objId)
         let groupIndexes = obj.GetGroupList()
@@ -217,7 +219,7 @@ module AutoOpenGroup =
     /// <summary>Returns the names of all groups that an object is part of .
     ///   This function primarily applies to objects that are members of nested groups.</summary>
     /// <param name="objId">(Guid) id of the object to query </param>
-    /// <returns>(int) The group's names sorted from bottom to top. Or an empty List if object is not in a group.</returns>
+    /// <returns>(string ResizeArray) The group's names sorted from bottom to top. Or an empty List if object is not in a group.</returns>
     static member ObjectGroups(objId:Guid) : ResizeArray<string> =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objId)
         let groupIndexes = obj.GetGroupList()

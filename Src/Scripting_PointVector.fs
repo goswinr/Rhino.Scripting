@@ -146,6 +146,12 @@ module AutoOpenPointVector =
                     if distance < t3 closest then
                         closest  <-  geometry, curve.PointAt(t), distance
 
+            | :? Extrusion as extrusion ->
+                use brep = extrusion.ToBrep()
+                let brepclosest = brep.ClosestPoint(point)
+                distance <- point.DistanceTo(brepclosest)
+                if distance < t3 closest then closest <- geometry, brepclosest, distance
+
             | :?  Surface as srf ->
                 let ok, u, v = srf.ClosestPoint(point)
                 if ok then
@@ -203,7 +209,7 @@ module AutoOpenPointVector =
     ///    Tolerance to use when verifying</param>
     /// <returns>(bool) True or False.</returns>
     static member PointsAreCoplanar(points:Point3d seq, [<OPT;DEF(0.0)>]tolerance:float) : bool =
-        let tolerance = Util.ifZero1 tolerance RhinoMath.ZeroTolerance
+        let tolerance = Util.ifZero1 tolerance 1e-12
         Point3d.ArePointsCoplanar(points, tolerance)
 
 
@@ -308,6 +314,12 @@ module AutoOpenPointVector =
                 brep.Faces.[0].PullPointsToFace(points, tolerance)
             else
                 RhinoScriptingException.Raise "PullPoints only works on surface and single sided breps not %d sided ones" brep.Faces.Count
+        | :? Extrusion as extrusion ->
+            use brep = extrusion.ToBrep()
+            RhinoScriptSyntax.PullPoints(brep, points)
+        | :? Surface as surface ->
+            use brep = surface.ToBrep()
+            RhinoScriptSyntax.PullPoints(brep, points)
         | _ -> RhinoScriptingException.Raise "PullPoints does not support %A" geometryObject.ObjectType
 
 

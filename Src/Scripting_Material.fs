@@ -56,10 +56,11 @@ module AutoOpenMaterial =
     /// <param name="destinationIndex">(int) Destination index of material to copy to.</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
     static member CopyMaterial(sourceIndex:int, destinationIndex:int) : bool =
-        if sourceIndex = destinationIndex then true // originally false
+        if sourceIndex < 0 || sourceIndex >= State.Doc.Materials.Count || destinationIndex < 0 || destinationIndex >= State.Doc.Materials.Count then false
+        elif sourceIndex = destinationIndex then true // originally false
         else
             let source = State.Doc.Materials.[sourceIndex]
-            if source|> isNull  then false
+            if source.IsDeleted then false
             else
                 let rc = State.Doc.Materials.Modify(source, destinationIndex, true)
                 if rc then State.Doc.Views.Redraw()
@@ -72,28 +73,27 @@ module AutoOpenMaterial =
     /// <param name="materialIndex">(int) The zero-based material index.</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
     static member IsMaterialDefault(materialIndex:int) : bool =
-        let mat = State.Doc.Materials.[materialIndex]
-        notNull mat && mat.IsDefaultMaterial
+        materialIndex >= 0 && materialIndex < State.Doc.Materials.Count &&
+            not State.Doc.Materials.[materialIndex].IsDeleted && State.Doc.Materials.[materialIndex].IsDefaultMaterial
 
 
     /// <summary>Verifies a material is referenced from another file.</summary>
     /// <param name="materialIndex">(int) The zero-based material index.</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
     static member IsMaterialReference(materialIndex:int) : bool =
-        let mat = State.Doc.Materials.[materialIndex]
-        notNull mat && mat.IsReference
+        materialIndex >= 0 && materialIndex < State.Doc.Materials.Count &&
+            not State.Doc.Materials.[materialIndex].IsDeleted && State.Doc.Materials.[materialIndex].IsReference
 
 
     /// <summary>Copies the material definition from one material to one or more objects.</summary>
-    /// <param name="source">(Guid) Source material index -or- identifier of the source object.
+    /// <param name="source">(Guid) Identifier of the source object.
     ///    The object must have a material assigned.</param>
     /// <param name="destination">(Guid seq) Id of the destination object.</param>
     /// <returns>(unit) void, nothing.</returns>
     static member MatchMaterial(source:Guid, destination:Guid seq) : unit =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(source)
         let source = rhobj.Attributes.MaterialIndex
-        let mat = State.Doc.Materials.[source]
-        if isNull mat then RhinoScriptingException.Raise "MatchMaterial failed.  source:'%A' destination:'%A'" source destination
+        if source < 0 || source >= State.Doc.Materials.Count || State.Doc.Materials.[source].IsDeleted then RhinoScriptingException.Raise "MatchMaterial failed.  source:'%A' destination:'%A'" source destination
 
         for objectId in destination do
             let rhobj = State.Doc.Objects.FindId(objectId)
@@ -110,8 +110,8 @@ module AutoOpenMaterial =
     /// <returns>(string) The current bump bitmap filename.
     /// Or an empty string if no Bump texture is present on the Material.</returns>
     static member MaterialBump(materialIndex:int) : string = //GET
+        if materialIndex < 0 || materialIndex >= State.Doc.Materials.Count  then RhinoScriptingException.Raise "MaterialBump failed.  materialIndex:'%A'" materialIndex
         let mat = State.Doc.Materials.[materialIndex]
-        if mat|> isNull  then RhinoScriptingException.Raise "MaterialBump failed.  materialIndex:'%A'" materialIndex
         let texture = mat.GetTexture(DocObjects.TextureType.Bump)
         if notNull texture then texture.FileName else ""
 
@@ -121,8 +121,8 @@ module AutoOpenMaterial =
     /// <param name="filename">(string) The bump bitmap filename.</param>
     /// <returns>(unit) void, nothing.</returns>
     static member MaterialBump(materialIndex:int, filename:string) : unit = //SET
+        if materialIndex < 0 || materialIndex >= State.Doc.Materials.Count  then RhinoScriptingException.Raise "MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
         let mat = State.Doc.Materials.[materialIndex]
-        if mat|> isNull  then RhinoScriptingException.Raise "MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
         if IO.File.Exists filename then
             let texture = new DocObjects.Texture()
             texture.FileName <- filename
@@ -137,8 +137,8 @@ module AutoOpenMaterial =
     /// <param name="materialIndex">(int) Zero based material index.</param>
     /// <returns>(Drawing.Color) The current material color.</returns>
     static member MaterialColor(materialIndex:int) : Drawing.Color = //GET
+        if materialIndex < 0 || materialIndex >= State.Doc.Materials.Count  then RhinoScriptingException.Raise "MaterialColor failed.  materialIndex:'%A'" materialIndex
         let mat = State.Doc.Materials.[materialIndex]
-        if mat|> isNull  then RhinoScriptingException.Raise "MaterialColor failed.  materialIndex:'%A'" materialIndex
         let rc = mat.DiffuseColor
         rc
 
@@ -147,8 +147,8 @@ module AutoOpenMaterial =
     /// <param name="color">(Drawing.Color) The new color value</param>
     /// <returns>(unit) void, nothing.</returns>
     static member MaterialColor(materialIndex:int, color:Drawing.Color) : unit = //SET
+        if materialIndex < 0 || materialIndex >= State.Doc.Materials.Count  then RhinoScriptingException.Raise "MaterialColor failed.  materialIndex:'%A' color:'%A'" materialIndex color
         let mat = State.Doc.Materials.[materialIndex]
-        if mat|> isNull  then RhinoScriptingException.Raise "MaterialColor failed.  materialIndex:'%A' color:'%A'" materialIndex color
         mat.DiffuseColor <- color
         mat.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
@@ -159,8 +159,8 @@ module AutoOpenMaterial =
     /// <returns>(string) The current environment bitmap filename.
     /// Or an empty string if no MaterialEnvironmentMap texture is present on the Material.</returns>
     static member MaterialEnvironmentMap(materialIndex:int) : string = //GET
+        if materialIndex < 0 || materialIndex >= State.Doc.Materials.Count  then RhinoScriptingException.Raise "MaterialEnvironmentMap failed.  materialIndex:'%A'" materialIndex
         let mat = State.Doc.Materials.[materialIndex]
-        if mat|> isNull  then RhinoScriptingException.Raise "MaterialEnvironmentMap failed.  materialIndex:'%A'" materialIndex
         let texture = mat.GetTexture(DocObjects.TextureType.Emap)
         if notNull texture then texture.FileName  else ""
 
@@ -169,8 +169,8 @@ module AutoOpenMaterial =
     /// <param name="filename">(string) The environment bitmap filename</param>
     /// <returns>(unit) void, nothing.</returns>
     static member MaterialEnvironmentMap(materialIndex:int, filename:string) : unit = //SET
+        if materialIndex < 0 || materialIndex >= State.Doc.Materials.Count  then RhinoScriptingException.Raise "MaterialEnvironmentMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
         let mat = State.Doc.Materials.[materialIndex]
-        if mat|> isNull  then RhinoScriptingException.Raise "MaterialEnvironmentMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
         if IO.File.Exists filename then
             let texture = new DocObjects.Texture()
             texture.FileName <- filename
@@ -186,8 +186,8 @@ module AutoOpenMaterial =
     /// <param name="materialIndex">(int) Zero based material index.</param>
     /// <returns>(string) The current material name.</returns>
     static member MaterialName(materialIndex:int) : string = //GET
+        if materialIndex < 0 || materialIndex >= State.Doc.Materials.Count  then RhinoScriptingException.Raise "MaterialName failed.  materialIndex:'%A'" materialIndex
         let mat = State.Doc.Materials.[materialIndex]
-        if mat|> isNull  then RhinoScriptingException.Raise "MaterialName failed.  materialIndex:'%A'" materialIndex
         let rc = mat.Name
         rc
 
@@ -196,8 +196,8 @@ module AutoOpenMaterial =
     /// <param name="name">(string) The new name</param>
     /// <returns>(unit) void, nothing.</returns>
     static member MaterialName(materialIndex:int, name:string) : unit = //SET
+        if materialIndex < 0 || materialIndex >= State.Doc.Materials.Count  then RhinoScriptingException.Raise "MaterialName failed.  materialIndex:'%A' name:'%A'" materialIndex name
         let mat = State.Doc.Materials.[materialIndex]
-        if mat|> isNull  then RhinoScriptingException.Raise "MaterialName failed.  materialIndex:'%A' name:'%A'" materialIndex name
         mat.Name <- name
         mat.CommitChanges() |> ignore<bool>
 
@@ -207,8 +207,8 @@ module AutoOpenMaterial =
     /// <param name="materialIndex">(int) Zero based material index.</param>
     /// <returns>(Drawing.Color) The current material reflective color.</returns>
     static member MaterialReflectiveColor(materialIndex:int) : Drawing.Color = //GET
+        if materialIndex < 0 || materialIndex >= State.Doc.Materials.Count  then RhinoScriptingException.Raise "MaterialReflectiveColor failed.  materialIndex:'%A'" materialIndex
         let mat = State.Doc.Materials.[materialIndex]
-        if mat|> isNull  then RhinoScriptingException.Raise "MaterialReflectiveColor failed.  materialIndex:'%A'" materialIndex
         let rc = mat.ReflectionColor
         rc
 
@@ -217,8 +217,8 @@ module AutoOpenMaterial =
     /// <param name="color">(Drawing.Color) The new color value.</param>
     /// <returns>(unit) void, nothing.</returns>
     static member MaterialReflectiveColor(materialIndex:int, color:Drawing.Color) : unit = //SET
+        if materialIndex < 0 || materialIndex >= State.Doc.Materials.Count  then RhinoScriptingException.Raise "MaterialReflectiveColor failed.  materialIndex:'%A' color:'%A'" materialIndex color
         let mat = State.Doc.Materials.[materialIndex]
-        if mat|> isNull  then RhinoScriptingException.Raise "MaterialReflectiveColor failed.  materialIndex:'%A' color:'%A'" materialIndex color
         mat.ReflectionColor <- color
         mat.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
@@ -230,8 +230,8 @@ module AutoOpenMaterial =
     /// <returns>(float) The current material shine value
     ///    0.0 being matte and 255.0 being glossy.</returns>
     static member MaterialShine(materialIndex:int) : float = //GET
+        if materialIndex < 0 || materialIndex >= State.Doc.Materials.Count  then RhinoScriptingException.Raise "MaterialShine failed.  materialIndex:'%A'" materialIndex
         let mat = State.Doc.Materials.[materialIndex]
-        if mat|> isNull  then RhinoScriptingException.Raise "MaterialShine failed.  materialIndex:'%A'" materialIndex
         let rc = mat.Shine
         rc
 
@@ -241,8 +241,8 @@ module AutoOpenMaterial =
     ///    0.0 being matte and 255.0 being glossy</param>
     /// <returns>(unit) void, nothing.</returns>
     static member MaterialShine(materialIndex:int, shine:float) : unit = //SET
+        if materialIndex < 0 || materialIndex >= State.Doc.Materials.Count  then RhinoScriptingException.Raise "MaterialShine failed.  materialIndex:'%A' shine:'%A'" materialIndex shine
         let mat = State.Doc.Materials.[materialIndex]
-        if mat|> isNull  then RhinoScriptingException.Raise "MaterialShine failed.  materialIndex:'%A' shine:'%A'" materialIndex shine
         mat.Shine <- shine
         mat.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
@@ -254,8 +254,8 @@ module AutoOpenMaterial =
     /// <returns>(string) The current texture bitmap filename.
     /// Or an empty string if no MaterialTexture is present on the Material</returns>
     static member MaterialTexture(materialIndex:int) : string = //GET
+        if materialIndex < 0 || materialIndex >= State.Doc.Materials.Count  then RhinoScriptingException.Raise "MaterialTexture failed.  materialIndex:'%A'" materialIndex
         let mat = State.Doc.Materials.[materialIndex]
-        if mat|> isNull  then RhinoScriptingException.Raise "MaterialTexture failed.  materialIndex:'%A'" materialIndex
         let texture = mat.GetTexture(DocObjects.TextureType.Bitmap)
         if notNull texture then texture.FileName else ""
 
@@ -264,8 +264,8 @@ module AutoOpenMaterial =
     /// <param name="filename">(string) The texture bitmap filename.</param>
     /// <returns>(unit) void, nothing.</returns>
     static member MaterialTexture(materialIndex:int, filename:string) : unit = //SET
+        if materialIndex < 0 || materialIndex >= State.Doc.Materials.Count  then RhinoScriptingException.Raise "MaterialTexture failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
         let mat = State.Doc.Materials.[materialIndex]
-        if mat|> isNull  then RhinoScriptingException.Raise "MaterialTexture failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
         if IO.File.Exists filename then
             let texture = new DocObjects.Texture()
             texture.FileName <- filename
@@ -281,8 +281,8 @@ module AutoOpenMaterial =
     /// <returns>(float) The current material transparency value
     ///    0.0 being opaque and 1.0 being transparent.</returns>
     static member MaterialTransparency(materialIndex:int) : float = //GET
+        if materialIndex < 0 || materialIndex >= State.Doc.Materials.Count  then RhinoScriptingException.Raise "MaterialTransparency failed.  materialIndex:'%A'" materialIndex
         let mat = State.Doc.Materials.[materialIndex]
-        if mat|> isNull  then RhinoScriptingException.Raise "MaterialTransparency failed.  materialIndex:'%A'" materialIndex
         let rc = mat.Transparency
         rc
 
@@ -292,8 +292,8 @@ module AutoOpenMaterial =
     ///    0.0 being opaque and 1.0 being transparent.</param>
     /// <returns>(unit) void, nothing.</returns>
     static member MaterialTransparency(materialIndex:int, transparency:float) : unit = //SET
+        if materialIndex < 0 || materialIndex >= State.Doc.Materials.Count  then RhinoScriptingException.Raise "MaterialTransparency failed.  materialIndex:'%A' transparency:'%A'" materialIndex transparency
         let mat = State.Doc.Materials.[materialIndex]
-        if mat|> isNull  then RhinoScriptingException.Raise "MaterialTransparency failed.  materialIndex:'%A' transparency:'%A'" materialIndex transparency
         mat.Transparency <- transparency
         mat.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
@@ -305,8 +305,8 @@ module AutoOpenMaterial =
     /// <returns>(string) The current transparency bitmap filename.
     /// Or an empty string if no Bump texture is present on the Material.</returns>
     static member MaterialTransparencyMap(materialIndex:int) : string = //GET
+        if materialIndex < 0 || materialIndex >= State.Doc.Materials.Count  then RhinoScriptingException.Raise "MaterialTransparencyMap failed.  materialIndex:'%A'" materialIndex
         let mat = State.Doc.Materials.[materialIndex]
-        if mat|> isNull  then RhinoScriptingException.Raise "MaterialTransparencyMap failed.  materialIndex:'%A'" materialIndex
         let texture = mat.GetTexture(DocObjects.TextureType.Transparency)
         if notNull texture then texture.FileName else ""
 
@@ -316,8 +316,8 @@ module AutoOpenMaterial =
     /// <param name="filename">(string) The transparency bitmap filename.</param>
     /// <returns>(unit) void, nothing.</returns>
     static member MaterialTransparencyMap(materialIndex:int, filename:string) : unit = //SET
+        if materialIndex < 0 || materialIndex >= State.Doc.Materials.Count  then RhinoScriptingException.Raise "MaterialTransparencyMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
         let mat = State.Doc.Materials.[materialIndex]
-        if mat|> isNull  then RhinoScriptingException.Raise "MaterialTransparencyMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
         if IO.File.Exists filename then
             let texture = new DocObjects.Texture()
             texture.FileName <- filename
@@ -333,8 +333,7 @@ module AutoOpenMaterial =
     /// <param name="materialIndex">(int) Zero based material index</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
     static member ResetMaterial(materialIndex:int) : bool =
-        let mat = State.Doc.Materials.[materialIndex]
-        if mat|> isNull  then false
+        if materialIndex < 0 || materialIndex >= State.Doc.Materials.Count then false
         else
             let rc = State.Doc.Materials.ResetMaterial(materialIndex)
             State.Doc.Views.Redraw()

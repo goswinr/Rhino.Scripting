@@ -35,7 +35,7 @@ module AutoOpenDocument =
                                         [<OPT;DEF(0)>]height:int,
                                         [<OPT;DEF(0)>]flags:int,
                                         [<OPT;DEF(false)>]wireframe:bool) : bool =
-        let rhview = RhinoScriptSyntax.CoerceView(view)
+        let rhview = RhinoScriptSyntax.CoerceViewOrActive(view)
         let inline  ( ./. ) (i:int) (j:int) = (float(i)) / (float(j))
         let inline  ( *. ) ( i:int) (f:float) = int(round(float(i) * f))
         let rhsize =
@@ -122,11 +122,13 @@ module AutoOpenDocument =
     /// <returns>(unit) void, nothing.</returns>
     static member ExtractPreviewImage(fileName:string, [<OPT;DEF(null:string)>]modelName:string) : unit =
         let bmp =
-            if notNull modelName  then
-                if notNull State.Doc.Path then RhinoDoc.ExtractPreviewImage(State.Doc.Path) // TODO test this works ok
+            if String.IsNullOrEmpty modelName then
+                if not <| String.IsNullOrEmpty State.Doc.Path then RhinoDoc.ExtractPreviewImage(State.Doc.Path) // TODO test this works ok
                 else RhinoScriptingException.Raise "ExtractPreviewImage failed on unsaved file"
             else
                 RhinoDoc.ExtractPreviewImage(modelName)
+        if isNull bmp then RhinoScriptingException.Raise "ExtractPreviewImage: no preview image is available"
+        use bmp = bmp
         bmp.Save(fileName)
 
 
@@ -254,14 +256,14 @@ module AutoOpenDocument =
 
     /// <summary>Sets the render Mesh maximum angle property of the active document.
     /// For more information on render Meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
-    /// <param name="angleDegrees">(float) The new maximum angle, which is a positive number in degrees</param>
+    /// <param name="angleDegrees">(float) The new maximum angle, which is a nonnegative number in degrees; 0 disables this constraint.</param>
     /// <returns>(unit) void, nothing.</returns>
     static member RenderMeshMaxAngle(angleDegrees:float) : unit = //SET
         let current = State.Doc.GetMeshingParameters(State.Doc.MeshingParameterStyle)
-        if angleDegrees > 0. then
-                current.RefineAngle <- toRadians(angleDegrees)
-                State.Doc.SetCustomMeshingParameters(current)
-                State.Doc.MeshingParameterStyle <- Rhino.Geometry.MeshingParameterStyle.Custom
+        if angleDegrees < 0.0 then RhinoScriptingException.Raise "RenderMeshMaxAngle: value must be nonnegative"
+        current.RefineAngle <- toRadians(angleDegrees)
+        State.Doc.SetCustomMeshingParameters(current)
+        State.Doc.MeshingParameterStyle <- Rhino.Geometry.MeshingParameterStyle.Custom
 
 
     /// <summary>Returns the render Mesh maximum aspect ratio property of the active document.
@@ -274,14 +276,14 @@ module AutoOpenDocument =
 
     /// <summary>Sets the render Mesh maximum aspect ratio property of the active document.
     /// For more information on render Meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
-    /// <param name="ratio">(float) The render Mesh maximum aspect ratio. The suggested range, when not zero, is from 1 to 100</param>
+    /// <param name="ratio">(float) The render Mesh maximum aspect ratio. The suggested range, when not zero, is from 1 to 100; 0 disables this constraint.</param>
     /// <returns>(unit) void, nothing.</returns>
     static member RenderMeshMaxAspectRatio(ratio:float) : unit = //SET
         let current = State.Doc.GetMeshingParameters(State.Doc.MeshingParameterStyle)
-        if ratio <> 0.0 then
-            current.GridAspectRatio <- ratio
-            State.Doc.SetCustomMeshingParameters(current)
-            State.Doc.MeshingParameterStyle <- Rhino.Geometry.MeshingParameterStyle.Custom
+        if ratio < 0.0 then RhinoScriptingException.Raise "RenderMeshMaxAspectRatio: value must be nonnegative"
+        current.GridAspectRatio <- ratio
+        State.Doc.SetCustomMeshingParameters(current)
+        State.Doc.MeshingParameterStyle <- Rhino.Geometry.MeshingParameterStyle.Custom
 
 
     /// <summary>Returns the render Mesh maximum distance, edge to Surface parameter of the active document.
@@ -294,14 +296,14 @@ module AutoOpenDocument =
 
     /// <summary>Sets the render Mesh maximum distance, edge to Surface parameter of the active document.
     /// For more information on render Meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
-    /// <param name="distance">(float) The render Mesh maximum distance, edge to Surface</param>
+    /// <param name="distance">(float) The render Mesh maximum distance, edge to Surface; 0 disables this constraint.</param>
     /// <returns>(unit) void, nothing.</returns>
     static member RenderMeshMaxDistEdgeToSrf(distance:float) : unit = //SET
         let current = State.Doc.GetMeshingParameters(State.Doc.MeshingParameterStyle)
-        if distance > 0. then
-            current.Tolerance <- distance
-            State.Doc.SetCustomMeshingParameters(current)
-            State.Doc.MeshingParameterStyle <- Rhino.Geometry.MeshingParameterStyle.Custom
+        if distance < 0.0 then RhinoScriptingException.Raise "RenderMeshMaxDistEdgeToSrf: value must be nonnegative"
+        current.Tolerance <- distance
+        State.Doc.SetCustomMeshingParameters(current)
+        State.Doc.MeshingParameterStyle <- Rhino.Geometry.MeshingParameterStyle.Custom
 
 
     /// <summary>Returns the render Mesh maximum edge length parameter of the active document.
@@ -314,14 +316,14 @@ module AutoOpenDocument =
 
     /// <summary>Sets the render Mesh maximum edge length parameter of the active document.
     /// For more information on render Meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
-    /// <param name="distance">(float) The render Mesh maximum edge length</param>
+    /// <param name="distance">(float) The render Mesh maximum edge length; 0 disables this constraint.</param>
     /// <returns>(unit) void, nothing.</returns>
     static member RenderMeshMaxEdgeLength(distance:float) : unit = //SET
         let current = State.Doc.GetMeshingParameters(State.Doc.MeshingParameterStyle)
-        if distance > 0.0 then
-            current.MaximumEdgeLength <- distance
-            State.Doc.SetCustomMeshingParameters(current)
-            State.Doc.MeshingParameterStyle <- Rhino.Geometry.MeshingParameterStyle.Custom
+        if distance < 0.0 then RhinoScriptingException.Raise "RenderMeshMaxEdgeLength: value must be nonnegative"
+        current.MaximumEdgeLength <- distance
+        State.Doc.SetCustomMeshingParameters(current)
+        State.Doc.MeshingParameterStyle <- Rhino.Geometry.MeshingParameterStyle.Custom
 
 
     /// <summary>Returns the render Mesh minimum edge length parameter of the active document.
@@ -334,14 +336,14 @@ module AutoOpenDocument =
 
     /// <summary>Sets the render Mesh minimum edge length parameter of the active document.
     /// For more information on render Meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
-    /// <param name="distance">(float) The render Mesh minimum edge length</param>
+    /// <param name="distance">(float) The render Mesh minimum edge length; 0 disables this constraint.</param>
     /// <returns>(unit) void, nothing.</returns>
     static member RenderMeshMinEdgeLength(distance:float) : unit = //SET
         let current = State.Doc.GetMeshingParameters(State.Doc.MeshingParameterStyle)
-        if distance > 0.0 then
-            current.MinimumEdgeLength <- distance
-            State.Doc.SetCustomMeshingParameters(current)
-            State.Doc.MeshingParameterStyle <- Rhino.Geometry.MeshingParameterStyle.Custom
+        if distance < 0.0 then RhinoScriptingException.Raise "RenderMeshMinEdgeLength: value must be nonnegative"
+        current.MinimumEdgeLength <- distance
+        State.Doc.SetCustomMeshingParameters(current)
+        State.Doc.MeshingParameterStyle <- Rhino.Geometry.MeshingParameterStyle.Custom
 
 
     /// <summary>Returns the render Mesh minimum initial grid quads parameter of the active document.
@@ -354,14 +356,14 @@ module AutoOpenDocument =
 
     /// <summary>Sets the render Mesh minimum initial grid quads parameter of the active document.
     /// For more information on render Meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
-    /// <param name="quads">(int) The render Mesh minimum initial grid quads. The suggested range is from 0 to 10000</param>
+    /// <param name="quads">(int) The render Mesh minimum initial grid quads. The suggested range is from 0 to 10000; 0 disables this constraint.</param>
     /// <returns>(unit) void, nothing.</returns>
     static member RenderMeshMinInitialGridQuads(quads:int) : unit = //SET
         let current = State.Doc.GetMeshingParameters(State.Doc.MeshingParameterStyle)
-        if quads > 0 then
-            current.GridMinCount <- quads
-            State.Doc.SetCustomMeshingParameters(current)
-            State.Doc.MeshingParameterStyle <- Rhino.Geometry.MeshingParameterStyle.Custom
+        if quads < 0 then RhinoScriptingException.Raise "RenderMeshMinInitialGridQuads: value must be nonnegative"
+        current.GridMinCount <- quads
+        State.Doc.SetCustomMeshingParameters(current)
+        State.Doc.MeshingParameterStyle <- Rhino.Geometry.MeshingParameterStyle.Custom
 
 
     /// <summary>Returns the render Mesh quality of the active document.
@@ -393,7 +395,7 @@ module AutoOpenDocument =
             elif quality = 2 then
                 MeshingParameterStyle.Custom
             else
-                MeshingParameterStyle.None
+                RhinoScriptingException.Raise "RenderMeshQuality: expected 0, 1 or 2, got %d" quality
         State.Doc.MeshingParameterStyle <- newValue
 
 
@@ -411,6 +413,7 @@ module AutoOpenDocument =
         if current.RefineGrid then  rc <- rc +  1
         if current.JaggedSeams then  rc <- rc +  2
         if current.SimplePlanes then  rc <- rc +  4
+        if current.TextureRange = MeshingParameterTextureRange.PackedScaledNormalized then rc <- rc + 8
         rc
 
     /// <summary>Sets the render Mesh settings of the active document.
@@ -428,6 +431,7 @@ module AutoOpenDocument =
         current.RefineGrid <- (settings &&& 1)   <> 0
         current.JaggedSeams <- (settings &&& 2)  <> 0
         current.SimplePlanes <- (settings &&& 4) <> 0
+        current.TextureRange <- if (settings &&& 8) <> 0 then MeshingParameterTextureRange.PackedScaledNormalized else MeshingParameterTextureRange.UnpackedUnscaledNormalized
         State.Doc.SetCustomMeshingParameters(current)
         State.Doc.MeshingParameterStyle <- Rhino.Geometry.MeshingParameterStyle.Custom
 
@@ -640,10 +644,10 @@ module AutoOpenDocument =
     ///    If not specified, any existing geometry is not scaled (False)</param>
     /// <returns>(unit) void, nothing.</returns>
     static member UnitSystem(unitSystem:int, [<OPT;DEF(false)>]scale:bool) : unit = //SET
-        if unitSystem < 1 || unitSystem > 25 then
+        if unitSystem < 0 || unitSystem > 25 then
             RhinoScriptingException.Raise "UnitSystem value of %d is not  valid" unitSystem
-            let unitSystem : UnitSystem  = LanguagePrimitives.EnumOfValue (byte unitSystem)
-            State.Doc.AdjustPageUnitSystem(unitSystem, scale)
+        let unitSystem : UnitSystem = LanguagePrimitives.EnumOfValue (byte unitSystem)
+        State.Doc.AdjustModelUnitSystem(unitSystem, scale)
 
 
 

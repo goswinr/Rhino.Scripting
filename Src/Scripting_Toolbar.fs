@@ -23,9 +23,11 @@ module AutoOpenToolbar =
     ///    if it has been modified prior to closing</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
     static member CloseToolbarCollection(name:string, [<OPT;DEF(false)>]prompt:bool) : bool =
-        let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
-        if notNull tbfile then  tbfile.Close(prompt)
-        else false
+        RhinoSync.DoSync (fun () ->
+            let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
+            if notNull tbfile then  tbfile.Close(prompt)
+            else false
+        )
 
 
     /// <summary>Hides a previously visible toolbar group in an open toolbar collection.</summary>
@@ -33,16 +35,18 @@ module AutoOpenToolbar =
     /// <param name="toolbarGroup">(string) Name of a toolbar group to hide</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
     static member HideToolbar(name:string, toolbarGroup:string) : bool =
-        let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
-        if notNull tbfile then
-            let group = tbfile.GetGroup(toolbarGroup)
-            if notNull group then
-                group.Visible <- false
-                true
+        RhinoSync.DoSync (fun () ->
+            let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
+            if notNull tbfile then
+                let group = tbfile.GetGroup(toolbarGroup)
+                if notNull group then
+                    group.Visible <- false
+                    true
+                else
+                    false
             else
                 false
-        else
-            false
+        )
 
 
     /// <summary>Verifies a toolbar (or toolbar group) exists in an open collection file.</summary>
@@ -73,7 +77,7 @@ module AutoOpenToolbar =
         else ""
 
 
-    /// <summary>Checks if a toolbar group in an open toolbar collection is visible.</summary>
+    /// <summary>Checks if a toolbar group in an open toolbar collection is docked.</summary>
     /// <param name="name">(string) Name of a currently open toolbar file</param>
     /// <param name="toolbarGroup">(string) Name of a toolbar group</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
@@ -103,18 +107,22 @@ module AutoOpenToolbar =
     /// <param name="file">(string) Full path to the collection file</param>
     /// <returns>(string) Rhino-assigned name of the toolbar collection.</returns>
     static member OpenToolbarCollection(file:string) : string =
-        let tbfile = RhinoApp.ToolbarFiles.Open(file)
-        if notNull tbfile then  tbfile.Name
-        else RhinoScriptingException.Raise "OpenToolbarCollection failed on file '%s'" file
+        RhinoSync.DoSync (fun () ->
+            let tbfile = RhinoApp.ToolbarFiles.Open(file)
+            if notNull tbfile then  tbfile.Name
+            else RhinoScriptingException.Raise "OpenToolbarCollection failed on file '%s'" file
+        )
 
 
     /// <summary>Saves an open toolbar collection to disk.</summary>
     /// <param name="name">(string) Name of a currently open toolbar file</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
     static member SaveToolbarCollection(name:string) : bool =
-        let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
-        if notNull tbfile then  tbfile.Save()
-        else false
+        RhinoSync.DoSync (fun () ->
+            let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
+            if notNull tbfile then  tbfile.Save()
+            else false
+        )
 
 
     /// <summary>Saves an open toolbar collection to a different disk file.</summary>
@@ -122,9 +130,11 @@ module AutoOpenToolbar =
     /// <param name="file">(string) Full path to file name to save to</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
     static member SaveToolbarCollectionAs(name:string, file:string) : bool =
-        let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
-        if notNull tbfile then  tbfile.SaveAs(file)
-        else false
+        RhinoSync.DoSync (fun () ->
+            let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
+            if notNull tbfile then  tbfile.SaveAs(file)
+            else false
+        )
 
 
     /// <summary>Shows a previously hidden toolbar group in an open toolbar collection.</summary>
@@ -132,16 +142,18 @@ module AutoOpenToolbar =
     /// <param name="toolbarGroup">(string) Name of a toolbar group to show</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
     static member ShowToolbar(name:string, toolbarGroup:string) : bool =
-        let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
-        if notNull tbfile then
-            let group = tbfile.GetGroup(toolbarGroup)
-            if notNull group then
-                group.Visible <- true
-                true
+        RhinoSync.DoSync (fun () ->
+            let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
+            if notNull tbfile then
+                let group = tbfile.GetGroup(toolbarGroup)
+                if notNull group then
+                    group.Visible <- true
+                    true
+                else
+                    false
             else
                 false
-        else
-            false
+        )
 
 
     /// <summary>Returns number of currently open toolbar collections.</summary>

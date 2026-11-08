@@ -316,7 +316,7 @@ module AutoOpenCoerce =
             None
         else
             let a = ref (new Arc())
-            if curve.TryGetArc(a, State.Doc.ModelAbsoluteTolerance) then Some a.Value
+            if curve.TryGetArc(a, State.Doc.ModelAbsoluteTolerance) && not a.Value.IsCircle then Some a.Value
             else None
 
     /// <summary>Attempt to get an Arc from a curve object using the current Documents Absolute Tolerance.
@@ -586,6 +586,18 @@ module AutoOpenCoerce =
             #endif
             |> Array.tryFind (fun v -> v.MainViewport.Name = viewName)
             |> Option.defaultWith (fun () ->  RhinoScriptingException.Raise "CoerceView: could not find view called '%s'" viewName)
+
+    /// <summary>Internal helper for optional view parameters: gets the view with this name,
+    /// or the active view if the name is null or an empty string.</summary>
+    /// <param name="viewName">(string) The name of the view, or null or "" for the active view.</param>
+    /// <returns>(Display.RhinoView) The view. Raises a RhinoScriptingException if no view has this name or if there is no active view.</returns>
+    static member internal CoerceViewOrActive (viewName:string) : Display.RhinoView =
+        if String.IsNullOrEmpty viewName then
+            match State.Doc.Views.ActiveView with
+            | null -> RhinoScriptingException.Raise "CoerceViewOrActive: there is no active view"
+            | v -> v
+        else
+            RhinoScriptSyntax.CoerceView(viewName)
 
 
     /// <summary>Gets a Rhino Page (or Layout) View from its Guid.</summary>
@@ -952,6 +964,7 @@ module AutoOpenCoerce =
     /// <returns>(Drawing.Color) The color in ARGB form (not as named color) this will provide better comparison to other colors.
     /// For example the named color Red is not equal to fromRGB(255, 0, 0). Raises a RhinoScriptingException if the string can not be parsed.</returns>
     static member CoerceColor(color:string) : Drawing.Color =
+        if String.IsNullOrWhiteSpace color then RhinoScriptingException.Raise "CoerceColor: color must not be empty"
         try
             let c = Drawing.ColorTranslator.FromHtml(color)
             Drawing.Color.FromArgb(int c.A, int c.R, int c.G, int c.B)// convert to unnamed color

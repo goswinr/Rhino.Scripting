@@ -22,7 +22,7 @@ module AutoOpenUserInterface =
     /// <param name="folder">(string) Optional, a default folder</param>
     /// <param name="message">(string) Optional, a prompt or message</param>
     /// <param name="title">(string) Optional, a dialog box title</param>
-    /// <returns>(string) Selected folder or None if selection was cancelled.
+    /// <returns>(string) Selected folder.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc key.</returns>
     static member BrowseForFolder(  [<OPT;DEF(null:string)>]folder:string,
                                     [<OPT;DEF(null:string)>]message:string,
@@ -31,10 +31,9 @@ module AutoOpenUserInterface =
             use dlg = new Eto.Forms.SelectFolderDialog()
             if notNull folder then
                 dlg.Directory <- folder
-            if notNull message then
-                dlg.Title <- message
-            if notNull title then
-                dlg.Title <- title
+            if notNull title && notNull message then dlg.Title <- title + " - " + message
+            elif notNull title then dlg.Title <- title
+            elif notNull message then dlg.Title <- message
             let parentEtoWindow = null
             if dlg.ShowDialog(parentEtoWindow) = Eto.Forms.DialogResult.Ok then
                 dlg.Directory
@@ -214,8 +213,7 @@ module AutoOpenUserInterface =
     static member GetColor([<OPT;DEF(Drawing.Color())>]color:Drawing.Color) : Drawing.Color =
         let get () =
             let zero = Drawing.Color()
-            let mutable col = if color = zero then Drawing.Color.Black else color
-            let colRef = &col
+            let col = if color = zero then Drawing.Color.Black else color
             // let rc = UI.Dialogs.ShowColorDialog(col) // needs a ref to WinForms
             // let mi = typeof<UI.Dialogs>.GetMethod("ShowColorDialog", [| typeof<byref<System.Drawing.Color>> |]) // fails
             let methOp =
@@ -226,9 +224,10 @@ module AutoOpenUserInterface =
             match methOp with
             | None -> RhinoScriptingException.Raise "GetColor: ShowColorDialog method not found"
             | Some mi ->
-                let rc = unbox<bool> (mi.Invoke(null,[|colRef:>obj|]))
+                let args = [|box col|]
+                let rc = unbox<bool> (mi.Invoke(null, args))
                 if not rc then  RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetColor()"
-                col
+                unbox<Drawing.Color> args.[0]
 
         RhinoSync.DoSyncRedrawHideEditor get
 
@@ -268,14 +267,12 @@ module AutoOpenUserInterface =
         let get () =
             let pt1 =
                 if firstPt = Point3d.Origin then
-                    let gp1 = new Input.Custom.GetPoint()
+                    use gp1 = new Input.Custom.GetPoint()
                     gp1.SetCommandPrompt(firstPtMsg)
                     match gp1.Get() with
                     | Input.GetResult.Point ->
-                        gp1.Dispose()
                         Some (gp1.Point())
                     | _ ->
-                        gp1.Dispose()
                         None
                 else
                     Some firstPt
@@ -297,6 +294,9 @@ module AutoOpenUserInterface =
                     PrettySetup.printfnBlue "Distance: %s %s" (PrettyFormat.float d) suffix
                     gp2.Dispose()
                     d
+                | Input.GetResult.Nothing when distance <> 0.0 ->
+                    gp2.Dispose()
+                    distance
                 | _ ->
                     gp2.Dispose()
                     RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetDistance()"
@@ -333,7 +333,7 @@ module AutoOpenUserInterface =
                 for i = 0 to go.ObjectCount - 1 do
                     let edge = go.Object(i).Edge()
                     if notNull edge then
-                        let crv = edge.Duplicate() :?> NurbsCurve
+                        let crv = edge.DuplicateCurve()
                         let curveid = State.Doc.Objects.AddCurve(crv)
                         let parentid = go.Object(i).ObjectId
                         let pt = go.Object(i).SelectionPoint()
@@ -391,8 +391,8 @@ module AutoOpenUserInterface =
         let getKeepEditor () =
             let layerindex = ref State.Doc.Layers.CurrentLayerIndex
             if notNull layer then
-                let layerinstance = State.Doc.Layers.FindName(layer)
-                if notNull layerinstance then layerindex := layerinstance.Index
+                let layerinstance = RhinoScriptSyntax.CoerceLayer(layer)
+                layerindex := layerinstance.Index
             let rc = UI.Dialogs.ShowSelectLayerDialog(layerindex, title, showNewButton, showSetCurrent, ref true)
             if not rc then RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetLayer()"
             else
@@ -767,7 +767,7 @@ module AutoOpenUserInterface =
                                [<OPT;DEF(null:string)>]message2:string,
                                [<OPT;DEF(null:string)>]message3:string,
                                [<OPT;DEF(null:string)>]message4:string,
-                               [<OPT;DEF(2147482999)>]min:int,
+                               [<OPT;DEF(2)>]min:int,
                                [<OPT;DEF(0)>]max:int) : Polyline =
         // original python code has a flags parameter, but it is not used in the code
         let get () =
@@ -776,8 +776,9 @@ module AutoOpenUserInterface =
             if notNull message2 then gpl.SecondPointPrompt <- message2
             if notNull message3 then gpl.ThirdPointPrompt <- message3
             if notNull message4 then gpl.FourthPointPrompt <- message4
+            if min < 2 || (max > 0 && max < min) then RhinoScriptingException.Raise "GetPolyline: require min >= 2 and max = 0 or max >= min"
             gpl.MinPointCount <- min
-            if max>min then gpl.MaxPointCount <- max
+            gpl.MaxPointCount <- max
             let rc, polyline = gpl.Get()
             State.Doc.Views.Redraw()
             if rc = Commands.Result.Success then polyline

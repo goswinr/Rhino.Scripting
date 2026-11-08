@@ -345,7 +345,7 @@ module AutoOpenApplication =
     /// <returns>(unit) void, nothing.</returns>
     static member EdgeAnalysisMode(mode:int) : unit = //SET
         RhinoSync.DoSync (fun () ->
-            if mode = 1 || mode = 2 then
+            if mode >= 0 && mode <= 2 then
                 ApplicationSettings.EdgeAnalysisSettings.ShowEdges <- mode
             else
                 RhinoScriptingException.Raise "EdgeAnalysisMode bad edge analysisMode %d" mode
@@ -476,10 +476,13 @@ module AutoOpenApplication =
 
 
     /// <summary>Checks if a plug-in is registered.</summary>
-    /// <param name="plugin">(string) The unique objectId of the plug-in</param>
+    /// <param name="plugin">(string) The name or identifier string of the plug-in</param>
     /// <returns>(bool) True if the Guid is registered or False if it is not.</returns>
     static member IsPlugIn(plugin:string) : bool =
-        let objectId = Rhino.PlugIns.PlugIn.IdFromName(plugin)
+        let objectId =
+            match Guid.TryParse(plugin) with
+            | true, id -> id
+            | _ -> Rhino.PlugIns.PlugIn.IdFromName(plugin)
         if objectId = Guid.Empty then false
         else
             let rc, _ , _ = Rhino.PlugIns.PlugIn.PlugInExists(objectId)
@@ -647,12 +650,10 @@ module AutoOpenApplication =
     /// 2 = unloaded. If omitted both statuses are returned</param>
     /// <returns>(string array) array of registered Rhino plug-ins.</returns>
     static member PlugIns([<OPT;DEF(0)>]types:int, [<OPT;DEF(0)>]status:int) : array<string> =
-        let mutable filter = Rhino.PlugIns.PlugInType.Any
-        if types = 1 then  filter <- Rhino.PlugIns.PlugInType.Render
-        if types = 2 then  filter <- Rhino.PlugIns.PlugInType.FileExport
-        if types = 4 then  filter <- Rhino.PlugIns.PlugInType.FileImport
-        if types = 8 then  filter <- Rhino.PlugIns.PlugInType.Digitizer
-        if types = 16 then filter <- Rhino.PlugIns.PlugInType.Utility
+        let mutable filter = enum<Rhino.PlugIns.PlugInType> 0
+        for bit, kind in [1, Rhino.PlugIns.PlugInType.Render; 2, Rhino.PlugIns.PlugInType.FileExport; 4, Rhino.PlugIns.PlugInType.FileImport; 8, Rhino.PlugIns.PlugInType.Digitizer; 16, Rhino.PlugIns.PlugInType.Utility] do
+            if types &&& bit <> 0 then filter <- filter ||| kind
+        if types = 0 then filter <- Rhino.PlugIns.PlugInType.Any
         let loaded = status = 0 || status = 1
         let unloaded = status = 0 || status = 2
         RhinoSync.DoSync (fun () ->
@@ -685,8 +686,10 @@ module AutoOpenApplication =
     static member ScreenSize() : int * int =
         // let sz = System.Windows.Forms.Screen.PrimaryScreen.Bounds //  TODO: Windows Forms is supported on Mono Mac??  compile separate Assembly for Windows ???
         // sz.Width, sz.Height
-        let sz = Eto.Forms.Screen.PrimaryScreen.Bounds
-        int sz.Width, int sz.Height
+        RhinoSync.DoSync (fun () ->
+            let screen = Eto.Forms.Screen.PrimaryScreen
+            let sz = screen.Bounds
+            int (Math.Round(float sz.Width * float screen.RealScale)), int (Math.Round(float sz.Height * float screen.RealScale)))
 
 
     /// <summary>Returns version of the Rhino SDK supported by the executing Rhino.</summary>
@@ -767,6 +770,7 @@ module AutoOpenApplication =
     static member StatusBarProgressMeterShow(label:string, lower:int, upper:int, [<OPT;DEF(true)>]embedLabel:bool, [<OPT;DEF(true)>]showPercent:bool) : bool =
         RhinoSync.DoSync (fun () ->
             let mutable rc = UI.StatusBar.ShowProgressMeter(lower, upper, label, embedLabel, showPercent)
+            RhinoApp.Wait()
             rc = 1)
 
 
@@ -779,6 +783,7 @@ module AutoOpenApplication =
         RhinoSync.DoSync (fun () ->
             UI.StatusBar.UpdateProgressMeter(position, absolute)
             |> ignore<int>
+            RhinoApp.Wait()
             )
 
 
@@ -786,7 +791,8 @@ module AutoOpenApplication =
     /// <returns>(unit) void, nothing.</returns>
     static member StatusBarProgressMeterHide() : unit =
         RhinoSync.DoSync (fun () ->
-            UI.StatusBar.HideProgressMeter())
+            UI.StatusBar.HideProgressMeter()
+            RhinoApp.Wait())
 
 
     /// <summary>Returns Rhino's default template file. This is the file used

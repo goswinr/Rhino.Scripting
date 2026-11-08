@@ -688,8 +688,8 @@ module AutoOpenCurve =
     /// <param name="direction">(Vector3d) Optional, default value: <c>Vector3d.ZAxis</c>
     ///    3d vector that identifies up, or Z axs, direction of
     ///    the Plane to test against</param>
-    /// <returns>(int) 1 if the Curve's orientation is clockwise
-    ///    -1 if the Curve's orientation is counter-clockwise
+    /// <returns>(int) 1 if the Curve's orientation is counter-clockwise
+    ///    -1 if the Curve's orientation is clockwise
     ///     0 if unable to compute the Curve's orientation.</returns>
     static member ClosedCurveOrientation(curveId:Guid, [<OPT;DEF(Vector3d())>]direction:Vector3d) : int = //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
         RhinoScriptSyntax.ClosedCurveOrientation(RhinoScriptSyntax.CoerceCurve(curveId), direction)
@@ -700,8 +700,8 @@ module AutoOpenCurve =
     /// <param name="direction">(Vector3d) Optional, default value: <c>Vector3d.ZAxis</c>
     ///    3d vector that identifies up, or Z axs, direction of
     ///    the Plane to test against</param>
-    /// <returns>(int) 1 if the Curve's orientation is clockwise
-    ///    -1 if the Curve's orientation is counter-clockwise
+    /// <returns>(int) 1 if the Curve's orientation is counter-clockwise
+    ///    -1 if the Curve's orientation is clockwise
     ///     0 if unable to compute the Curve's orientation.</returns>
     static member ClosedCurveOrientation(curveGeo:Curve, [<OPT;DEF(Vector3d())>]direction:Vector3d) : int = //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
         let direction0 =if direction.IsZero then Vector3d.Unset else direction
@@ -753,7 +753,7 @@ module AutoOpenCurve =
                                             [<OPT;DEF(0.0)>]minEdgeLength:float,
                                             [<OPT;DEF(0.0)>]maxEdgeLength:float) : PolylineCurve =
         let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
-        let angleTolerance0 = toRadians (Util.ifZero1 angleTolerance 0.5)
+        let angleTolerance0 = toRadians (Util.ifZero1 angleTolerance 5.0)
         let tolerance0 = Util.ifZero1 tolerance 0.01
         let polyline = curve.ToPolyline(0, 0, angleTolerance0, 0.0, 0.0, tolerance0, minEdgeLength, maxEdgeLength, keepStartPoint=true)
         if isNull polyline then RhinoScriptingException.Raise "ConvertCurveToPolyline: Unable to convert curve"
@@ -1118,7 +1118,7 @@ module AutoOpenCurve =
         let curvePoint = ref Point3d.Unset
         let linePoint  = ref Point3d.Unset
         let success = curve.ClosestPoints(line.ToNurbsCurve(), curvePoint, linePoint)
-        if success then  !linePoint, !curvePoint
+        if success then !curvePoint, !linePoint
         else RhinoScriptingException.Raise "CurveLineClosestPoint failed  curveGeo:'%s' Line:'%A'" (Pretty.str curveGeo) line
 
 
@@ -1388,7 +1388,7 @@ module AutoOpenCurve =
         let curveA = RhinoScriptSyntax.DirectCurveInput(curveA, -1)
         let curveB = RhinoScriptSyntax.DirectCurveInput(curveB, -1)
         let tol = State.Doc.ModelAbsoluteTolerance
-        let ok, maxa, maxb, maxd, mina, minb, mind = Curve.GetDistancesBetweenCurves(curveA, curveB, tol)
+        let ok, maxd, maxa, maxb, mind, mina, minb = Curve.GetDistancesBetweenCurves(curveA, curveB, tol)
         if not ok then  RhinoScriptingException.Raise "CurveDeviation failed for %A; %A" curveB curveA
         else
             maxa, maxb, maxd, mina, minb, mind
@@ -1671,7 +1671,7 @@ module AutoOpenCurve =
 
         let ok, a, b, pl = Curve.GetFilletPoints(curve0, curve1, radius, t0Base, t1Base)
         if not ok then RhinoScriptingException.Raise "CurveFilletPoints failed 3 curveA:'%A' curveB:'%A' radius:'%A' basePointA: %A basePointB: %A" curveA curveB radius basePointA basePointB
-        curve0.PointAt(a), curve0.PointAt(b), pl
+        curve0.PointAt(a), curve1.PointAt(b), pl
 
 
     /// <summary>Returns the Plane at a parameter of a Curve. The Plane is based on the
@@ -2591,7 +2591,7 @@ module AutoOpenCurve =
             curve <- curve.ToNurbsCurve()
             clamp <- 1
         let newCurve = curve.Fair(tolerance, angleTol, clamp, clamp, 100)
-        if notNull newCurve then  false
+        if isNull newCurve then false
         else
             if State.Doc.Objects.Replace(curveId, newCurve) then
                 State.Doc.Views.Redraw()
@@ -2668,19 +2668,18 @@ module AutoOpenCurve =
             let nc = curve.ToNurbsCurve()
             if isNull nc then  false
             else
-                let rc, t = curve.GetNurbsFormParameterFromCurveParameter(parameter)
-                if rc then
+                let ok, t = curve.GetNurbsFormParameterFromCurveParameter(parameter)
+                if not ok then false
+                else
                     let mutable rc = nc.Knots.InsertKnot(t, 1)
                     if rc && symmetrical then
-                        let domain = nc.Domain
-                        let tSym = domain.T1 - t + domain.T0
-                        if abs(tSym)>RhinoMath.SqrtEpsilon then
+                        let tSym = nc.Domain.T1 - t + nc.Domain.T0
+                        if abs(tSym - t) > RhinoMath.SqrtEpsilon then
                             rc <- nc.Knots.InsertKnot(tSym, 1)
-                            if rc then  State.Doc.Views.Redraw()
                     if rc then
                         rc <- State.Doc.Objects.Replace(curveId, nc)
-                        if rc then  State.Doc.Views.Redraw()
-                rc
+                        if rc then State.Doc.Views.Redraw()
+                    rc
 
 
     /// <summary>Checks if an object is an open arc Curve. Returns false for any other Rhino object.</summary>
@@ -3016,7 +3015,10 @@ module AutoOpenCurve =
     static member JoinCurves(curveIds:Guid seq, [<OPT;DEF(false)>]deleteInput:bool, [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray =
         let curveIds = Seq.toArray curveIds
         let curves = RhinoScriptSyntax.JoinCurves(curveIds |> Seq.map RhinoScriptSyntax.CoerceCurve, tolerance)
-        let ids = curves |> RArr.mapSeq State.Doc.Objects.AddCurve
+        let ids = curves |> RArr.mapSeq (fun curve ->
+            let id = State.Doc.Objects.AddCurve(curve)
+            if id = Guid.Empty then RhinoScriptingException.Raise "JoinCurves: unable to add result to document; inputs were retained"
+            id)
         if deleteInput then
             for objectId in curveIds do State.Doc.Objects.Delete(objectId, quiet=false) |> ignore<bool>
         State.Doc.Views.Redraw()
@@ -3033,7 +3035,7 @@ module AutoOpenCurve =
         if curves.Length = 0 then RhinoScriptingException.Raise "JoinCurves: Curves must contain at least two items"
         let tolerance0 = Util.ifZero1 tolerance (2.1 * State.Doc.ModelAbsoluteTolerance)
         let joined = Curve.JoinCurves(curves, tolerance0)
-        if isNull joined then RhinoScriptingException.Raise "JoinCurves: Unable to join curves"
+        if isNull joined || joined.Length = 0 then RhinoScriptingException.Raise "JoinCurves: Unable to join curves"
         ResizeArray(joined)
 
     /// <summary>Returns a line that was fit through an array of 3D points.</summary>
@@ -3079,8 +3081,8 @@ module AutoOpenCurve =
     /// <summary>Creates an average Curve from two Curves.</summary>
     /// <param name="curve0">(Guid) identifiers of first Curve</param>
     /// <param name="curve1">(Guid) identifiers of second Curve</param>
-    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
-    ///    Angle tolerance used to match kinks between Curves</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>0.0</c>.
+    ///    Angle tolerance in radians used to match kinks between Curves; 0.0 uses RhinoCommon's default (RhinoMath.UnsetValue).</param>
     /// <returns>(Guid) objectId of the new or modified Curve.</returns>
     static member MeanCurve(curve0:Guid, curve1:Guid, [<OPT;DEF(0.0)>]tolerance:float) : Guid =
         let curve = RhinoScriptSyntax.MeanCurve(RhinoScriptSyntax.CoerceCurve(curve0), RhinoScriptSyntax.CoerceCurve(curve1), tolerance)
@@ -3091,8 +3093,8 @@ module AutoOpenCurve =
     /// <summary>Computes MeanCurve from geometry without modifying the document. Inputs are not modified.</summary>
     /// <param name="curve0">(Curve) The input geometry.</param>
     /// <param name="curve1">(Curve) The input geometry.</param>
-    /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
-    ///    Angle tolerance used to match kinks between Curves</param>
+    /// <param name="tolerance">(float) Optional, default value: <c>0.0</c>.
+    ///    Angle tolerance in radians used to match kinks between Curves; 0.0 uses RhinoCommon's default (RhinoMath.UnsetValue).</param>
     /// <returns>(Curve) The resulting geometry; it is not added to a document.</returns>
     static member MeanCurve(curve0:Curve, curve1:Curve, [<OPT;DEF(0.0)>]tolerance:float) : Curve =
         let curve0 = RhinoScriptSyntax.DirectCurveInput(curve0, -1)
@@ -3141,6 +3143,7 @@ module AutoOpenCurve =
     static member OffsetCurve(curveId:Guid, direction:Point3d, distance:float, [<OPT;DEF(Vector3d())>]normal:Vector3d, [<OPT;DEF(1)>]style:int) : Guid ResizeArray = //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
         let curves = RhinoScriptSyntax.OffsetCurve(RhinoScriptSyntax.CoerceCurve(curveId), direction, distance, normal, style)
         let ids = curves |> RArr.mapSeq State.Doc.Objects.AddCurve
+        State.Doc.Views.Redraw()
         ids
 
     /// <summary>Computes OffsetCurve from geometry without modifying the document. Inputs are not modified.</summary>
@@ -3176,6 +3179,7 @@ module AutoOpenCurve =
     static member OffsetCurveOnSurfaceUV(curveId:Guid, surfaceId:Guid, parameter:Point2d) : Guid ResizeArray =
         let curves = RhinoScriptSyntax.OffsetCurveOnSurfaceUV(RhinoScriptSyntax.CoerceCurve(curveId), RhinoScriptSyntax.CoerceSurface(surfaceId), parameter)
         let ids = curves |> RArr.mapSeq State.Doc.Objects.AddCurve
+        State.Doc.Views.Redraw()
         ids
 
     /// <summary>Computes OffsetCurveOnSurfaceUV from geometry without modifying the document. Inputs are not modified.</summary>
@@ -3189,7 +3193,12 @@ module AutoOpenCurve =
         let tol = State.Doc.ModelAbsoluteTolerance
         let curves = curve.OffsetOnSurface(surface, parameter, tol)
         if isNull curves then  RhinoScriptingException.Raise "OffsetCurveOnSurfaceUV failed. curveGeo:'%s' surfaceGeo:'%s' parameter:'%A'" (Pretty.str curveGeo) (Pretty.str surfaceGeo) parameter
-        ResizeArray(curves)
+        curves
+        |> Seq.map (fun offset ->
+            match offset.ExtendOnSurface(CurveEnd.Both, surface) with
+            | null -> offset
+            | extended -> extended)
+        |> ResizeArray
 
     /// <summary>Offset a Curve on a Surface. The source Curve must lie on the Surface.
     ///    The offset Curve or Curves will be added to Rhino Document.</summary>
@@ -3562,7 +3571,7 @@ module AutoOpenCurve =
     static member ChangeCurveDegree(curveId:Guid, degree:int) : bool =
         let curve = RhinoScriptSyntax.CoerceCurve curveId
         let nc = curve.ToNurbsCurve()
-        if degree > 2 && degree < 12 && curve.Degree <> degree then
+        if degree >= 1 && degree < 12 && curve.Degree <> degree then
             if not <| nc.IncreaseDegree(degree) then false
             else
                 State.Doc.Objects.Replace(curveId, nc)
@@ -3613,6 +3622,7 @@ module AutoOpenCurve =
         let tolerance = State.Doc.ModelAbsoluteTolerance
         if method = 0 then
             outCurves <- Curve.CreateTweenCurves(curve0, curve1, numberOfCurves, tolerance)
+        elif method = 1 then
             outCurves <- Curve.CreateTweenCurvesWithMatching(curve0, curve1, numberOfCurves, tolerance)
         elif method = 2 then
             outCurves <- Curve.CreateTweenCurvesWithSampling(curve0, curve1, numberOfCurves, sampleNumber, tolerance)

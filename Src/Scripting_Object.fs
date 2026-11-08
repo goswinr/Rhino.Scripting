@@ -175,6 +175,7 @@ module AutoOpenObject =
         let res = State.Doc.Objects.Transform(objectId, matrix, not copy)
         if res = Guid.Empty then RhinoScriptingException.Raise "TransformObject: Cannot apply transform to objectId:'%s' matrix:'%A' copy:'%A'"  (Pretty.str objectId) matrix copy
         if copy then RhinoScriptSyntax.putCopiesInNewGroups [res]
+        State.Doc.Views.Redraw()
         res
 
 
@@ -211,6 +212,7 @@ module AutoOpenObject =
         let res = State.Doc.Objects.Transform(objectId, translation, deleteOriginal=false)
         if res = Guid.Empty then RhinoScriptingException.Raise "CopyObject failed.  objectId:'%s' translation:'%A'" (Pretty.str objectId) translation
         RhinoScriptSyntax.putCopiesInNewGroups [res]
+        State.Doc.Views.Redraw()
         res
 
 
@@ -244,6 +246,7 @@ module AutoOpenObject =
             if res = Guid.Empty then RhinoScriptingException.Raise "CopyObjects failed.  objectId:'%s' translation:'%A'" (Pretty.str objectId) translation
             rc.Add res
         RhinoScriptSyntax.putCopiesInNewGroups rc
+        State.Doc.Views.Redraw()
         rc
 
 
@@ -296,7 +299,9 @@ module AutoOpenObject =
     /// <param name="objectId">(Guid) Id of object to hide</param>
     /// <returns>(bool) True of False indicating success or failure.</returns>
     static member HideObject(objectId:Guid) : bool =
-        State.Doc.Objects.Hide(objectId, ignoreLayerMode=false)
+        let rc = State.Doc.Objects.Hide(objectId, ignoreLayerMode=false)
+        if rc then State.Doc.Views.Redraw()
+        rc
 
 
     /// <summary>Hides one or more objects.</summary>
@@ -458,8 +463,7 @@ module AutoOpenObject =
         | :? Surface   as s -> s.IsSolid
         | :? Brep      as s -> s.IsSolid
         | :? SubD      as s -> s.IsSolid // only for Rh7 and higher
-        | _                 ->
-            RhinoScriptingException.Raise "IsObjectSolid only Mesh, Extrusion, Surface, Brep or SubD can be tested for solidity but not %s" (Pretty.str geometryObject)
+        | _ -> false
 
 
 
@@ -488,7 +492,9 @@ module AutoOpenObject =
     /// <param name="objectId">(Guid) The identifier of an object</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
     static member LockObject(objectId:Guid) : bool =
-        State.Doc.Objects.Lock(objectId, ignoreLayerMode=false)
+        let rc = State.Doc.Objects.Lock(objectId, ignoreLayerMode=false)
+        if rc then State.Doc.Views.Redraw()
+        rc
 
 
     /// <summary>Locks multiple objects. Locked objects are visible, and they can be
@@ -538,6 +544,7 @@ module AutoOpenObject =
         let res = State.Doc.Objects.Transform(objectId, xf, not copy)
         if res = Guid.Empty then RhinoScriptingException.Raise "MirrorObject Cannot apply MirrorObject transform to objectId:'%s' startPoint:'%A' endPoint:'%A' copy:'%A'" (Pretty.str objectId) startPoint endPoint copy
         if copy then RhinoScriptSyntax.putCopiesInNewGroups [res]
+        State.Doc.Views.Redraw()
         res
 
 
@@ -594,6 +601,7 @@ module AutoOpenObject =
         let xf = Transform.Translation(translation)
         let res = State.Doc.Objects.Transform(objectId, xf, deleteOriginal=true)
         if res = Guid.Empty then RhinoScriptingException.Raise "MoveObject Cannot apply move to from objectId:'%s' translation:'%A'" (Pretty.str objectId) translation
+        State.Doc.Views.Redraw()
         //if objectId <> res
 
     /// <summary>Moves one or more objects.</summary>
@@ -607,6 +615,7 @@ module AutoOpenObject =
             let res = State.Doc.Objects.Transform(objectId, xf, deleteOriginal=true)
             if res = Guid.Empty then RhinoScriptingException.Raise "MoveObjects Cannot apply MoveObjects Transform to objectId:'%s'  translation:'%A'" (Pretty.str objectId) translation
             //rc.Add objectId
+        State.Doc.Views.Redraw()
         //rc
 
 
@@ -934,7 +943,7 @@ module AutoOpenObject =
     /// <param name="materialIndex">(int) The new material index</param>
     static member ObjectMaterialIndex(objectId:Guid, materialIndex:int) : unit = //SET
         let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        if 0 <= materialIndex && materialIndex < State.Doc.Materials.Count then
+        if materialIndex < -1 || materialIndex >= State.Doc.Materials.Count then
             RhinoScriptingException.Raise "ObjectMaterialIndex: Setting it failed for '%A' and '%A'"  materialIndex objectId
         let attrs = rhinoObject.Attributes
         attrs.MaterialIndex <- materialIndex
@@ -948,7 +957,7 @@ module AutoOpenObject =
     /// <param name="objectIds">(Guid seq) Identifiers of an objects</param>
     /// <param name="materialIndex">(int) The new material index</param>
     static member ObjectMaterialIndex(objectIds:Guid seq, materialIndex:int) : unit = //MULTISET
-        if 0 <= materialIndex && materialIndex < State.Doc.Materials.Count then
+        if materialIndex < -1 || materialIndex >= State.Doc.Materials.Count then
             RhinoScriptingException.Raise "ObjectMaterialIndex: Setting it failed for '%A' and '%A'"  materialIndex objectIds
         for objectId in objectIds do
             let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
@@ -1297,6 +1306,7 @@ module AutoOpenObject =
         let res = State.Doc.Objects.Transform(objectId, xf, not copy)
         if res = Guid.Empty then RhinoScriptingException.Raise "RotateObject failed.  objectId:'%s' centerPoint:'%A' rotationAngle:'%A' axis:'%A' copy:'%A'" (Pretty.str objectId) centerPoint rotationAngle axis copy
         if copy then RhinoScriptSyntax.putCopiesInNewGroups [res]
+        State.Doc.Views.Redraw()
         res
 
 
@@ -1377,6 +1387,7 @@ module AutoOpenObject =
         let res = State.Doc.Objects.Transform(objectId, xf, not copy)
         if res = Guid.Empty then RhinoScriptingException.Raise "ScaleObject failed.  objectId:'%s' origin:'%A' scale:'%A' copy:'%A'" (Pretty.str objectId) origin scale  copy
         if copy then RhinoScriptSyntax.putCopiesInNewGroups [res]
+        State.Doc.Views.Redraw()
         res
 
 
@@ -1411,6 +1422,7 @@ module AutoOpenObject =
         let res = State.Doc.Objects.Transform(objectId, xf, not copy)
         if res = Guid.Empty then RhinoScriptingException.Raise "ScaleObject failed.  objectId:'%s' origin:'%A' scale:'%A' copy:'%A'" (Pretty.str objectId) origin scale  copy
         if copy then RhinoScriptSyntax.putCopiesInNewGroups [res]
+        State.Doc.Views.Redraw()
         res
 
 
@@ -1529,7 +1541,7 @@ module AutoOpenObject =
                     elif not lay.IsVisible then
                         if forceVisible then redo <- true ; UtilLayer.visibleSetTrue(lay, true)
                         else RhinoScriptingException.Raise "SelectObject failed on invisible layer %s for object %s" lay.FullPath (Pretty.str objectId)
-                    elif not lay.IsLocked then
+                    elif lay.IsLocked then
                         if forceVisible then redo <- true ; UtilLayer.lockedSetFalse(lay, true)
                         else RhinoScriptingException.Raise "SelectObject failed on locked layer %s for object %s" lay.FullPath (Pretty.str objectId)
                     else
@@ -1566,7 +1578,7 @@ module AutoOpenObject =
                         elif not lay.IsVisible then
                             if forceVisible then redo <- true ; UtilLayer.visibleSetTrue(lay, true)
                             else RhinoScriptingException.Raise "SelectObjects failed on invisible layer %s for object %s out of %d objects" lay.FullPath (Pretty.str objectId) (Seq.length objectIds)
-                        elif not lay.IsLocked then
+                        elif lay.IsLocked then
                             if forceVisible then redo <- true ; UtilLayer.lockedSetFalse(lay, true)
                             else RhinoScriptingException.Raise "SelectObjects failed on locked layer %s for object %s out of %d objects" lay.FullPath (Pretty.str objectId) (Seq.length objectIds)
                         else
@@ -1597,6 +1609,7 @@ module AutoOpenObject =
         let res = State.Doc.Objects.Transform(objectId, xf, not copy)
         if res = Guid.Empty then RhinoScriptingException.Raise "ShearObject failed for %s, origin %s, ref point  %s and angle in Deg  %f" (Pretty.str objectId) origin.Pretty referencePoint.Pretty angleDegrees
         if copy then RhinoScriptSyntax.putCopiesInNewGroups [res]
+        State.Doc.Views.Redraw()
         res
 
 

@@ -59,6 +59,7 @@ module internal UtilLayer =
             if forceVisible then
                 if not (State.Doc.Layers.ForceLayerVisible(lay.Id)) then RhinoScriptingException.Raise "UtilLayer.visibleSetTrue: Failed to turn on sub-layers of layer %s." lay.FullPath
             else
+                lay.IsVisible <- true
                 lay.SetPersistentVisibility(true)
 
     let internal visibleSetFalse(lay:Layer, persist:bool) : unit =
@@ -81,7 +82,9 @@ module internal UtilLayer =
             if parentsToo then
                 for l in getParents(lay) do
                     l.SetPersistentLocking(false)
-                lay.SetPersistentLocking(false) // does not unlock parents
+                    l.IsLocked <- false
+            lay.SetPersistentLocking(false)
+            lay.IsLocked <- false
 
     type internal LayerState = Off | On | ByParent
 

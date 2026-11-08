@@ -193,7 +193,7 @@ module AutoOpenUtility =
     /// <param name="hls">(Drawing.Color) The HLS color value</param>
     /// <returns>(Drawing.Color) The RGB color value.</returns>
     static member ColorHLSToRGB(hls:Drawing.Color) : Drawing.Color =
-        let hls = Display.ColorHSL((float hls.A) /240.0, (float hls.R)/240.0, (float hls.G)/240.0, (float hls.B)/240.0) // TODO test if correct with reverse function
+        let hls = Display.ColorHSL((float hls.A) /240.0, (float hls.R)/240.0, (float hls.B)/240.0, (float hls.G)/240.0)
         hls.ToArgbColor()
 
 
@@ -218,22 +218,13 @@ module AutoOpenUtility =
     ///    The minimum distance between numbers. Numbers that fall within this tolerance will be discarded</param>
     /// <returns>(float ResizeArray) numbers with duplicates removed.</returns>
     static member CullDuplicateNumbers(numbers:float seq, [<OPT;DEF(0.0)>]tolerance:float) : float ResizeArray =
-        if Seq.length numbers < 2 then ResizeArray(numbers )
-        else
-            let tol = Util.ifZero1 tolerance  RhinoMath.ZeroTolerance // or State.Doc.ModelAbsoluteTolerance
-            let nums = numbers|> Seq.sort
-            let first = Seq.head nums
-            let second = (Seq.item 1 nums)
-            let mutable lastOK = first
-            let r = ResizeArray()
-            if abs(first-second) > tol then
-                r.Add first
-                lastOK <- second
-            for n in Seq.skip 2 nums do
-                if abs(lastOK-n) > tol then
-                    r.Add n
-                    lastOK <- n
-            r
+        let tol = Util.ifZero1 tolerance RhinoMath.ZeroTolerance
+        let nums = numbers |> Seq.sort |> Seq.toArray
+        let result = ResizeArray<float>()
+        for n in nums do
+            if result.Count = 0 || abs(result.[result.Count - 1] - n) > tol then
+                result.Add n
+        result
 
 
 
@@ -243,7 +234,7 @@ module AutoOpenUtility =
     /// Points within this tolerance will be discarded.</param>
     /// <returns>(Point3d array) Array of 3D points with duplicates removed.</returns>
     static member CullDuplicatePoints(points:Point3d seq, [<OPT;DEF(0.0)>]tolerance:float) : Point3d array =
-        let tol = Util.ifZero1 tolerance State.Doc.ModelAbsoluteTolerance // RhinoMath.ZeroTolerance
+        let tol = Util.ifZero1 tolerance RhinoMath.ZeroTolerance
         Geometry.Point3d.CullDuplicates(points, tol)
 
 
@@ -275,6 +266,7 @@ module AutoOpenUtility =
     ///    x-y Plane is used</param>
     /// <returns>(Point3d) resulting point is successful.</returns>
     static member Polar(point:Point3d, angleDegrees:float, distance:float, [<OPT;DEF(Plane())>]plane:Plane) : Point3d =
+        let plane = if plane.IsValid then plane else Plane.WorldXY
         let angle = toRadians(angleDegrees)
         let mutable offset = plane.XAxis
         offset.Unitize() |> ignore<bool>
@@ -453,10 +445,9 @@ module AutoOpenUtility =
     ///    Direction of Y-Axis</param>
     /// <returns>(Plane) A Rhino.Geometry.Plane.</returns>
     static member CreatePlane(origin:Point3d , [<OPT;DEF(Vector3d())>]xAxis:Vector3d, [<OPT;DEF(Vector3d())>]yAxis:Vector3d) : Plane =
-        if xAxis.IsZero || yAxis.IsZero then
-            Plane(origin, Vector3d.XAxis, Vector3d.YAxis)
-        else
-            Plane(origin, xAxis, yAxis)
+        let xAxis = if xAxis.IsZero then Vector3d.XAxis else xAxis
+        let yAxis = if yAxis.IsZero then Vector3d.YAxis else yAxis
+        Plane(origin, xAxis, yAxis)
 
 
     /// <summary>Converts input into a Rhino.Geometry.Transform object if possible.</summary>

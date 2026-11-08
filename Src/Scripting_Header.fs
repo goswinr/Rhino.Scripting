@@ -78,22 +78,20 @@ type RhinoScriptSyntax private () =
         if isNanOrInf start then RhinoScriptingException.Raise "FxrangePython: NaN or Infinity, start=%f, step=%f, stop=%f" start step stop
         if isNanOrInf step  then RhinoScriptingException.Raise "FxrangePython: NaN or Infinity, start=%f, step=%f, stop=%f" start step stop
         if isNanOrInf stop  then RhinoScriptingException.Raise "FxrangePython: NaN or Infinity, start=%f, step=%f, stop=%f" start step stop
-        let range = stop - start
-                    |> BitConverter.DoubleToInt64Bits
-                    |> (+) 15L // to make sure stop value is included in Range, this will then explicitly be removed below to match python semantics
-                    |> BitConverter.Int64BitsToDouble
-        let steps = range/step - 1.0 // -1 to make sure stop value is not included(python semantics different from F# semantics on range expressions)
-        if isNanOrInf steps then RhinoScriptingException.Raise "FxrangePython range/step in frange: %f / %f is NaN Infinity, start=%f, stop=%f" range step start stop
+        if step = 0.0 then RhinoScriptingException.Raise "FxrangePython: step must not be zero"
+        let steps = (stop - start) / step
+        if isNanOrInf steps then RhinoScriptingException.Raise "FxrangePython: invalid range start=%f, stop=%f, step=%f" start stop step
+        seq {
+            let mutable i = 0.0
+            let mutable value = start
+            while i < steps && (if step > 0.0 then value < stop else value > stop) do
+                yield value
+                i <- i + 1.0
+                let next = start + i * step
+                if next = value then RhinoScriptingException.Raise "FxrangePython: step %f is too small to advance from %f" step value
+                value <- next
+        }
 
-        if steps < 0.0 then
-            Seq.empty // Stop value cannot be reached, as in Python
-        else
-            // the actual algorithm:
-            let rec floatRange (start, i, steps) =
-                seq { if i <= steps then
-                        yield start + i*step
-                        yield! floatRange (start, (i + 1.0), steps) } // tail recursive !
-            floatRange (start, 0.0, steps)
 
     /// <summary>Like the Python 'range' function for integers, this creates a range of floating point values.
     /// The last or stop value will NOT be included in the range as per Python semantics; this is different from F# semantics on range expressions.
@@ -117,11 +115,11 @@ type RhinoScriptSyntax private () =
                                   ,  collapseParents:bool
                                   ) : Guid =
         let attr =
-            if layerIndex = -1 && objectName="" && isNull userTextKeysAndValues  then
+            if layerIndex = -1 && objectName="" && isNull userTextKeysAndValues && not collapseParents then
                 null
             else
                 let a = new DocObjects.ObjectAttributes()
-                a.LayerIndex <- layerIndex
+                a.LayerIndex <- if layerIndex = -1 then State.Doc.Layers.CurrentLayerIndex else layerIndex
                 if objectName <> "" then
                     if stringSafetyCheck && not <|  Util.isAcceptableStringId( objectName, false) then // TODO or enforce goodStringID ?
                         RhinoScriptingException.Raise "Add: objectName the string '%s' cannot be used as key. See RhinoScriptSyntax.IsGoodStringId. You can use checkStrings=false parameter to bypass some of these restrictions." objectName
@@ -136,7 +134,8 @@ type RhinoScriptSyntax private () =
                         if not <| a.SetUserString(k,v) then
                             RhinoScriptingException.Raise "Add: failed to set key value pair '%s' and '%s' " k v
                 if collapseParents then
-                    State.Doc.Layers.[layerIndex].IsExpanded <- false
+                    for parent in UtilLayer.getParents(State.Doc.Layers.[a.LayerIndex]) do
+                        parent.IsExpanded <- false
                 a
 
         let id = addWithAttributes attr

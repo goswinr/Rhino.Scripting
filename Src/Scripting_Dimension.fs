@@ -28,8 +28,10 @@ module AutoOpenDimension =
                                         endPoint:Point3d,
                                         pointOnDimensionLine:Point3d,  // TODO allow Point3d.Unset an then draw dim in XY plane
                                         [<OPT;DEF("")>]style:string) : Guid =
-        let plane = Geometry.Plane(startPoint, endPoint, pointOnDimensionLine)
-        if not plane.IsValid then RhinoScriptingException.Raise "AddAlignedDimension failed to create Plane.  startPoint:'%O' endPoint:'%O' pointOnDimensionLine:'%O'" startPoint endPoint pointOnDimensionLine
+        let plane =
+            let candidate = Geometry.Plane(startPoint, endPoint, pointOnDimensionLine)
+            if candidate.IsValid then candidate
+            else (RhinoScriptSyntax.CoerceViewOrActive(null)).ActiveViewport.ConstructionPlane()
         let _, s, t = plane.ClosestParameter(startPoint)
         let start2 = Point2d(s, t)
         let _, s, t = plane.ClosestParameter(endPoint)
@@ -61,7 +63,7 @@ module AutoOpenDimension =
 
     /// <summary>Adds a leader to the document. Leader objects are planar.
     ///    The 3D points passed will define the plane if no plane is given.
-    ///    If there are only two points, the World XY plane is used.</summary>
+    ///    If there are only two points, the World XY plane is used, except for a vertical segment, which uses a plane containing the segment.</summary>
     /// <param name="points">(Point3d seq) List of (at least 2) 3D points.</param>
     /// <param name="text">(string) Leader's text.</param>
     /// <param name="plane">(Geometry.Plane) Optional, default value: <c>defined by points arg</c>.
@@ -70,29 +72,21 @@ module AutoOpenDimension =
     static member AddLeader( points:Point3d seq,
                              text:string,
                              [<OPT;DEF(Plane())>]plane:Plane) : Guid =
+        let points = points |> Seq.toArray
+        if points.Length < 2 then RhinoScriptingException.Raise "AddLeader: at least two points are required"
         let points2d = ResizeArray()
         let plane0 =
             if plane.IsValid then plane
+            elif points.Length = 2 then
+                let direction = points.[1] - points.[0]
+                if direction.IsTiny() then RhinoScriptingException.Raise "AddLeader: the two points must be distinct"
+                if abs direction.X <= RhinoMath.ZeroTolerance && abs direction.Y <= RhinoMath.ZeroTolerance then
+                    Plane(points.[0], direction, Vector3d.XAxis)
+                else Plane.WorldXY
             else
-                let ps= ResizeArray(points)
-                if ps.Count<2 then
-                    RhinoScriptingException.Raise "AddLeader needs at least two points.  given %A, text:%s" points text
-                elif ps.Count=2 then
-                    let y =  ps.[1] - ps.[0]
-                    if y.IsTiny(State.Doc.ModelAbsoluteTolerance*100.) then RhinoScriptingException.Raise "AddLeader two points given are identical %A, text:%s" points text
-                    let pl = Plane(ps.[0], Vector3d.CrossProduct (y, Vector3d.ZAxis), y)
-                    if not pl.IsValid then RhinoScriptingException.Raise "AddLeader failed to find plane from two points: %A, text:%s"  points text
-                    pl
-                else
-                    let o = ps.GetNeg(-2)
-                    let mutable x = ps.GetNeg(-1) - o
-                    let mutable y = ps.[0]-ps.[1]
-                    if y.Z < 0.0 then y <- -y
-                    if y.Y < 0.0 then y <- -y
-                    if x.X < 0.0 then x <- -x
-                    let pl = Plane(o, x, y)
-                    if not pl.IsValid then RhinoScriptingException.Raise "AddLeader failed to find plane from %d points: %A, text:%s" ps.Count points text
-                    pl
+                let result, fitted = Plane.FitPlaneToPoints(points)
+                if result = PlaneFitResult.Failure then RhinoScriptingException.Raise "AddLeader: unable to fit a plane to the points"
+                fitted
 
         for point in points do
             let cprc, s, t = plane0.ClosestParameter( point )
@@ -100,6 +94,7 @@ module AutoOpenDimension =
             points2d.Add( Rhino.Geometry.Point2d(s, t))
         let rc = State.Doc.Objects.AddLeader(text, plane0, points2d)
         if rc = Guid.Empty then RhinoScriptingException.Raise "AddLeader: Unable to add leader to document. points:'%A' text:'%A' plane:'%A'" points text plane0
+        State.Doc.Views.Redraw()
         rc
 
 
@@ -272,6 +267,8 @@ module AutoOpenDimension =
             ds.AngleResolution <- precision
             if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=false) then RhinoScriptingException.Raise "DimStyleAnglePrecision set failed. dimStyle:'%s' precision:%d" dimStyle precision
             State.Doc.Views.Redraw()
+        else
+            RhinoScriptingException.Raise "DimStyleAnglePrecision: precision must be nonnegative"
 
     /// <summary>Returns the arrow size of a dimension style.</summary>
     /// <param name="dimStyle">(string) The name of an existing dimension style</param>
@@ -318,7 +315,7 @@ module AutoOpenDimension =
     static member DimStyleExtension(dimStyle:string, extension:float) : unit = //SET
         let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "DimStyleExtension set failed. dimStyle:'%s' extension:'%A'" dimStyle extension
-        if extension > 0.0 then
+        if extension >= 0.0 then
             ds.ExtensionLineExtension <- extension
             if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=false) then
                 RhinoScriptingException.Raise "DimStyleExtension failed. dimStyle:'%s' extension:'%A'" dimStyle extension
@@ -375,11 +372,13 @@ module AutoOpenDimension =
     static member DimStyleLeaderArrowSize(dimStyle:string, size:float) : unit = //SET
         let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "DimStyleLeaderArrowSize set failed. dimStyle:'%s' size:'%A'" dimStyle size
-        if size > 0.0 then
+        if size >= 0.0 then
             ds.LeaderArrowLength <- size
             if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=false) then
                 RhinoScriptingException.Raise "DimStyleLeaderArrowSize set failed. dimStyle:'%s' size:'%A'" dimStyle size
             State.Doc.Views.Redraw()
+        else
+            RhinoScriptingException.Raise "DimStyleLeaderArrowSize: size must be nonnegative"
 
 
 
@@ -528,7 +527,7 @@ module AutoOpenDimension =
 
     /// <summary>Returns the scale of a dimension style .</summary>
     /// <param name="dimStyle">(string) The name of an existing dimStyle</param>
-    /// <returns>(string) The current suffix.</returns>
+    /// <returns>(float) The current dimension scale.</returns>
     static member DimStyleScale(dimStyle:string) : float = //GET
         let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "DimStyleScale get failed. dimStyle:'%s'" dimStyle

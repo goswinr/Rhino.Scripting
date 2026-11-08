@@ -335,6 +335,7 @@ module AutoOpenBlock =
         let instDef = State.Doc.InstanceDefinitions.Find(blockName)
         if isNull instDef then  RhinoScriptingException.Raise "IsBlockEmbedded: '%s' does not exist in InstanceDefinitionsTable" blockName
         match int( instDef.UpdateType) with
+        | 0  -> true //DocObjects.InstanceDefinitionUpdateType.Static
         | 1  -> true //DocObjects.InstanceDefinitionUpdateType.Embedded
         | 2  -> true //DocObjects.InstanceDefinitionUpdateType.LinkedAndEmbedded
         |_-> false
@@ -344,7 +345,7 @@ module AutoOpenBlock =
     /// <param name="objectId">(Guid) The identifier of an existing block insertion object</param>
     /// <returns>(bool) True or False.</returns>
     static member IsBlockInstance(objectId:Guid) : bool =
-        match RhinoScriptSyntax.CoerceRhinoObject(objectId) with
+        match State.Doc.Objects.FindId(objectId) with
         | :? DocObjects.InstanceObject as _ -> true
         | _ -> false
 
@@ -394,9 +395,12 @@ module AutoOpenBlock =
         let objs  = newObjects |> Seq.map RhinoScriptSyntax.CoerceRhinoObject |> Array.ofSeq // just to be sure its not lazy
         let geos  = objs |> Array.map (fun o-> o.Geometry)
         let attrs = objs |> Array.map (fun o-> o.Attributes)
-        if deleteInput then
-            let k = State.Doc.Objects.Delete(newObjects, quiet=true)
-            let l = Seq.length newObjects
-            if k <> l then RhinoScriptingException.Raise "ReplaceBlockObjects failed to delete input on %d out of %s" (l-k) (Pretty.str newObjects)
-        State.Doc.InstanceDefinitions.ModifyGeometry(instDef.Index,geos,attrs)
+        let modified = State.Doc.InstanceDefinitions.ModifyGeometry(instDef.Index, geos, attrs)
+        if modified then
+            if deleteInput then
+                let ids = objs |> Array.map _.Id
+                let deleted = State.Doc.Objects.Delete(ids, quiet=true)
+                if deleted <> ids.Length then RhinoScriptingException.Raise "ReplaceBlockObjects: failed to delete %d inputs" (ids.Length - deleted)
+            State.Doc.Views.Redraw()
+        modified
 

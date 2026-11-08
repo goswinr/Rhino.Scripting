@@ -44,6 +44,7 @@ module AutoOpenGeometry =
                         if item.ActiveViewport.Name = view then
                             yield item.ActiveViewportID
                 ]
+        if List.isEmpty viewList then RhinoScriptingException.Raise "AddClippingPlane: no matching views"
         let rc = State.Doc.Objects.AddClippingPlane(plane, uMagnitude, vMagnitude, viewList)
         if rc = Guid.Empty then
             RhinoScriptingException.Raise "AddClippingPlane: Unable to add clipping plane to document.  plane:'%s' uMagnitude:'%g' vMagnitude:'%g' views:'%s'" plane.Pretty uMagnitude vMagnitude (Pretty.str views)
@@ -187,12 +188,12 @@ module AutoOpenGeometry =
             te.Font <- f
         if bold <> quartetBoldProp then
             if DocObjects.Font.FromQuartetProperties(qn, bold, false) |> isNull then
-                RhinoScriptingException.Raise "AddText failed. text:'%s' plane:'%s' height:'%g' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane.Pretty height font fontStyle horizontalAlignment verticalAlignment
+                State.Warn "AddText: the requested font style is unavailable"
             else
                 te.SetBold(bold)|> ignore<bool>
         if italic <> quartetItalicProp then
             if DocObjects.Font.FromQuartetProperties(qn, false, italic) |> isNull then
-                RhinoScriptingException.Raise "AddText failed. text:'%s' plane:'%s' height:'%g' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane.Pretty height font fontStyle horizontalAlignment verticalAlignment
+                State.Warn "AddText: the requested font style is unavailable"
             else
                 te.SetItalic(italic)|> ignore<bool>
 
@@ -267,7 +268,10 @@ module AutoOpenGeometry =
     /// <param name="geometry">(GeometryBase) The geometry to use</param>
     /// <returns>(float) area.</returns>
     static member Area(geometry:GeometryBase) : float =
-        let mp = AreaMassProperties.Compute([geometry])
+        use mp =
+            match geometry with
+            | :? Hatch as hatch -> AreaMassProperties.Compute(hatch)
+            | _ -> AreaMassProperties.Compute([geometry])
         if mp |> isNull then RhinoScriptingException.Raise "Area: Unable to compute area mass properties from geometry:'%s'" (Pretty.str geometry)
         mp.Area
 
@@ -499,7 +503,7 @@ module AutoOpenGeometry =
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True if the object with a given objectId is a clipping Plane.</returns>
     static member IsClippingPlane(objectId:Guid) : bool =
-        RhinoScriptSyntax.IsClippingPlane(RhinoScriptSyntax.CoerceGeometry(objectId))
+        RhinoScriptSyntax.TryCoerceGeometry(objectId) |> Option.exists RhinoScriptSyntax.IsClippingPlane
 
 
     /// <summary>Checks if that an object is a clipping Plane object. Returns false for any other Rhino object.</summary>
@@ -513,7 +517,7 @@ module AutoOpenGeometry =
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True if the object with a given objectId is a point.</returns>
     static member IsPoint(objectId:Guid) : bool =
-        RhinoScriptSyntax.IsPoint(RhinoScriptSyntax.CoerceGeometry(objectId))
+        RhinoScriptSyntax.TryCoerceGeometry(objectId) |> Option.exists RhinoScriptSyntax.IsPoint
 
 
     /// <summary>Checks if an object is a point object. Returns false for any other Rhino object.</summary>
@@ -527,7 +531,7 @@ module AutoOpenGeometry =
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True if the object with a given objectId is a point cloud.</returns>
     static member IsPointCloud(objectId:Guid) : bool =
-        RhinoScriptSyntax.IsPointCloud(RhinoScriptSyntax.CoerceGeometry(objectId))
+        RhinoScriptSyntax.TryCoerceGeometry(objectId) |> Option.exists RhinoScriptSyntax.IsPointCloud
 
 
     /// <summary>Checks if an object is a point cloud object. Returns false for any other Rhino object.</summary>
@@ -541,7 +545,7 @@ module AutoOpenGeometry =
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True if the object with a given objectId is a text object.</returns>
     static member IsText(objectId:Guid) : bool =
-        RhinoScriptSyntax.IsText(RhinoScriptSyntax.CoerceGeometry(objectId))
+        RhinoScriptSyntax.TryCoerceGeometry(objectId) |> Option.exists RhinoScriptSyntax.IsText
 
 
     /// <summary>Checks if an object is a text object. Returns false for any other Rhino object.</summary>
@@ -555,7 +559,7 @@ module AutoOpenGeometry =
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <returns>(bool) True if the object with a given objectId is a text dot object.</returns>
     static member IsTextDot(objectId:Guid) : bool =
-        RhinoScriptSyntax.IsTextDot(RhinoScriptSyntax.CoerceGeometry(objectId))
+        RhinoScriptSyntax.TryCoerceGeometry(objectId) |> Option.exists RhinoScriptSyntax.IsTextDot
 
 
     /// <summary>Checks if an object is a text dot object. Returns false for any other Rhino object.</summary>
@@ -621,7 +625,7 @@ module AutoOpenGeometry =
     /// <param name="hidden">(bool seq) List of booleans matched to the index of points to be hidden, On empty seq all point wil be shown</param>
     /// <returns>(unit) void, nothing.</returns>
     static member PointCloudHidePoints(objectId:Guid, hidden:bool seq) : unit = //SET
-        let pc = RhinoScriptSyntax.CoercePointCloud objectId
+        let pc = (RhinoScriptSyntax.CoercePointCloud objectId).Duplicate() :?> PointCloud
         if Seq.isEmpty hidden then
             pc.ClearHiddenFlags()
 
@@ -631,7 +635,7 @@ module AutoOpenGeometry =
         else
             RhinoScriptingException.Raise "PointCloudHidePoints length of hidden values does not match point cloud point count"
 
-        (RhinoScriptSyntax.CoerceRhinoObject objectId).CommitChanges() |> ignore<bool>
+        if not <| State.Doc.Objects.Replace(objectId, pc) then RhinoScriptingException.Raise "PointCloud: unable to replace object %A" objectId
         State.Doc.Views.Redraw()
 
 
@@ -658,14 +662,14 @@ module AutoOpenGeometry =
     /// <param name="colors">(Drawing.Color seq) List of color values if you want to adjust colors, empty Seq to clear colors</param>
     /// <returns>(unit) void, nothing.</returns>
     static member PointCloudPointColors(objectId:Guid, colors:Drawing.Color seq) : unit = //SET
-        let pc = RhinoScriptSyntax.CoercePointCloud objectId
+        let pc = (RhinoScriptSyntax.CoercePointCloud objectId).Duplicate() :?> PointCloud
         if colors |> Seq.isEmpty then
             pc.ClearColors()
         elif Seq.length(colors) = pc.Count then
             for i, c in Seq.indexed colors do pc.[i].Color <- c
         else
             RhinoScriptingException.Raise "PointCloudPointColors length of color values does not match PointCloud point count"
-        (RhinoScriptSyntax.CoerceRhinoObject objectId).CommitChanges() |> ignore<bool>
+        if not <| State.Doc.Objects.Replace(objectId, pc) then RhinoScriptingException.Raise "PointCloud: unable to replace object %A" objectId
         State.Doc.Views.Redraw()
 
 
@@ -733,8 +737,8 @@ module AutoOpenGeometry =
     /// <param name="point">(Point3d) A new 3D point location</param>
     /// <returns>(unit) void, nothing.</returns>
     static member PointCoordinates(objectId:Guid, point:Point3d) : unit = //SET
-        let pt = RhinoScriptSyntax.Coerce3dPoint(objectId)
-        if not <| State.Doc.Objects.Replace(objectId, pt) then RhinoScriptingException.Raise "PointCoordinates failed to change object %s to %s" (Pretty.str objectId) (Pretty.str point)
+        RhinoScriptSyntax.Coerce3dPoint(objectId) |> ignore<Point3d>
+        if not <| State.Doc.Objects.Replace(objectId, point) then RhinoScriptingException.Raise "PointCoordinates failed to change object %s to %s" (Pretty.str objectId) (Pretty.str point)
         State.Doc.Views.Redraw()
 
 
@@ -918,7 +922,7 @@ module AutoOpenGeometry =
             |? DocObjects.Font.FromQuartetProperties(font, bold=true , italic=false)
             |? DocObjects.Font.FromQuartetProperties(font, bold=false, italic=true )
             |? DocObjects.Font.FromQuartetProperties(font, bold=true , italic=true )
-            |? (RhinoScriptingException.Raise "TextObjectFont failed.  objectId:'%s' font:''%s''" (Pretty.str objectId) font)
+        if isNull f then RhinoScriptingException.Raise "TextObjectFont: font not found: '%s'" font
         annotation.Font <- f
         if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "TextObjectFont failed.  objectId:'%s' font:''%s''" (Pretty.str objectId) font
         State.Doc.Views.Redraw()
@@ -1176,8 +1180,8 @@ module AutoOpenGeometry =
             if isNull ds then  RhinoScriptingException.Raise "TextObjectRichText, style not found:'%s'"  style
             for objectId in objectIds do
                 let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
-                if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "TextObjectRichText failed.  objectId:'%s' text:'%s' style:'%s'" (Pretty.str objectId) rtfString style
                 annotation.SetRichText(rtfString, ds)
+                if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "TextObjectRichText failed.  objectId:'%s' text:'%s' style:'%s'" (Pretty.str objectId) rtfString style
         else
             for objectId in objectIds do
                 let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)

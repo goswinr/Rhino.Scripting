@@ -69,7 +69,7 @@ module AutoOpenHatch =
 
         let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance
         let hatches = Hatch.Create(curves, index, rotation, scale, tolerance)
-        if isNull hatches then
+        if isNull hatches || hatches.Length = 0 then
             RhinoScriptingException.Raise "MakeHatches failed to create hatch from %d curves, not closed: %d, not planar %d, tolerance:'%g' "
                 (Seq.length curves)
                 (curves |> Seq.countIf ( fun c -> c.IsClosed   |> not ))
@@ -155,16 +155,26 @@ module AutoOpenHatch =
     ///    If Hatch pattern names already in the document match Hatch
     ///    pattern names in the pattern definition file, then the existing Hatch
     ///    patterns will be redefined</param>
+    /// <remarks>Replacing an existing pattern requires Rhino 8; Rhino 7 raises before replacing it.</remarks>
     /// <returns>(string ResizeArray) Names of the newly added Hatch patterns.</returns>
     static member AddHatchPatterns(filename:string, [<OPT;DEF(false)>]replace:bool) : string ResizeArray =
         let patterns = DocObjects.HatchPattern.ReadFromFile(filename, true)
         if isNull patterns then RhinoScriptingException.Raise "AddHatchPatterns failed. filename:'%s' replace:'%A'" filename replace
         let rc = ResizeArray()
         for pattern in patterns do
-             let index = State.Doc.HatchPatterns.Add(pattern)
-             if index>=0 then
-                 let pattern = State.Doc.HatchPatterns.[index]
-                 rc.Add(pattern.Name)
+            let existing = State.Doc.HatchPatterns.FindName(pattern.Name)
+            let index =
+                if isNull existing then State.Doc.HatchPatterns.Add(pattern)
+                elif not replace then -1
+                else
+                    #if RH7
+                    RhinoScriptingException.Raise "AddHatchPatterns: replacing existing pattern '%s' requires Rhino 8" pattern.Name
+                    #else
+                    if not <| State.Doc.HatchPatterns.Modify(pattern, existing.Index, true) then
+                        RhinoScriptingException.Raise "AddHatchPatterns: unable to replace pattern '%s'" pattern.Name
+                    existing.Index
+                    #endif
+            if index >= 0 then rc.Add(State.Doc.HatchPatterns.[index].Name)
         if  rc.Count = 0 then RhinoScriptingException.Raise "AddHatchPatterns failed. filename:'%A' replace:'%A'" filename replace
         rc
 
@@ -416,8 +426,7 @@ module AutoOpenHatch =
     /// <param name="objectId">(Guid) Identifier of an object</param>
     /// <returns>(bool) True or False.</returns>
     static member IsHatch(objectId:Guid) : bool =
-        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        match rhobj with :? DocObjects.HatchObject  -> true |_ -> false
+        RhinoScriptSyntax.TryCoerceGeometry(objectId) |> Option.exists RhinoScriptSyntax.IsHatch
 
 
     /// <summary>Tests whether the supplied geometry is a Hatch.</summary>

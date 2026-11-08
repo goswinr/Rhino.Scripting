@@ -28,7 +28,7 @@ module AutoOpenTransformation =
     ///    transformation can be broken into a sequence of dilatations, translations,
     ///    rotations, and reflections.</summary>
     /// <param name="xForm">(Transform) Rhino.Geometry.Transform. A 4x4 transformation matrix</param>
-    /// <returns>(bool) True if this transformation is an orientation preserving similarity, otherwise False.</returns>
+    /// <returns>(bool) True if this transformation is a similarity, including an orientation reversing reflection; otherwise False.</returns>
     static member IsXformSimilarity(xForm:Transform) : bool =
         xForm.SimilarityType <> TransformSimilarityType.NotSimilarity
 
@@ -254,7 +254,7 @@ module AutoOpenTransformation =
     static member XformScreenToWorld( point:Point3d,
                                       [<OPT;DEF(null:string)>]view:string,
                                       [<OPT;DEF(false)>]screenCoordinates:bool) : Point3d =
-        let view = RhinoScriptSyntax.CoerceView(view |? "") // ""to get active view
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view) // ""to get active view
         let viewport = view.MainViewport
         let xForm = viewport.GetTransform(DocObjects.CoordinateSystem.Screen, DocObjects.CoordinateSystem.World)
         let mutable point3d = Point3d(point.X, point.Y, 0.0)
@@ -307,7 +307,7 @@ module AutoOpenTransformation =
     static member XformWorldToScreen( point:Point3d,
                                       [<OPT;DEF(null:string)>]view:string,
                                       [<OPT;DEF(false)>]screenCoordinates:bool) : Point2d =
-        let view = RhinoScriptSyntax.CoerceView(view |? "")// to get active view
+        let view = RhinoScriptSyntax.CoerceViewOrActive(view)// to get active view
         let viewport = view.MainViewport
         let xForm = viewport.GetTransform(DocObjects.CoordinateSystem.World, DocObjects.CoordinateSystem.Screen)
         let mutable point3 = xForm * point

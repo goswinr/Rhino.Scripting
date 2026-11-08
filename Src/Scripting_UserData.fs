@@ -154,13 +154,13 @@ module AutoOpenUserData =
     /// <summary>Checks if the current document contains user data.</summary>
     /// <returns>(bool) True or False indicating the presence of Script user data.</returns>
     static member IsDocumentData() : bool =
-        State.Doc.Strings.Count > 0 //DocumentDataCount > 0
+        State.Doc.Strings.DocumentDataCount > 0
 
 
     /// <summary>Checks if the current document contains user text.</summary>
     /// <returns>(bool) True or False indicating the presence of Script user text.</returns>
     static member IsDocumentUserText() : bool =
-        State.Doc.Strings.Count > 0 //.DocumentUserTextCount > 0
+        State.Doc.Strings.DocumentUserTextCount > 0
 
 
     /// <summary>Checks if an object contains user text.</summary>
@@ -218,12 +218,13 @@ module AutoOpenUserData =
     /// <summary>Sets a user text stored on an object. Key and value must not contain ambiguous Unicode characters.</summary>
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <param name="key">(string) The key name to set. Cannot be an empty string.</param>
-    /// <param name="value">(string) The string value to set. Can be an empty string. Use rs.DeleteUserText to delete keys</param>
+    /// <param name="value">(string) The nonempty string value to set. Rhino treats empty values as deletion; use rs.DeleteUserText to delete keys</param>
     /// <param name="attachToGeometry">(bool) Optional, default value: <c>false</c> Location on the object to store the user text</param>
     /// <param name="allowAllUnicode">(bool) Optional, default value: <c>false</c> , set to true to allow all Unicode characters,
     ///     (even the ones that look like ASCII characters but are not ASCII) in the value</param>
     /// <returns>(unit) void, nothing.</returns>
     static member SetUserText(objectId:Guid, key:string, value:string, [<OPT;DEF(false)>]attachToGeometry:bool, [<OPT;DEF(false)>]allowAllUnicode:bool) : unit =
+        if String.IsNullOrEmpty value then RhinoScriptingException.Raise "SetUserText: empty values cannot be stored by Rhino; use DeleteUserText to remove a key"
         if not <| RhinoScriptSyntax.IsGoodStringId( key, allowEmpty=false) then
             RhinoScriptingException.Raise "SetUserText the string '%s' cannot be used as key. See RhinoScriptSyntax.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." key
 
@@ -245,12 +246,13 @@ module AutoOpenUserData =
     /// <summary>Sets or removes user text stored on multiple objects. Key and value must not contain ambiguous Unicode characters.</summary>
     /// <param name="objectIds">(Guid seq) The object identifiers</param>
     /// <param name="key">(string) The key name to set. Cannot be an empty string.</param>
-    /// <param name="value">(string) The string value to set. Can be an empty string. Use rs.DeleteUserText to delete keys</param>
+    /// <param name="value">(string) The nonempty string value to set. Rhino treats empty values as deletion; use rs.DeleteUserText to delete keys</param>
     /// <param name="attachToGeometry">(bool) Optional, default value: <c>false</c> Location on the object to store the user text</param>
     /// <param name="allowAllUnicode">(bool) Optional, default value: <c>false</c> , set to true to allow Unicode characters,
     ///     (even the ones that look like ASCII characters but are not ASCII) in the value</param>
     /// <returns>(unit) void, nothing.</returns>
     static member SetUserText(objectIds:Guid seq, key:string, value:string, [<OPT;DEF(false)>]attachToGeometry:bool, [<OPT;DEF(false)>]allowAllUnicode:bool) : unit = //PLURAL
+        if String.IsNullOrEmpty value then RhinoScriptingException.Raise "SetUserText: empty values cannot be stored by Rhino; use DeleteUserText to remove a key"
         if not <|  RhinoScriptSyntax.IsGoodStringId( key, allowEmpty=false) then
             RhinoScriptingException.Raise "SetUserText the string '%s' cannot be used as key. See RhinoScriptSyntax.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." key
 

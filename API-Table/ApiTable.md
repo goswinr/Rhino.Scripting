@@ -870,7 +870,7 @@ From [Src/Scripting_Group.fs](../Src/Scripting_Group.fs).
 | `AddObjectToGroup` | `objectId: Guid * groupName: string -> unit` | Adds a single object to an existing group. |
 | `DeleteGroup` | `groupName: string -> unit` | Removes an existing group from the document. |
 | `GroupCount` | `unit -> int` | Returns the number of groups in the document. |
-| `GroupNames` | `unit -> string array` | Returns the names of all the groups in the document None if no names exist in the document. |
+| `GroupNames` | `unit -> string array` | Returns the names of all the groups in the document. |
 | `GroupObjects` | `objectIds: Guid seq -> unit` | Adds two or more objects to a new group. |
 | `GroupObjects` | `objectIds: Guid seq * groupName: string -> unit` | Adds two or more objects to a new group, sets group name. |
 | `HideGroup` | `groupName: string -> int` | Hides a group of objects. |
@@ -1613,8 +1613,8 @@ From [Src/Scripting_Surface.fs](../Src/Scripting_Surface.fs).
 | `SurfaceIsocurveDensity` | `surfaceId: Guid -> int` | Returns the isocurve density of a Surface or Polysurface object. |
 | `SurfaceIsocurveDensity` | `surfaceId: Guid * density: int -> unit` | Sets the isocurve density of a Surface or Polysurface object. |
 | `SurfaceIsocurveDensity` | `surfaceIds: Guid seq * density: int -> unit` | Sets the isocurve density of multiple Surface or Polysurface objects. |
-| `SurfaceKnotCount` | `surfaceId: Guid -> int * int` | Returns the control point count of a Surface SurfaceId = the Surface's identifier. |
-| `SurfaceKnotCount` | `surfaceGeo: Surface -> int * int` | Returns the control point count of a Surface SurfaceId = the Surface's identifier. |
+| `SurfaceKnotCount` | `surfaceId: Guid -> int * int` | Returns the knot count of a Surface SurfaceId = the Surface's identifier. |
+| `SurfaceKnotCount` | `surfaceGeo: Surface -> int * int` | Returns the knot count of a Surface SurfaceId = the Surface's identifier. |
 | `SurfaceKnots` | `surfaceId: Guid -> NurbsSurfaceKnotList * NurbsSurfaceKnotList` | Returns the knots, or knot vector, of a Surface object. |
 | `SurfaceKnots` | `surfaceGeo: Surface -> NurbsSurfaceKnotList * NurbsSurfaceKnotList` | Returns the knots, or knot vector, of a Surface object. |
 | `SurfaceNormal` | `surfaceId: Guid * uvParameter: (float * float) -> Vector3d` | Returns 3D vector that is the normal to a Surface at a parameter. |
@@ -1664,7 +1664,7 @@ From [Src/Scripting_Toolbar.fs](../Src/Scripting_Toolbar.fs).
 | `HideToolbar` | `name: string * toolbarGroup: string -> bool` | Hides a previously visible toolbar group in an open toolbar collection. |
 | `IsToolbar` | `name: string * toolbar: string * ?group: bool = false -> bool` | Verifies a toolbar (or toolbar group) exists in an open collection file. |
 | `IsToolbarCollection` | `file: string -> string` | Checks if a toolbar collection is open. |
-| `IsToolbarDocked` | `name: string * toolbarGroup: string -> bool` | Checks if a toolbar group in an open toolbar collection is visible. |
+| `IsToolbarDocked` | `name: string * toolbarGroup: string -> bool` | Checks if a toolbar group in an open toolbar collection is docked. |
 | `IsToolbarVisible` | `name: string * toolbarGroup: string -> bool` | Checks if a toolbar group in an open toolbar collection is visible. |
 | `OpenToolbarCollection` | `file: string -> string` | Opens a toolbar collection file. |
 | `SaveToolbarCollection` | `name: string -> bool` | Saves an open toolbar collection to disk. |
@@ -1771,7 +1771,7 @@ From [Src/Scripting_UserInterface.fs](../Src/Scripting_UserInterface.fs).
 | `GetPointOnSurface` | `surfaceId: Guid * ?message: string = "Pick Point on Surface or Polysurface" -> Point3d` | Pauses for user input of a point constrained to a Surface or Polysurface object. |
 | `GetPointOnSurface` | `surfaceGeo: GeometryBase * ?message: string = "Pick Point on Surface or Polysurface" -> Point3d` | Pauses for user input of a point constrained to a Surface or Polysurface object. |
 | `GetPoints` | `?drawLines: bool = false * ?inPlane: bool = false * ?message1: string = null * ?message2: string = null * ?maxPoints: int = 0 -> ResizeArray<Point3d>` | Pauses for user input of one or more points. |
-| `GetPolyline` | `?message1: string = null * ?message2: string = null * ?message3: string = null * ?message4: string = null * ?min: int = 2147482999 * ?max: int = 0 -> Polyline` | Prompts the user to pick points that define a polyline. |
+| `GetPolyline` | `?message1: string = null * ?message2: string = null * ?message3: string = null * ?message4: string = null * ?min: int = 2 * ?max: int = 0 -> Polyline` | Prompts the user to pick points that define a polyline. |
 | `GetReal` | `?message: string = "Number" * ?number: float = 7e89 * ?minimum: float = 7e89 * ?maximum: float = 7e89 -> float` | Pauses for user input of a number. |
 | `GetRectangle` | `?mode: int = 0 * ?basePoint: Point3d = Point3d() * ?prompt1: string = null * ?prompt2: string = null * ?prompt3: string = null -> Point3d * Point3d * Point3d * Point3d` | Pauses for user input of a rectangle. |
 | `GetString` | `?message: string = null * ?defaultValString: string = null * ?strings: string seq = null -> string` | Pauses for user input of a string value. |
