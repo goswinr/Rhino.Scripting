@@ -7317,6 +7317,14 @@ type RhinoScriptSyntax private () =
 
 
 
+    /// <summary>Adds a dimension style with an automatically generated name and the current default properties.</summary>
+    /// <returns>(string) The name assigned to the new dimension style.</returns>
+    static member AddDimStyle() : string =
+        let index = State.Doc.DimStyles.Add(null:string)
+        if index < 0 then RhinoScriptingException.Raise "AddDimStyle: unable to add an automatically named dimension style"
+        State.Doc.DimStyles.[index].Name
+
+
     /// <summary>Adds a leader to the document. Leader objects are planar.
     ///    The 3D points passed will define the plane if no plane is given.
     ///    If there are only two points, the World XY plane is used, except for a vertical segment, which uses a plane containing the segment.</summary>
