@@ -35,21 +35,14 @@ module AutoOpenLight =
     /// <summary>Adds a new linear light object to the document.</summary>
     /// <param name="startPoint">(Point3d) Starting point of the light</param>
     /// <param name="endPoint">(Point3d) Ending point and direction of the light</param>
-    /// <param name="lightWidth">(float) Optional, width of the light</param>
+    /// <param name="lightWidth">(float) Width of the light. An explicit zero is preserved. Use the two-argument overload for the default width.</param>
     /// <returns>(Guid) Identifier of the new object.</returns>
     static member AddLinearLight( startPoint:Point3d,
                                   endPoint:Point3d,
-                                  [<OPT;DEF(0.0)>]lightWidth:float) : Guid =
+                                  lightWidth:float) : Guid =
         let start =  startPoint
         let ende =  endPoint
-        let mutable width = lightWidth
-        if width = 0.0  then
-            let mutable radius = 0.5
-            let units = State.Doc.ModelUnitSystem
-            if units <> UnitSystem.None then
-                let scale = RhinoMath.UnitScale(UnitSystem.Inches, units)
-                radius <- radius * scale
-            width <- radius
+        let width = lightWidth
         let light = new Light()
         light.LightStyle <- LightStyle.WorldLinear
         light.Location <- start
@@ -68,6 +61,16 @@ module AutoOpenLight =
         let rc = State.Doc.Lights.[index].Id
         State.Doc.Views.Redraw()
         rc
+
+
+    /// <summary>Adds a linear light with the default width of half an inch in model units, limited to one twentieth of its length.</summary>
+    /// <param name="startPoint">(Point3d) Starting point of the light.</param>
+    /// <param name="endPoint">(Point3d) Ending point and direction of the light.</param>
+    /// <returns>(Guid) Identifier of the new light.</returns>
+    static member AddLinearLight(startPoint:Point3d, endPoint:Point3d) : Guid =
+        let units = State.Doc.ModelUnitSystem
+        let width = if units = UnitSystem.None then 0.5 else 0.5 * RhinoMath.UnitScale(UnitSystem.Inches, units)
+        RhinoScriptSyntax.AddLinearLight(startPoint, endPoint, width)
 
 
     /// <summary>Adds a new point light object to the document.</summary>

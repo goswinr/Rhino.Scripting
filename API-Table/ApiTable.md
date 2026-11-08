@@ -2,7 +2,7 @@
 
 All public types, members and functions of Rhino.Scripting, with the first sentence of their summary.
 
-- The 1676 static members of `RhinoScriptSyntax`, 1038 names with their overloads, have one table per source file,
+- The 1677 static members of `RhinoScriptSyntax`, 1038 names with their overloads, have one table per source file,
   e.g. [Curve](#curve) for `Src/Scripting_Curve.fs`. Scripts usually call them through an alias, `type rs = RhinoScriptSyntax`.
 - Overloads of the same name are in the order of the source.
 - Geometry-only `Make...` methods are listed immediately after their corresponding document-adding `Add...` methods.
@@ -28,7 +28,7 @@ Generated from the sources by `API-Table/ApiTable.fsx`. Do not edit by hand.
 - [Group](#group), 20 members
 - [Hatch](#hatch), 30 members
 - [Layer](#layer), 61 members
-- [Light](#light), 56 members
+- [Light](#light), 57 members
 - [Line](#line), 15 members
 - [Linetype](#linetype), 5 members
 - [Material](#material), 25 members
@@ -1012,7 +1012,8 @@ From [Src/Scripting_Light.fs](../Src/Scripting_Light.fs).
 | Name | Signature | Summary |
 |:--|:--|:--|
 | `AddDirectionalLight` | `startPoint: Point3d * endPoint: Point3d -> Guid` | Adds a new directional light object to the document. |
-| `AddLinearLight` | `startPoint: Point3d * endPoint: Point3d * ?lightWidth: float = 0.0 -> Guid` | Adds a new linear light object to the document. |
+| `AddLinearLight` | `startPoint: Point3d * endPoint: Point3d * lightWidth: float -> Guid` | Adds a new linear light object to the document. |
+| `AddLinearLight` | `startPoint: Point3d * endPoint: Point3d -> Guid` | Adds a linear light with the default width of half an inch in model units, limited to one twentieth of its length. |
 | `AddPointLight` | `point: Point3d -> Guid` | Adds a new point light object to the document. |
 | `AddRectangularLight` | `origin: Point3d * widthPoint: Point3d * heightPoint: Point3d -> Guid` | Adds a new rectangular light object to the document. |
 | `AddSpotLight` | `origin: Point3d * radius: float * apexPoint: Point3d -> Guid` | Adds a new spot light object to the document. |
