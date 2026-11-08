@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - IsSurfaceFlipped provides the correctly spelled surface-orientation getter; IsSurfaceFliped remains available for compatibility.
 - UnitScale accepts only the destination unit system and uses the current model units as the source, like in RhinoPython.
 - UnitAbsoluteTolerance, UnitAngleTolerance, UnitDistanceDisplayPrecision, UnitRelativeTolerance and UnitSystem have model/page selector overloads, restoring page-unit access without changing existing model-unit calls.
-- AddDimStyle() creates an automatically named dimension style and returns its name, like in RhinoPython.
+- AddDimStyle accepts an optional name and returns the assigned style name; omitting the name generates one automatically, like in RhinoPython.
 - LinetypeNames accepts an optional sort flag, defaulting to false, to return names in ordinal order, like in RhinoPython.
 - LayerNames accepts an optional sort flag, defaulting to false, to return names in ordinal order, like in RhinoPython.
 - DimStyleNames accepts an optional sort flag, defaulting to false, to return names in ordinal order, like in RhinoPython.
@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - MeshTextureCoordinates, like in RhinoPython
 - XformScale overloads with a Plane, to scale about the Plane's origin along the Plane's axes, like in RhinoPython
 ### Changed
+- Breaking: AddDimStyle uses one optional dimStyleName parameter and returns the assigned name for both named and automatically named styles; the named form previously returned unit.
 - The Python parity review in API-Table/PythonParityReview.md records retained F# API designs and the fixes made; XML docs clarify cylinder inputs, plane/sphere point results, active linetype counts and local bitmap validation.
 - IsHatch, IsBlockInstance, IsPoint, IsPointCloud, IsText, IsTextDot, IsClippingPlane, IsBrep, IsPolysurface and IsPolysurfaceClosed return false for missing object identifiers, like in RhinoPython.
 - IsObjectSolid returns false for geometry that cannot be solid, like in RhinoPython.

@@ -25,7 +25,7 @@ Each code change has its own commit, including its changelog entry and regenerat
 | `4ea4590` | Restore the origin default for `StatusBarPoint`. |
 | `493d36a` | Match Python's curve/curve overlap tolerance. |
 | `dc2fe71` | Restore the default fillet radius in `CurveFilletPoints`. |
-| `94b3f71` | Add automatically named dimension styles and return the generated name. |
+| `94b3f71` | Add automatically named dimension styles; subsequently consolidated into one method with an optional name, returning the assigned name for all calls. |
 | `17e20dd` | Allow omitted leader text. |
 | `c15db52` | Restore model/page selectors for tolerance, precision and unit-system operations. |
 | `3dcd0dd` | Restore current-model-unit defaults for `UnitScale`. |

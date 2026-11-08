@@ -7293,19 +7293,11 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Adds a new dimension style to the document. The new dimension style will
     ///    be initialized with the current default dimension style properties.</summary>
-    /// <param name="dimStyleName">(string) Name of the new dimension style.</param>
-    /// <returns>(unit) void, nothing.</returns>
-    static member AddDimStyle(dimStyleName:string) : unit =
-        let index = State.Doc.DimStyles.Add(dimStyleName)
-        if index<0 then  RhinoScriptingException.Raise "AddDimStyle failed. dimStyleName:'%A'" dimStyleName
-
-
-
-    /// <summary>Adds a dimension style with an automatically generated name and the current default properties.</summary>
+    /// <param name="dimStyleName">(string) Optional, default value: <c>null</c>. Name of the new dimension style; omit to generate a name automatically.</param>
     /// <returns>(string) The name assigned to the new dimension style.</returns>
-    static member AddDimStyle() : string =
-        let index = State.Doc.DimStyles.Add(null:string)
-        if index < 0 then RhinoScriptingException.Raise "AddDimStyle: unable to add an automatically named dimension style"
+    static member AddDimStyle([<OPT;DEF(null:string)>]dimStyleName:string) : string =
+        let index = State.Doc.DimStyles.Add(dimStyleName)
+        if index < 0 then RhinoScriptingException.Raise "AddDimStyle failed. dimStyleName:'%A'" dimStyleName
         State.Doc.DimStyles.[index].Name
 
 

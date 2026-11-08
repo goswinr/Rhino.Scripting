@@ -2,7 +2,7 @@
 
 All public types, members and functions of Rhino.Scripting, with the first sentence of their summary.
 
-- The 1681 static members of `RhinoScriptSyntax`, 1041 names with their overloads, have one table per source file,
+- The 1680 static members of `RhinoScriptSyntax`, 1041 names with their overloads, have one table per source file,
   e.g. [Curve](#curve) for `Src/Scripting_Curve.fs`. Scripts usually call them through an alias, `type rs = RhinoScriptSyntax`.
 - Overloads of the same name are in the order of the source.
 - Geometry-only `Make...` methods are listed immediately after their corresponding document-adding `Add...` methods.
@@ -21,7 +21,7 @@ Generated from the sources by `API-Table/ApiTable.fsx`. Do not edit by hand.
 - [Block](#block), 28 members
 - [Coerce](#coerce), 103 members
 - [Curve](#curve), 247 members
-- [Dimension](#dimension), 71 members
+- [Dimension](#dimension), 70 members
 - [Document](#document), 62 members
 - [Geometry](#geometry), 101 members
 - [Grips](#grips), 17 members
@@ -599,8 +599,7 @@ From [Src/Scripting_Dimension.fs](../Src/Scripting_Dimension.fs).
 | Name | Signature | Summary |
 |:--|:--|:--|
 | `AddAlignedDimension` | `startPoint: Point3d * endPoint: Point3d * pointOnDimensionLine: Point3d * ?style: string = "" -> Guid` | Adds an aligned dimension object to the document. |
-| `AddDimStyle` | `dimStyleName: string -> unit` | Adds a new dimension style to the document. |
-| `AddDimStyle` | `unit -> string` | Adds a dimension style with an automatically generated name and the current default properties. |
+| `AddDimStyle` | `?dimStyleName: string = null -> string` | Adds a new dimension style to the document. |
 | `AddLeader` | `points: Point3d seq * ?text: string = null * ?plane: Plane = Plane() -> Guid` | Adds a leader to the document. |
 | `AddLinearDimension` | `startPoint: Point3d * endPoint: Point3d * pointOnDimensionLine: Point3d * ?plane: Plane = Plane() -> Guid` | Adds a linear dimension to the document. |
 | `CurrentDimStyle` | `unit -> string` | Returns the current default dimension style. |
