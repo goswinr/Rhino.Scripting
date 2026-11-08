@@ -744,3 +744,9 @@ module AutoOpenDocument =
             let units : UnitSystem = LanguagePrimitives.EnumOfValue (byte unitSystem)
             State.Doc.AdjustPageUnitSystem(units, scale)
 
+    /// <summary>Returns the scale factor from the document model units to another unit system.</summary>
+    /// <param name="toSystem">(int) The destination unit system, using the values documented by the two-argument overload.</param>
+    /// <returns>(float) The scale factor from the current model units.</returns>
+    static member UnitScale(toSystem:int) : float =
+        RhinoScriptSyntax.UnitScale(toSystem, int State.Doc.ModelUnitSystem)
+

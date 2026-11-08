@@ -2,7 +2,7 @@
 
 All public types, members and functions of Rhino.Scripting, with the first sentence of their summary.
 
-- The 1675 static members of `RhinoScriptSyntax`, 1038 names with their overloads, have one table per source file,
+- The 1676 static members of `RhinoScriptSyntax`, 1038 names with their overloads, have one table per source file,
   e.g. [Curve](#curve) for `Src/Scripting_Curve.fs`. Scripts usually call them through an alias, `type rs = RhinoScriptSyntax`.
 - Overloads of the same name are in the order of the source.
 - Geometry-only `Make...` methods are listed immediately after their corresponding document-adding `Add...` methods.
@@ -22,7 +22,7 @@ Generated from the sources by `API-Table/ApiTable.fsx`. Do not edit by hand.
 - [Coerce](#coerce), 103 members
 - [Curve](#curve), 247 members
 - [Dimension](#dimension), 72 members
-- [Document](#document), 61 members
+- [Document](#document), 62 members
 - [Geometry](#geometry), 101 members
 - [Grips](#grips), 17 members
 - [Group](#group), 20 members
@@ -734,6 +734,7 @@ From [Src/Scripting_Document.fs](../Src/Scripting_Document.fs).
 | `UnitRelativeTolerance` | `modelUnits: bool -> float` | Returns the relative tolerance for model or page units. |
 | `UnitRelativeTolerance` | `relativeTolerance: float * modelUnits: bool -> unit` | Sets the relative tolerance for model or page units. |
 | `UnitScale` | `toSystem: int * fromSystem: int -> float` | Return the scale factor for changing between unit systems. |
+| `UnitScale` | `toSystem: int -> float` | Returns the scale factor from the document model units to another unit system. |
 | `UnitSystem` | `unit -> int` | Return the document's unit system. |
 | `UnitSystem` | `unitSystem: int * ?scale: bool = false -> unit` | Set the document's unit system. |
 | `UnitSystem` | `modelUnits: bool -> int` | Returns the model or page unit system. |
