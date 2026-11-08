@@ -424,6 +424,19 @@ module AutoOpenMesh =
 
 
 
+    /// <summary>Returns the total approximate area of a collection of mesh objects.</summary>
+    /// <param name="objectIds">(Guid seq) Identifiers of the mesh objects.</param>
+    /// <returns>(float) The total area; zero for an empty collection.</returns>
+    static member MeshArea(objectIds:Guid seq) : float =
+        objectIds |> Seq.sumBy (fun objectId -> RhinoScriptSyntax.MeshArea(objectId))
+
+    /// <summary>Returns the total approximate area of a collection of meshes.</summary>
+    /// <param name="meshes">(Mesh seq) The mesh geometry.</param>
+    /// <returns>(float) The total area; zero for an empty collection.</returns>
+    static member MeshArea(meshes:Mesh seq) : float =
+        meshes |> Seq.sumBy (fun mesh -> RhinoScriptSyntax.MeshArea(mesh))
+
+
     /// <summary>Calculates the area centroid of a Mesh object.</summary>
     /// <param name="objectId">(Guid) Identifier of a Mesh object</param>
     /// <returns>(Point3d) representing the area centroid.</returns>

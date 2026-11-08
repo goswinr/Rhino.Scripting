@@ -2,7 +2,7 @@
 
 All public types, members and functions of Rhino.Scripting, with the first sentence of their summary.
 
-- The 1679 static members of `RhinoScriptSyntax`, 1039 names with their overloads, have one table per source file,
+- The 1681 static members of `RhinoScriptSyntax`, 1039 names with their overloads, have one table per source file,
   e.g. [Curve](#curve) for `Src/Scripting_Curve.fs`. Scripts usually call them through an alias, `type rs = RhinoScriptSyntax`.
 - Overloads of the same name are in the order of the source.
 - Geometry-only `Make...` methods are listed immediately after their corresponding document-adding `Add...` methods.
@@ -32,7 +32,7 @@ Generated from the sources by `API-Table/ApiTable.fsx`. Do not edit by hand.
 - [Line](#line), 15 members
 - [Linetype](#linetype), 5 members
 - [Material](#material), 25 members
-- [Mesh](#mesh), 97 members
+- [Mesh](#mesh), 99 members
 - [Object](#object), 104 members
 - [Plane](#plane), 21 members
 - [PointVector](#pointvector), 37 members
@@ -1167,6 +1167,8 @@ From [Src/Scripting_Mesh.fs](../Src/Scripting_Mesh.fs).
 | `JoinMeshes` | `objectIds: Guid seq * ?deleteInput: bool = false -> Guid` | Joins two or or more Mesh objects together. |
 | `MeshArea` | `objectId: Guid -> float` | Returns approximate area of one mesh object. |
 | `MeshArea` | `mesh: Mesh -> float` | Returns approximate area of one mesh object. |
+| `MeshArea` | `objectIds: Guid seq -> float` | Returns the total approximate area of a collection of mesh objects. |
+| `MeshArea` | `meshes: Mesh seq -> float` | Returns the total approximate area of a collection of meshes. |
 | `MeshAreaCentroid` | `objectId: Guid -> Point3d` | Calculates the area centroid of a Mesh object. |
 | `MeshAreaCentroid` | `mesh: Mesh -> Point3d` | Calculates the area centroid of a Mesh object. |
 | `MeshBooleanDifference` | `input0: Guid seq * input1: Guid seq * ?deleteInput: bool = true -> ResizeArray<Guid>` | Performs boolean difference operation on two sets of input Meshes. |

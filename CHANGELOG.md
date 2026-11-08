@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- MeshArea accepts collections of mesh identifiers or geometry and returns their total area, retaining the documented scalar return design.
 - IsSurfaceFlipped provides the correctly spelled surface-orientation getter; IsSurfaceFliped remains available for compatibility.
 - UnitScale accepts only the destination unit system and uses the current model units as the source, like in RhinoPython.
 - UnitAbsoluteTolerance, UnitAngleTolerance, UnitDistanceDisplayPrecision, UnitRelativeTolerance and UnitSystem have model/page selector overloads, restoring page-unit access without changing existing model-unit calls.
