@@ -452,8 +452,8 @@ From [Src/Scripting_Curve.fs](../Src/Scripting_Curve.fs).
 | `CurveEndPoint` | `curveGeo: Curve * ?segmentIndex: int = -1 -> Point3d` | Returns the end point of a Curve object. |
 | `CurveEndTangent` | `curveId: Guid * ?segmentIndex: int = -1 -> Vector3d` | Returns the tangent at end point of a Curve object pointing away from the Curve . |
 | `CurveEndTangent` | `curveGeo: Curve * ?segmentIndex: int = -1 -> Vector3d` | Returns the tangent at end point of a Curve object pointing away from the Curve . |
-| `CurveFilletPoints` | `curveA: Guid * curveB: Guid * radius: float * ?basePointA: Point3d = Point3d() * ?basePointB: Point3d = Point3d() -> Point3d * Point3d * Plane` | Find points at which to cut a pair of Curves so that a fillet of a specified radius fits. |
-| `CurveFilletPoints` | `curveA: Curve * curveB: Curve * radius: float * ?basePointA: Point3d = Point3d() * ?basePointB: Point3d = Point3d() -> Point3d * Point3d * Plane` | Find points at which to cut a pair of Curves so that a fillet of a specified radius fits. |
+| `CurveFilletPoints` | `curveA: Guid * curveB: Guid * ?radius: float = 1.0 * ?basePointA: Point3d = Point3d() * ?basePointB: Point3d = Point3d() -> Point3d * Point3d * Plane` | Find points at which to cut a pair of Curves so that a fillet of a specified radius fits. |
+| `CurveFilletPoints` | `curveA: Curve * curveB: Curve * ?radius: float = 1.0 * ?basePointA: Point3d = Point3d() * ?basePointB: Point3d = Point3d() -> Point3d * Point3d * Plane` | Find points at which to cut a pair of Curves so that a fillet of a specified radius fits. |
 | `CurveFrame` | `curveId: Guid * parameter: float * ?segmentIndex: int = -1 -> Plane` | Returns the Plane at a parameter of a Curve. |
 | `CurveFrame` | `curveGeo: Curve * parameter: float * ?segmentIndex: int = -1 -> Plane` | Returns the Plane at a parameter of a Curve. |
 | `CurveKnotCount` | `curveId: Guid * ?segmentIndex: int = -1 -> int` | Returns the knot count of a Curve object. |

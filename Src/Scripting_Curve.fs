@@ -1596,7 +1596,7 @@ module AutoOpenCurve =
     ///    lengths along the two Curves.</summary>
     /// <param name="curveA">(Guid) Identifier of the first Curve object</param>
     /// <param name="curveB">(Guid) Identifier of the second Curve object</param>
-    /// <param name="radius">(float) The fillet radius</param>
+    /// <param name="radius">(float) Optional, default value: <c>1.0</c>. The fillet radius.</param>
     /// <param name="basePointA">(Point3d) Optional. The base point on the first Curve.
     ///    If omitted, the starting point of the Curve is used</param>
     /// <param name="basePointB">(Point3d) Optional. The base point on the second Curve. If omitted,
@@ -1608,7 +1608,7 @@ module AutoOpenCurve =
     ///      [2]    The fillet Plane.</returns>
     static member CurveFilletPoints(curveA:Guid,
                                     curveB:Guid,
-                                    radius:float,
+                                    [<OPT;DEF(1.0)>]radius:float,
                                     [<OPT;DEF(Point3d())>]basePointA:Point3d,
                                     [<OPT;DEF(Point3d())>]basePointB:Point3d) : Point3d * Point3d * Plane = //TODO make overload instead, this may leak  see draw vector and transform point!
         RhinoScriptSyntax.CurveFilletPoints(RhinoScriptSyntax.CoerceCurve(curveA), RhinoScriptSyntax.CoerceCurve(curveB), radius, basePointA, basePointB)
@@ -1622,7 +1622,7 @@ module AutoOpenCurve =
     ///    lengths along the two Curves. Uses the supplied geometry directly.</summary>
     /// <param name="curveA">(Curve) The input geometry.</param>
     /// <param name="curveB">(Curve) The input geometry.</param>
-    /// <param name="radius">(float) The fillet radius</param>
+    /// <param name="radius">(float) Optional, default value: <c>1.0</c>. The fillet radius.</param>
     /// <param name="basePointA">(Point3d) Optional. The base point on the first Curve.
     ///    If omitted, the starting point of the Curve is used</param>
     /// <param name="basePointB">(Point3d) Optional. The base point on the second Curve. If omitted,
@@ -1634,7 +1634,7 @@ module AutoOpenCurve =
     ///      [2]    The fillet Plane.</returns>
     static member CurveFilletPoints(curveA:Curve,
                                     curveB:Curve,
-                                    radius:float,
+                                    [<OPT;DEF(1.0)>]radius:float,
                                     [<OPT;DEF(Point3d())>]basePointA:Point3d,
                                     [<OPT;DEF(Point3d())>]basePointB:Point3d) : Point3d * Point3d * Plane = //TODO make overload instead, this may leak  see draw vector and transform point!
         //  [<OPT;DEF(true)>]returnPoints:bool)
