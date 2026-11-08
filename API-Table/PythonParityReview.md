@@ -8,14 +8,14 @@ This review preserves documented F# API choices where they provide useful static
 
 ## Fixes
 
-Each code change has its own commit, including its changelog entry and regenerated combined source. Public API changes also regenerate the API table. Existing call syntax remains available when adding collection or selector options. BlockNames uses one optional sort argument defaulting to false, so both BlockNames() and BlockNames(true) remain valid calls.
+Each code change has its own commit, including its changelog entry and regenerated combined source. Public API changes also regenerate the API table. Existing call syntax remains available when adding collection or selector options. BlockNames and DimStyleNames each use one optional sort argument defaulting to false, supporting both omitted and explicit sort flags.
 
 | Commit | Change |
 | --- | --- |
 | `02f7e69` | Preserve unrelated preselected objects in `GetObject`. |
 | `3130f42` | Apply both the allowed-object list and custom geometry filter in `GetObjects`. |
 | `7c222e9` | Add BlockNames sorting support, subsequently consolidated into one optional sort argument defaulting to false. |
-| `bf83c78` | Add `DimStyleNames(sort)`. |
+| `bf83c78` | Add DimStyleNames sorting support, subsequently consolidated into one optional sort argument defaulting to false. |
 | `4d5903d` | Add `LayerNames(sort)`. |
 | `8b9c68d` | Add `LinetypeNames(sort)`. |
 | `64b619e` | Restore omitted-message support for `Prompt`. |

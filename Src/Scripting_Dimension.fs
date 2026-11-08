@@ -441,17 +441,11 @@ module AutoOpenDimension =
 
 
 
-    /// <summary>Returns the names of all dimension styles in the document.</summary>
+    /// <summary>Returns the names of all dimension styles in the document, optionally sorted in ordinal order.</summary>
+    /// <param name="sort">(bool) Optional, default value: <c>false</c>. True to sort the names; False to preserve document order.</param>
     /// <returns>(string ResizeArray) The names of all dimension styles in the document.</returns>
-    static member DimStyleNames() : string ResizeArray =
-        State.Doc.DimStyles |> RArr.mapSeq _.Name
-
-
-    /// <summary>Returns the names, optionally sorted in ordinal order, like in RhinoPython.</summary>
-    /// <param name="sort">(bool) True to sort the names; False to preserve document order.</param>
-    /// <returns>(string ResizeArray) The names.</returns>
-    static member DimStyleNames(sort:bool) : string ResizeArray =
-        let names = RhinoScriptSyntax.DimStyleNames()
+    static member DimStyleNames([<OPT;DEF(false)>]sort:bool) : string ResizeArray =
+        let names = State.Doc.DimStyles |> RArr.mapSeq _.Name
         if sort then names.Sort(StringComparer.Ordinal)
         names
 
