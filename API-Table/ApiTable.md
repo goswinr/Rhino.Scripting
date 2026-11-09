@@ -2,7 +2,7 @@
 
 All public types, members and functions of Rhino.Scripting, with the first sentence of their summary.
 
-- The 1686 static members of `RhinoScriptSyntax`, 1041 names with their overloads, have one table per source file,
+- The 1684 static members of `RhinoScriptSyntax`, 1040 names with their overloads, have one table per source file,
   e.g. [Curve](#curve) for `Src/Scripting_Curve.fs`. Scripts usually call them through an alias, `type rs = RhinoScriptSyntax`.
 - Overloads of the same name are in the order of the source.
 - Geometry-only `Make...` methods are listed immediately after their corresponding document-adding `Add...` methods.
@@ -37,7 +37,7 @@ Generated from the sources by `API-Table/ApiTable.fsx`. Do not edit by hand.
 - [Plane](#plane), 21 members
 - [PointVector](#pointvector), 37 members
 - [Selection](#selection), 26 members
-- [Surface](#surface), 214 members
+- [Surface](#surface), 212 members
 - [Toolbar](#toolbar), 15 members
 - [Transformation](#transformation), 29 members
 - [UserData](#userdata), 21 members
@@ -1569,8 +1569,6 @@ From [Src/Scripting_Surface.fs](../Src/Scripting_Surface.fs).
 | `IsSurface` | `geometryObject: Surface -> bool` | Verifies an object is a Surface, Extrusion or Brep objects with only one face. |
 | `IsSurfaceClosed` | `surfaceId: Guid * direction: int -> bool` | Verifies a Surface object is closed in the specified direction. |
 | `IsSurfaceClosed` | `surfaceGeo: Surface * direction: int -> bool` | Verifies a Surface object is closed in the specified direction. |
-| `IsSurfaceFliped` | `surfaceId: Guid -> bool` | Returns the normal direction of a Surface. |
-| `IsSurfaceFliped` | `surfaceGeo: Brep -> bool` | Returns the normal direction of a Surface. |
 | `IsSurfaceFlipped` | `surfaceId: Guid -> bool` | Returns whether the normal of a single-face surface is flipped. |
 | `IsSurfaceFlipped` | `surfaceGeo: Brep -> bool` | Returns whether the normal of a single-face surface is flipped. |
 | `IsSurfacePeriodic` | `surfaceId: Guid * direction: int -> bool` | Verifies a Surface object is periodic in the specified direction. |

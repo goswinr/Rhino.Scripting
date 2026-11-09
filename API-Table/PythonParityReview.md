@@ -31,7 +31,7 @@ Each code change has its own commit, including its changelog entry and regenerat
 | `3dcd0dd` | Restore current-model-unit defaults for `UnitScale`. |
 | `dc97ff2` | Distinguish omitted linear-light width from an explicit zero. |
 | `8d4d338` | Restore the default magnification mode in the `ViewRadius` setter. |
-| `c4b5b64` | Add correctly spelled `IsSurfaceFlipped` getters while preserving `IsSurfaceFliped`. |
+| `c4b5b64` | Add correctly spelled IsSurfaceFlipped getters; the misspelled methods were subsequently removed. |
 | `48ad1ef` | Restore mesh-area collection aggregation. |
 | `2639548` | Add `GetObjectRef` for selected subobject information and share picking with `GetObject`. |
 | `4733496` | Use the textless Rhino overload when leader text is omitted or null. |

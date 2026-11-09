@@ -1592,36 +1592,21 @@ module AutoOpenSurface =
         ResizeArray(surfaces)
 
 
-    /// <summary>Returns the normal direction of a Surface. This feature can
-    /// also be found in Rhino's Dir command.</summary>
-    /// <param name="surfaceId">(Guid) Identifier of a Surface object</param>
-    /// <returns>(bool) The current normal orientation.</returns>
-    static member IsSurfaceFliped(surfaceId:Guid) : bool = //GET
-        let surfaceIdObject = RhinoScriptSyntax.CoerceBrep(surfaceId)
-        RhinoScriptSyntax.IsSurfaceFliped(surfaceIdObject)
-
-    /// <summary>Returns the normal direction of a Surface. This feature can
-    /// also be found in Rhino's Dir command. Uses the supplied objects directly.</summary>
-    /// <param name="surfaceGeo">(Brep) Object of a Surface object</param>
-    /// <returns>(bool) The current normal orientation.</returns>
-    static member IsSurfaceFliped(surfaceGeo:Brep) : bool = //GET
-        let brep = surfaceGeo
-        if brep.Faces.Count>1 then RhinoScriptingException.Raise "IsSurfaceFliped failed. surfaceGeo:'%s'" (Pretty.str surfaceGeo)
-        let face = brep.Faces.[0]
-        face.OrientationIsReversed
-
-
     /// <summary>Returns whether the normal of a single-face surface is flipped.</summary>
     /// <param name="surfaceId">(Guid) Identifier of the surface object.</param>
     /// <returns>(bool) True when the surface normal is reversed.</returns>
     static member IsSurfaceFlipped(surfaceId:Guid) : bool = //GET
-        RhinoScriptSyntax.IsSurfaceFliped(surfaceId)
+        let brep = RhinoScriptSyntax.CoerceBrep(surfaceId)
+        RhinoScriptSyntax.IsSurfaceFlipped(brep)
 
     /// <summary>Returns whether the normal of a single-face surface is flipped.</summary>
     /// <param name="surfaceGeo">(Brep) The single-face surface geometry.</param>
     /// <returns>(bool) True when the surface normal is reversed.</returns>
     static member IsSurfaceFlipped(surfaceGeo:Brep) : bool = //GET
-        RhinoScriptSyntax.IsSurfaceFliped(surfaceGeo)
+        let brep = surfaceGeo
+        if brep.Faces.Count>1 then RhinoScriptingException.Raise "IsSurfaceFlipped failed. surfaceGeo:'%s'" (Pretty.str surfaceGeo)
+        let face = brep.Faces.[0]
+        face.OrientationIsReversed
 
 
     /// <summary>Changes the normal direction of a Surface. This feature can

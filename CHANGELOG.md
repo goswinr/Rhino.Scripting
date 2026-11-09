@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - MatchMaterial accepts a material-table index as well as a source object identifier, restoring the index-based RhinoPython operation.
 - GetObjectRef returns the picked ObjRef, retaining selected subobject information; GetObject keeps its Guid return and shares the picking implementation.
 - MeshArea accepts collections of mesh identifiers or geometry and returns their total area, retaining the documented scalar return design.
-- IsSurfaceFlipped provides the correctly spelled surface-orientation getter; IsSurfaceFliped remains available for compatibility.
+- IsSurfaceFlipped provides the correctly spelled surface-orientation getter.
 - UnitScale accepts only the destination unit system and uses the current model units as the source, like in RhinoPython.
 - UnitAbsoluteTolerance, UnitAngleTolerance, UnitDistanceDisplayPrecision, UnitRelativeTolerance and UnitSystem have model/page selector overloads, restoring page-unit access without changing existing model-unit calls.
 - AddDimStyle accepts an optional name and returns the assigned style name; omitting the name generates one automatically, like in RhinoPython.
@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - MeshTextureCoordinates, like in RhinoPython
 - XformScale overloads with a Plane, to scale about the Plane's origin along the Plane's axes, like in RhinoPython
 ### Changed
+- Breaking: Removed the misspelled IsSurfaceFliped methods; use IsSurfaceFlipped for both object identifiers and Brep geometry.
 - Breaking: AddDimStyle uses one optional dimStyleName parameter and returns the assigned name for both named and automatically named styles; the named form previously returned unit.
 - The Python parity review in API-Table/PythonParityReview.md records retained F# API designs and the fixes made; XML docs clarify cylinder inputs, plane/sphere point results, active linetype counts and local bitmap validation.
 - IsHatch, IsBlockInstance, IsPoint, IsPointCloud, IsText, IsTextDot, IsClippingPlane, IsBrep, IsPolysurface and IsPolysurfaceClosed return false for missing object identifiers, like in RhinoPython.
