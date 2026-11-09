@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ContextIsGrasshopper, it checks if the call stack of the current thread goes through the Grasshopper assembly
 - MeshTextureCoordinates, like in RhinoPython
 - XformScale overloads with a Plane, to scale about the Plane's origin along the Plane's axes, like in RhinoPython
+- The NuGet package ships an agent skill, rhino.scripting-usage, with the API table, for installation with dotnet-package-skills.
 ### Changed
 - Breaking: Removed the misspelled IsSurfaceFliped methods; use IsSurfaceFlipped for both object identifiers and Brep geometry.
 - Breaking: AddDimStyle uses one optional dimStyleName parameter and returns the assigned name for both named and automatically named styles; the named form previously returned unit.

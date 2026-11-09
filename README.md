@@ -210,6 +210,18 @@ These are implemented with 3 overloads and `Optional` and `DefaultParameterValue
 
 [goswinr.github.io/Rhino.Scripting](https://goswinr.github.io/Rhino.Scripting/reference/rhino-scripting-rhinoscriptsyntax.html)
 
+A single Markdown page with the whole public API in one table, with signatures, default values and summaries, is in [skills/rhino.scripting-usage/ApiTable.md](skills/rhino.scripting-usage/ApiTable.md).
+
+## Agent skill
+The NuGet package ships an agent skill, `rhino.scripting-usage`, for writing scripts with this library. It includes the API table.<br>
+To install it into a project, run these from the project folder:
+```bash
+dotnet tool install --global dotnet-package-skills
+dotnet-package-skills install
+```
+The skill goes to `.agents/skills`. For Claude Code, use `dotnet-package-skills install --destination .claude/skills`.
+Run the command again after you add or upgrade the package.
+
 ## .NET Framework or .NET Core?
 The NuGet package contains builds for .NET Framework 4.8, .NET 8.0 and .NET 10.0.<br>
 Each .NET build can only be loaded when Rhino runs on that .NET runtime or a newer one (see the Rhino command `SetDotNetRuntime`).<br>
@@ -234,6 +246,15 @@ While having all 900 methods on one class in one file is needed for publishing v
 it is not ideal for editing.<br>
 The source is split into several files imitating the structure of the original Python implementation.<br>
 Open the project `ForEditing.fsproj` to edit the source.<br>
+
+```bash
+dotnet build ForEditing.fsproj
+```
+
+After changing the public API, regenerate the API table from the repo root:
+```bash
+dotnet fsi API-Table/ApiTable.fsx
+```
 
 
 ## Changelog

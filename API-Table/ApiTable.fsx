@@ -5,7 +5,7 @@
 //
 // Usage, from the repo root:
 //     dotnet fsi API-Table/ApiTable.fsx [output.md]
-// The default output is API-Table/ApiTable.md.
+// The default output is skills/rhino.scripting-usage/ApiTable.md, the agent skill that ships in the NuGet package.
 //
 // The script type checks the files listed in ForEditing.fsproj with FSharp.Compiler.Service.
 // So it needs no build and always reflects the current sources.
@@ -47,7 +47,7 @@ let targetFramework = "net8.0"
 let outFile =
     match fsi.CommandLineArgs |> Array.tail with
     | [| path |] -> Path.GetFullPath path
-    | _ -> Path.Combine(__SOURCE_DIRECTORY__, "ApiTable.md")
+    | _ -> Path.Combine(root, "skills", "rhino.scripting-usage", "ApiTable.md")
 
 let attr (e: XElement) (name: string) =
     match e.Attribute(XName.Get name) with
