@@ -21,7 +21,7 @@ dotnet build ForPublishing.fsproj -c Release
 - `global.json` pins the .NET 10 SDK, and all workflows install the SDK from it. `fsdocs-tool` needs the .NET 10 runtime too.
 - Pass `-c Release` explicitly. The project file deliberately doesn't set the configuration, because a value set there comes too late to switch on optimization.
 
-- There are no tests and no linter. The library only works inside a running Rhino process (`State.Doc` raises otherwise), so verification means compiling both projects without new warnings. `--warnon:3390` (XML doc completeness) and `--warnon:1182` (unused variables) are on.
+- There is no linter and no `dotnet test`. The library only works inside a running Rhino process (`State.Doc` raises otherwise), so the baseline check is compiling both projects without new warnings. `--warnon:3390` (XML doc completeness) and `--warnon:1182` (unused variables) are on. Behavior is tested with F# scripts inside Rhino, see Testing below.
 - Both `ForPublishing.fsproj` frameworks run `combineIntoOneFile.fsx` before compiling. Built together, they can race writing the generated file. Running the script first (as CI does) avoids that, because it skips writing when the content is unchanged.
 - Building `ForPublishing.fsproj` also copies README.md to `Docs/index.md` (gitignored), which the docs need.
 
@@ -31,6 +31,17 @@ Docs (needs a Release build of `ForPublishing.fsproj` first):
 dotnet tool restore
 dotnet fsdocs build --clean --strict --properties Configuration=Release --input Docs --output DocsGenerated
 ```
+
+## Testing
+
+`Tests/` holds one F# script per source file, `Test_<Name>.fsx` for `Src/Scripting_<Name>.fs`, plus `RunAll.fsx`. The scripts run inside the Rhino process through the Caddis MCP server. [Tests/README.md](Tests/README.md) has the details: the harness helpers, the skipped functions, the hazards, and how to recover a hung Rhino.
+
+1. If the user asks you to run the tests and Rhino isn't running, start it yourself, detached, e.g. `powershell -NoProfile -Command "Start-Process 'C:\Program Files\Rhino 8\System\Rhino.exe'"` (Rhino 9 is in `C:\Program Files\Rhino 9\System\`). Only start Rhino when asked to. Closing Rhino (e.g. to restart it after a crash or to free the locked dll) is fine only if its document was empty when your session started: check that first with `caddis_eval` (`RhinoDoc.ActiveDoc.Objects.Count = 0`). Otherwise never close or kill Rhino, it may hold unsaved work.
+2. The Caddis plugin loads with Rhino and starts its MCP server, `caddis-rhino` at `http://127.0.0.1:7811/mcp` or `http://127.0.0.1:7810/mcp`. Wait for Rhino to finish loading, then look for the `caddis_*` tools (`caddis_eval`, `caddis_check`, `caddis_reset`), with ToolSearch if they are deferred. If the server failed to connect when the session started, the tools stay missing. Then ask the user to reconnect it with `/mcp`.
+3. Build first: `dotnet build ForPublishing.fsproj -c Release`. The harness loads `bin/Release/net8.0/Rhino.Scripting.dll`, and Rhino locks that file once it is loaded, so call `caddis_reset` before rebuilding.
+4. Run one suite with `caddis_eval path=<absolute path>\Tests\Test_Surface.fsx`, or all of them with `caddis_eval path=<absolute path>\Tests\RunAll.fsx waitMs=300000` (about one minute). `caddis_check path=...` type-checks a script without running it.
+
+Each suite prints `=== Name: N passed, M failed, K skipped ===`, then the failures. All suites are expected to pass. A failure is a library bug or a wrong test, so never make a test pass by loosening it. Tests run in a fresh scratch document, so the user's document stays untouched. When adding a public function, add a test for it to the matching `Test_*.fsx`, or record why it can't run with `skip "Name" "reason"`.
 
 ## Architecture: one class, many files
 
