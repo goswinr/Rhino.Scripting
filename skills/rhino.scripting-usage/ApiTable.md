@@ -2,7 +2,7 @@
 
 All public types, members and functions of Rhino.Scripting, with the first sentence of their summary.
 
-- The 1689 static members of `RhinoScriptSyntax`, 1040 names with their overloads, have one table per source file,
+- The 1691 static members of `RhinoScriptSyntax`, 1040 names with their overloads, have one table per source file,
   e.g. [Curve](#curve) for `Src/Scripting_Curve.fs`. Scripts usually call them through an alias, `type rs = RhinoScriptSyntax`.
 - Overloads of the same name are in the order of the source.
 - Geometry-only `Make...` methods are listed immediately after their corresponding document-adding `Add...` methods.
@@ -19,7 +19,7 @@ Generated from the sources by `API-Table/ApiTable.fsx`. Do not edit by hand.
 - [Header](#header), 34 members
 - [Application](#application), 84 members
 - [Block](#block), 28 members
-- [Coerce](#coerce), 103 members
+- [Coerce](#coerce), 105 members
 - [Curve](#curve), 247 members
 - [Dimension](#dimension), 70 members
 - [Document](#document), 68 members
@@ -277,6 +277,7 @@ From [Src/Scripting_Coerce.fs](../../Src/Scripting_Coerce.fs).
 | `CoerceEllipse` | `objectId: Guid -> Ellipse` | Gets an Ellipse from a curve object using the current Documents Absolute Tolerance. |
 | `CoerceGeometry` | `objectId: Guid -> GeometryBase` | Attempt to get GeometryBase from a given input. |
 | `CoerceGuid` | `objectId: Guid -> Guid` | Checks that a Guid is not empty. |
+| `CoerceGuid` | `objectId: Guid option -> Guid` | Gets the Guid out of a Guid option, as returned by the UI functions. |
 | `CoerceGuid` | `input: string -> Guid` | Parses a Guid from a string. |
 | `CoerceGuid` | `rhinoObject: RhinoObject -> Guid` | Gets the Guid of a RhinoObject. |
 | `CoerceGuid` | `objRef: ObjRef -> Guid` | Gets the Guid of the object an ObjRef refers to. |
@@ -326,6 +327,7 @@ From [Src/Scripting_Coerce.fs](../../Src/Scripting_Coerce.fs).
 | `TryCoerceEllipse` | `objectId: Guid -> Ellipse option` | Attempt to get an Ellipse from a curve object using the current Documents Absolute Tolerance. |
 | `TryCoerceGeometry` | `objectId: Guid -> GeometryBase option` | Attempt to get GeometryBase from a given Guid. |
 | `TryCoerceGuid` | `objectId: Guid -> Guid option` | Attempt to get a Guid that is not empty. |
+| `TryCoerceGuid` | `objectId: Guid option -> Guid option` | Attempt to get a Guid that is not empty out of a Guid option, as returned by the UI functions. |
 | `TryCoerceGuid` | `input: string -> Guid option` | Attempt to parse a Guid from a string. |
 | `TryCoerceGuid` | `rhinoObject: RhinoObject -> Guid option` | Attempt to get the Guid of a RhinoObject. |
 | `TryCoerceGuid` | `objRef: ObjRef -> Guid option` | Attempt to get the Guid of the object an ObjRef refers to. |

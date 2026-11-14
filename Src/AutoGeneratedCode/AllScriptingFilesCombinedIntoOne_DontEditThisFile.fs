@@ -667,6 +667,14 @@ type RhinoScriptSyntax private () =
     static member TryCoerceGuid (objectId:Guid) : Guid option =
         if Guid.Empty = objectId then None else Some objectId
 
+    /// <summary>Attempt to get a Guid that is not empty out of a Guid option, as returned by the UI functions.</summary>
+    /// <param name="objectId">(Guid option) The optional Guid.</param>
+    /// <returns>A Guid option. None if the input is None or contains the empty Guid.</returns>
+    static member TryCoerceGuid (objectId:Guid option) : Guid option =
+        match objectId with
+        | Some g when g <> Guid.Empty -> Some g
+        | _ -> None
+
     /// <summary>Attempt to parse a Guid from a string.</summary>
     /// <param name="input">(string) The Guid as a string.</param>
     /// <returns>A Guid option. None if the string is not a Guid or is the empty Guid.</returns>
@@ -693,6 +701,14 @@ type RhinoScriptSyntax private () =
     static member CoerceGuid(objectId:Guid) : Guid =
         if Guid.Empty = objectId then RhinoScriptingException.Raise "CoerceGuid: Guid is Empty"
         objectId
+
+    /// <summary>Gets the Guid out of a Guid option, as returned by the UI functions.</summary>
+    /// <param name="objectId">(Guid option) The optional Guid.</param>
+    /// <returns>(Guid) The Guid. Raises a RhinoScriptingException if the option is None or contains the empty Guid.</returns>
+    static member CoerceGuid(objectId:Guid option) : Guid =
+        match objectId with
+        | Some g when g <> Guid.Empty -> g
+        | _ -> RhinoScriptingException.Raise "CoerceGuid: Guid option is None or contains the empty Guid: %A" objectId
 
     /// <summary>Parses a Guid from a string.</summary>
     /// <param name="input">(string) The Guid as a string.</param>
