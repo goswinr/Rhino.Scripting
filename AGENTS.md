@@ -25,7 +25,7 @@ dotnet build ForPublishing.fsproj -c Release
 - Both `ForPublishing.fsproj` frameworks run `combineIntoOneFile.fsx` before compiling. Built together, they can race writing the generated file. Running the script first (as CI does) avoids that, because it skips writing when the content is unchanged.
 - Building `ForPublishing.fsproj` also copies README.md to `Docs/index.md` (gitignored), which the docs need.
 
-Docs (needs a Release build of `ForPublishing.fsproj` first; `fsdocs-tool` must keep `rollForward: false` in `.config/dotnet-tools.json`):
+Docs (needs a Release build of `ForPublishing.fsproj` first):
 
 ```bash
 dotnet tool restore
@@ -87,3 +87,4 @@ Methods can be called from any thread. Code that touches UI (dialogs, layer crea
 - The `skills/**/*` item in `ForPublishing.fsproj` packs the folder, so a new skill folder needs no change there.
 - Caddis serves the same files over MCP as `caddis-skill://` resources. Its instructions in `Caddis.Rhino/RhinoInfo.fs` name the skill, so rename it there too.
 - Consumers install the skill with `dotnet-package-skills install` (`--destination .claude/skills` for Claude Code), not during a build.
+See `https://www.nuget.org/packages/dotnet-package-skills` for more information.
