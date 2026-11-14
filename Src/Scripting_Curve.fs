@@ -75,7 +75,11 @@ module AutoOpenCurve =
     /// <param name="curves">(Guid * Guid) Tuple of two curves.</param>
     /// <param name="parameters">(float * float) Tuple of two curve parameters defining the blend end points.</param>
     /// <param name="reverses">(bool * bool) Tuple of two boolean values specifying to use the natural or opposite direction of the curve.</param>
-    /// <param name="continuities">(int * int) Tuple of two numbers specifying continuity at end points: 0 = position, 1 = tangency, 2 = curvature.</param>
+    /// <param name="continuities">(int * int) Tuple of two numbers specifying continuity at end points:
+    ///     0 = position
+    ///     1 = tangency
+    ///     2 = curvature
+    /// </param>
     /// <returns>(Guid) Identifier of new curve.</returns>
     static member AddBlendCurve(curves:Guid * Guid, parameters:float * float, reverses:bool * bool, continuities:int * int) : Guid =
         let geometry = RhinoScriptSyntax.MakeBlendCurve((RhinoScriptSyntax.CoerceCurve(fst curves), RhinoScriptSyntax.CoerceCurve(snd curves)), parameters, reverses, continuities)
@@ -88,7 +92,11 @@ module AutoOpenCurve =
     /// <param name="curves">(Curve * Curve) The pair of input curves.</param>
     /// <param name="parameters">(float * float) Tuple of two curve parameters defining the blend end points.</param>
     /// <param name="reverses">(bool * bool) Tuple of two boolean values specifying to use the natural or opposite direction of the curve.</param>
-    /// <param name="continuities">(int * int) Tuple of two numbers specifying continuity at end points: 0 = position, 1 = tangency, 2 = curvature.</param>
+    /// <param name="continuities">(int * int) Tuple of two numbers specifying continuity at end points:
+    ///     0 = position
+    ///     1 = tangency
+    ///     2 = curvature
+    /// </param>
     /// <returns>(Curve) The resulting geometry; it is not added to a document.</returns>
     static member MakeBlendCurve(curves:Curve * Curve, parameters:float * float, reverses:bool * bool, continuities:int * int) : Curve =
         let crv0 = RhinoScriptSyntax.DirectCurveInput(fst curves, -1)
@@ -264,20 +272,24 @@ module AutoOpenCurve =
 
     ///<summary>Adds an interpolated Curve object to the document. Options exist to make
     ///    a periodic Curve or to specify the tangent at the endpoints. The resulting
-    ///    Curve is a non-rational NURBS Curve of the specified degree.</summary>
+    ///    Curve is a non-rational NURBS Curve of the specified degree.
+    /// </summary>
     ///<param name="points">(Point3d seq) A list containing 3D points to interpolate. For periodic Curves,
     ///    if the final point is a duplicate of the initial point, it is
     ///    ignored. The number of control points must be bigger than 'degree' number</param>
     ///<param name="degree">(int) Optional, default value: <c>3</c>
-    ///    Periodic Curves must have a degree bigger than 1. For knot-style = 1 or 2,
-    ///    the degree must be 3. For knot-style = 4 or 5, the degree must be odd</param>
+    ///    Periodic Curves must have a degree bigger than 1.
+    ///     For knot-style = 1 or 2, the degree must be 3.
+    ///     For knot-style = 4 or 5, the degree must be odd
+    /// </param>
     ///<param name="knotStyle">(int) Optional, default value: <c>0</c>
     ///    0 Uniform knots. Parameter spacing between consecutive knots is 1.0.
     ///    1 Chord length spacing. Requires degree = 3 with arrCV1 and arrCVn1 specified.
     ///    2 Sqrt (chord length). Requires degree = 3 with arrCV1 and arrCVn1 specified.
     ///    3 Periodic with uniform spacing.
     ///    4 Periodic with chord length spacing. Requires an odd degree value.
-    ///    5 Periodic with sqrt (chord length) spacing. Requires an odd degree value</param>
+    ///    5 Periodic with sqrt (chord length) spacing. Requires an odd degree value
+    /// </param>
     ///<param name="startTangent">(Vector3d) Optional, A vector that specifies a tangency condition at the
     ///    beginning of the Curve. If the Curve is periodic, this argument must be omitted</param>
     ///<param name="endTangent">(Vector3d) Optional, 3d vector that specifies a tangency condition at the
@@ -342,10 +354,12 @@ module AutoOpenCurve =
     /// <summary>Creates a NURBS Curve geometry, but does not add or draw it to the document.</summary>
     /// <param name="points">(Point3d seq) A list containing 3D control points.</param>
     /// <param name="knots">(float seq) Knot values for the Curve. The number of elements in knots must
-    ///    equal the number of elements in points plus degree minus 1.</param>
+    ///    equal the number of elements in points plus degree minus 1.
+    /// </param>
     /// <param name="degree">(int) Degree of the Curve. must be greater than of equal to 1.</param>
     /// <param name="weights">(float seq) Optional, Weight values for the Curve. Number of elements should
-    ///    equal the number of elements in points. Values must be greater than 0.</param>
+    ///    equal the number of elements in points. Values must be greater than 0.
+    /// </param>
     /// <returns>(NurbsCurve) a NurbsCurve geometry.</returns>
     static member CreateNurbsCurve(points:Point3d seq, knots:float seq, degree:int, [<OPT;DEF(null: float seq)>]weights:float seq) : NurbsCurve =
         let cvcount = Seq.length(points)
@@ -376,10 +390,12 @@ module AutoOpenCurve =
     /// <summary>Adds a NURBS Curve object to the document.</summary>
     /// <param name="points">(Point3d seq) A list containing 3D control points.</param>
     /// <param name="knots">(float seq) Knot values for the Curve. The number of elements in knots must
-    ///    equal the number of elements in points plus degree minus 1.</param>
+    ///    equal the number of elements in points plus degree minus 1.
+    /// </param>
     /// <param name="degree">(int) Degree of the Curve. must be greater than of equal to 1.</param>
     /// <param name="weights">(float seq) Optional, Weight values for the Curve. Number of elements should
-    ///    equal the number of elements in points. Values must be greater than 0.</param>
+    ///    equal the number of elements in points. Values must be greater than 0.
+    /// </param>
     /// <returns>(Guid) The identifier of the new object.</returns>
     static member AddNurbsCurve(points:Point3d seq, knots:float seq, degree:int, [<OPT;DEF(null: float seq)>]weights:float seq) : Guid =
         let nc = RhinoScriptSyntax.CreateNurbsCurve(points, knots, degree, weights)
@@ -414,7 +430,9 @@ module AutoOpenCurve =
     /// </summary>
     /// <param name="points">(Point3d seq) List of 3D points. The list must contain at least three points.</param>
     /// <param name="deleteShortSegments">(bool) Optional, default value: <c>true</c>. If true, segments shorter than the document's absolute tolerance will be deleted.</param>
-    /// <param name="drawDotsAndRaiseIfFailed">(bool) Optional, default value: <c>false</c>. If true, text dots will be drawn on layer `ERROR-AddPolylineClosed` at each point and an exception will be raised if the operation fails.</param>
+    /// <param name="drawDotsAndRaiseIfFailed">(bool) Optional, default value: <c>false</c>.
+    ///     If true, text dots will be drawn on layer `ERROR-AddPolylineClosed` at each point and an exception will be raised if the operation fails.
+    /// </param>
     /// <returns>(Guid) ObjectId of the new curve object. Empty Guid if the operation fails.</returns>
     static member AddPolylineClosed(points:Point3d seq,  [<OPT;DEF(true)>]deleteShortSegments: bool, [<OPT;DEF(false)>]drawDotsAndRaiseIfFailed: bool) : Guid =
         let pl = Polyline(points)
@@ -437,10 +455,8 @@ module AutoOpenCurve =
 
     /// <summary>Add a rectangular Curve to the document.</summary>
     /// <param name="plane">(Plane) Plane on which the rectangle will lie</param>
-    /// <param name="width">(float) Width of rectangle as measured along the Plane's
-    ///    x and y axes</param>
-    /// <param name="height">(float) Height of rectangle as measured along the Plane's
-    ///    x and y axes</param>
+    /// <param name="width">(float) Width of rectangle as measured along the Plane's x and y axes</param>
+    /// <param name="height">(float) Height of rectangle as measured along the Plane's x and y axes</param>
     /// <returns>(Guid) ObjectId of new rectangle.</returns>
     static member AddRectangle(plane:Plane, width:float, height:float) : Guid =
         let rect = Rectangle3d(plane, width, height)
@@ -454,8 +470,7 @@ module AutoOpenCurve =
     /// <summary>Adds a spiral or helical curve to the document.</summary>
     /// <param name="point0">(Point3d) Helix axis start point or center of spiral.</param>
     /// <param name="point1">(Point3d) Helix axis end point or point normal on spiral Plane.</param>
-    /// <param name="pitch">(float) Distance between turns. If 0, then a spiral. If > 0 then the
-    ///    distance between helix "threads".</param>
+    /// <param name="pitch">(float) Distance between turns. If 0, then a spiral. If > 0 then the distance between helix "threads".</param>
     /// <param name="turns">(float) Number of turns.</param>
     /// <param name="radius0">(float) Starting radius of spiral.</param>
     /// <param name="radius1">(float) Optional, Ending radius of spiral. If omitted, the starting radius is used for the complete spiral.</param>
@@ -474,7 +489,8 @@ module AutoOpenCurve =
 
 
     /// <summary>Add a Curve object based on a portion, or interval of an existing Curve
-    ///    object. Similar in operation to Rhino's SubCrv command.</summary>
+    ///    object. Similar in operation to Rhino's SubCrv command.
+    /// </summary>
     /// <param name="curveId">(Guid) Identifier of a closed planar Curve object</param>
     /// <param name="param0">(float) First parameters on the source Curve</param>
     /// <param name="param1">(float) Second parameters on the source Curve</param>
@@ -499,16 +515,14 @@ module AutoOpenCurve =
 
     /// <summary>Returns the angle of an arc Curve object.</summary>
     /// <param name="curveId">(Guid) Identifier of a Curve object</param>
-    /// <param name="segmentIndex">(int) Optional,
-    ///    Identifies the Curve segment if CurveId identifies a poly-curve</param>
+    /// <param name="segmentIndex">(int) Optional, Identifies the Curve segment if CurveId identifies a poly-curve.</param>
     /// <returns>(float) The angle in degrees.</returns>
     static member ArcAngle(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : float =
         RhinoScriptSyntax.ArcAngle(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
 
     /// <summary>Returns the angle of an arc Curve object. Uses the supplied geometry directly.</summary>
     /// <param name="curveGeo">(Curve) The input geometry.</param>
-    /// <param name="segmentIndex">(int) Optional,
-    ///    Identifies the Curve segment if CurveId identifies a poly-curve</param>
+    /// <param name="segmentIndex">(int) Optional, Identifies the Curve segment if CurveId identifies a poly-curve.</param>
     /// <returns>(float) The angle in degrees.</returns>
     static member ArcAngle(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : float =
         let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
@@ -612,8 +626,6 @@ module AutoOpenCurve =
         let rc = curve.TryGetCircle(circle, RhinoMath.ZeroTolerance )
         if not <| rc then RhinoScriptingException.Raise "CircleCenterPlane: Curve is not circle. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
         (!circle).Plane
-
-
 
 
 

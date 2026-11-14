@@ -333,14 +333,18 @@ module AutoOpenApplication =
     /// <summary>Returns edge analysis mode displayed by the ShowEdges command.</summary>
     /// <returns>(int) The current edge analysis mode
     ///    0 - display all edges
-    ///    1 - display naked edges.</returns>
+    ///    1 - display naked edges
+    ///    2 - non-manifold edges
+    /// </returns>
     static member EdgeAnalysisMode() : int = //GET
         ApplicationSettings.EdgeAnalysisSettings.ShowEdges
 
     /// <summary>Modifies edge analysis mode displayed by the ShowEdges command.</summary>
     /// <param name="mode">(int) The new display mode. The available modes are
     ///    0 - display all edges
-    ///    1 - display naked edges</param>
+    ///    1 - display naked edges
+    ///    2 - non-manifold edges
+    /// </param>
     /// <returns>(unit) void, nothing.</returns>
     static member EdgeAnalysisMode(mode:int) : unit = //SET
         RhinoSync.DoSync (fun () ->
@@ -507,7 +511,8 @@ module AutoOpenApplication =
     ///    1 = cancel (command was cancelled by the user)
     ///    2 = nothing (command did nothing, but was not cancelled)
     ///    3 = failure (command failed due to bad input, computational problem...)
-    ///    4 = unknown command (the command was not found).</returns>
+    ///    4 = unknown command (the command was not found)
+    /// </returns>
     static member LastCommandResult() : int =
         RhinoSync.DoSync (fun () ->
             int(Commands.Command.LastCommandResult))
@@ -524,7 +529,8 @@ module AutoOpenApplication =
     ///    1040  Italian-Italy
     ///    1041  Japanese
     ///    1042  Korean
-    ///    1045  Polish.</returns>
+    ///    1045  Polish
+    /// </returns>
     static member LocaleID() : int =
         ApplicationSettings.AppearanceSettings.LanguageIdentifier
 
@@ -586,7 +592,8 @@ module AutoOpenApplication =
     ///    524288     Perpendicular
     ///    2097152    Tangent
     ///    134217728  Point
-    ///    Object snap modes can be added together to set multiple modes.</returns>
+    ///    Object snap modes can be added together to set multiple modes
+    /// </returns>
     static member OsnapMode() : int = //GET
         int(ModelAidSettings.OsnapModes)
 
@@ -606,7 +613,8 @@ module AutoOpenApplication =
     ///    524288     Perpendicular
     ///    2097152    Tangent
     ///    134217728  Point
-    ///    Object snap modes can be added together to set multiple modes</param>
+    ///    Object snap modes can be added together to set multiple modes
+    /// </param>
     /// <returns>(unit) void, nothing.</returns>
     static member OsnapMode(mode:int) : unit = //SET
         RhinoSync.DoSync (fun () ->
@@ -644,9 +652,10 @@ module AutoOpenApplication =
     ///    16 = utility.
     ///    If omitted, all are returned</param>
     /// <param name="status">(int) Optional, default value: <c>0</c>
-    /// 0 = both loaded and unloaded,
-    /// 1 = loaded,
-    /// 2 = unloaded. If omitted both statuses are returned</param>
+    ///     0 = both loaded and unloaded,
+    ///     1 = loaded,
+    ///     2 = unloaded. If omitted both statuses are returned
+    /// </param>
     /// <returns>(string array) array of registered Rhino plug-ins.</returns>
     static member PlugIns([<OPT;DEF(0)>]types:int, [<OPT;DEF(0)>]status:int) : array<string> =
         let mutable filter = enum<Rhino.PlugIns.PlugInType> 0
@@ -698,14 +707,16 @@ module AutoOpenApplication =
 
 
     /// <summary>Returns the number of path items in Rhino's search path list.
-    ///    See "Options Files settings" in the Rhino help file for more details.</summary>
+    ///    See "Options Files settings" in the Rhino help file for more details.
+    /// </summary>
     /// <returns>(int) The number of path items in Rhino's search path list.</returns>
     static member SearchPathCount() : int =
         ApplicationSettings.FileSettings.SearchPathCount
 
 
     /// <summary>Returns all of the path items in Rhino's search path list.
-    ///    See "Options Files settings" in the Rhino help file for more details.</summary>
+    ///    See "Options Files settings" in the Rhino help file for more details.
+    /// </summary>
     /// <returns>(string array) list of search paths.</returns>
     static member SearchPathList() : array<string> =
         ApplicationSettings.FileSettings.GetSearchPaths()
@@ -713,7 +724,9 @@ module AutoOpenApplication =
     /// <summary>Sends a string of printable characters to Rhino's Commandline.</summary>
     /// <param name="keys">(string) Optional, default value: <c>""</c>. Characters to send; omit to send only the optional return.</param>
     /// <param name="addReturn">(bool) Optional, default value: <c>true</c>
-    ///    Append a return character to the end of the string. If omitted a return character will be added (True)</param>
+    ///    Append a return character to the end of the string.
+    ///    If omitted a return character will be added (True)
+    /// </param>
     /// <returns>(unit) void, nothing.</returns>
     static member SendKeystrokes([<OPT;DEF("")>]keys:string, [<OPT;DEF(true)>]addReturn:bool) : unit =
         RhinoSync.DoSync (fun () ->
