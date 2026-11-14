@@ -81,7 +81,7 @@ module AutoOpenPointVector =
         else RhinoScriptingException.Raise "PointArrayClosestPoint failed on %A, %A" points testPoint
 
 
-    /// <summary>Transforms a list of 3D points.</summary>
+    /// <summary>Transforms a list of 3D points. The input points are not modified, a new list is returned.</summary>
     /// <param name="points">(Point3d IList) List of 3D points</param>
     /// <param name="xForm">(Transform) Transformation to apply</param>
     /// <returns>(Point3d ResizeArray) A new list of the transformed points.</returns>
@@ -213,7 +213,7 @@ module AutoOpenPointVector =
         Point3d.ArePointsCoplanar(points, tolerance)
 
 
-    /// <summary>Scales a 3D point by a value.</summary>
+    /// <summary>Scales a 3D point by a value. The input point is not modified, a new Point3d is returned.</summary>
     /// <param name="point">(Point3d) The point to divide</param>
     /// <param name="scale">(float) Scale factor to apply</param>
     /// <returns>(Point3d) resulting point.</returns>
@@ -230,7 +230,7 @@ module AutoOpenPointVector =
         Point3d(v)
 
 
-    /// <summary>Transforms a 3D point.</summary>
+    /// <summary>Transforms a 3D point. The input point is not modified, a new Point3d is returned.</summary>
     /// <param name="point">(Point3d) The point to transform</param>
     /// <param name="xForm">(Transform) A valid 4x4 transformation matrix</param>
     /// <returns>(Point3d) transformed Point.</returns>
@@ -336,8 +336,8 @@ module AutoOpenPointVector =
     /// <param name="vector2">(Vector3d) The second 3-D vector</param>
     /// <returns>(float) The angle in degrees.</returns>
     static member VectorAngle(vector1:Vector3d, vector2:Vector3d) : float =
-        let vector1 = Vector3d(vector1.X, vector1.Y, vector1.Z)
-        let vector2 = Vector3d(vector2.X, vector2.Y, vector2.Z)
+        let mutable vector1 = Vector3d(vector1.X, vector1.Y, vector1.Z)
+        let mutable vector2 = Vector3d(vector2.X, vector2.Y, vector2.Z)
         if not <| vector1.Unitize() || not <| vector2.Unitize() then
             RhinoScriptingException.Raise "VectorAngle: Unable to unitize vector.  vector1:'%A' vector2:'%A'" vector1 vector2
         let mutable dot = vector1 * vector2
@@ -415,7 +415,7 @@ module AutoOpenPointVector =
 
 
 
-    /// <summary>Rotates a 3D vector.</summary>
+    /// <summary>Rotates a 3D vector. The input vector is not modified, a new Vector3d is returned.</summary>
     /// <param name="vector">(Vector3d) The vector to rotate</param>
     /// <param name="angleDegrees">(float) Rotation angle</param>
     /// <param name="axis">(Vector3d) Axis of rotation</param>
@@ -424,12 +424,12 @@ module AutoOpenPointVector =
                                 angleDegrees:float,
                                 axis:Vector3d) : Vector3d =
         let angleradians = RhinoMath.ToRadians(angleDegrees)
-        let rc = Vector3d(vector.X, vector.Y, vector.Z)
+        let mutable rc = Vector3d(vector.X, vector.Y, vector.Z)
         if rc.Rotate(angleradians, axis) then rc
         else RhinoScriptingException.Raise "VectorRotate failed on %A, %A, %A" vector angleDegrees axis
 
 
-    /// <summary>Scales a 3-D vector.</summary>
+    /// <summary>Scales a 3-D vector. The input vector is not modified, a new Vector3d is returned.</summary>
     /// <param name="vector">(Vector3d) The vector to scale</param>
     /// <param name="scale">(float) Scale factor to apply</param>
     /// <returns>(Vector3d) resulting vector.</returns>
@@ -445,7 +445,7 @@ module AutoOpenPointVector =
         vector1-vector2
 
 
-    /// <summary>Transforms a 3D vector.</summary>
+    /// <summary>Transforms a 3D vector. The input vector is not modified, a new Vector3d is returned.</summary>
     /// <param name="vector">(Vector3d) The vector to transform</param>
     /// <param name="xForm">(Transform) A valid 4x4 transformation matrix</param>
     /// <returns>(Vector3d) transformed vector.</returns>

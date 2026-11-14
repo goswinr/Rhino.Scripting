@@ -3430,7 +3430,7 @@ type RhinoScriptSyntax private () =
     static member BlockInstanceInsertPoint(objectId:Guid) : Point3d =
         let  instance = RhinoScriptSyntax.CoerceBlockInstanceObject(objectId)
         let  xf = instance.InstanceXform
-        let  pt = Point3d(0. , 0. , 0.)
+        let mutable  pt = Point3d(0. , 0. , 0.)
         pt.Transform(xf)
         pt
 
@@ -5479,7 +5479,7 @@ type RhinoScriptSyntax private () =
         let  curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         if allowNonLinear || curve.IsLinear(RhinoMath.ZeroTolerance) then
             if curve.IsClosed || curve.IsClosable(State.Doc.ModelAbsoluteTolerance) then RhinoScriptingException.Raise "CurveDirection failed on closed or closable curve. curveGeo:'%s' allowNonLinear '%A' segmentIndex:'%A'" (Pretty.str curveGeo) allowNonLinear segmentIndex
-            let v = curve.PointAtEnd - curve.PointAtStart
+            let mutable v = curve.PointAtEnd - curve.PointAtStart
             if v.Unitize() then v
             else
                 RhinoScriptingException.Raise "CurveDirection failed. start and end are the same point. curveGeo:'%s' allowNonLinear '%A' segmentIndex:'%A'" (Pretty.str curveGeo) allowNonLinear segmentIndex
@@ -9358,7 +9358,7 @@ type RhinoScriptSyntax private () =
 
         if  inWorldCoords then
             let planetoworld = Transform.ChangeBasis(plane, Plane.WorldXY)
-            let box = Box(bbox)
+            let mutable box = Box(bbox)
             box.Transform(planetoworld) |> RhinoScriptingException.FailIfFalse "plane Transform in rs.BoundingBox()"
             box
         else
@@ -9385,7 +9385,7 @@ type RhinoScriptSyntax private () =
     /// <param name="amount">(float) amount in model units to expand</param>
     /// <returns>(Geometry.BoundingBox) The new Box.</returns>
     static member BoundingBoxInflate(bbox:BoundingBox, amount:float) : BoundingBox =
-        let b = BoundingBox(bbox.Min,bbox.Max)
+        let mutable b = BoundingBox(bbox.Min,bbox.Max)
         b.Inflate(amount)
         if not b.IsValid then RhinoScriptingException.Raise "BoundingBoxInflate Invalid BoundingBox from rs.BoundingBoxInflate by %f on %s" amount bbox.Pretty
         b
@@ -9400,7 +9400,7 @@ type RhinoScriptSyntax private () =
     /// <param name="amountZ">(float) amount on X Axis in model units to expand</param>
     /// <returns>(Geometry.BoundingBox) The new Box.</returns>
     static member BoundingBoxInflate(bbox:BoundingBox, amountX:float, amountY:float, amountZ:float) : BoundingBox =
-        let b = BoundingBox(bbox.Min,bbox.Max)
+        let mutable b = BoundingBox(bbox.Min,bbox.Max)
         b.Inflate(amountX, amountY, amountZ)
         if not b.IsValid then RhinoScriptingException.Raise "BoundingBoxInflate Invalid BoundingBox from rs.BoundingBoxInflate by x:%f, y:%f, z:%f, on %s" amountX amountY amountZ bbox.Pretty
         b
@@ -11187,7 +11187,7 @@ type RhinoScriptSyntax private () =
         light.Length <- light.Direction
         light.Width <- -light.Width
         let mutable plane = Plane(light.Location, light.Direction)
-        let xAxis = plane.XAxis
+        let mutable xAxis = plane.XAxis
         xAxis.Unitize() |> ignore<bool>
         plane.XAxis <- xAxis
         light.Width <- xAxis * ( min width ( v.Length/20.0))
@@ -11235,7 +11235,7 @@ type RhinoScriptSyntax private () =
         let pty =  heightPoint
         let length = pty-origin
         let width = ptx-origin
-        let normal = Vector3d.CrossProduct(width, length)
+        let mutable normal = Vector3d.CrossProduct(width, length)
         normal.Unitize() |> ignore<bool>
         let light = new Light()
         light.LightStyle <- LightStyle.WorldRectangular
@@ -11938,11 +11938,13 @@ type RhinoScriptSyntax private () =
         else [|pt1; pt2|]
 
 
-    /// <summary>Transforms a line.</summary>
+    /// <summary>Transforms a line object in the document. With copy=false the line object is transformed in place and keeps its Guid,
+    /// with copy=true the original is left unchanged and a transformed copy is added to the document.
+    /// The Line geometry overload returns a new transformed Line instead and does not touch the document.</summary>
     /// <param name="lineId">(Guid) The line to transform</param>
     /// <param name="xForm">(Transform) The transformation to apply</param>
     /// <param name="copy">(bool) Optional, default value: <c>false</c>. Copy the Line object</param>
-    /// <returns>(Guid) The same Guid, or a new Guid if copy=true.</returns>
+    /// <returns>(Guid) The same Guid if copy=false, or the Guid of the new line object if copy=true.</returns>
     static member LineTransform(    lineId:Guid,
                                     xForm:Transform,
                                     [<OPT;DEF(false)>]copy:bool)  : Guid =
@@ -11954,7 +11956,7 @@ type RhinoScriptSyntax private () =
         rc
 
 
-    /// <summary>Transforms a line geometry and returns the transformed line.</summary>
+    /// <summary>Transforms a line geometry and returns the transformed line. The input line is not modified, a new Line is returned.</summary>
     /// <param name="line">(Line) The line geometry to transform.</param>
     /// <param name="xForm">(Transform) The transformation to apply.</param>
     /// <returns>(Line) The transformed line.</returns>
@@ -13676,8 +13678,8 @@ type RhinoScriptSyntax private () =
             else
                 //Orient2Pt
                 let xformMove = Rhino.Geometry.Transform.Translation( targetPts.[0]-referencePts.[0] )
-                let v0 = referencePts.[1] - referencePts.[0]
-                let v1 = targetPts.[1] - targetPts.[0]
+                let mutable v0 = referencePts.[1] - referencePts.[0]
+                let mutable v1 = targetPts.[1] - targetPts.[0]
                 let xformScale =
                     if scale then
                         let len0 = v0.Length
@@ -13704,10 +13706,10 @@ type RhinoScriptSyntax private () =
         let mutable frame = Plane(plane)
         frame.Origin <- origin
         frame.ZAxis <- plane.Normal
-        let yAxis = referencePoint-origin
+        let mutable yAxis = referencePoint-origin
         yAxis.Unitize() |> ignore<bool>
         frame.YAxis <- yAxis
-        let xAxis = Vector3d.CrossProduct(frame.ZAxis, frame.YAxis)
+        let mutable xAxis = Vector3d.CrossProduct(frame.ZAxis, frame.YAxis)
         xAxis.Unitize() |> ignore<bool>
         frame.XAxis <- xAxis
         let worldPlane = Plane.WorldXY
@@ -13730,7 +13732,7 @@ type RhinoScriptSyntax private () =
 
 
     /// <summary>Moves, scales, or rotates a list of objects given a 4x4 transformation
-    ///    matrix. The matrix acts on the left. Use the geometry overload to return transformed duplicates without modifying document objects.</summary>
+    ///    matrix. The matrix acts on the left. Use the geometry overload to return transformed duplicates without modifying document objects. With copy=false the objects in the document are transformed in place and keep their Guids, with copy=true the originals are left unchanged and transformed copies are added to the document. The geometry overload returns transformed duplicates instead and does not touch the document.</summary>
     /// <param name="objectIds">(Guid seq) List of object identifiers</param>
     /// <param name="matrix">(Transform) The transformation matrix (4x4 array of numbers)</param>
     /// <param name="copy">(bool) Optional, default value: <c>false</c>
@@ -13767,7 +13769,7 @@ type RhinoScriptSyntax private () =
 
 
     /// <summary>Moves, scales, or rotates an object given a 4x4 transformation matrix.
-    ///    The matrix acts on the left. Use the geometry overload to return transformed duplicates without modifying document objects.</summary>
+    ///    The matrix acts on the left. Use the geometry overload to return transformed duplicates without modifying document objects. With copy=false the object in the document is transformed in place and keeps its Guid, with copy=true the original is left unchanged and a transformed copy is added to the document. The geometry overload returns a transformed duplicate instead and does not touch the document.</summary>
     /// <param name="objectId">(Guid) The identifier of the object</param>
     /// <param name="matrix">(Transform) The transformation matrix (4x4 array of numbers)</param>
     /// <param name="copy">(bool) Optional, default value: <c>false</c>
@@ -13803,7 +13805,7 @@ type RhinoScriptSyntax private () =
 
 
     /// <summary>Copies an object from one location to another, or in-place.
-    /// The copy of a grouped object is put into a new group.</summary>
+    /// The copy of a grouped object is put into a new group. The original is left unchanged and the copy is added to the document. The geometry overload returns a transformed duplicate instead and does not touch the document.</summary>
     /// <param name="objectId">(Guid) Object to copy</param>
     /// <param name="translation">(Vector3d) Optional, additional translation vector to apply</param>
     /// <returns>(Guid) objectId for the copy.</returns>
@@ -13834,7 +13836,7 @@ type RhinoScriptSyntax private () =
 
 
     /// <summary>Copies one or more objects from one location to another, or in-place.
-    /// Copies of grouped objects are put into new groups.</summary>
+    /// Copies of grouped objects are put into new groups. The originals are left unchanged and the copies are added to the document. The geometry overload returns transformed duplicates instead and does not touch the document.</summary>
     /// <param name="objectIds">(Guid seq) List of objects to copy</param>
     /// <param name="translation">(Vector3d) Optional, translation vector to apply to copied set</param>
     /// <returns>(Guid ResizeArray) Identifiers for the copies.</returns>
@@ -14133,7 +14135,7 @@ type RhinoScriptSyntax private () =
         rc
 
 
-    /// <summary>Mirrors a single object on World XY Plane.</summary>
+    /// <summary>Mirrors a single object on World XY Plane. With copy=false the object in the document is transformed in place and keeps its Guid, with copy=true the original is left unchanged and a transformed copy is added to the document. The geometry overload returns a transformed duplicate instead and does not touch the document.</summary>
     /// <param name="objectId">(Guid) The identifier of an object to mirror</param>
     /// <param name="startPoint">(Point3d) Start of the mirror Plane</param>
     /// <param name="endPoint">(Point3d) End of the mirror Plane</param>
@@ -14164,7 +14166,7 @@ type RhinoScriptSyntax private () =
         RhinoScriptSyntax.TransformObject(geometry, xf)
 
 
-    /// <summary>Mirrors a list of objects on World XY Plane.</summary>
+    /// <summary>Mirrors a list of objects on World XY Plane. With copy=false the objects in the document are transformed in place and keep their Guids, with copy=true the originals are left unchanged and transformed copies are added to the document. The geometry overload returns transformed duplicates instead and does not touch the document.</summary>
     /// <param name="objectIds">(Guid seq) Identifiers of objects to mirror</param>
     /// <param name="startPoint">(Point3d) Start of the mirror Plane</param>
     /// <param name="endPoint">(Point3d) End of the mirror Plane</param>
@@ -14197,7 +14199,7 @@ type RhinoScriptSyntax private () =
         RhinoScriptSyntax.TransformObjects(geometries, xf)
 
 
-    /// <summary>Moves a single object.</summary>
+    /// <summary>Moves a single object. The object in the document is moved in place and keeps its Guid, no copy is made. Use CopyObject to move a copy.</summary>
     /// <param name="objectId">(Guid) The identifier of an object to move</param>
     /// <param name="translation">(Vector3d) Vector3d</param>
     /// <returns>(unit) void, nothing.</returns>
@@ -14208,7 +14210,7 @@ type RhinoScriptSyntax private () =
         State.Doc.Views.Redraw()
         //if objectId <> res
 
-    /// <summary>Moves one or more objects.</summary>
+    /// <summary>Moves one or more objects. The objects in the document are moved in place and keep their Guids, no copies are made. Use CopyObjects to move copies.</summary>
     /// <param name="objectIds">(Guid seq) The identifiers objects to move</param>
     /// <param name="translation">(Vector3d)Vector3d</param>
     /// <returns>(unit) void, nothing.</returns>
@@ -14859,7 +14861,7 @@ type RhinoScriptSyntax private () =
     /// function similar to Rhino's Orient command.
     /// If more than two 3-D points are specified,
     /// then the function will orient similar to Rhino's Orient3Pt command.
-    /// </summary>
+    /// Without the copy flag the object in the document is transformed in place and keeps its Guid, with the copy flag the original is left unchanged and a transformed copy is added to the document. The geometry overload returns a transformed duplicate instead and does not touch the document.</summary>
     /// <param name="objectId">(Guid) Identifier of object</param>
     /// <param name="referencePts">(IList of Point3d) list of 3D reference points.</param>
     /// <param name="targetPts">(IList of Point3d) list of 3D target points.</param>
@@ -14891,7 +14893,7 @@ type RhinoScriptSyntax private () =
         RhinoScriptSyntax.TransformObject(geometry, xform)
 
 
-    /// <summary>Rotates a single object.</summary>
+    /// <summary>Rotates a single object. With copy=false the object in the document is transformed in place and keeps its Guid, with copy=true the original is left unchanged and a transformed copy is added to the document. The geometry overload returns a transformed duplicate instead and does not touch the document.</summary>
     /// <param name="objectId">(Guid) The identifier of an object to rotate</param>
     /// <param name="centerPoint">(Point3d) The center of rotation</param>
     /// <param name="rotationAngle">(float) In degrees</param>
@@ -14931,7 +14933,7 @@ type RhinoScriptSyntax private () =
         RhinoScriptSyntax.TransformObject(geometry, xf)
 
 
-    /// <summary>Rotates multiple objects.</summary>
+    /// <summary>Rotates multiple objects. With copy=false the objects in the document are transformed in place and keep their Guids, with copy=true the originals are left unchanged and transformed copies are added to the document. The geometry overload returns transformed duplicates instead and does not touch the document.</summary>
     /// <param name="objectIds">(Guid seq) Identifiers of objects to rotate</param>
     /// <param name="centerPoint">(Point3d) The center of rotation</param>
     /// <param name="rotationAngle">(float) In degrees</param>
@@ -14974,7 +14976,7 @@ type RhinoScriptSyntax private () =
 
 
     /// <summary>Scales a single object. Can be used to perform a uniform or non-uniform
-    ///    scale transformation. Scaling is based on the WorldXY Plane.</summary>
+    ///    scale transformation. Scaling is based on the WorldXY Plane. With copy=false the object in the document is transformed in place and keeps its Guid, with copy=true the original is left unchanged and a transformed copy is added to the document. The geometry overload returns a transformed duplicate instead and does not touch the document.</summary>
     /// <param name="objectId">(Guid) The identifier of an object</param>
     /// <param name="origin">(Point3d) The origin of the scale transformation</param>
     /// <param name="scale">(float*float*float) Three numbers that identify the X, Y, and Z axis scale factors to apply</param>
@@ -15010,7 +15012,7 @@ type RhinoScriptSyntax private () =
         RhinoScriptSyntax.TransformObject(geometry, xf)
 
 
-    /// <summary>Scales a single object. Uniform scale transformation. Scaling is based on the WorldXY Plane.</summary>
+    /// <summary>Scales a single object. Uniform scale transformation. Scaling is based on the WorldXY Plane. With copy=false the object in the document is transformed in place and keeps its Guid, with copy=true the original is left unchanged and a transformed copy is added to the document. The geometry overload returns a transformed duplicate instead and does not touch the document.</summary>
     /// <param name="objectId">(Guid) The identifier of an object</param>
     /// <param name="origin">(Point3d) The origin of the scale transformation</param>
     /// <param name="scale">(float) One numbers that identify the X, Y, and Z axis scale factors to apply</param>
@@ -15045,7 +15047,7 @@ type RhinoScriptSyntax private () =
 
 
     /// <summary>Scales one or more objects. Can be used to perform a uniform or non-
-    ///    uniform scale transformation. Scaling is based on the WorldXY Plane.</summary>
+    ///    uniform scale transformation. Scaling is based on the WorldXY Plane. With copy=false the objects in the document are transformed in place and keep their Guids, with copy=true the originals are left unchanged and transformed copies are added to the document. The geometry overload returns transformed duplicates instead and does not touch the document.</summary>
     /// <param name="objectIds">(Guid seq) Identifiers of objects to scale</param>
     /// <param name="origin">(Point3d) The origin of the scale transformation</param>
     /// <param name="scale">(float*float*float) Three numbers that identify the X, Y, and Z axis scale factors to apply</param>
@@ -15083,7 +15085,7 @@ type RhinoScriptSyntax private () =
         RhinoScriptSyntax.TransformObjects(geometries, xf)
 
 
-    /// <summary>Scales one or more objects. Uniform scale transformation. Scaling is based on the WorldXY Plane.</summary>
+    /// <summary>Scales one or more objects. Uniform scale transformation. Scaling is based on the WorldXY Plane. With copy=false the objects in the document are transformed in place and keep their Guids, with copy=true the originals are left unchanged and transformed copies are added to the document. The geometry overload returns transformed duplicates instead and does not touch the document.</summary>
     /// <param name="objectIds">(Guid seq) Identifiers of objects to scale</param>
     /// <param name="origin">(Point3d) The origin of the scale transformation</param>
     /// <param name="scale">(float) One numbers that identify the X, Y, and Z axis scale factors to apply</param>
@@ -15194,7 +15196,7 @@ type RhinoScriptSyntax private () =
             )
 
 
-    /// <summary>Perform a shear transformation on a single object.</summary>
+    /// <summary>Perform a shear transformation on a single object. With copy=false the object in the document is transformed in place and keeps its Guid, with copy=true the original is left unchanged and a transformed copy is added to the document. The geometry overload returns a transformed duplicate instead and does not touch the document.</summary>
     /// <param name="objectId">(Guid) The identifier of an object</param>
     /// <param name="origin">(Point3d) Origin point of the shear transformation</param>
     /// <param name="referencePoint">(Point3d) Reference point of the shear transformation</param>
@@ -15233,7 +15235,7 @@ type RhinoScriptSyntax private () =
         RhinoScriptSyntax.TransformObject(geometry, xf)
 
 
-    /// <summary>Shears one or more objects.</summary>
+    /// <summary>Shears one or more objects. With copy=false the objects in the document are transformed in place and keep their Guids, with copy=true the originals are left unchanged and transformed copies are added to the document. The geometry overload returns transformed duplicates instead and does not touch the document.</summary>
     /// <param name="objectIds">(Guid seq) The identifiers objects to shear</param>
     /// <param name="origin">(Point3d) Origin point of the shear transformation</param>
     /// <param name="referencePoint">(Point3d) Reference point of the shear transformation</param>
@@ -15370,7 +15372,7 @@ type RhinoScriptSyntax private () =
         else RhinoScriptingException.Raise "IntersectPlanes failed, are they parallel? %A; %A; %A" plane1 plane2 plane3
 
 
-    /// <summary>Moves the origin of a plane.</summary>
+    /// <summary>Moves the origin of a plane. The input plane is not modified, a new Plane is returned.</summary>
     /// <param name="plane">(Plane) The plane</param>
     /// <param name="origin">(Point3d) Point3d or list of three numbers</param>
     /// <returns>(Plane) Moved plane.</returns>
@@ -15385,7 +15387,7 @@ type RhinoScriptSyntax private () =
     /// <param name="plane">(Plane) The plane</param>
     /// <returns>(Plane) Flipped plane.</returns>
     static member FlipPlane(plane:Plane) : Plane =
-        let pl = Plane(plane)
+        let mutable pl = Plane(plane)
         pl.Flip()
         pl
 
@@ -15551,7 +15553,7 @@ type RhinoScriptSyntax private () =
         let mutable rc = Plane(origin, normal)
         if not xAxis.IsZero then
             //x axis = RhinoScriptSyntax.Coerce3dvector(x axis)
-            let xAxis = Vector3d(xAxis)//prevent original x axis parameter from being unitized too
+            let mutable xAxis = Vector3d(xAxis)//prevent original x axis parameter from being unitized too
             xAxis.Unitize() |> ignore<bool>
             let yAxis = Vector3d.CrossProduct(rc.Normal, xAxis)
             rc <- Plane(origin, xAxis, yAxis)
@@ -15612,19 +15614,19 @@ type RhinoScriptSyntax private () =
             RhinoScriptingException.Raise "PlaneSphereIntersection failed for %A; %A, %A" plane spherePlane sphereRadius
 
 
-    /// <summary>Transforms a Plane.</summary>
+    /// <summary>Transforms a Plane. The input plane is not modified, a new Plane is returned.</summary>
     /// <param name="plane">(Plane) Plane to transform</param>
     /// <param name="xForm">(Transform) Transformation to apply</param>
     /// <returns>(Plane) The resulting Plane.</returns>
     static member PlaneTransform(plane:Plane, xForm:Transform) : Plane =
         //plane = RhinoScriptSyntax.CoercePlane(plane)
         //xForm = RhinoScriptSyntax.CoercexForm(xForm)
-        let rc = Plane(plane)
+        let mutable rc = Plane(plane)
         if rc.Transform(xForm) then rc
         else RhinoScriptingException.Raise "PlaneTransform failed for %A; %A" plane xForm
 
 
-    /// <summary>Rotates a Plane.</summary>
+    /// <summary>Rotates a Plane. The input plane is not modified, a new Plane is returned.</summary>
     /// <param name="plane">(Plane) Plane to rotate</param>
     /// <param name="angleDegrees">(float) Rotation angle in degrees</param>
     /// <param name="axis">(Vector3d) Axis of rotation or list of three numbers</param>
@@ -15635,7 +15637,7 @@ type RhinoScriptSyntax private () =
         //plane = RhinoScriptSyntax.CoercePlane(plane)
         //axis = RhinoScriptSyntax.Coerce3dvector(axis)
         let angleradians = toRadians(angleDegrees)
-        let rc = Plane(plane)
+        let mutable rc = Plane(plane)
         if rc.Rotate(angleradians, axis) then rc
         else RhinoScriptingException.Raise "RotatePlane failed for %A; %A; %A" plane angleDegrees axis
 
@@ -15721,7 +15723,7 @@ type RhinoScriptSyntax private () =
         else RhinoScriptingException.Raise "PointArrayClosestPoint failed on %A, %A" points testPoint
 
 
-    /// <summary>Transforms a list of 3D points.</summary>
+    /// <summary>Transforms a list of 3D points. The input points are not modified, a new list is returned.</summary>
     /// <param name="points">(Point3d IList) List of 3D points</param>
     /// <param name="xForm">(Transform) Transformation to apply</param>
     /// <returns>(Point3d ResizeArray) A new list of the transformed points.</returns>
@@ -15853,7 +15855,7 @@ type RhinoScriptSyntax private () =
         Point3d.ArePointsCoplanar(points, tolerance)
 
 
-    /// <summary>Scales a 3D point by a value.</summary>
+    /// <summary>Scales a 3D point by a value. The input point is not modified, a new Point3d is returned.</summary>
     /// <param name="point">(Point3d) The point to divide</param>
     /// <param name="scale">(float) Scale factor to apply</param>
     /// <returns>(Point3d) resulting point.</returns>
@@ -15870,7 +15872,7 @@ type RhinoScriptSyntax private () =
         Point3d(v)
 
 
-    /// <summary>Transforms a 3D point.</summary>
+    /// <summary>Transforms a 3D point. The input point is not modified, a new Point3d is returned.</summary>
     /// <param name="point">(Point3d) The point to transform</param>
     /// <param name="xForm">(Transform) A valid 4x4 transformation matrix</param>
     /// <returns>(Point3d) transformed Point.</returns>
@@ -15976,8 +15978,8 @@ type RhinoScriptSyntax private () =
     /// <param name="vector2">(Vector3d) The second 3-D vector</param>
     /// <returns>(float) The angle in degrees.</returns>
     static member VectorAngle(vector1:Vector3d, vector2:Vector3d) : float =
-        let vector1 = Vector3d(vector1.X, vector1.Y, vector1.Z)
-        let vector2 = Vector3d(vector2.X, vector2.Y, vector2.Z)
+        let mutable vector1 = Vector3d(vector1.X, vector1.Y, vector1.Z)
+        let mutable vector2 = Vector3d(vector2.X, vector2.Y, vector2.Z)
         if not <| vector1.Unitize() || not <| vector2.Unitize() then
             RhinoScriptingException.Raise "VectorAngle: Unable to unitize vector.  vector1:'%A' vector2:'%A'" vector1 vector2
         let mutable dot = vector1 * vector2
@@ -16055,7 +16057,7 @@ type RhinoScriptSyntax private () =
 
 
 
-    /// <summary>Rotates a 3D vector.</summary>
+    /// <summary>Rotates a 3D vector. The input vector is not modified, a new Vector3d is returned.</summary>
     /// <param name="vector">(Vector3d) The vector to rotate</param>
     /// <param name="angleDegrees">(float) Rotation angle</param>
     /// <param name="axis">(Vector3d) Axis of rotation</param>
@@ -16064,12 +16066,12 @@ type RhinoScriptSyntax private () =
                                 angleDegrees:float,
                                 axis:Vector3d) : Vector3d =
         let angleradians = RhinoMath.ToRadians(angleDegrees)
-        let rc = Vector3d(vector.X, vector.Y, vector.Z)
+        let mutable rc = Vector3d(vector.X, vector.Y, vector.Z)
         if rc.Rotate(angleradians, axis) then rc
         else RhinoScriptingException.Raise "VectorRotate failed on %A, %A, %A" vector angleDegrees axis
 
 
-    /// <summary>Scales a 3-D vector.</summary>
+    /// <summary>Scales a 3-D vector. The input vector is not modified, a new Vector3d is returned.</summary>
     /// <param name="vector">(Vector3d) The vector to scale</param>
     /// <param name="scale">(float) Scale factor to apply</param>
     /// <returns>(Vector3d) resulting vector.</returns>
@@ -16085,7 +16087,7 @@ type RhinoScriptSyntax private () =
         vector1-vector2
 
 
-    /// <summary>Transforms a 3D vector.</summary>
+    /// <summary>Transforms a 3D vector. The input vector is not modified, a new Vector3d is returned.</summary>
     /// <param name="vector">(Vector3d) The vector to transform</param>
     /// <param name="xForm">(Transform) A valid 4x4 transformation matrix</param>
     /// <returns>(Vector3d) transformed vector.</returns>
@@ -17017,8 +17019,8 @@ type RhinoScriptSyntax private () =
         let pick () =
             let view = RhinoScriptSyntax.CoerceViewOrActive(view)
             let viewport = view.MainViewport
-            let screen1 = corner1
-            let screen2 = corner2
+            let mutable screen1 = corner1
+            let mutable screen2 = corner2
             let xf = viewport.GetTransform(DocObjects.CoordinateSystem.World, DocObjects.CoordinateSystem.Screen)
             screen1.Transform(xf)
             screen2.Transform(xf)
@@ -21767,7 +21769,7 @@ type RhinoScriptSyntax private () =
             let clientPt = view.ScreenToClient(screenPt)
             let viewport = view.ActiveViewport
             let xf = viewport.GetTransform(DocObjects.CoordinateSystem.Screen, DocObjects.CoordinateSystem.World)
-            let worldPt = Point3d(clientPt.X, clientPt.Y, 0.0)
+            let mutable worldPt = Point3d(clientPt.X, clientPt.Y, 0.0)
             worldPt.Transform(xf)
             worldPt, screenPt, viewport.Id, clientPt
         RhinoSync.DoSyncRedrawHideEditor get
@@ -22806,8 +22808,8 @@ type RhinoScriptSyntax private () =
     ///    1 = The reflex angle in degrees.
     /// </returns>
     static member Angle2(line1:Line, line2:Line) : float * float =
-        let vec0 = line1.To - line1.From
-        let vec1 = line2.To - line2.From
+        let mutable vec0 = line1.To - line1.From
+        let mutable vec1 = line2.To - line2.From
         if not <| vec0.Unitize() || not <| vec1.Unitize() then  RhinoScriptingException.Raise "Angle2 two failed on %A and %A" line1 line2
         let mutable dot = vec0 * vec1
         dot <- max -1.0 (min 1.0 dot) // clamp for math errors
@@ -22999,7 +23001,7 @@ type RhinoScriptSyntax private () =
         let mutable offset = plane.XAxis
         offset.Unitize() |> ignore<bool>
         offset <- distance * offset
-        let rc = point + offset
+        let mutable rc = point + offset
         let xForm = Transform.Rotation(angle, plane.ZAxis, point)
         rc.Transform(xForm)
         rc

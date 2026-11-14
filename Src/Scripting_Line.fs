@@ -157,11 +157,13 @@ module AutoOpenLine =
         else [|pt1; pt2|]
 
 
-    /// <summary>Transforms a line.</summary>
+    /// <summary>Transforms a line object in the document. With copy=false the line object is transformed in place and keeps its Guid,
+    /// with copy=true the original is left unchanged and a transformed copy is added to the document.
+    /// The Line geometry overload returns a new transformed Line instead and does not touch the document.</summary>
     /// <param name="lineId">(Guid) The line to transform</param>
     /// <param name="xForm">(Transform) The transformation to apply</param>
     /// <param name="copy">(bool) Optional, default value: <c>false</c>. Copy the Line object</param>
-    /// <returns>(Guid) The same Guid, or a new Guid if copy=true.</returns>
+    /// <returns>(Guid) The same Guid if copy=false, or the Guid of the new line object if copy=true.</returns>
     static member LineTransform(    lineId:Guid,
                                     xForm:Transform,
                                     [<OPT;DEF(false)>]copy:bool)  : Guid =
@@ -173,7 +175,7 @@ module AutoOpenLine =
         rc
 
 
-    /// <summary>Transforms a line geometry and returns the transformed line.</summary>
+    /// <summary>Transforms a line geometry and returns the transformed line. The input line is not modified, a new Line is returned.</summary>
     /// <param name="line">(Line) The line geometry to transform.</param>
     /// <param name="xForm">(Transform) The transformation to apply.</param>
     /// <returns>(Line) The transformed line.</returns>

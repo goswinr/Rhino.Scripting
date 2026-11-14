@@ -125,7 +125,7 @@ module AutoOpenBlock =
     static member BlockInstanceInsertPoint(objectId:Guid) : Point3d =
         let  instance = RhinoScriptSyntax.CoerceBlockInstanceObject(objectId)
         let  xf = instance.InstanceXform
-        let  pt = Point3d(0. , 0. , 0.)
+        let mutable  pt = Point3d(0. , 0. , 0.)
         pt.Transform(xf)
         pt
 

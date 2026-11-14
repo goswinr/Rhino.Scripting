@@ -911,8 +911,8 @@ module AutoOpenSelection =
         let pick () =
             let view = RhinoScriptSyntax.CoerceViewOrActive(view)
             let viewport = view.MainViewport
-            let screen1 = corner1
-            let screen2 = corner2
+            let mutable screen1 = corner1
+            let mutable screen2 = corner2
             let xf = viewport.GetTransform(DocObjects.CoordinateSystem.World, DocObjects.CoordinateSystem.Screen)
             screen1.Transform(xf)
             screen2.Transform(xf)

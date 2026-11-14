@@ -1785,7 +1785,7 @@ module AutoOpenCurve =
         let  curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         if allowNonLinear || curve.IsLinear(RhinoMath.ZeroTolerance) then
             if curve.IsClosed || curve.IsClosable(State.Doc.ModelAbsoluteTolerance) then RhinoScriptingException.Raise "CurveDirection failed on closed or closable curve. curveGeo:'%s' allowNonLinear '%A' segmentIndex:'%A'" (Pretty.str curveGeo) allowNonLinear segmentIndex
-            let v = curve.PointAtEnd - curve.PointAtStart
+            let mutable v = curve.PointAtEnd - curve.PointAtStart
             if v.Unitize() then v
             else
                 RhinoScriptingException.Raise "CurveDirection failed. start and end are the same point. curveGeo:'%s' allowNonLinear '%A' segmentIndex:'%A'" (Pretty.str curveGeo) allowNonLinear segmentIndex

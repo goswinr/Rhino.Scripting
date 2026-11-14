@@ -78,8 +78,8 @@ module AutoOpenUtility =
     ///    1 = The reflex angle in degrees.
     /// </returns>
     static member Angle2(line1:Line, line2:Line) : float * float =
-        let vec0 = line1.To - line1.From
-        let vec1 = line2.To - line2.From
+        let mutable vec0 = line1.To - line1.From
+        let mutable vec1 = line2.To - line2.From
         if not <| vec0.Unitize() || not <| vec1.Unitize() then  RhinoScriptingException.Raise "Angle2 two failed on %A and %A" line1 line2
         let mutable dot = vec0 * vec1
         dot <- max -1.0 (min 1.0 dot) // clamp for math errors
@@ -271,7 +271,7 @@ module AutoOpenUtility =
         let mutable offset = plane.XAxis
         offset.Unitize() |> ignore<bool>
         offset <- distance * offset
-        let rc = point + offset
+        let mutable rc = point + offset
         let xForm = Transform.Rotation(angle, plane.ZAxis, point)
         rc.Transform(xForm)
         rc

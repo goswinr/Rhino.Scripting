@@ -52,7 +52,7 @@ module AutoOpenPlane =
         else RhinoScriptingException.Raise "IntersectPlanes failed, are they parallel? %A; %A; %A" plane1 plane2 plane3
 
 
-    /// <summary>Moves the origin of a plane.</summary>
+    /// <summary>Moves the origin of a plane. The input plane is not modified, a new Plane is returned.</summary>
     /// <param name="plane">(Plane) The plane</param>
     /// <param name="origin">(Point3d) Point3d or list of three numbers</param>
     /// <returns>(Plane) Moved plane.</returns>
@@ -67,7 +67,7 @@ module AutoOpenPlane =
     /// <param name="plane">(Plane) The plane</param>
     /// <returns>(Plane) Flipped plane.</returns>
     static member FlipPlane(plane:Plane) : Plane =
-        let pl = Plane(plane)
+        let mutable pl = Plane(plane)
         pl.Flip()
         pl
 
@@ -233,7 +233,7 @@ module AutoOpenPlane =
         let mutable rc = Plane(origin, normal)
         if not xAxis.IsZero then
             //x axis = RhinoScriptSyntax.Coerce3dvector(x axis)
-            let xAxis = Vector3d(xAxis)//prevent original x axis parameter from being unitized too
+            let mutable xAxis = Vector3d(xAxis)//prevent original x axis parameter from being unitized too
             xAxis.Unitize() |> ignore<bool>
             let yAxis = Vector3d.CrossProduct(rc.Normal, xAxis)
             rc <- Plane(origin, xAxis, yAxis)
@@ -294,19 +294,19 @@ module AutoOpenPlane =
             RhinoScriptingException.Raise "PlaneSphereIntersection failed for %A; %A, %A" plane spherePlane sphereRadius
 
 
-    /// <summary>Transforms a Plane.</summary>
+    /// <summary>Transforms a Plane. The input plane is not modified, a new Plane is returned.</summary>
     /// <param name="plane">(Plane) Plane to transform</param>
     /// <param name="xForm">(Transform) Transformation to apply</param>
     /// <returns>(Plane) The resulting Plane.</returns>
     static member PlaneTransform(plane:Plane, xForm:Transform) : Plane =
         //plane = RhinoScriptSyntax.CoercePlane(plane)
         //xForm = RhinoScriptSyntax.CoercexForm(xForm)
-        let rc = Plane(plane)
+        let mutable rc = Plane(plane)
         if rc.Transform(xForm) then rc
         else RhinoScriptingException.Raise "PlaneTransform failed for %A; %A" plane xForm
 
 
-    /// <summary>Rotates a Plane.</summary>
+    /// <summary>Rotates a Plane. The input plane is not modified, a new Plane is returned.</summary>
     /// <param name="plane">(Plane) Plane to rotate</param>
     /// <param name="angleDegrees">(float) Rotation angle in degrees</param>
     /// <param name="axis">(Vector3d) Axis of rotation or list of three numbers</param>
@@ -317,7 +317,7 @@ module AutoOpenPlane =
         //plane = RhinoScriptSyntax.CoercePlane(plane)
         //axis = RhinoScriptSyntax.Coerce3dvector(axis)
         let angleradians = toRadians(angleDegrees)
-        let rc = Plane(plane)
+        let mutable rc = Plane(plane)
         if rc.Rotate(angleradians, axis) then rc
         else RhinoScriptingException.Raise "RotatePlane failed for %A; %A; %A" plane angleDegrees axis
 

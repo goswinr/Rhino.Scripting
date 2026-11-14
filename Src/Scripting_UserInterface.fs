@@ -245,7 +245,7 @@ module AutoOpenUserInterface =
             let clientPt = view.ScreenToClient(screenPt)
             let viewport = view.ActiveViewport
             let xf = viewport.GetTransform(DocObjects.CoordinateSystem.Screen, DocObjects.CoordinateSystem.World)
-            let worldPt = Point3d(clientPt.X, clientPt.Y, 0.0)
+            let mutable worldPt = Point3d(clientPt.X, clientPt.Y, 0.0)
             worldPt.Transform(xf)
             worldPt, screenPt, viewport.Id, clientPt
         RhinoSync.DoSyncRedrawHideEditor get

@@ -1097,7 +1097,7 @@ From [Src/Scripting_Line.fs](../../Src/Scripting_Line.fs).
 | `LinePlane` | `line: Line -> Plane` | Returns a Plane that contains the line. |
 | `LinePlaneIntersection` | `line: Line * plane: Plane -> Point3d` | Calculates the intersection of a line and a Plane. |
 | `LineSphereIntersection` | `line: Line * sphereCenter: Point3d * sphereRadius: float -> Point3d array` | Calculates the intersection of a line and a sphere. |
-| `LineTransform` | `lineId: Guid * xForm: Transform * ?copy: bool = false -> Guid` | Transforms a line. |
+| `LineTransform` | `lineId: Guid * xForm: Transform * ?copy: bool = false -> Guid` | Transforms a line object in the document. |
 | `LineTransform` | `line: Line * xForm: Transform -> Line` | Transforms a line geometry and returns the transformed line. |
 
 ## Linetype

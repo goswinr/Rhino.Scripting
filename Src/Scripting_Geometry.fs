@@ -410,7 +410,7 @@ module AutoOpenGeometry =
 
         if  inWorldCoords then
             let planetoworld = Transform.ChangeBasis(plane, Plane.WorldXY)
-            let box = Box(bbox)
+            let mutable box = Box(bbox)
             box.Transform(planetoworld) |> RhinoScriptingException.FailIfFalse "plane Transform in rs.BoundingBox()"
             box
         else
@@ -437,7 +437,7 @@ module AutoOpenGeometry =
     /// <param name="amount">(float) amount in model units to expand</param>
     /// <returns>(Geometry.BoundingBox) The new Box.</returns>
     static member BoundingBoxInflate(bbox:BoundingBox, amount:float) : BoundingBox =
-        let b = BoundingBox(bbox.Min,bbox.Max)
+        let mutable b = BoundingBox(bbox.Min,bbox.Max)
         b.Inflate(amount)
         if not b.IsValid then RhinoScriptingException.Raise "BoundingBoxInflate Invalid BoundingBox from rs.BoundingBoxInflate by %f on %s" amount bbox.Pretty
         b
@@ -452,7 +452,7 @@ module AutoOpenGeometry =
     /// <param name="amountZ">(float) amount on X Axis in model units to expand</param>
     /// <returns>(Geometry.BoundingBox) The new Box.</returns>
     static member BoundingBoxInflate(bbox:BoundingBox, amountX:float, amountY:float, amountZ:float) : BoundingBox =
-        let b = BoundingBox(bbox.Min,bbox.Max)
+        let mutable b = BoundingBox(bbox.Min,bbox.Max)
         b.Inflate(amountX, amountY, amountZ)
         if not b.IsValid then RhinoScriptingException.Raise "BoundingBoxInflate Invalid BoundingBox from rs.BoundingBoxInflate by x:%f, y:%f, z:%f, on %s" amountX amountY amountZ bbox.Pretty
         b
