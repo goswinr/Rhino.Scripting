@@ -28,6 +28,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - XformScale overloads with a Plane, to scale about the Plane's origin along the Plane's axes, like in RhinoPython
 - The NuGet package ships an agent skill, rhino.scripting-usage, with the API table, for installation with dotnet-package-skills.
 ### Changed
+- Breaking: ShrinkTrimmedSurface returns a bool, false when there is nothing to shrink, like in RhinoPython; before, it raised, and returned the input or copy Guid on success. The Brep overload returns a Brep option, None when there is nothing to shrink.
+- Breaking: MeshBooleanDifference, MeshBooleanIntersection, MeshBooleanSplit and MeshBooleanUnion check all result meshes before adding any; an invalid result raises with the Rhino mesh log in the message, and nothing is added. MeshBooleanUnion used to skip results it could not add silently.
+- Documented that ShootRay returns the start point first, that SurfaceAreaMoments and SurfaceVolumeMoments return 14 tuples, that IsPointOnSurface raises for polysurfaces with several faces, and that BooleanIntersection, AddSweep1, AddSweep2 and FilletSurfaces return an empty list when there is no result.
 - ShowToolbar, HideToolbar, IsToolbarVisible and IsToolbarDocked are marked obsolete: RhinoCommon lists no toolbar groups in Rhino 8, and in Rhino 9 a toolbar group can be shown but not hidden again.
 - Breaking: Removed the misspelled IsSurfaceFliped methods; use IsSurfaceFlipped for both object identifiers and Brep geometry.
 - Breaking: AddDimStyle uses one optional dimStyleName parameter and returns the assigned name for both named and automatically named styles; the named form previously returned unit.
@@ -53,6 +56,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Breaking: IsDimension, IsLeader and the other dimension checks return false for objects that don't exist, instead of raising an exception, like in RhinoPython
 - Breaking: IsCone, IsCylinder, IsPlaneSurface and IsPointLight, IsSpotLight and the other light type checks return false for objects of another type or that don't exist, instead of raising an exception, like in RhinoPython
 ### Fixed
+- AddPipe and MakePipe raise a RhinoScriptingException when the counts of parameters and radii differ or are zero, instead of the ArgumentException of RhinoCommon.
 - ObjectsByType with the hidden state (4) but without the normal state (1) now returns hidden objects; before, state 4 returned nothing.
 - Breaking: Unset document notes and block descriptions return empty strings instead of null.
 - Clarified that ChangeSurfaceDegree raises degrees and SdkVersion returns Rhino's signed SDK value.

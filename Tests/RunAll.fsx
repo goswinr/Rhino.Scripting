@@ -1,7 +1,7 @@
 // Runs every Test_*.fsx suite in one go. Each suite prints its own "=== Name: N passed, M failed, K skipped ===" summary.
 // Run with Caddis:  caddis_eval path=Tests/RunAll.fsx waitMs=300000   (takes about one minute)
 // Needs a Release build of Rhino.Scripting (bin/Release/net8.0/Rhino.Scripting.dll), see README.md.
-// Failures listed for the suites are known library bugs, see todo.md.
+// All suites are expected to pass; a failure is a library bug or a wrong test.
 #load "Test_Application.fsx"
 #load "Test_Block.fsx"
 #load "Test_Coerce.fsx"

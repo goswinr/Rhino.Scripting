@@ -47,7 +47,7 @@ test "ExeFolder" (fun () -> ok "folder exists" (IO.Directory.Exists (rs.ExeFolde
 test "ExePlatform" (fun () -> eq "64 bit" (if Environment.Is64BitProcess then 1 else 0) (rs.ExePlatform()))
 test "ExeServiceRelease" (fun () -> ok "service release is not negative" (rs.ExeServiceRelease() >= 0))
 test "ExeVersion" (fun () -> eq "major version of the running Rhino" RhinoApp.ExeVersion (rs.ExeVersion()))
-// Rhino 8 returns a negative Int32 here (RhinoCommon's own value), so the doc string "9 digit number YYYYMMDDn" is outdated. Only the pass through is checked, see todo.md.
+// Rhino 8 returns a negative Int32 here (RhinoCommon's own value), not a 9 digit number YYYYMMDDn. Only the pass through is checked.
 test "SdkVersion" (fun () -> eq "like RhinoApp.SdkVersion" RhinoApp.SdkVersion (rs.SdkVersion()))
 test "InstallFolder" (fun () -> ok "folder exists" (IO.Directory.Exists (rs.InstallFolder())))
 test "IsRunningOnWindows" (fun () -> eq "like the platform" (Runtime.InteropServices.RuntimeInformation.IsOSPlatform Runtime.InteropServices.OSPlatform.Windows) (rs.IsRunningOnWindows()))

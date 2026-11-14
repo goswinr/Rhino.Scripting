@@ -1607,8 +1607,8 @@ From [Src/Scripting_Surface.fs](../../Src/Scripting_Surface.fs).
 | `ShootRay` | `surfaceGeos: Brep seq * startPoint: Point3d * direction: Vector3d * ?reflections: int = 10 -> Point3d array` | Shoots a ray at a collection of Surfaces or Polysurfaces. |
 | `ShortPath` | `surfaceId: Guid * startPoint: Point3d * endPoint: Point3d -> Guid` | Creates the shortest possible Curve(geodesic) between two points on a Surface. |
 | `ShortPath` | `surfaceGeo: Surface * startPoint: Point3d * endPoint: Point3d -> Curve` | Creates the shortest possible Curve(geodesic) between two points on a Surface. |
-| `ShrinkTrimmedSurface` | `objectId: Guid * ?createCopy: bool = false -> Guid` | Shrinks the underlying untrimmed Surfaces near to the trimming boundaries. |
-| `ShrinkTrimmedSurface` | `geometryObject: Brep -> Brep` | Shrinks the underlying untrimmed Surfaces near to the trimming boundaries. |
+| `ShrinkTrimmedSurface` | `objectId: Guid * ?createCopy: bool = false -> bool` | Shrinks the underlying untrimmed Surfaces near to the trimming boundaries. |
+| `ShrinkTrimmedSurface` | `geometryObject: Brep -> Brep option` | Shrinks the underlying untrimmed Surfaces near to the trimming boundaries. |
 | `SplitBrep` | `brepId: Guid * cutterId: Guid * ?deleteInput: bool = false -> ResizeArray<Guid>` | Splits a brep. |
 | `SplitBrep` | `brepGeo: Brep * cutterGeo: Brep -> ResizeArray<Brep>` | Splits a brep. |
 | `SurfaceArea` | `srf: Surface -> float` | Calculate the area of a Surface Geometry. |

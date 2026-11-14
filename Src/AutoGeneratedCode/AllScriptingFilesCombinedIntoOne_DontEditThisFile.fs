@@ -12328,6 +12328,28 @@ type RhinoScriptSyntax private () =
     //---The functions below are part of Scripting_Mesh.fs: file split marker: {@$%^&*()*&^%$@}
 
 
+    /// <summary>Adds the result Meshes of a mesh boolean to the document.
+    ///    All results are checked before any is added, so on failure nothing is added and the inputs are retained.</summary>
+    /// <param name="functionName">(string) Name of the calling function, for the error message</param>
+    /// <param name="meshes">(Mesh seq) The result Meshes</param>
+    /// <returns>(Guid ResizeArray) identifiers of the new Meshes.</returns>
+    static member private AddMeshBooleanResults(functionName:string, meshes:Mesh seq) : Guid ResizeArray =
+        let meshes = ResizeArray(meshes)
+        meshes |> Seq.iteri (fun i mesh ->
+            let mutable log = ""
+            if not (mesh.IsValidWithLog(&log)) then
+                RhinoScriptingException.Raise "%s: RhinoCommon returned an invalid result mesh (%d of %d), so nothing was added and the inputs were retained. Coplanar or overlapping faces in the inputs often cause this. Mesh log: %s" functionName (i+1) meshes.Count (log.Trim())
+            )
+        let rc = ResizeArray<Guid>()
+        for mesh in meshes do
+            let objectId = State.Doc.Objects.AddMesh(mesh)
+            if objectId = Guid.Empty then
+                for added in rc do State.Doc.Objects.Delete(added, true) |> ignore<bool>
+                RhinoScriptingException.Raise "%s: unable to add a result mesh to the document, so nothing was added and the inputs were retained." functionName
+            rc.Add(objectId)
+        rc
+
+
     /// <summary>Adds a Mesh object to the document.</summary>
     /// <param name="vertices">(Point3d seq) List of 3D points defining the vertices of the mesh</param>
     /// <param name="faceVertices">(int IList seq) List containing lists of 3 or 4 numbers that define the
@@ -12778,11 +12800,7 @@ type RhinoScriptSyntax private () =
         let meshes0 = input0 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
         let meshes1 = input1 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
         let newmeshes = RhinoScriptSyntax.MeshBooleanDifference(meshes0, meshes1)
-        let rc = ResizeArray()
-        for mesh in newmeshes do
-            let objectId = State.Doc.Objects.AddMesh(mesh)
-            if objectId = Guid.Empty then RhinoScriptingException.Raise "MeshBooleanDifference: unable to add result to document; inputs were retained"
-            rc.Add(objectId)
+        let rc = RhinoScriptSyntax.AddMeshBooleanResults("MeshBooleanDifference", newmeshes)
         if deleteInput then
             for objectId in Seq.append input0 input1 do State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
         State.Doc.Views.Redraw()
@@ -12817,11 +12835,7 @@ type RhinoScriptSyntax private () =
         let meshes0 = input0 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
         let meshes1 = input1 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
         let newmeshes = RhinoScriptSyntax.MeshBooleanIntersection(meshes0, meshes1)
-        let rc = ResizeArray()
-        for mesh in newmeshes do
-            let objectId = State.Doc.Objects.AddMesh(mesh)
-            if objectId = Guid.Empty then RhinoScriptingException.Raise "MeshBooleanIntersection: unable to add result to document; inputs were retained"
-            rc.Add(objectId)
+        let rc = RhinoScriptSyntax.AddMeshBooleanResults("MeshBooleanIntersection", newmeshes)
         if deleteInput then
             for objectId in Seq.append input0 input1 do State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
         State.Doc.Views.Redraw()
@@ -12856,11 +12870,7 @@ type RhinoScriptSyntax private () =
         let meshes0 = input0 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
         let meshes1 = input1 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
         let newmeshes = RhinoScriptSyntax.MeshBooleanSplit(meshes0, meshes1)
-        let rc = ResizeArray()
-        for mesh in newmeshes do
-            let objectId = State.Doc.Objects.AddMesh(mesh)
-            if objectId = Guid.Empty then RhinoScriptingException.Raise "MeshBooleanSplit: unable to add result to document; inputs were retained"
-            rc.Add(objectId)
+        let rc = RhinoScriptSyntax.AddMeshBooleanResults("MeshBooleanSplit", newmeshes)
         if deleteInput then
             for objectId in Seq.append input0 input1 do State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
         State.Doc.Views.Redraw()
@@ -12891,10 +12901,7 @@ type RhinoScriptSyntax private () =
         if meshIds.Count < 2 then RhinoScriptingException.Raise "MeshBooleanUnion: MeshIds must contain at least 2 meshes."
         let meshes = meshIds |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
         let newmeshes = RhinoScriptSyntax.MeshBooleanUnion(meshes)
-        let rc = ResizeArray()
-        for mesh in newmeshes do
-            let objectId = State.Doc.Objects.AddMesh(mesh)
-            if objectId <> Guid.Empty then rc.Add(objectId)
+        let rc = RhinoScriptSyntax.AddMeshBooleanResults("MeshBooleanUnion", newmeshes)
         if rc.Count > 0 && deleteInput then
             for objectId in meshIds do State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
         State.Doc.Views.Redraw()
@@ -17517,8 +17524,9 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Creates a single walled Surface with a circular profile around a Curve.</summary>
     /// <param name="curveId">(Guid) Identifier of rail Curve</param>
-    /// <param name="parameters">(float seq) normalized Curve parameters</param>
-    /// <param name="radii">(float seq) radius values at normalized Curve parameters</param>
+    /// <param name="parameters">(float seq) normalized Curve parameters, from 0.0 to 1.0</param>
+    /// <param name="radii">(float seq) radius values at normalized Curve parameters, the same count as parameters.
+    ///    A RhinoScriptingException is raised if the counts differ.</param>
     /// <param name="blendType">(int) Optional, default value: <c>0</c>
     ///    0(local) or 1(global)</param>
     /// <param name="cap">(int) Optional, default value: <c>0</c>
@@ -17541,8 +17549,9 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Creates a single walled Surface with a circular profile around a Curve. Returns geometry without adding it.</summary>
     /// <param name="curveGeo">(Curve) Object of rail Curve</param>
-    /// <param name="parameters">(float seq) normalized Curve parameters</param>
-    /// <param name="radii">(float seq) radius values at normalized Curve parameters</param>
+    /// <param name="parameters">(float seq) normalized Curve parameters, from 0.0 to 1.0</param>
+    /// <param name="radii">(float seq) radius values at normalized Curve parameters, the same count as parameters.
+    ///    A RhinoScriptingException is raised if the counts differ.</param>
     /// <param name="blendType">(int) Optional, default value: <c>0</c>
     ///    0(local) or 1(global)</param>
     /// <param name="cap">(int) Optional, default value: <c>0</c>
@@ -17560,7 +17569,15 @@ type RhinoScriptSyntax private () =
         let abstol = State.Doc.ModelAbsoluteTolerance
         let angtol = State.Doc.ModelAngleToleranceRadians
         let cap :PipeCapMode  = LanguagePrimitives.EnumOfValue  cap
-        let breps = Brep.CreatePipe(rail, parameters, radii, (blendType = 0), cap, fit, abstol, angtol)
+        let parameters = Seq.toArray parameters
+        let radii = Seq.toArray radii
+        if parameters.Length = 0 then RhinoScriptingException.Raise "MakePipe: at least one parameter and radius is needed."
+        if parameters.Length <> radii.Length then
+            RhinoScriptingException.Raise "MakePipe: there are %d parameters but %d radii, the counts must be equal." parameters.Length radii.Length
+        let breps =
+            try Brep.CreatePipe(rail, parameters, radii, (blendType = 0), cap, fit, abstol, angtol)
+            with e -> RhinoScriptingException.RaiseWith e "MakePipe failed on %s: %s" (Pretty.str curveGeo) e.Message
+        if isNull breps || breps.Length = 0 then RhinoScriptingException.Raise "MakePipe failed on %s." (Pretty.str curveGeo)
         ResizeArray(breps)
 
 
@@ -17929,7 +17946,8 @@ type RhinoScriptSyntax private () =
     /// <param name="shapes">(Guid seq) One or more cross section shape Curves</param>
     /// <param name="closed">(bool) Optional, default value: <c>false</c>
     ///    If True, then create a closed Surface</param>
-    /// <returns>(Guid ResizeArray) List of new Surface objects.</returns>
+    /// <returns>(Guid ResizeArray) List of new Surface objects.
+    ///    An empty list if RhinoCommon finds no result, this is not an error.</returns>
     static member AddSweep1( rail:Guid,
                              shapes:Guid seq,
                              [<OPT;DEF(false)>]closed:bool) : Guid ResizeArray =
@@ -17947,7 +17965,8 @@ type RhinoScriptSyntax private () =
     /// <param name="shapes">(Curve seq) One or more cross section shape Curves</param>
     /// <param name="closed">(bool) Optional, default value: <c>false</c>
     ///    If True, then create a closed Surface</param>
-    /// <returns>(Brep ResizeArray) Newly created geometry. The caller owns the returned objects.</returns>
+    /// <returns>(Brep ResizeArray) Newly created geometry. The caller owns the returned objects.
+    ///    An empty list if RhinoCommon finds no result, this is not an error.</returns>
     static member MakeSweep1( rail:Curve,
                              shapes:Curve seq,
                              [<OPT;DEF(false)>]closed:bool) : Brep ResizeArray =
@@ -17965,7 +17984,8 @@ type RhinoScriptSyntax private () =
     /// <param name="shapes">(Guid seq) One or more cross section shape Curves</param>
     /// <param name="closed">(bool) Optional, default value: <c>false</c>
     ///    If True, then create a closed Surface</param>
-    /// <returns>(Guid ResizeArray) List of new Surface objects.</returns>
+    /// <returns>(Guid ResizeArray) List of new Surface objects.
+    ///    An empty list if RhinoCommon finds no result, this is not an error.</returns>
     static member AddSweep2( rails:Guid * Guid,
                              shapes:Guid seq,
                              [<OPT;DEF(false)>]closed:bool) : Guid ResizeArray =
@@ -17983,7 +18003,8 @@ type RhinoScriptSyntax private () =
     /// <param name="shapes">(Curve seq) One or more cross section shape Curves</param>
     /// <param name="closed">(bool) Optional, default value: <c>false</c>
     ///    If True, then create a closed Surface</param>
-    /// <returns>(Brep ResizeArray) Newly created geometry. The caller owns the returned objects.</returns>
+    /// <returns>(Brep ResizeArray) Newly created geometry. The caller owns the returned objects.
+    ///    An empty list if RhinoCommon finds no result, this is not an error.</returns>
     static member MakeSweep2( rails:Curve * Curve,
                              shapes:Curve seq,
                              [<OPT;DEF(false)>]closed:bool) : Brep ResizeArray =
@@ -18098,7 +18119,8 @@ type RhinoScriptSyntax private () =
     /// <param name="input1">(Guid seq) List of Surfaces</param>
     /// <param name="deleteInput">(bool) Optional, default value: <c>true</c>
     ///    Delete all input objects</param>
-    /// <returns>(Guid ResizeArray) List of identifiers of newly created objects .</returns>
+    /// <returns>(Guid ResizeArray) List of identifiers of newly created objects.
+    ///    An empty list if the inputs do not overlap. Then the inputs are still deleted if deleteInput is true, like in RhinoPython.</returns>
     static member BooleanIntersection( input0:Guid seq,
                                        input1:Guid seq,
                                        [<OPT;DEF(true)>]deleteInput:bool) : Guid ResizeArray =
@@ -18120,7 +18142,8 @@ type RhinoScriptSyntax private () =
     ///    the Rhino help file. Returns geometry without adding it.</summary>
     /// <param name="input0">(Brep seq) List of Surfaces</param>
     /// <param name="input1">(Brep seq) List of Surfaces</param>
-    /// <returns>(Brep ResizeArray) Newly created geometry. The caller owns the returned objects.</returns>
+    /// <returns>(Brep ResizeArray) Newly created geometry. The caller owns the returned objects.
+    ///    An empty list if the inputs do not overlap.</returns>
     static member BooleanIntersection( input0:Brep seq,
                                        input1:Brep seq) : Brep ResizeArray =
         let breps0 = input0 |> Seq.toArray
@@ -18600,7 +18623,8 @@ type RhinoScriptSyntax private () =
     /// <param name="uvparam0">(Point2d) Optional, A u, v Surface parameter of Surface0 near where the fillet
     ///    is expected to hit the Surface</param>
     /// <param name="uvparam1">(Point2d) Optional, Same as uvparam0, but for Surface1</param>
-    /// <returns>(Guid ResizeArray) ids of Surfaces created .</returns>
+    /// <returns>(Guid ResizeArray) ids of Surfaces created.
+    ///    An empty list if no fillet could be made, this is not an error.</returns>
     static member FilletSurfaces( surface0:Guid,
                                   surface1:Guid,
                                   radius:float,
@@ -18622,7 +18646,8 @@ type RhinoScriptSyntax private () =
     /// <param name="uvparam0">(Point2d) Optional, A u, v Surface parameter of Surface0 near where the fillet
     ///    is expected to hit the Surface</param>
     /// <param name="uvparam1">(Point2d) Optional, Same as uvparam0, but for Surface1</param>
-    /// <returns>(Surface ResizeArray) Newly created geometry. The caller owns the returned objects.</returns>
+    /// <returns>(Surface ResizeArray) Newly created geometry. The caller owns the returned objects.
+    ///    An empty list if no fillet could be made, this is not an error.</returns>
     static member FilletSurfaces( surface0:Surface,
                                   surface1:Surface,
                                   radius:float,
@@ -18884,7 +18909,8 @@ type RhinoScriptSyntax private () =
         | _ -> RhinoScriptingException.Raise "IsPointInSurface does not work  on %s %A" (Pretty.str geometryObject) geometryObject
 
 
-    /// <summary>Checks if a point lies on a Surface.</summary>
+    /// <summary>Checks if a point lies on a Surface.
+    ///    A Polysurface with a single face is accepted, a Polysurface with several faces raises a RhinoScriptingException, like in RhinoPython.</summary>
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <param name="point">(Point3d) The test, or sampling point</param>
     /// <returns>(bool) True , otherwise False.</returns>
@@ -18892,7 +18918,8 @@ type RhinoScriptSyntax private () =
         let geometry = RhinoScriptSyntax.CoerceGeometry(objectId)
         RhinoScriptSyntax.IsPointOnSurface(geometry, point)
 
-    /// <summary>Checks if a point lies on a Surface. Uses the supplied objects directly.</summary>
+    /// <summary>Checks if a point lies on a Surface. Uses the supplied objects directly.
+    ///    A Polysurface with a single face is accepted, a Polysurface with several faces raises a RhinoScriptingException, like in RhinoPython.</summary>
     /// <param name="geometryObject">(GeometryBase) The object</param>
     /// <param name="point">(Point3d) The test, or sampling point</param>
     /// <returns>(bool) True , otherwise False.</returns>
@@ -19461,7 +19488,8 @@ type RhinoScriptSyntax private () =
     /// <param name="direction">(Vector3d) Vector identifying the direction of the ray</param>
     /// <param name="reflections">(int) Optional, default value: <c>10</c>
     ///    The maximum number of times the ray will be reflected</param>
-    /// <returns>(Point3d array) Array of reflection points.</returns>
+    /// <returns>(Point3d array) The start point, followed by the reflection points, like in RhinoPython.
+    ///    An empty array if the ray hits nothing.</returns>
     static member ShootRay( surfaceIds:Guid seq,
                             startPoint:Point3d,
                             direction:Vector3d,
@@ -19475,7 +19503,8 @@ type RhinoScriptSyntax private () =
     /// <param name="direction">(Vector3d) Vector identifying the direction of the ray</param>
     /// <param name="reflections">(int) Optional, default value: <c>10</c>
     ///    The maximum number of times the ray will be reflected</param>
-    /// <returns>(Point3d array) Array of reflection points.</returns>
+    /// <returns>(Point3d array) The start point, followed by the reflection points, like in RhinoPython.
+    ///    An empty array if the ray hits nothing.</returns>
     static member ShootRay( surfaceGeos:Brep seq,
                             startPoint:Point3d,
                             direction:Vector3d,
@@ -19530,30 +19559,34 @@ type RhinoScriptSyntax private () =
     ///    boundaries. See the ShrinkTrimmedSrf command in the Rhino help.</summary>
     /// <param name="objectId">(Guid) The Surface's identifier</param>
     /// <param name="createCopy">(bool) Optional, default value: <c>false</c>
-    ///    If True, the original Surface is not deleted</param>
-    /// <returns>(Guid) If createCopy is true the new Guid, else the input Guid.</returns>
-    static member ShrinkTrimmedSurface(objectId:Guid, [<OPT;DEF(false)>]createCopy:bool) : Guid =
+    ///    If True, the shrunk Surface is added as a new object and the original Surface is kept.
+    ///    The new object's identifier is not returned, use LastCreatedObjects to find it.</param>
+    /// <returns>(bool) True if the Surface was shrunk (in place, or as a new copy).
+    ///    False if there was nothing to shrink, then the document is not changed, like in RhinoPython.</returns>
+    static member ShrinkTrimmedSurface(objectId:Guid, [<OPT;DEF(false)>]createCopy:bool) : bool =
         let objectIdGeometry = RhinoScriptSyntax.CoerceBrep(objectId)
-        let brep = RhinoScriptSyntax.ShrinkTrimmedSurface(objectIdGeometry)
-        let id =
+        match RhinoScriptSyntax.ShrinkTrimmedSurface(objectIdGeometry) with
+        | None -> false
+        | Some brep ->
             if createCopy then
                 let attributes = (RhinoScriptSyntax.CoerceRhinoObject(objectId)).Attributes
-                State.Doc.Objects.AddBrep(brep, attributes)
+                if State.Doc.Objects.AddBrep(brep, attributes) = Guid.Empty then
+                    RhinoScriptingException.Raise "ShrinkTrimmedSurface: unable to add the shrunk copy of %s to the document." (Pretty.str objectId)
             else
-                State.Doc.Objects.Replace(objectId, brep) |> ignore<bool>
-                objectId
-        State.Doc.Views.Redraw()
-        id
+                if not (State.Doc.Objects.Replace(objectId, brep)) then
+                    RhinoScriptingException.Raise "ShrinkTrimmedSurface: unable to replace %s in the document." (Pretty.str objectId)
+            State.Doc.Views.Redraw()
+            true
 
 
     /// <summary>Shrinks the underlying untrimmed Surfaces near to the trimming
     ///    boundaries. See the ShrinkTrimmedSrf command in the Rhino help. Returns geometry without adding it.</summary>
     /// <param name="geometryObject">(Brep) The Surface</param>
-    /// <returns>(Brep) Newly created geometry. The caller owns the returned objects.</returns>
-    static member ShrinkTrimmedSurface(geometryObject:Brep) : Brep =
+    /// <returns>(Brep option) A shrunk copy of the input, the caller owns it.
+    ///    None if there was nothing to shrink.</returns>
+    static member ShrinkTrimmedSurface(geometryObject:Brep) : Brep option =
         let brep = geometryObject.DuplicateBrep()
-        if not (brep.Faces.ShrinkFaces()) then RhinoScriptingException.Raise "ShrinkTrimmedSurface failed."
-        brep
+        if brep.Faces.ShrinkFaces() then Some brep else None
 
 
     /// <summary>Splits a brep.</summary>
@@ -19657,6 +19690,7 @@ type RhinoScriptSyntax private () =
 
 
     /// <summary>Calculates area moments of inertia of a Surface or Polysurface object.
+    ///    Returns 14 tuples: seven values, each followed by its error bound.
     ///    See the Rhino help for "Mass Properties calculation details".</summary>
     /// <param name="surfaceId">(Guid) The Surface's identifier</param>
     /// <returns>((float*float*float) ResizeArray ) of moments and error bounds in tuples(X, Y, Z) - see help topic
@@ -19681,6 +19715,7 @@ type RhinoScriptSyntax private () =
         | None -> RhinoScriptingException.Raise "SurfaceAreaMoments failed on %A" surfaceId
 
     /// <summary>Calculates area moments of inertia of a Surface or Polysurface object.
+    ///    Returns 14 tuples: seven values, each followed by its error bound.
     ///    See the Rhino help for "Mass Properties calculation details". Uses the supplied objects directly.</summary>
     /// <param name="surfaceGeo">(GeometryBase) The Surface</param>
     /// <returns>((float*float*float) ResizeArray ) of moments and error bounds in tuples(X, Y, Z) - see help topic
@@ -20385,6 +20420,7 @@ type RhinoScriptSyntax private () =
 
 
     /// <summary>Calculates volume moments of inertia of a Surface or Polysurface object.
+    ///    Returns 14 tuples: seven values, each followed by its error bound.
     ///    For more information, see Rhino help for "Mass Properties calculation details".</summary>
     /// <param name="objectId">(Guid) The Surface's identifier</param>
     /// <returns>((float*float*float) ResizeArray) A List of moments and error bounds in tuple(X, Y, Z) - see help topic
@@ -20410,6 +20446,7 @@ type RhinoScriptSyntax private () =
         | None -> RhinoScriptingException.Raise "SurfaceVolumeMoments failed on %A" (Pretty.str objectId)
 
     /// <summary>Calculates volume moments of inertia of a Surface or Polysurface object.
+    ///    Returns 14 tuples: seven values, each followed by its error bound.
     ///    For more information, see Rhino help for "Mass Properties calculation details". Uses the supplied objects directly.</summary>
     /// <param name="geometryObject">(GeometryBase) The Surface</param>
     /// <returns>((float*float*float) ResizeArray) A List of moments and error bounds in tuple(X, Y, Z) - see help topic

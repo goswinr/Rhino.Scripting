@@ -280,7 +280,9 @@ test "AddPipe" (fun () ->
     for cap in [ 0; 1; 2 ] do ok (sprintf "cap %d" cap) ((rs.AddPipe(c, [ 0. ], [ 1. ], 0, cap)).Count >= 1)
     ok "blend type and fit" ((rs.AddPipe(c, [ 0.; 1. ], [ 1.; 2. ], 1, 1, true)).Count >= 1)
     ok "geometry" ((rs.MakePipe(curve c, [ 0. ], [ 1. ])).Count >= 1)
-    throws "different number of parameters and radii" (fun () -> rs.AddPipe(c, [ 0.; 1. ], [ 1. ]))
+    throwsRs "different number of parameters and radii" (fun () -> rs.AddPipe(c, [ 0.; 1. ], [ 1. ]))
+    throwsRs "geometry: different number of parameters and radii" (fun () -> rs.MakePipe(curve c, [ 0. ], [ 1.; 2. ]))
+    throwsRs "no parameters" (fun () -> rs.AddPipe(c, ([] : float list), ([] : float list)))
     )
 test "MakePipe" (fun () ->
     let c = new LineCurve(pt 0. 0. 0., pt 0. 0. 10.) :> Curve
@@ -492,14 +494,26 @@ test "ShrinkTrimmedSurface" (fun () ->
         let cut = rs.AddPlaneSurface(Plane(pt 5. -1. -1., Vector3d.YAxis, Vector3d.ZAxis), 12., 2.)
         (rs.SplitBrep(planeId (), cut, true)).[0]
     let t = trimmed ()
-    let r = rs.ShrinkTrimmedSurface t
-    eq "same id when no copy is made" t r
+    ok "shrunk in place" (rs.ShrinkTrimmedSurface t)
+    ok "same object" (rs.IsObject t)
+    near "area is unchanged" 50. (area t)
+    ok "nothing left to shrink returns false" (not (rs.ShrinkTrimmedSurface t))
+    ok "an untrimmed surface has nothing to shrink" (not (rs.ShrinkTrimmedSurface (planeId ())))
     let t2 = trimmed ()
-    let copy = rs.ShrinkTrimmedSurface(t2, true)
-    ok "copy is a new object" (copy <> t2 && rs.IsObject t2 && rs.IsObject copy)
-    near "area is unchanged" 50. (area copy)
-    let g = rs.ShrinkTrimmedSurface (brepOf (trimmed ()))
-    ok "geometry" (not (isNull g))
+    let before = rs.AllObjects().Count
+    ok "shrunk as a copy" (rs.ShrinkTrimmedSurface(t2, true))
+    ok "the original is kept" (rs.IsObject t2)
+    eq "one new object" (before + 1) (rs.AllObjects().Count)
+    let t3 = trimmed ()
+    rs.ShrinkTrimmedSurface t3 |> ignore
+    let before3 = rs.AllObjects().Count
+    ok "nothing to shrink adds no copy" (not (rs.ShrinkTrimmedSurface(t3, true)))
+    eq "no new object" before3 (rs.AllObjects().Count)
+    match rs.ShrinkTrimmedSurface (brepOf (trimmed ())) with
+    | Some g ->
+        near "geometry area is unchanged" 50. (g.GetArea())
+        ok "geometry: nothing left to shrink gives None" (Option.isNone (rs.ShrinkTrimmedSurface g))
+    | None -> ok "geometry overload shrinks a trimmed surface" false
     )
 test "OffsetSurface" (fun () ->
     let p = planeId ()

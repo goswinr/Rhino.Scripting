@@ -18,6 +18,28 @@ module AutoOpenMesh =
     //---The functions below are part of Scripting_Mesh.fs: file split marker: {@$%^&*()*&^%$@}
 
 
+    /// <summary>Adds the result Meshes of a mesh boolean to the document.
+    ///    All results are checked before any is added, so on failure nothing is added and the inputs are retained.</summary>
+    /// <param name="functionName">(string) Name of the calling function, for the error message</param>
+    /// <param name="meshes">(Mesh seq) The result Meshes</param>
+    /// <returns>(Guid ResizeArray) identifiers of the new Meshes.</returns>
+    static member private AddMeshBooleanResults(functionName:string, meshes:Mesh seq) : Guid ResizeArray =
+        let meshes = ResizeArray(meshes)
+        meshes |> Seq.iteri (fun i mesh ->
+            let mutable log = ""
+            if not (mesh.IsValidWithLog(&log)) then
+                RhinoScriptingException.Raise "%s: RhinoCommon returned an invalid result mesh (%d of %d), so nothing was added and the inputs were retained. Coplanar or overlapping faces in the inputs often cause this. Mesh log: %s" functionName (i+1) meshes.Count (log.Trim())
+            )
+        let rc = ResizeArray<Guid>()
+        for mesh in meshes do
+            let objectId = State.Doc.Objects.AddMesh(mesh)
+            if objectId = Guid.Empty then
+                for added in rc do State.Doc.Objects.Delete(added, true) |> ignore<bool>
+                RhinoScriptingException.Raise "%s: unable to add a result mesh to the document, so nothing was added and the inputs were retained." functionName
+            rc.Add(objectId)
+        rc
+
+
     /// <summary>Adds a Mesh object to the document.</summary>
     /// <param name="vertices">(Point3d seq) List of 3D points defining the vertices of the mesh</param>
     /// <param name="faceVertices">(int IList seq) List containing lists of 3 or 4 numbers that define the
@@ -468,11 +490,7 @@ module AutoOpenMesh =
         let meshes0 = input0 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
         let meshes1 = input1 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
         let newmeshes = RhinoScriptSyntax.MeshBooleanDifference(meshes0, meshes1)
-        let rc = ResizeArray()
-        for mesh in newmeshes do
-            let objectId = State.Doc.Objects.AddMesh(mesh)
-            if objectId = Guid.Empty then RhinoScriptingException.Raise "MeshBooleanDifference: unable to add result to document; inputs were retained"
-            rc.Add(objectId)
+        let rc = RhinoScriptSyntax.AddMeshBooleanResults("MeshBooleanDifference", newmeshes)
         if deleteInput then
             for objectId in Seq.append input0 input1 do State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
         State.Doc.Views.Redraw()
@@ -507,11 +525,7 @@ module AutoOpenMesh =
         let meshes0 = input0 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
         let meshes1 = input1 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
         let newmeshes = RhinoScriptSyntax.MeshBooleanIntersection(meshes0, meshes1)
-        let rc = ResizeArray()
-        for mesh in newmeshes do
-            let objectId = State.Doc.Objects.AddMesh(mesh)
-            if objectId = Guid.Empty then RhinoScriptingException.Raise "MeshBooleanIntersection: unable to add result to document; inputs were retained"
-            rc.Add(objectId)
+        let rc = RhinoScriptSyntax.AddMeshBooleanResults("MeshBooleanIntersection", newmeshes)
         if deleteInput then
             for objectId in Seq.append input0 input1 do State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
         State.Doc.Views.Redraw()
@@ -546,11 +560,7 @@ module AutoOpenMesh =
         let meshes0 = input0 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
         let meshes1 = input1 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
         let newmeshes = RhinoScriptSyntax.MeshBooleanSplit(meshes0, meshes1)
-        let rc = ResizeArray()
-        for mesh in newmeshes do
-            let objectId = State.Doc.Objects.AddMesh(mesh)
-            if objectId = Guid.Empty then RhinoScriptingException.Raise "MeshBooleanSplit: unable to add result to document; inputs were retained"
-            rc.Add(objectId)
+        let rc = RhinoScriptSyntax.AddMeshBooleanResults("MeshBooleanSplit", newmeshes)
         if deleteInput then
             for objectId in Seq.append input0 input1 do State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
         State.Doc.Views.Redraw()
@@ -581,10 +591,7 @@ module AutoOpenMesh =
         if meshIds.Count < 2 then RhinoScriptingException.Raise "MeshBooleanUnion: MeshIds must contain at least 2 meshes."
         let meshes = meshIds |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
         let newmeshes = RhinoScriptSyntax.MeshBooleanUnion(meshes)
-        let rc = ResizeArray()
-        for mesh in newmeshes do
-            let objectId = State.Doc.Objects.AddMesh(mesh)
-            if objectId <> Guid.Empty then rc.Add(objectId)
+        let rc = RhinoScriptSyntax.AddMeshBooleanResults("MeshBooleanUnion", newmeshes)
         if rc.Count > 0 && deleteInput then
             for objectId in meshIds do State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
         State.Doc.Views.Redraw()

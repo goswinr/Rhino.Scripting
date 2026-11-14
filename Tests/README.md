@@ -5,7 +5,7 @@ check the behavior and edge cases described in the doc strings, and check the Gu
 
 The library only works inside a running Rhino, so these are not `dotnet test` tests. They are F# scripts that run inside the Rhino process.
 
-Last full run (Rhino 8.36): 27 suites, 927 passing tests (each test block holds several assertions), 19 failing tests that point at real library bugs, 58 functions skipped on purpose. See [todo.md](todo.md).
+Last full run (Rhino 8.34 and Rhino 9.0, 2026-11-11): 27 suites, 943 passing tests (each test block holds several assertions), no failing tests, 59 functions skipped on purpose.
 
 ## What you need
 
@@ -47,7 +47,7 @@ Each suite ends by printing a summary like this, followed by the failures and th
 FAIL AddCone -> Exception: zero radius: expected a RhinoScriptingException but got 00000000-0000-0000-0000-000000000000
 ```
 
-A failing test is either a bug in the library (see [todo.md](todo.md)) or a wrong test. A test that fails on purpose is never "fixed" by loosening the test.
+A failing test is either a bug in the library or a wrong test. A test that fails on purpose is never "fixed" by loosening the test.
 
 ## How a suite is built
 
