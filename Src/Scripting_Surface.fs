@@ -1156,16 +1156,13 @@ module AutoOpenSurface =
     ///      5        Vector3d        The normal to the brepFace, or the tangent to the brepEdge.</returns>
     static member BrepClosestPoint(geometryObject:Brep, point:Point3d) : Point3d * float * float * ComponentIndexType * int * Vector3d =
         let brep = geometryObject
-        let clpt = ref Point3d.Origin
-        let ci = ref ComponentIndex.Unset
-        let s = ref 0.0
-        let t = ref 0.0
-        let n = ref Vector3d.Zero
-        let ok = brep.ClosestPoint(point, clpt, ci, s, t, 0.0, n)
-        if ok then
-            let typ = (!ci).ComponentIndexType
-            let idx = (!ci).Index
-            !clpt,!s,!t, typ, idx, !n
+        let mutable clpt = Point3d.Origin
+        let mutable ci = ComponentIndex.Unset
+        let mutable s = 0.0
+        let mutable t = 0.0
+        let mutable n = Vector3d.Zero
+        if brep.ClosestPoint(point, &clpt, &ci, &s, &t, 0.0, &n) then
+            clpt, s, t, ci.ComponentIndexType, ci.Index, n
         else
             RhinoScriptingException.Raise "BrepClosestPoint failed for %A and %A" (Pretty.str geometryObject) point
 
@@ -2146,9 +2143,8 @@ module AutoOpenSurface =
     static member SurfaceSphere(surfaceGeo:Surface) : Plane * float =
         let surface = surfaceGeo
         let tol = State.Doc.ModelAbsoluteTolerance
-        let sphere = ref Sphere.Unset
-        let issphere = surface.TryGetSphere(sphere, tol)
-        if issphere then (!sphere).EquatorialPlane, (!sphere).Radius
+        let mutable sphere = Sphere.Unset
+        if surface.TryGetSphere(&sphere, tol) then sphere.EquatorialPlane, sphere.Radius
         else RhinoScriptingException.Raise "SurfaceSphere input is not a sphere %A"surfaceGeo
 
 
@@ -2799,10 +2795,8 @@ module AutoOpenSurface =
     static member SurfaceCylinder(surfaceGeo:Surface) : Plane * float * float =
         let surface = surfaceGeo
         let tol = State.Doc.ModelAbsoluteTolerance
-        let cy = ref Cylinder.Unset
-        let rc = surface.TryGetFiniteCylinder(cy, tol)
-        if rc  then
-            let cylinder = !cy
+        let mutable cylinder = Cylinder.Unset
+        if surface.TryGetFiniteCylinder(&cylinder, tol) then
             cylinder.BasePlane, cylinder.TotalHeight, cylinder.Radius
         else
             RhinoScriptingException.Raise "SurfaceCylinder failed on %A" surfaceGeo

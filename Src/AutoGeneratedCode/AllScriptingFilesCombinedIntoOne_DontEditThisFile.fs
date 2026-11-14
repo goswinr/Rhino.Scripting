@@ -953,8 +953,8 @@ type RhinoScriptSyntax private () =
         if isNull curve then
             None
         else
-            let a = ref (new Arc())
-            if curve.TryGetArc(a, State.Doc.ModelAbsoluteTolerance) && not a.Value.IsCircle then Some a.Value
+            let mutable a = Arc.Unset
+            if curve.TryGetArc(&a, State.Doc.ModelAbsoluteTolerance) && not a.IsCircle then Some a
             else None
 
     /// <summary>Attempt to get an Arc from a curve object using the current Documents Absolute Tolerance.
@@ -1003,8 +1003,8 @@ type RhinoScriptSyntax private () =
         if isNull curve then
             None
         else
-            let a = ref (new Circle())
-            if curve.TryGetCircle(a, State.Doc.ModelAbsoluteTolerance) then Some a.Value
+            let mutable c = Circle.Unset
+            if curve.TryGetCircle(&c, State.Doc.ModelAbsoluteTolerance) then Some c
             else None
 
     /// <summary>Attempt to get a Circle from a curve object using the current Documents Absolute Tolerance.</summary>
@@ -1050,8 +1050,8 @@ type RhinoScriptSyntax private () =
         if isNull curve then
             None
         else
-            let a = ref (new Ellipse())
-            if curve.TryGetEllipse(a, State.Doc.ModelAbsoluteTolerance) then Some a.Value
+            let mutable e = Ellipse()
+            if curve.TryGetEllipse(&e, State.Doc.ModelAbsoluteTolerance) then Some e
             else None
 
     /// <summary>Attempt to get an Ellipse from a curve object using the current Documents Absolute Tolerance.</summary>
@@ -1098,8 +1098,8 @@ type RhinoScriptSyntax private () =
         | null -> None
         | :? PolylineCurve as crv -> Some <| crv.ToPolyline()
         | crv ->
-            let a : ref<Polyline> = ref null
-            if crv.TryGetPolyline(a) then Some a.Value
+            let mutable pl : Polyline = null
+            if crv.TryGetPolyline(&pl) then Some pl
             else None
 
     /// <summary>Attempt to get a Polyline from a curve object.</summary>
@@ -3753,7 +3753,11 @@ type RhinoScriptSyntax private () =
     /// <param name="curves">(Guid * Guid) Tuple of two curves.</param>
     /// <param name="parameters">(float * float) Tuple of two curve parameters defining the blend end points.</param>
     /// <param name="reverses">(bool * bool) Tuple of two boolean values specifying to use the natural or opposite direction of the curve.</param>
-    /// <param name="continuities">(int * int) Tuple of two numbers specifying continuity at end points: 0 = position, 1 = tangency, 2 = curvature.</param>
+    /// <param name="continuities">(int * int) Tuple of two numbers specifying continuity at end points:
+    ///     0 = position
+    ///     1 = tangency
+    ///     2 = curvature
+    /// </param>
     /// <returns>(Guid) Identifier of new curve.</returns>
     static member AddBlendCurve(curves:Guid * Guid, parameters:float * float, reverses:bool * bool, continuities:int * int) : Guid =
         let geometry = RhinoScriptSyntax.MakeBlendCurve((RhinoScriptSyntax.CoerceCurve(fst curves), RhinoScriptSyntax.CoerceCurve(snd curves)), parameters, reverses, continuities)
@@ -3766,7 +3770,11 @@ type RhinoScriptSyntax private () =
     /// <param name="curves">(Curve * Curve) The pair of input curves.</param>
     /// <param name="parameters">(float * float) Tuple of two curve parameters defining the blend end points.</param>
     /// <param name="reverses">(bool * bool) Tuple of two boolean values specifying to use the natural or opposite direction of the curve.</param>
-    /// <param name="continuities">(int * int) Tuple of two numbers specifying continuity at end points: 0 = position, 1 = tangency, 2 = curvature.</param>
+    /// <param name="continuities">(int * int) Tuple of two numbers specifying continuity at end points:
+    ///     0 = position
+    ///     1 = tangency
+    ///     2 = curvature
+    /// </param>
     /// <returns>(Curve) The resulting geometry; it is not added to a document.</returns>
     static member MakeBlendCurve(curves:Curve * Curve, parameters:float * float, reverses:bool * bool, continuities:int * int) : Curve =
         let crv0 = RhinoScriptSyntax.DirectCurveInput(fst curves, -1)
@@ -3942,20 +3950,24 @@ type RhinoScriptSyntax private () =
 
     ///<summary>Adds an interpolated Curve object to the document. Options exist to make
     ///    a periodic Curve or to specify the tangent at the endpoints. The resulting
-    ///    Curve is a non-rational NURBS Curve of the specified degree.</summary>
+    ///    Curve is a non-rational NURBS Curve of the specified degree.
+    /// </summary>
     ///<param name="points">(Point3d seq) A list containing 3D points to interpolate. For periodic Curves,
     ///    if the final point is a duplicate of the initial point, it is
     ///    ignored. The number of control points must be bigger than 'degree' number</param>
     ///<param name="degree">(int) Optional, default value: <c>3</c>
-    ///    Periodic Curves must have a degree bigger than 1. For knot-style = 1 or 2,
-    ///    the degree must be 3. For knot-style = 4 or 5, the degree must be odd</param>
+    ///    Periodic Curves must have a degree bigger than 1.
+    ///     For knot-style = 1 or 2, the degree must be 3.
+    ///     For knot-style = 4 or 5, the degree must be odd
+    /// </param>
     ///<param name="knotStyle">(int) Optional, default value: <c>0</c>
     ///    0 Uniform knots. Parameter spacing between consecutive knots is 1.0.
     ///    1 Chord length spacing. Requires degree = 3 with arrCV1 and arrCVn1 specified.
     ///    2 Sqrt (chord length). Requires degree = 3 with arrCV1 and arrCVn1 specified.
     ///    3 Periodic with uniform spacing.
     ///    4 Periodic with chord length spacing. Requires an odd degree value.
-    ///    5 Periodic with sqrt (chord length) spacing. Requires an odd degree value</param>
+    ///    5 Periodic with sqrt (chord length) spacing. Requires an odd degree value
+    /// </param>
     ///<param name="startTangent">(Vector3d) Optional, A vector that specifies a tangency condition at the
     ///    beginning of the Curve. If the Curve is periodic, this argument must be omitted</param>
     ///<param name="endTangent">(Vector3d) Optional, 3d vector that specifies a tangency condition at the
@@ -4020,10 +4032,12 @@ type RhinoScriptSyntax private () =
     /// <summary>Creates a NURBS Curve geometry, but does not add or draw it to the document.</summary>
     /// <param name="points">(Point3d seq) A list containing 3D control points.</param>
     /// <param name="knots">(float seq) Knot values for the Curve. The number of elements in knots must
-    ///    equal the number of elements in points plus degree minus 1.</param>
+    ///    equal the number of elements in points plus degree minus 1.
+    /// </param>
     /// <param name="degree">(int) Degree of the Curve. must be greater than of equal to 1.</param>
     /// <param name="weights">(float seq) Optional, Weight values for the Curve. Number of elements should
-    ///    equal the number of elements in points. Values must be greater than 0.</param>
+    ///    equal the number of elements in points. Values must be greater than 0.
+    /// </param>
     /// <returns>(NurbsCurve) a NurbsCurve geometry.</returns>
     static member CreateNurbsCurve(points:Point3d seq, knots:float seq, degree:int, [<OPT;DEF(null: float seq)>]weights:float seq) : NurbsCurve =
         let cvcount = Seq.length(points)
@@ -4054,10 +4068,12 @@ type RhinoScriptSyntax private () =
     /// <summary>Adds a NURBS Curve object to the document.</summary>
     /// <param name="points">(Point3d seq) A list containing 3D control points.</param>
     /// <param name="knots">(float seq) Knot values for the Curve. The number of elements in knots must
-    ///    equal the number of elements in points plus degree minus 1.</param>
+    ///    equal the number of elements in points plus degree minus 1.
+    /// </param>
     /// <param name="degree">(int) Degree of the Curve. must be greater than of equal to 1.</param>
     /// <param name="weights">(float seq) Optional, Weight values for the Curve. Number of elements should
-    ///    equal the number of elements in points. Values must be greater than 0.</param>
+    ///    equal the number of elements in points. Values must be greater than 0.
+    /// </param>
     /// <returns>(Guid) The identifier of the new object.</returns>
     static member AddNurbsCurve(points:Point3d seq, knots:float seq, degree:int, [<OPT;DEF(null: float seq)>]weights:float seq) : Guid =
         let nc = RhinoScriptSyntax.CreateNurbsCurve(points, knots, degree, weights)
@@ -4092,7 +4108,9 @@ type RhinoScriptSyntax private () =
     /// </summary>
     /// <param name="points">(Point3d seq) List of 3D points. The list must contain at least three points.</param>
     /// <param name="deleteShortSegments">(bool) Optional, default value: <c>true</c>. If true, segments shorter than the document's absolute tolerance will be deleted.</param>
-    /// <param name="drawDotsAndRaiseIfFailed">(bool) Optional, default value: <c>false</c>. If true, text dots will be drawn on layer `ERROR-AddPolylineClosed` at each point and an exception will be raised if the operation fails.</param>
+    /// <param name="drawDotsAndRaiseIfFailed">(bool) Optional, default value: <c>false</c>.
+    ///     If true, text dots will be drawn on layer `ERROR-AddPolylineClosed` at each point and an exception will be raised if the operation fails.
+    /// </param>
     /// <returns>(Guid) ObjectId of the new curve object. Empty Guid if the operation fails.</returns>
     static member AddPolylineClosed(points:Point3d seq,  [<OPT;DEF(true)>]deleteShortSegments: bool, [<OPT;DEF(false)>]drawDotsAndRaiseIfFailed: bool) : Guid =
         let pl = Polyline(points)
@@ -4115,10 +4133,8 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Add a rectangular Curve to the document.</summary>
     /// <param name="plane">(Plane) Plane on which the rectangle will lie</param>
-    /// <param name="width">(float) Width of rectangle as measured along the Plane's
-    ///    x and y axes</param>
-    /// <param name="height">(float) Height of rectangle as measured along the Plane's
-    ///    x and y axes</param>
+    /// <param name="width">(float) Width of rectangle as measured along the Plane's x and y axes</param>
+    /// <param name="height">(float) Height of rectangle as measured along the Plane's x and y axes</param>
     /// <returns>(Guid) ObjectId of new rectangle.</returns>
     static member AddRectangle(plane:Plane, width:float, height:float) : Guid =
         let rect = Rectangle3d(plane, width, height)
@@ -4132,8 +4148,7 @@ type RhinoScriptSyntax private () =
     /// <summary>Adds a spiral or helical curve to the document.</summary>
     /// <param name="point0">(Point3d) Helix axis start point or center of spiral.</param>
     /// <param name="point1">(Point3d) Helix axis end point or point normal on spiral Plane.</param>
-    /// <param name="pitch">(float) Distance between turns. If 0, then a spiral. If > 0 then the
-    ///    distance between helix "threads".</param>
+    /// <param name="pitch">(float) Distance between turns. If 0, then a spiral. If > 0 then the distance between helix "threads".</param>
     /// <param name="turns">(float) Number of turns.</param>
     /// <param name="radius0">(float) Starting radius of spiral.</param>
     /// <param name="radius1">(float) Optional, Ending radius of spiral. If omitted, the starting radius is used for the complete spiral.</param>
@@ -4152,7 +4167,8 @@ type RhinoScriptSyntax private () =
 
 
     /// <summary>Add a Curve object based on a portion, or interval of an existing Curve
-    ///    object. Similar in operation to Rhino's SubCrv command.</summary>
+    ///    object. Similar in operation to Rhino's SubCrv command.
+    /// </summary>
     /// <param name="curveId">(Guid) Identifier of a closed planar Curve object</param>
     /// <param name="param0">(float) First parameters on the source Curve</param>
     /// <param name="param1">(float) Second parameters on the source Curve</param>
@@ -4177,23 +4193,20 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Returns the angle of an arc Curve object.</summary>
     /// <param name="curveId">(Guid) Identifier of a Curve object</param>
-    /// <param name="segmentIndex">(int) Optional,
-    ///    Identifies the Curve segment if CurveId identifies a poly-curve</param>
+    /// <param name="segmentIndex">(int) Optional, Identifies the Curve segment if CurveId identifies a poly-curve.</param>
     /// <returns>(float) The angle in degrees.</returns>
     static member ArcAngle(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : float =
         RhinoScriptSyntax.ArcAngle(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
 
     /// <summary>Returns the angle of an arc Curve object. Uses the supplied geometry directly.</summary>
     /// <param name="curveGeo">(Curve) The input geometry.</param>
-    /// <param name="segmentIndex">(int) Optional,
-    ///    Identifies the Curve segment if CurveId identifies a poly-curve</param>
+    /// <param name="segmentIndex">(int) Optional, Identifies the Curve segment if CurveId identifies a poly-curve.</param>
     /// <returns>(float) The angle in degrees.</returns>
     static member ArcAngle(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : float =
         let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
-        let arc = ref Arc.Unset
-        let rc = curve.TryGetArc( arc, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "ArcAngle: Curve is not an arc. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
-        (arc.Value).AngleDegrees
+        let mutable arc = Arc.Unset
+        if curve.TryGetArc(&arc, RhinoMath.ZeroTolerance) then arc.AngleDegrees
+        else RhinoScriptingException.Raise "ArcAngle: Curve is not an arc. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
 
 
     /// <summary>Returns the center point of an arc Curve object.</summary>
@@ -4209,10 +4222,9 @@ type RhinoScriptSyntax private () =
     /// <returns>(Point3d) The 3D center point of the arc.</returns>
     static member ArcCenterPoint(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
         let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
-        let arc = ref Arc.Unset
-        let rc = curve.TryGetArc( arc, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "ArcCenterPoint: Curve is not an arc. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
-        (arc.Value).Center
+        let mutable arc = Arc.Unset
+        if curve.TryGetArc(&arc, RhinoMath.ZeroTolerance) then arc.Center
+        else RhinoScriptingException.Raise "ArcCenterPoint: Curve is not an arc. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
 
 
     /// <summary>Returns the mid point of an arc Curve object.</summary>
@@ -4228,10 +4240,9 @@ type RhinoScriptSyntax private () =
     /// <returns>(Point3d) The 3D mid point of the arc.</returns>
     static member ArcMidPoint(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
         let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
-        let arc = ref Arc.Unset
-        let rc = curve.TryGetArc( arc, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "ArcMidPoint: Curve is not an arc. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
-        (arc.Value).MidPoint
+        let mutable arc = Arc.Unset
+        if curve.TryGetArc(&arc, RhinoMath.ZeroTolerance) then arc.MidPoint
+        else RhinoScriptingException.Raise "ArcMidPoint: Curve is not an arc. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
 
 
     /// <summary>Returns the radius of an arc Curve object.</summary>
@@ -4247,10 +4258,9 @@ type RhinoScriptSyntax private () =
     /// <returns>(float) The radius of the arc.</returns>
     static member ArcRadius(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : float =
         let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
-        let arc = ref Arc.Unset
-        let rc = curve.TryGetArc( arc, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "ArcRadius: Curve is not an arc. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
-        (arc.Value).Radius
+        let mutable arc = Arc.Unset
+        if curve.TryGetArc(&arc, RhinoMath.ZeroTolerance) then arc.Radius
+        else RhinoScriptingException.Raise "ArcRadius: Curve is not an arc. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
 
 
 
@@ -4267,10 +4277,9 @@ type RhinoScriptSyntax private () =
     /// <returns>(Point3d) The 3D center point of the circle.</returns>
     static member CircleCenterPoint(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
         let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
-        let circle = ref Circle.Unset
-        let rc = curve.TryGetCircle(circle, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "CircleCenterPoint: Curve is not circle. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
-        (!circle).Center
+        let mutable circle = Circle.Unset
+        if curve.TryGetCircle(&circle, RhinoMath.ZeroTolerance) then circle.Center
+        else RhinoScriptingException.Raise "CircleCenterPoint: Curve is not circle. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
 
 
     /// <summary>Returns the center Plane of a circle Curve object.</summary>
@@ -4286,12 +4295,9 @@ type RhinoScriptSyntax private () =
     /// <returns>(Plane) The 3D Plane at the center point of the circle.</returns>
     static member CircleCenterPlane(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : Plane =
         let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
-        let circle = ref Circle.Unset
-        let rc = curve.TryGetCircle(circle, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "CircleCenterPlane: Curve is not circle. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
-        (!circle).Plane
-
-
+        let mutable circle = Circle.Unset
+        if curve.TryGetCircle(&circle, RhinoMath.ZeroTolerance) then circle.Plane
+        else RhinoScriptingException.Raise "CircleCenterPlane: Curve is not circle. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
 
 
 
@@ -4308,10 +4314,9 @@ type RhinoScriptSyntax private () =
     /// <returns>(float) The circumference of the circle.</returns>
     static member CircleCircumference(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : float =
         let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
-        let circle = ref Circle.Unset
-        let rc = curve.TryGetCircle(circle, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "CircleCircumference: Curve is not circle. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
-        (!circle).Circumference
+        let mutable circle = Circle.Unset
+        if curve.TryGetCircle(&circle, RhinoMath.ZeroTolerance) then circle.Circumference
+        else RhinoScriptingException.Raise "CircleCircumference: Curve is not circle. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
 
 
     /// <summary>Returns the radius of a circle Curve object.</summary>
@@ -4327,10 +4332,9 @@ type RhinoScriptSyntax private () =
     /// <returns>(float) The radius of the circle.</returns>
     static member CircleRadius(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : float =
         let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
-        let circle = ref Circle.Unset
-        let rc = curve.TryGetCircle(circle, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "CircleRadius: Curve is not circle. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
-        (!circle).Radius
+        let mutable circle = Circle.Unset
+        if curve.TryGetCircle(&circle, RhinoMath.ZeroTolerance) then circle.Radius
+        else RhinoScriptingException.Raise "CircleRadius: Curve is not circle. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
 
 
     /// <summary>Closes an open Curve object by making adjustments to the end points so
@@ -4769,12 +4773,9 @@ type RhinoScriptSyntax private () =
         let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
         let geometry = ResizeArray<GeometryBase>(objectInputs)
         if geometry.Count = 0 then RhinoScriptingException.Raise "CurveClosestObject: Objects must contain at least one item"
-        let curvePoint = ref Point3d.Unset
-        let geomPoint = ref Point3d.Unset
-        let whichGeom = ref 0
-        if curve.ClosestPoints(geometry, curvePoint, geomPoint, whichGeom) then
-            geometry.[!whichGeom], !geomPoint, !curvePoint
-        else RhinoScriptingException.Raise "CurveClosestObject: Closest point calculation failed"
+        match curve.ClosestPoints(geometry) with
+        | true, curvePoint, geomPoint, whichGeom -> geometry.[whichGeom], geomPoint, curvePoint
+        | _ -> RhinoScriptingException.Raise "CurveClosestObject: Closest point calculation failed"
 
     /// <summary>Returns the 3D point locations on the Curve and finite line where they are closest to
     ///    each other. Note, this function provides similar functionality to that of
@@ -4793,11 +4794,9 @@ type RhinoScriptSyntax private () =
     /// <returns>(Point3d * Point3d) first point on Curve, second point on Line.</returns>
     static member CurveLineClosestPoint(curveGeo:Curve, line:Line) : Point3d * Point3d =
         let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
-        let curvePoint = ref Point3d.Unset
-        let linePoint  = ref Point3d.Unset
-        let success = curve.ClosestPoints(line.ToNurbsCurve(), curvePoint, linePoint)
-        if success then !curvePoint, !linePoint
-        else RhinoScriptingException.Raise "CurveLineClosestPoint failed  curveGeo:'%s' Line:'%A'" (Pretty.str curveGeo) line
+        match curve.ClosestPoints(line.ToNurbsCurve()) with
+        | true, curvePoint, linePoint -> curvePoint, linePoint
+        | _ -> RhinoScriptingException.Raise "CurveLineClosestPoint failed  curveGeo:'%s' Line:'%A'" (Pretty.str curveGeo) line
 
 
     /// <summary>Returns parameter of the point on a Curve that is closest to a test point.</summary>
@@ -4817,20 +4816,18 @@ type RhinoScriptSyntax private () =
     /// <returns>(float) The parameter of the closest point on the Curve.</returns>
     static member CurveClosestParameter(curveGeo:Curve, point:Point3d, segmentIndex:int) : float =
         let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
-        let t = ref 0.
-        let rc = curve.ClosestPoint(point, t)
-        if not <| rc then RhinoScriptingException.Raise "CurveClosestParameter failed. curveGeo:'%s' segmentIndex:'%d'" (Pretty.str curveGeo) segmentIndex
-        !t
+        match curve.ClosestPoint(point) with
+        | true, t -> t
+        | _ -> RhinoScriptingException.Raise "CurveClosestParameter failed. curveGeo:'%s' segmentIndex:'%d'" (Pretty.str curveGeo) segmentIndex
 
     /// <summary>Returns parameter of the point on a Curve that is closest to a test point.</summary>
     /// <param name="curve">(Geometry.Curve) A Curve geometry object</param>
     /// <param name="point">(Point3d) Sampling point</param>
     /// <returns>(float) The parameter of the closest point on the Curve.</returns>
     static member CurveClosestParameter(curve:Curve, point:Point3d) : float =
-        let t = ref 0.
-        let rc = curve.ClosestPoint(point, t)
-        if not <| rc then RhinoScriptingException.Raise "CurveClosestParameter failed on Curve Geometry"
-        !t
+        match curve.ClosestPoint(point) with
+        | true, t -> t
+        | _ -> RhinoScriptingException.Raise "CurveClosestParameter failed on Curve Geometry"
 
 
     /// <summary>Returns the point on a Curve that is closest to a test point.</summary>
@@ -5507,9 +5504,8 @@ type RhinoScriptSyntax private () =
     static member CurveNormal(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : Vector3d =
         let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let tol = State.Doc.ModelAbsoluteTolerance
-        let plane = ref Plane.WorldXY
-        let rc = curve.TryGetPlane(plane, tol)
-        if rc then  (!plane).Normal
+        let mutable plane = Plane.WorldXY
+        if curve.TryGetPlane(&plane, tol) then plane.Normal
         else RhinoScriptingException.Raise "CurveNormal failed. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
 
 
@@ -5584,9 +5580,8 @@ type RhinoScriptSyntax private () =
     static member CurvePlane(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : Plane =
         let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let tol = State.Doc.ModelAbsoluteTolerance
-        let plane = ref Plane.WorldXY
-        let rc = curve.TryGetPlane(plane, tol)
-        if rc then  !plane
+        let mutable plane = Plane.WorldXY
+        if curve.TryGetPlane(&plane, tol) then plane
         else RhinoScriptingException.Raise "CurvePlane failed. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
 
 
@@ -5874,10 +5869,10 @@ type RhinoScriptSyntax private () =
     /// <param name="segments">(int) The number of segments</param>
     /// <returns>(Point3d array) Array containing points at divisions.</returns>
     static member DivideCurveIntoPoints(curve:Curve, segments:int) : Point3d array =
-        let pts = ref (Array.zeroCreate (segments + 1))
-        let rc = curve.DivideByCount(segments, includeEnds=true, points=pts)
+        let mutable pts = Array.zeroCreate<Point3d> (segments + 1)
+        let rc = curve.DivideByCount(segments, true, &pts)
         if isNull rc then  RhinoScriptingException.Raise "DivideCurveIntoPoints failed. curve:'%A' segments:'%A'" curve segments
-        !pts
+        pts
 
     /// <summary>Divides a Curve object into a specified number of segments, including start and end point.</summary>
     /// <param name="curveId">(Guid) Identifier of the Curve object</param>
@@ -6633,8 +6628,8 @@ type RhinoScriptSyntax private () =
     static member IsPointOnCurve(curveGeo:Curve, point:Point3d, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
         let tol = Util.ifZero2 RhinoMath.SqrtEpsilon tolerance
         let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
-        let t = ref 0.0
-        curve.ClosestPoint(point, t, tol)
+        let mutable t = 0.0
+        curve.ClosestPoint(point, &t, tol)
 
 
     /// <summary>Checks if an object is a PolyCurve Curve. Returns false for any other Rhino object.</summary>
@@ -10168,9 +10163,8 @@ type RhinoScriptSyntax private () =
             if not preselect then
                 State.Doc.Objects.UnselectAll() |> ignore<int>
                 State.Doc.Views.Redraw()
-            let grip = ref null
-            let rc = Input.RhinoGet.GetGrip(grip, message)
-            let grip = !grip
+            let mutable grip : DocObjects.GripObject = null
+            let rc = Input.RhinoGet.GetGrip(&grip, message)
             if rc <> Commands.Result.Success || isNull grip then
                 RhinoUserInteractionException.Raise "GetObjectGrip User failed to select a Grip for : %s " message
             else
@@ -10199,9 +10193,8 @@ type RhinoScriptSyntax private () =
             if not preselect then
                 State.Doc.Objects.UnselectAll() |> ignore<int>
                 State.Doc.Views.Redraw()
-            let grips = ref null
-            let re = Input.RhinoGet.GetGrips(grips, message)
-            let grips = !grips
+            let mutable grips : DocObjects.GripObject[] = null
+            let re = Input.RhinoGet.GetGrips(&grips, message)
             let rc = ResizeArray()
             if re <> Commands.Result.Success || isNull grips then RhinoUserInteractionException.Raise "GetObjectGrips: user cancelled grip selection"
             if re = Commands.Result.Success && notNull grips then
@@ -12683,8 +12676,8 @@ type RhinoScriptSyntax private () =
                                     [<OPT;DEF(0.0)>]tolerance:float) : bool =
 
         let maxDistance = Util.ifZero1 tolerance RhinoMath.SqrtEpsilon
-        let pt = ref Point3d.Origin
-        let face = mesh.ClosestPoint(point, pt, maxDistance)
+        let mutable pt = Point3d.Origin
+        let face = mesh.ClosestPoint(point, &pt, maxDistance)
         face>=0
 
 
@@ -12943,10 +12936,10 @@ type RhinoScriptSyntax private () =
     static member MeshClosestPoint( mesh:Mesh,
                                     point:Point3d,
                                     [<OPT;DEF(0.0)>]maximumDistance:float) : Point3d * int =
-        let pt = ref Point3d.Origin
-        let face = mesh.ClosestPoint(point, pt, maximumDistance)
+        let mutable pt = Point3d.Origin
+        let face = mesh.ClosestPoint(point, &pt, maximumDistance)
         if face<0 then RhinoScriptingException.Raise "MeshClosestPoint failed.  mesh:'%s' point:'%A' maximumDistance:'%A'" (Pretty.str mesh) point maximumDistance
-        !pt, face
+        pt, face
 
 
     /// <summary>Returns the center of each face of the Mesh object.</summary>
@@ -18187,16 +18180,13 @@ type RhinoScriptSyntax private () =
     ///      5        Vector3d        The normal to the brepFace, or the tangent to the brepEdge.</returns>
     static member BrepClosestPoint(geometryObject:Brep, point:Point3d) : Point3d * float * float * ComponentIndexType * int * Vector3d =
         let brep = geometryObject
-        let clpt = ref Point3d.Origin
-        let ci = ref ComponentIndex.Unset
-        let s = ref 0.0
-        let t = ref 0.0
-        let n = ref Vector3d.Zero
-        let ok = brep.ClosestPoint(point, clpt, ci, s, t, 0.0, n)
-        if ok then
-            let typ = (!ci).ComponentIndexType
-            let idx = (!ci).Index
-            !clpt,!s,!t, typ, idx, !n
+        let mutable clpt = Point3d.Origin
+        let mutable ci = ComponentIndex.Unset
+        let mutable s = 0.0
+        let mutable t = 0.0
+        let mutable n = Vector3d.Zero
+        if brep.ClosestPoint(point, &clpt, &ci, &s, &t, 0.0, &n) then
+            clpt, s, t, ci.ComponentIndexType, ci.Index, n
         else
             RhinoScriptingException.Raise "BrepClosestPoint failed for %A and %A" (Pretty.str geometryObject) point
 
@@ -19177,9 +19167,8 @@ type RhinoScriptSyntax private () =
     static member SurfaceSphere(surfaceGeo:Surface) : Plane * float =
         let surface = surfaceGeo
         let tol = State.Doc.ModelAbsoluteTolerance
-        let sphere = ref Sphere.Unset
-        let issphere = surface.TryGetSphere(sphere, tol)
-        if issphere then (!sphere).EquatorialPlane, (!sphere).Radius
+        let mutable sphere = Sphere.Unset
+        if surface.TryGetSphere(&sphere, tol) then sphere.EquatorialPlane, sphere.Radius
         else RhinoScriptingException.Raise "SurfaceSphere input is not a sphere %A"surfaceGeo
 
 
@@ -19830,10 +19819,8 @@ type RhinoScriptSyntax private () =
     static member SurfaceCylinder(surfaceGeo:Surface) : Plane * float * float =
         let surface = surfaceGeo
         let tol = State.Doc.ModelAbsoluteTolerance
-        let cy = ref Cylinder.Unset
-        let rc = surface.TryGetFiniteCylinder(cy, tol)
-        if rc  then
-            let cylinder = !cy
+        let mutable cylinder = Cylinder.Unset
+        if surface.TryGetFiniteCylinder(&cylinder, tol) then
             cylinder.BasePlane, cylinder.TotalHeight, cylinder.Radius
         else
             RhinoScriptingException.Raise "SurfaceCylinder failed on %A" surfaceGeo
@@ -21718,9 +21705,9 @@ type RhinoScriptSyntax private () =
                 |4 -> Input.GetBoxMode.Center
                 |_ -> RhinoScriptingException.Raise "GetBox:Bad mode %A" mode
 
-            let box = ref (Box())
-            let rc= Input.RhinoGet.GetBox(box, m, basePoint, prompt1, prompt2, prompt3)
-            if rc = Commands.Result.Success then (box.Value.GetCorners())
+            let mutable box = Box()
+            let rc = Input.RhinoGet.GetBox(&box, m, basePoint, prompt1, prompt2, prompt3)
+            if rc = Commands.Result.Success then (box.GetCorners())
             else RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetBox()"
         RhinoSync.DoSyncRedrawHideEditor get
 
@@ -21908,14 +21895,15 @@ type RhinoScriptSyntax private () =
                             [<OPT;DEF(false)>]showNewButton:bool,
                             [<OPT;DEF(false)>]showSetCurrent:bool) : string =
         let getKeepEditor () =
-            let layerindex = ref State.Doc.Layers.CurrentLayerIndex
+            let mutable layerindex = State.Doc.Layers.CurrentLayerIndex
             if notNull layer then
                 let layerinstance = RhinoScriptSyntax.CoerceLayer(layer)
-                layerindex := layerinstance.Index
-            let rc = UI.Dialogs.ShowSelectLayerDialog(layerindex, title, showNewButton, showSetCurrent, ref true)
+                layerindex <- layerinstance.Index
+            let mutable initialLayer = true
+            let rc = UI.Dialogs.ShowSelectLayerDialog(&layerindex, title, showNewButton, showSetCurrent, &initialLayer)
             if not rc then RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetLayer()"
             else
-                let layer = State.Doc.Layers.[!layerindex]
+                let layer = State.Doc.Layers.[layerindex]
                 layer.FullPath
         RhinoSync.DoSync getKeepEditor
 
@@ -22658,12 +22646,12 @@ type RhinoScriptSyntax private () =
                            [<OPT;DEF(7e89)>]minimum:float,
                            [<OPT;DEF(7e89)>]maximum:float) : float =
         let get () =
-            let defaultValNumber = ref <| if defaultValNumber = 7e89 then RhinoMath.UnsetValue else defaultValNumber
+            let mutable defaultValNumber = if defaultValNumber = 7e89 then RhinoMath.UnsetValue else defaultValNumber
             let minimum = if minimum = 7e89 then RhinoMath.UnsetValue else minimum
             let maximum = if maximum = 7e89 then RhinoMath.UnsetValue else maximum
 
-            let rc = UI.Dialogs.ShowNumberBox(title, message, defaultValNumber, minimum, maximum)
-            if  rc then (defaultValNumber.Value)
+            let rc = UI.Dialogs.ShowNumberBox(title, message, &defaultValNumber, minimum, maximum)
+            if  rc then defaultValNumber
             else RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.RealBox()"
 
         RhinoSync.DoSyncRedrawHideEditor get

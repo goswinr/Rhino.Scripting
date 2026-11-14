@@ -373,8 +373,8 @@ module AutoOpenMesh =
                                     [<OPT;DEF(0.0)>]tolerance:float) : bool =
 
         let maxDistance = Util.ifZero1 tolerance RhinoMath.SqrtEpsilon
-        let pt = ref Point3d.Origin
-        let face = mesh.ClosestPoint(point, pt, maxDistance)
+        let mutable pt = Point3d.Origin
+        let face = mesh.ClosestPoint(point, &pt, maxDistance)
         face>=0
 
 
@@ -633,10 +633,10 @@ module AutoOpenMesh =
     static member MeshClosestPoint( mesh:Mesh,
                                     point:Point3d,
                                     [<OPT;DEF(0.0)>]maximumDistance:float) : Point3d * int =
-        let pt = ref Point3d.Origin
-        let face = mesh.ClosestPoint(point, pt, maximumDistance)
+        let mutable pt = Point3d.Origin
+        let face = mesh.ClosestPoint(point, &pt, maximumDistance)
         if face<0 then RhinoScriptingException.Raise "MeshClosestPoint failed.  mesh:'%s' point:'%A' maximumDistance:'%A'" (Pretty.str mesh) point maximumDistance
-        !pt, face
+        pt, face
 
 
     /// <summary>Returns the center of each face of the Mesh object.</summary>

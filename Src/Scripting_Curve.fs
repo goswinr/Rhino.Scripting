@@ -526,10 +526,9 @@ module AutoOpenCurve =
     /// <returns>(float) The angle in degrees.</returns>
     static member ArcAngle(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : float =
         let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
-        let arc = ref Arc.Unset
-        let rc = curve.TryGetArc( arc, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "ArcAngle: Curve is not an arc. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
-        (arc.Value).AngleDegrees
+        let mutable arc = Arc.Unset
+        if curve.TryGetArc(&arc, RhinoMath.ZeroTolerance) then arc.AngleDegrees
+        else RhinoScriptingException.Raise "ArcAngle: Curve is not an arc. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
 
 
     /// <summary>Returns the center point of an arc Curve object.</summary>
@@ -545,10 +544,9 @@ module AutoOpenCurve =
     /// <returns>(Point3d) The 3D center point of the arc.</returns>
     static member ArcCenterPoint(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
         let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
-        let arc = ref Arc.Unset
-        let rc = curve.TryGetArc( arc, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "ArcCenterPoint: Curve is not an arc. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
-        (arc.Value).Center
+        let mutable arc = Arc.Unset
+        if curve.TryGetArc(&arc, RhinoMath.ZeroTolerance) then arc.Center
+        else RhinoScriptingException.Raise "ArcCenterPoint: Curve is not an arc. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
 
 
     /// <summary>Returns the mid point of an arc Curve object.</summary>
@@ -564,10 +562,9 @@ module AutoOpenCurve =
     /// <returns>(Point3d) The 3D mid point of the arc.</returns>
     static member ArcMidPoint(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
         let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
-        let arc = ref Arc.Unset
-        let rc = curve.TryGetArc( arc, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "ArcMidPoint: Curve is not an arc. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
-        (arc.Value).MidPoint
+        let mutable arc = Arc.Unset
+        if curve.TryGetArc(&arc, RhinoMath.ZeroTolerance) then arc.MidPoint
+        else RhinoScriptingException.Raise "ArcMidPoint: Curve is not an arc. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
 
 
     /// <summary>Returns the radius of an arc Curve object.</summary>
@@ -583,10 +580,9 @@ module AutoOpenCurve =
     /// <returns>(float) The radius of the arc.</returns>
     static member ArcRadius(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : float =
         let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
-        let arc = ref Arc.Unset
-        let rc = curve.TryGetArc( arc, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "ArcRadius: Curve is not an arc. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
-        (arc.Value).Radius
+        let mutable arc = Arc.Unset
+        if curve.TryGetArc(&arc, RhinoMath.ZeroTolerance) then arc.Radius
+        else RhinoScriptingException.Raise "ArcRadius: Curve is not an arc. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
 
 
 
@@ -603,10 +599,9 @@ module AutoOpenCurve =
     /// <returns>(Point3d) The 3D center point of the circle.</returns>
     static member CircleCenterPoint(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
         let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
-        let circle = ref Circle.Unset
-        let rc = curve.TryGetCircle(circle, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "CircleCenterPoint: Curve is not circle. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
-        (!circle).Center
+        let mutable circle = Circle.Unset
+        if curve.TryGetCircle(&circle, RhinoMath.ZeroTolerance) then circle.Center
+        else RhinoScriptingException.Raise "CircleCenterPoint: Curve is not circle. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
 
 
     /// <summary>Returns the center Plane of a circle Curve object.</summary>
@@ -622,10 +617,9 @@ module AutoOpenCurve =
     /// <returns>(Plane) The 3D Plane at the center point of the circle.</returns>
     static member CircleCenterPlane(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : Plane =
         let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
-        let circle = ref Circle.Unset
-        let rc = curve.TryGetCircle(circle, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "CircleCenterPlane: Curve is not circle. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
-        (!circle).Plane
+        let mutable circle = Circle.Unset
+        if curve.TryGetCircle(&circle, RhinoMath.ZeroTolerance) then circle.Plane
+        else RhinoScriptingException.Raise "CircleCenterPlane: Curve is not circle. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
 
 
 
@@ -642,10 +636,9 @@ module AutoOpenCurve =
     /// <returns>(float) The circumference of the circle.</returns>
     static member CircleCircumference(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : float =
         let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
-        let circle = ref Circle.Unset
-        let rc = curve.TryGetCircle(circle, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "CircleCircumference: Curve is not circle. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
-        (!circle).Circumference
+        let mutable circle = Circle.Unset
+        if curve.TryGetCircle(&circle, RhinoMath.ZeroTolerance) then circle.Circumference
+        else RhinoScriptingException.Raise "CircleCircumference: Curve is not circle. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
 
 
     /// <summary>Returns the radius of a circle Curve object.</summary>
@@ -661,10 +654,9 @@ module AutoOpenCurve =
     /// <returns>(float) The radius of the circle.</returns>
     static member CircleRadius(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : float =
         let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
-        let circle = ref Circle.Unset
-        let rc = curve.TryGetCircle(circle, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "CircleRadius: Curve is not circle. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
-        (!circle).Radius
+        let mutable circle = Circle.Unset
+        if curve.TryGetCircle(&circle, RhinoMath.ZeroTolerance) then circle.Radius
+        else RhinoScriptingException.Raise "CircleRadius: Curve is not circle. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
 
 
     /// <summary>Closes an open Curve object by making adjustments to the end points so
@@ -1103,12 +1095,9 @@ module AutoOpenCurve =
         let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
         let geometry = ResizeArray<GeometryBase>(objectInputs)
         if geometry.Count = 0 then RhinoScriptingException.Raise "CurveClosestObject: Objects must contain at least one item"
-        let curvePoint = ref Point3d.Unset
-        let geomPoint = ref Point3d.Unset
-        let whichGeom = ref 0
-        if curve.ClosestPoints(geometry, curvePoint, geomPoint, whichGeom) then
-            geometry.[!whichGeom], !geomPoint, !curvePoint
-        else RhinoScriptingException.Raise "CurveClosestObject: Closest point calculation failed"
+        match curve.ClosestPoints(geometry) with
+        | true, curvePoint, geomPoint, whichGeom -> geometry.[whichGeom], geomPoint, curvePoint
+        | _ -> RhinoScriptingException.Raise "CurveClosestObject: Closest point calculation failed"
 
     /// <summary>Returns the 3D point locations on the Curve and finite line where they are closest to
     ///    each other. Note, this function provides similar functionality to that of
@@ -1127,11 +1116,9 @@ module AutoOpenCurve =
     /// <returns>(Point3d * Point3d) first point on Curve, second point on Line.</returns>
     static member CurveLineClosestPoint(curveGeo:Curve, line:Line) : Point3d * Point3d =
         let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
-        let curvePoint = ref Point3d.Unset
-        let linePoint  = ref Point3d.Unset
-        let success = curve.ClosestPoints(line.ToNurbsCurve(), curvePoint, linePoint)
-        if success then !curvePoint, !linePoint
-        else RhinoScriptingException.Raise "CurveLineClosestPoint failed  curveGeo:'%s' Line:'%A'" (Pretty.str curveGeo) line
+        match curve.ClosestPoints(line.ToNurbsCurve()) with
+        | true, curvePoint, linePoint -> curvePoint, linePoint
+        | _ -> RhinoScriptingException.Raise "CurveLineClosestPoint failed  curveGeo:'%s' Line:'%A'" (Pretty.str curveGeo) line
 
 
     /// <summary>Returns parameter of the point on a Curve that is closest to a test point.</summary>
@@ -1151,20 +1138,18 @@ module AutoOpenCurve =
     /// <returns>(float) The parameter of the closest point on the Curve.</returns>
     static member CurveClosestParameter(curveGeo:Curve, point:Point3d, segmentIndex:int) : float =
         let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
-        let t = ref 0.
-        let rc = curve.ClosestPoint(point, t)
-        if not <| rc then RhinoScriptingException.Raise "CurveClosestParameter failed. curveGeo:'%s' segmentIndex:'%d'" (Pretty.str curveGeo) segmentIndex
-        !t
+        match curve.ClosestPoint(point) with
+        | true, t -> t
+        | _ -> RhinoScriptingException.Raise "CurveClosestParameter failed. curveGeo:'%s' segmentIndex:'%d'" (Pretty.str curveGeo) segmentIndex
 
     /// <summary>Returns parameter of the point on a Curve that is closest to a test point.</summary>
     /// <param name="curve">(Geometry.Curve) A Curve geometry object</param>
     /// <param name="point">(Point3d) Sampling point</param>
     /// <returns>(float) The parameter of the closest point on the Curve.</returns>
     static member CurveClosestParameter(curve:Curve, point:Point3d) : float =
-        let t = ref 0.
-        let rc = curve.ClosestPoint(point, t)
-        if not <| rc then RhinoScriptingException.Raise "CurveClosestParameter failed on Curve Geometry"
-        !t
+        match curve.ClosestPoint(point) with
+        | true, t -> t
+        | _ -> RhinoScriptingException.Raise "CurveClosestParameter failed on Curve Geometry"
 
 
     /// <summary>Returns the point on a Curve that is closest to a test point.</summary>
@@ -1841,9 +1826,8 @@ module AutoOpenCurve =
     static member CurveNormal(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : Vector3d =
         let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let tol = State.Doc.ModelAbsoluteTolerance
-        let plane = ref Plane.WorldXY
-        let rc = curve.TryGetPlane(plane, tol)
-        if rc then  (!plane).Normal
+        let mutable plane = Plane.WorldXY
+        if curve.TryGetPlane(&plane, tol) then plane.Normal
         else RhinoScriptingException.Raise "CurveNormal failed. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
 
 
@@ -1918,9 +1902,8 @@ module AutoOpenCurve =
     static member CurvePlane(curveGeo:Curve, [<OPT;DEF(-1)>]segmentIndex:int) : Plane =
         let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
         let tol = State.Doc.ModelAbsoluteTolerance
-        let plane = ref Plane.WorldXY
-        let rc = curve.TryGetPlane(plane, tol)
-        if rc then  !plane
+        let mutable plane = Plane.WorldXY
+        if curve.TryGetPlane(&plane, tol) then plane
         else RhinoScriptingException.Raise "CurvePlane failed. curveGeo:'%s' segmentIndex:'%A'" (Pretty.str curveGeo) segmentIndex
 
 
@@ -2208,10 +2191,10 @@ module AutoOpenCurve =
     /// <param name="segments">(int) The number of segments</param>
     /// <returns>(Point3d array) Array containing points at divisions.</returns>
     static member DivideCurveIntoPoints(curve:Curve, segments:int) : Point3d array =
-        let pts = ref (Array.zeroCreate (segments + 1))
-        let rc = curve.DivideByCount(segments, includeEnds=true, points=pts)
+        let mutable pts = Array.zeroCreate<Point3d> (segments + 1)
+        let rc = curve.DivideByCount(segments, true, &pts)
         if isNull rc then  RhinoScriptingException.Raise "DivideCurveIntoPoints failed. curve:'%A' segments:'%A'" curve segments
-        !pts
+        pts
 
     /// <summary>Divides a Curve object into a specified number of segments, including start and end point.</summary>
     /// <param name="curveId">(Guid) Identifier of the Curve object</param>
@@ -2967,8 +2950,8 @@ module AutoOpenCurve =
     static member IsPointOnCurve(curveGeo:Curve, point:Point3d, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
         let tol = Util.ifZero2 RhinoMath.SqrtEpsilon tolerance
         let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, segmentIndex)
-        let t = ref 0.0
-        curve.ClosestPoint(point, t, tol)
+        let mutable t = 0.0
+        curve.ClosestPoint(point, &t, tol)
 
 
     /// <summary>Checks if an object is a PolyCurve Curve. Returns false for any other Rhino object.</summary>

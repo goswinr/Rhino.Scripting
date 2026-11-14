@@ -50,9 +50,8 @@ module AutoOpenGrips =
             if not preselect then
                 State.Doc.Objects.UnselectAll() |> ignore<int>
                 State.Doc.Views.Redraw()
-            let grip = ref null
-            let rc = Input.RhinoGet.GetGrip(grip, message)
-            let grip = !grip
+            let mutable grip : DocObjects.GripObject = null
+            let rc = Input.RhinoGet.GetGrip(&grip, message)
             if rc <> Commands.Result.Success || isNull grip then
                 RhinoUserInteractionException.Raise "GetObjectGrip User failed to select a Grip for : %s " message
             else
@@ -81,9 +80,8 @@ module AutoOpenGrips =
             if not preselect then
                 State.Doc.Objects.UnselectAll() |> ignore<int>
                 State.Doc.Views.Redraw()
-            let grips = ref null
-            let re = Input.RhinoGet.GetGrips(grips, message)
-            let grips = !grips
+            let mutable grips : DocObjects.GripObject[] = null
+            let re = Input.RhinoGet.GetGrips(&grips, message)
             let rc = ResizeArray()
             if re <> Commands.Result.Success || isNull grips then RhinoUserInteractionException.Raise "GetObjectGrips: user cancelled grip selection"
             if re = Commands.Result.Success && notNull grips then

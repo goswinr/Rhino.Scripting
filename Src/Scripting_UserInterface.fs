@@ -199,9 +199,9 @@ module AutoOpenUserInterface =
                 |4 -> Input.GetBoxMode.Center
                 |_ -> RhinoScriptingException.Raise "GetBox:Bad mode %A" mode
 
-            let box = ref (Box())
-            let rc= Input.RhinoGet.GetBox(box, m, basePoint, prompt1, prompt2, prompt3)
-            if rc = Commands.Result.Success then (box.Value.GetCorners())
+            let mutable box = Box()
+            let rc = Input.RhinoGet.GetBox(&box, m, basePoint, prompt1, prompt2, prompt3)
+            if rc = Commands.Result.Success then (box.GetCorners())
             else RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetBox()"
         RhinoSync.DoSyncRedrawHideEditor get
 
@@ -389,14 +389,15 @@ module AutoOpenUserInterface =
                             [<OPT;DEF(false)>]showNewButton:bool,
                             [<OPT;DEF(false)>]showSetCurrent:bool) : string =
         let getKeepEditor () =
-            let layerindex = ref State.Doc.Layers.CurrentLayerIndex
+            let mutable layerindex = State.Doc.Layers.CurrentLayerIndex
             if notNull layer then
                 let layerinstance = RhinoScriptSyntax.CoerceLayer(layer)
-                layerindex := layerinstance.Index
-            let rc = UI.Dialogs.ShowSelectLayerDialog(layerindex, title, showNewButton, showSetCurrent, ref true)
+                layerindex <- layerinstance.Index
+            let mutable initialLayer = true
+            let rc = UI.Dialogs.ShowSelectLayerDialog(&layerindex, title, showNewButton, showSetCurrent, &initialLayer)
             if not rc then RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetLayer()"
             else
-                let layer = State.Doc.Layers.[!layerindex]
+                let layer = State.Doc.Layers.[layerindex]
                 layer.FullPath
         RhinoSync.DoSync getKeepEditor
 
@@ -1139,12 +1140,12 @@ module AutoOpenUserInterface =
                            [<OPT;DEF(7e89)>]minimum:float,
                            [<OPT;DEF(7e89)>]maximum:float) : float =
         let get () =
-            let defaultValNumber = ref <| if defaultValNumber = 7e89 then RhinoMath.UnsetValue else defaultValNumber
+            let mutable defaultValNumber = if defaultValNumber = 7e89 then RhinoMath.UnsetValue else defaultValNumber
             let minimum = if minimum = 7e89 then RhinoMath.UnsetValue else minimum
             let maximum = if maximum = 7e89 then RhinoMath.UnsetValue else maximum
 
-            let rc = UI.Dialogs.ShowNumberBox(title, message, defaultValNumber, minimum, maximum)
-            if  rc then (defaultValNumber.Value)
+            let rc = UI.Dialogs.ShowNumberBox(title, message, &defaultValNumber, minimum, maximum)
+            if  rc then defaultValNumber
             else RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.RealBox()"
 
         RhinoSync.DoSyncRedrawHideEditor get

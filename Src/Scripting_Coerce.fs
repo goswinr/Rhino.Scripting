@@ -315,8 +315,8 @@ module AutoOpenCoerce =
         if isNull curve then
             None
         else
-            let a = ref (new Arc())
-            if curve.TryGetArc(a, State.Doc.ModelAbsoluteTolerance) && not a.Value.IsCircle then Some a.Value
+            let mutable a = Arc.Unset
+            if curve.TryGetArc(&a, State.Doc.ModelAbsoluteTolerance) && not a.IsCircle then Some a
             else None
 
     /// <summary>Attempt to get an Arc from a curve object using the current Documents Absolute Tolerance.
@@ -365,8 +365,8 @@ module AutoOpenCoerce =
         if isNull curve then
             None
         else
-            let a = ref (new Circle())
-            if curve.TryGetCircle(a, State.Doc.ModelAbsoluteTolerance) then Some a.Value
+            let mutable c = Circle.Unset
+            if curve.TryGetCircle(&c, State.Doc.ModelAbsoluteTolerance) then Some c
             else None
 
     /// <summary>Attempt to get a Circle from a curve object using the current Documents Absolute Tolerance.</summary>
@@ -412,8 +412,8 @@ module AutoOpenCoerce =
         if isNull curve then
             None
         else
-            let a = ref (new Ellipse())
-            if curve.TryGetEllipse(a, State.Doc.ModelAbsoluteTolerance) then Some a.Value
+            let mutable e = Ellipse()
+            if curve.TryGetEllipse(&e, State.Doc.ModelAbsoluteTolerance) then Some e
             else None
 
     /// <summary>Attempt to get an Ellipse from a curve object using the current Documents Absolute Tolerance.</summary>
@@ -460,8 +460,8 @@ module AutoOpenCoerce =
         | null -> None
         | :? PolylineCurve as crv -> Some <| crv.ToPolyline()
         | crv ->
-            let a : ref<Polyline> = ref null
-            if crv.TryGetPolyline(a) then Some a.Value
+            let mutable pl : Polyline = null
+            if crv.TryGetPolyline(&pl) then Some pl
             else None
 
     /// <summary>Attempt to get a Polyline from a curve object.</summary>
