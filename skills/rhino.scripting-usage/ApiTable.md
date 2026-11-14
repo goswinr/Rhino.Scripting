@@ -2,7 +2,7 @@
 
 All public types, members and functions of Rhino.Scripting, with the first sentence of their summary.
 
-- The 1684 static members of `RhinoScriptSyntax`, 1040 names with their overloads, have one table per source file,
+- The 1689 static members of `RhinoScriptSyntax`, 1040 names with their overloads, have one table per source file,
   e.g. [Curve](#curve) for `Src/Scripting_Curve.fs`. Scripts usually call them through an alias, `type rs = RhinoScriptSyntax`.
 - Overloads of the same name are in the order of the source.
 - Geometry-only `Make...` methods are listed immediately after their corresponding document-adding `Add...` methods.
@@ -17,7 +17,7 @@ Generated from the sources by `API-Table/ApiTable.fsx`. Do not edit by hand.
 **RhinoScriptSyntax**
 
 - [Header](#header), 34 members
-- [Application](#application), 79 members
+- [Application](#application), 84 members
 - [Block](#block), 28 members
 - [Coerce](#coerce), 103 members
 - [Curve](#curve), 247 members
@@ -131,6 +131,7 @@ From [Src/Scripting_Application.fs](../../Src/Scripting_Application.fs).
 | `CommandHistory` | `unit -> string` | Returns the contents of Rhino's command history window. |
 | `DefaultRenderer` | `unit -> string` | Returns the default render plug-in. |
 | `DefaultRenderer` | `renderer: string -> bool` | Changes the default render plug-in. |
+| `DefaultRenderer` | `rendererId: Guid -> bool` | Changes the default render plug-in. |
 | `DeleteAlias` | `alias: string -> bool` | Delete an existing alias from Rhino. |
 | `DeleteSearchPath` | `folder: string -> bool` | Removes existing path from Rhino's search path list. |
 | `DisplayOleAlerts` | `enable: bool -> unit` | Enables/disables OLE Server Busy/Not Responding dialog boxes. |
@@ -141,6 +142,8 @@ From [Src/Scripting_Application.fs](../../Src/Scripting_Application.fs).
 | `EnableAutosave` | `?enable: bool = true -> unit` | Enables or disables Rhino's automatic file saving mechanism. |
 | `EnablePlugIn` | `plugin: string -> bool` | Get status of a Rhino plug-in. |
 | `EnablePlugIn` | `plugin: string * enable: bool -> unit` | Enables or disables a Rhino plug-in. |
+| `EnablePlugIn` | `pluginId: Guid -> bool` | Get status of a Rhino plug-in. |
+| `EnablePlugIn` | `pluginId: Guid * enable: bool -> unit` | Enables or disables a Rhino plug-in. |
 | `ExeFolder` | `unit -> string` | Returns the full path to Rhino's executable folder. |
 | `ExePlatform` | `unit -> int` | Returns the platform of the Rhino executable , calls System.Environment.Is64BitProcess. |
 | `ExeServiceRelease` | `unit -> int` | Returns the service release number of the Rhino executable. |
@@ -148,11 +151,13 @@ From [Src/Scripting_Application.fs](../../Src/Scripting_Application.fs).
 | `Exit` | `unit -> unit` | Closes the Rhino application. |
 | `FindFile` | `filename: string -> string` | Searches for a file using Rhino's search path. |
 | `GetPlugInObject` | `plugIn: string -> obj` | Returns a scriptable object from a specified plug-in. |
+| `GetPlugInObject` | `plugInId: Guid -> obj` | Returns a scriptable object from a specified plug-in. |
 | `InCommand` | `unit -> int` | Determines if Rhino is currently running a command. |
 | `InstallFolder` | `unit -> string` | The full path to Rhino's installation folder. |
 | `IsAlias` | `alias: string -> bool` | Checks if a command alias exists in Rhino. |
 | `IsCommand` | `commandName: string -> bool` | Checks if a command exists in Rhino. |
 | `IsPlugIn` | `plugin: string -> bool` | Checks if a plug-in is registered. |
+| `IsPlugIn` | `pluginId: Guid -> bool` | Checks if a plug-in is registered. |
 | `IsRunningOnWindows` | `unit -> bool` | Returns True if this script is being executed on a Windows platform. |
 | `LastCommandName` | `unit -> string` | Returns the name of the last executed command. |
 | `LastCommandResult` | `unit -> int` | Returns the result code for the last executed command. |

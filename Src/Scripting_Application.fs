@@ -289,6 +289,14 @@ module AutoOpenApplication =
             Rhino.Render.Utilities.SetDefaultRenderPlugIn(objectId)
             )
 
+    /// <summary>Changes the default render plug-in.</summary>
+    /// <param name="rendererId">(Guid) The Guid of the renderer plug-in to set as default renderer</param>
+    /// <returns>(bool) True or False indicating success or failure.</returns>
+    static member DefaultRenderer(rendererId:Guid) : bool = //SET
+        RhinoSync.DoSync (fun () ->
+            Rhino.Render.Utilities.SetDefaultRenderPlugIn(rendererId)
+            )
+
 
     /// <summary>Delete an existing alias from Rhino.</summary>
     /// <param name="alias">(string) The name of an existing alias</param>
@@ -386,6 +394,27 @@ module AutoOpenApplication =
             else RhinoScriptingException.Raise "EnablePlugIn: %s GetLoadProtection failed" plugin
             )
 
+    /// <summary>Get status of a Rhino plug-in.</summary>
+    /// <param name="pluginId">(Guid) The Guid of the plugin</param>
+    /// <returns>(bool) True if set to load silently otherwise False.</returns>
+    static member EnablePlugIn(pluginId:Guid) : bool = //GET
+        RhinoSync.DoSync (fun () ->
+            let rc, loadSilent = PlugIns.PlugIn.GetLoadProtection(pluginId)
+            if rc then loadSilent
+            else RhinoScriptingException.Raise "EnablePlugIn: %O GetLoadProtection failed" pluginId
+            )
+
+    /// <summary>Enables or disables a Rhino plug-in.</summary>
+    /// <param name="pluginId">(Guid) The Guid of the plugin</param>
+    /// <param name="enable">(bool) Load silently if True</param>
+    /// <returns>(unit) void, nothing.</returns>
+    static member EnablePlugIn(pluginId:Guid, enable:bool) : unit = //SET
+        RhinoSync.DoSync (fun () ->
+            let rc, _ = PlugIns.PlugIn.GetLoadProtection(pluginId)
+            if rc then PlugIns.PlugIn.SetLoadProtection(pluginId, enable)
+            else RhinoScriptingException.Raise "EnablePlugIn: %O GetLoadProtection failed" pluginId
+            )
+
 
 
     /// <summary>Returns the full path to Rhino's executable folder.</summary>
@@ -438,6 +467,15 @@ module AutoOpenApplication =
     static member GetPlugInObject(plugIn:string) : obj =
         RhinoApp.GetPlugInObject(plugIn)
 
+    /// <summary>Returns a scriptable object from a specified plug-in. Not all plug-ins
+    ///    contain scriptable objects. Check with the manufacturer of your plug-in
+    ///    to see if they support this capability.</summary>
+    /// <param name="plugInId">(Guid) The Guid of a registered plug-in that supports scripting.
+    ///    If the plug-in is registered but not loaded, it will be loaded</param>
+    /// <returns>(object) a scriptable plugin object.</returns>
+    static member GetPlugInObject(plugInId:Guid) : obj =
+        RhinoApp.GetPlugInObject(plugInId)
+
 
     /// <summary>Determines if Rhino is currently running a command. Because Rhino allows
     ///    for transparent commands (commands run from inside of other commands), this
@@ -486,9 +524,15 @@ module AutoOpenApplication =
             match Guid.TryParse(plugin) with
             | true, id -> id
             | _ -> Rhino.PlugIns.PlugIn.IdFromName(plugin)
-        if objectId = Guid.Empty then false
+        RhinoScriptSyntax.IsPlugIn(objectId)
+
+    /// <summary>Checks if a plug-in is registered.</summary>
+    /// <param name="pluginId">(Guid) The Guid of the plug-in</param>
+    /// <returns>(bool) True if the Guid is registered or False if it is not.</returns>
+    static member IsPlugIn(pluginId:Guid) : bool =
+        if pluginId = Guid.Empty then false
         else
-            let rc, _ , _ = Rhino.PlugIns.PlugIn.PlugInExists(objectId)
+            let rc, _ , _ = Rhino.PlugIns.PlugIn.PlugInExists(pluginId)
             rc
 
 

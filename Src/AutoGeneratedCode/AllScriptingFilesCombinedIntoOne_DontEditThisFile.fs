@@ -2691,6 +2691,14 @@ type RhinoScriptSyntax private () =
             Rhino.Render.Utilities.SetDefaultRenderPlugIn(objectId)
             )
 
+    /// <summary>Changes the default render plug-in.</summary>
+    /// <param name="rendererId">(Guid) The Guid of the renderer plug-in to set as default renderer</param>
+    /// <returns>(bool) True or False indicating success or failure.</returns>
+    static member DefaultRenderer(rendererId:Guid) : bool = //SET
+        RhinoSync.DoSync (fun () ->
+            Rhino.Render.Utilities.SetDefaultRenderPlugIn(rendererId)
+            )
+
 
     /// <summary>Delete an existing alias from Rhino.</summary>
     /// <param name="alias">(string) The name of an existing alias</param>
@@ -2735,14 +2743,18 @@ type RhinoScriptSyntax private () =
     /// <summary>Returns edge analysis mode displayed by the ShowEdges command.</summary>
     /// <returns>(int) The current edge analysis mode
     ///    0 - display all edges
-    ///    1 - display naked edges.</returns>
+    ///    1 - display naked edges
+    ///    2 - non-manifold edges
+    /// </returns>
     static member EdgeAnalysisMode() : int = //GET
         ApplicationSettings.EdgeAnalysisSettings.ShowEdges
 
     /// <summary>Modifies edge analysis mode displayed by the ShowEdges command.</summary>
     /// <param name="mode">(int) The new display mode. The available modes are
     ///    0 - display all edges
-    ///    1 - display naked edges</param>
+    ///    1 - display naked edges
+    ///    2 - non-manifold edges
+    /// </param>
     /// <returns>(unit) void, nothing.</returns>
     static member EdgeAnalysisMode(mode:int) : unit = //SET
         RhinoSync.DoSync (fun () ->
@@ -2782,6 +2794,27 @@ type RhinoScriptSyntax private () =
             let rc, _ = Rhino.PlugIns.PlugIn.GetLoadProtection(objectId)
             if rc then PlugIns.PlugIn.SetLoadProtection(objectId, enable)
             else RhinoScriptingException.Raise "EnablePlugIn: %s GetLoadProtection failed" plugin
+            )
+
+    /// <summary>Get status of a Rhino plug-in.</summary>
+    /// <param name="pluginId">(Guid) The Guid of the plugin</param>
+    /// <returns>(bool) True if set to load silently otherwise False.</returns>
+    static member EnablePlugIn(pluginId:Guid) : bool = //GET
+        RhinoSync.DoSync (fun () ->
+            let rc, loadSilent = PlugIns.PlugIn.GetLoadProtection(pluginId)
+            if rc then loadSilent
+            else RhinoScriptingException.Raise "EnablePlugIn: %O GetLoadProtection failed" pluginId
+            )
+
+    /// <summary>Enables or disables a Rhino plug-in.</summary>
+    /// <param name="pluginId">(Guid) The Guid of the plugin</param>
+    /// <param name="enable">(bool) Load silently if True</param>
+    /// <returns>(unit) void, nothing.</returns>
+    static member EnablePlugIn(pluginId:Guid, enable:bool) : unit = //SET
+        RhinoSync.DoSync (fun () ->
+            let rc, _ = PlugIns.PlugIn.GetLoadProtection(pluginId)
+            if rc then PlugIns.PlugIn.SetLoadProtection(pluginId, enable)
+            else RhinoScriptingException.Raise "EnablePlugIn: %O GetLoadProtection failed" pluginId
             )
 
 
@@ -2836,6 +2869,15 @@ type RhinoScriptSyntax private () =
     static member GetPlugInObject(plugIn:string) : obj =
         RhinoApp.GetPlugInObject(plugIn)
 
+    /// <summary>Returns a scriptable object from a specified plug-in. Not all plug-ins
+    ///    contain scriptable objects. Check with the manufacturer of your plug-in
+    ///    to see if they support this capability.</summary>
+    /// <param name="plugInId">(Guid) The Guid of a registered plug-in that supports scripting.
+    ///    If the plug-in is registered but not loaded, it will be loaded</param>
+    /// <returns>(object) a scriptable plugin object.</returns>
+    static member GetPlugInObject(plugInId:Guid) : obj =
+        RhinoApp.GetPlugInObject(plugInId)
+
 
     /// <summary>Determines if Rhino is currently running a command. Because Rhino allows
     ///    for transparent commands (commands run from inside of other commands), this
@@ -2884,9 +2926,15 @@ type RhinoScriptSyntax private () =
             match Guid.TryParse(plugin) with
             | true, id -> id
             | _ -> Rhino.PlugIns.PlugIn.IdFromName(plugin)
-        if objectId = Guid.Empty then false
+        RhinoScriptSyntax.IsPlugIn(objectId)
+
+    /// <summary>Checks if a plug-in is registered.</summary>
+    /// <param name="pluginId">(Guid) The Guid of the plug-in</param>
+    /// <returns>(bool) True if the Guid is registered or False if it is not.</returns>
+    static member IsPlugIn(pluginId:Guid) : bool =
+        if pluginId = Guid.Empty then false
         else
-            let rc, _ , _ = Rhino.PlugIns.PlugIn.PlugInExists(objectId)
+            let rc, _ , _ = Rhino.PlugIns.PlugIn.PlugInExists(pluginId)
             rc
 
 
@@ -2909,7 +2957,8 @@ type RhinoScriptSyntax private () =
     ///    1 = cancel (command was cancelled by the user)
     ///    2 = nothing (command did nothing, but was not cancelled)
     ///    3 = failure (command failed due to bad input, computational problem...)
-    ///    4 = unknown command (the command was not found).</returns>
+    ///    4 = unknown command (the command was not found)
+    /// </returns>
     static member LastCommandResult() : int =
         RhinoSync.DoSync (fun () ->
             int(Commands.Command.LastCommandResult))
@@ -2926,7 +2975,8 @@ type RhinoScriptSyntax private () =
     ///    1040  Italian-Italy
     ///    1041  Japanese
     ///    1042  Korean
-    ///    1045  Polish.</returns>
+    ///    1045  Polish
+    /// </returns>
     static member LocaleID() : int =
         ApplicationSettings.AppearanceSettings.LanguageIdentifier
 
@@ -2988,7 +3038,8 @@ type RhinoScriptSyntax private () =
     ///    524288     Perpendicular
     ///    2097152    Tangent
     ///    134217728  Point
-    ///    Object snap modes can be added together to set multiple modes.</returns>
+    ///    Object snap modes can be added together to set multiple modes
+    /// </returns>
     static member OsnapMode() : int = //GET
         int(ModelAidSettings.OsnapModes)
 
@@ -3008,7 +3059,8 @@ type RhinoScriptSyntax private () =
     ///    524288     Perpendicular
     ///    2097152    Tangent
     ///    134217728  Point
-    ///    Object snap modes can be added together to set multiple modes</param>
+    ///    Object snap modes can be added together to set multiple modes
+    /// </param>
     /// <returns>(unit) void, nothing.</returns>
     static member OsnapMode(mode:int) : unit = //SET
         RhinoSync.DoSync (fun () ->
@@ -3046,9 +3098,10 @@ type RhinoScriptSyntax private () =
     ///    16 = utility.
     ///    If omitted, all are returned</param>
     /// <param name="status">(int) Optional, default value: <c>0</c>
-    /// 0 = both loaded and unloaded,
-    /// 1 = loaded,
-    /// 2 = unloaded. If omitted both statuses are returned</param>
+    ///     0 = both loaded and unloaded,
+    ///     1 = loaded,
+    ///     2 = unloaded. If omitted both statuses are returned
+    /// </param>
     /// <returns>(string array) array of registered Rhino plug-ins.</returns>
     static member PlugIns([<OPT;DEF(0)>]types:int, [<OPT;DEF(0)>]status:int) : array<string> =
         let mutable filter = enum<Rhino.PlugIns.PlugInType> 0
@@ -3100,14 +3153,16 @@ type RhinoScriptSyntax private () =
 
 
     /// <summary>Returns the number of path items in Rhino's search path list.
-    ///    See "Options Files settings" in the Rhino help file for more details.</summary>
+    ///    See "Options Files settings" in the Rhino help file for more details.
+    /// </summary>
     /// <returns>(int) The number of path items in Rhino's search path list.</returns>
     static member SearchPathCount() : int =
         ApplicationSettings.FileSettings.SearchPathCount
 
 
     /// <summary>Returns all of the path items in Rhino's search path list.
-    ///    See "Options Files settings" in the Rhino help file for more details.</summary>
+    ///    See "Options Files settings" in the Rhino help file for more details.
+    /// </summary>
     /// <returns>(string array) list of search paths.</returns>
     static member SearchPathList() : array<string> =
         ApplicationSettings.FileSettings.GetSearchPaths()
@@ -3115,7 +3170,9 @@ type RhinoScriptSyntax private () =
     /// <summary>Sends a string of printable characters to Rhino's Commandline.</summary>
     /// <param name="keys">(string) Optional, default value: <c>""</c>. Characters to send; omit to send only the optional return.</param>
     /// <param name="addReturn">(bool) Optional, default value: <c>true</c>
-    ///    Append a return character to the end of the string. If omitted a return character will be added (True)</param>
+    ///    Append a return character to the end of the string.
+    ///    If omitted a return character will be added (True)
+    /// </param>
     /// <returns>(unit) void, nothing.</returns>
     static member SendKeystrokes([<OPT;DEF("")>]keys:string, [<OPT;DEF(true)>]addReturn:bool) : unit =
         RhinoSync.DoSync (fun () ->
