@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
   Lists, and optionally closes, the dialog windows of a running Rhino. Use it when Rhino looks frozen but still says "Responding",
-  e.g. after Tests/Repro_RenameBlockHang.fsx, which leaves a hidden modal message box behind.
+  e.g. when a RhinoCommon call opened a modal message box that is hidden behind the main window.
 
 .EXAMPLE
   powershell -File CloseRhinoDialog.ps1                 # only lists the windows of Rhino

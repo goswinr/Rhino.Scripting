@@ -1,6 +1,6 @@
 # Bugs found by the test scripts, with suggested fixes
 
-> Progress: the failing cases in sections 1 and 2 and the hatch and knot cases have been fixed and checked in Rhino 9, along with the unset Notes and BlockDescription cases. RenameBlock already used quiet=true; a duplicate-name regression test now passes. LightObjects after purge was reproduced, but remains unresolved. The other observations below still need review. The historical descriptions below have not yet been reconciled.
+> Progress: the failing cases in sections 1 and 2 and the hatch and knot cases have been fixed and checked in Rhino 9, along with the unset Notes and BlockDescription cases. RenameBlock already used quiet=true; a duplicate-name regression test now passes. The other observations below still need review. The historical descriptions below have not yet been reconciled.
 
 Found while writing and running the suites in this folder (Rhino 8.36, `net8.0` build). Each entry names the failing test, so
 `caddis_eval path=Tests/Test_<File>.fsx` shows the failure. The failing tests are left as they are on purpose: they pass once the bug is fixed.
@@ -84,18 +84,10 @@ and run `dotnet fsi API-Table/ApiTable.fsx` if a signature changed.
 - Cause: [Scripting_Hatch.fs](../Src/Scripting_Hatch.fs) `MakeHatches` uses `HatchPatterns.CurrentHatchPatternIndex`, which is -1 in a document created from the default template, then `Hatch.Create` fails with that index.
 - Fix: after `InitHatchPatterns()`, if the index is below 0 use the first pattern of the table (index 0), or raise a message that says "no current hatch pattern" instead of the generic "failed to create hatch".
 
-### RenameBlock can freeze Rhino (see the reproduction below)
-- Cause: `InstanceDefinitions.Modify(instDef, newName, description, quiet=false)` in [Scripting_Block.fs](../Src/Scripting_Block.fs) lets RhinoCommon show a modal message box when `newName` already exists.
-- Fix: check `State.Doc.InstanceDefinitions.Find(newName)` first and raise `RhinoScriptingException` (or return `false`, as the doc promises "True or False"), and pass `quiet=true`.
-- Audit the other `quiet=false` calls the same way, they can show dialogs too:
+### Other `quiet=false` calls can open dialogs
+- `RenameBlock` used to freeze Rhino behind a hidden "name already exists" message box; it now passes `quiet=true`, and `Test_Block.fsx` checks a duplicate name. Audit the other `quiet=false` calls the same way:
   `DeleteBlock` (`InstanceDefinitions.Delete(..., quiet=false)`), `Scripting_Curve.fs` around line 3018 (`Objects.Delete(id, quiet=false)`), and the many `DimStyles.Modify(ds, ds.Id, quiet=false)` calls in `Scripting_Dimension.fs`.
   Rule for all scripted code: never let RhinoCommon ask a person; use `quiet=true` and report the failure through the return value or an exception.
-
-### LightObjects throws after Objects.Purge
-- Rhino 9.0.26300.9401: purging a light in a scratch document, disposing it, and creating another document crashed Rhino twice, even without enumerating the light table. Deleting the light instead was a successful control. See [Repro_PurgeLightCrash.fsx](Repro_PurgeLightCrash.fsx); do not purge lights in the harness.
-- Seen once during development, not covered by a test any more (the harness deletes lights with `Delete`, never `Purge`).
-- Cause: [Scripting_Light.fs](../Src/Scripting_Light.fs) walks `Doc.Lights.[i]` for `i < Lights.Count`. After `Objects.Purge` of a light the table is shorter than expected or the entry is gone.
-- Suggested fix: enumerate `State.Doc.Objects.GetObjectList(ObjectType.Light)` (or `foreach l in State.Doc.Lights` skipping null and deleted entries).
 
 ### ChangeSurfaceDegree can only raise the degree
 - Test: `Test_Surface.fsx` / `ChangeSurfaceDegree` documents the current behavior (lowering returns `false`).
@@ -114,19 +106,3 @@ and run `dotnet fsi API-Table/ApiTable.fsx` if a signature changed.
 - `AddPipe` parameters are normalized (0..1), as documented, but it throws a plain `ArgumentException` for unequal parameter and radius counts instead of `RhinoScriptingException`.
 - `BooleanIntersection` of non-overlapping breps returns an empty list instead of raising, while `AddSweep1/2` and `FilletSurfaces` also return empty lists on failure. Decide on one rule (AGENTS.md prefers raising).
 - `MeshBooleanDifference` etc. raise when RhinoCommon returns an invalid ngon mesh (seen with coplanar 6-division boxes). Fine, but a clearer message would help.
-
-## 4. Reproduction of the Rhino freeze
-
-File: [Repro_RenameBlockHang.fsx](Repro_RenameBlockHang.fsx). Recovery tool: [CloseRhinoDialog.ps1](CloseRhinoDialog.ps1).
-
-What happened: while the Block suite was running through Caddis (UI thread mode), `RenameBlock("A", "B")` with an existing block "B" hit the `quiet=false` path.
-RhinoCommon opened a modal message box that was not visible (hidden behind the main window). The UI thread was inside the box's message loop, so
-Rhino looked frozen (nothing redrawn, no reaction), but Windows still reported "Responding", and Caddis could not cancel a UI thread run.
-I found the culprit by looking at the blocked UI thread with `dotnet-stack report -p <pid>` and by elimination (the hang followed the `RenameBlock` test case, and removing that case made it go away).
-
-To reproduce (save your work first):
-1. Build the Release dll as described in [README.md](README.md).
-2. Open `Repro_RenameBlockHang.fsx`, set `let runIt = true`, and run it with `caddis_eval path=...`. The script creates two blocks `reproA` and `reproB` in a scratch document and renames A to B.
-3. Rhino freezes. Close the hidden dialog with `powershell -NoProfile -ExecutionPolicy Bypass -File Tests\CloseRhinoDialog.ps1 -Close`. The script then continues and prints the result.
-
-The fix is in the section "RenameBlock can freeze Rhino" above. When it is done, change the repro into a normal test (`throwsRs "name exists"` in `Test_Block.fsx`) and delete the repro file.

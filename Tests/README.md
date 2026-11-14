@@ -100,8 +100,7 @@ the Application suite changes and restores some Rhino options, and the Utility s
 ## Hazards when writing or running tests
 
 - A function that can open a modal dialog. The UI thread blocks, Caddis cannot cancel a UI thread run, and Rhino still shows as "Responding".
-  This happened once, see [Repro_RenameBlockHang.fsx](Repro_RenameBlockHang.fsx) and the recovery steps below. This should be fixed now by setting
-  `quiet=true` in `Doc.InstanceDefinitions.Modify`.
+  This happened once with `RenameBlock` (now fixed with `quiet=true`), see the recovery steps below.
 - Don't define top-level names such as `box` in a test script: the FSI session persists and the name shadows the core function for everything that runs later. Use `caddis_reset` if it happened.
 - Rhino 8 specifics the tests rely on: object enumeration is newest first; `Mesh.CreateFromBox` has 24 unwelded vertices; mesh booleans need non-coplanar boxes with 3 or 8 divisions;
   the default hatch pattern "Dash" is named "HatchDash"; `InterpolatedCurveOnSurfaceUV` returns null in this build.

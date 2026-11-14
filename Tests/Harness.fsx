@@ -84,10 +84,17 @@ let throwsRs (msg:string) (f: unit -> 'T) =
 let clearObjects () =
     let s = DocObjects.ObjectEnumeratorSettings(NormalObjects = true, LockedObjects = true, HiddenObjects = true, IncludeLights = true, IncludeGrips = true, DeletedObjects = false)
     let objs = testDoc.Objects.GetObjectList(s) |> Seq.toArray
-    // purging light objects leaves slots in the light table that throw when enumerated, so lights are only deleted
+    // Never purge lights: Rhino 9.0 crashes when it later closes a document from which a light was purged. Delete them instead.
     for o in objs do
         if o.ObjectType = DocObjects.ObjectType.Light then testDoc.Objects.Delete(o, true) |> ignore
         else testDoc.Objects.Purge(o) |> ignore
+
+/// Counts the lights that Objects.Purge left behind without a document.
+/// Rhino 9.0 crashes when it closes a document that has one. Rhino 8 does not report them and does not crash.
+let purgedLightCount (d:RhinoDoc) =
+    if isNull d then 0 else
+    let s = DocObjects.ObjectEnumeratorSettings(IncludeLights = true, NormalObjects = false, DeletedObjects = true, ObjectTypeFilter = DocObjects.ObjectType.Light)
+    d.Objects.GetObjectList(s) |> Seq.filter (fun o -> isNull o.Document) |> Seq.length
 
 /// Deletes the block definitions and groups of the test document
 let clearDefinitions () =
@@ -99,15 +106,20 @@ let clearDefinitions () =
 /// Runs one named test. The name should be the name of the function in RhinoScriptSyntax that is tested.
 /// The test passes if the function returns without exception. Objects added to the document are removed afterwards.
 let test (name:string) (f: unit -> unit) =
+    let purgedBefore = purgedLightCount testDoc
     let outcome =
         try
             f ()
             Pass
         with e ->
             Fail (e.GetType().Name + ": " + e.Message.Split('\n').[0])
-    results.Add((name, outcome))
     try clearObjects () with _ -> ()
     try clearDefinitions () with _ -> ()
+    let outcome =
+        if purgedLightCount testDoc > purgedBefore then
+            Fail "a light was purged: Rhino 9 crashes when this document is closed, so the next 'start' refuses to run. Delete lights instead of purging them, then restart Rhino."
+        else outcome
+    results.Add((name, outcome))
 
 /// Marks a function as not tested, with the reason
 let skip (name:string) (reason:string) = results.Add((name, Skip reason))
@@ -143,6 +155,9 @@ let start (suiteName:string) =
     results.Clear()
     suite <- suiteName
     userDoc <- RhinoDoc.ActiveDoc
+    // RhinoDoc.Create closes the active document, which would crash Rhino 9 if a light was purged from it
+    if purgedLightCount userDoc > 0 then
+        failwith "The active document contains a purged light, closing it would crash Rhino 9. Restart Rhino before running the tests."
     testDoc <- RhinoDoc.Create(null)
     if isNull testDoc then failwith "Could not create a test document"
     if RhinoDoc.ActiveDoc.RuntimeSerialNumber <> testDoc.RuntimeSerialNumber then failwith "The test document is not the active document"
