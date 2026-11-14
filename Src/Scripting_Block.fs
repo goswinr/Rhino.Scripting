@@ -232,7 +232,7 @@ module AutoOpenBlock =
     static member DeleteBlock(blockName:string) : bool =
         let instDef = State.Doc.InstanceDefinitions.Find(blockName)
         if isNull instDef then  RhinoScriptingException.Raise "DeleteBlock: '%s' does not exist in InstanceDefinitionsTable" blockName
-        let  rc = State.Doc.InstanceDefinitions.Delete(instDef.Index, deleteReferences=true, quiet=false)
+        let  rc = State.Doc.InstanceDefinitions.Delete(instDef.Index, deleteReferences=true, quiet=true)
         State.Doc.Views.Redraw()
         rc
 
@@ -379,9 +379,9 @@ module AutoOpenBlock =
     /// <returns>(bool) True or False indicating success or failure.</returns>
     static member RenameBlock(blockName:string, newName:string) : bool =
         let instDef = State.Doc.InstanceDefinitions.Find(blockName)
-        if isNull instDef then  RhinoScriptingException.Raise "RenameBlock: '%s' does not exist in InstanceDefinitionsTable" blockName
+        if isNull instDef then RhinoScriptingException.Raise "RenameBlock: '%s' does not exist in InstanceDefinitionsTable" blockName
         let description = instDef.Description
-        State.Doc.InstanceDefinitions.Modify(instDef, newName, description, quiet=false)
+        State.Doc.InstanceDefinitions.Modify(instDef, newName, description, quiet=true) // if the new name already exists, Rhino will not show a modal dialog due to quiet=true, this caused the automated tests to crash
 
 
     /// <summary>Replaces the objects inside an existing block definition.</summary>

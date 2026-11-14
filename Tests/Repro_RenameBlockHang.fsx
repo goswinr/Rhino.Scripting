@@ -1,3 +1,10 @@
+
+
+// this should be fixed now by setting quiet=true in
+//Doc.InstanceDefinitions.Modify(instDef, newName, description, quiet=true)
+
+
+
 // Reproduction of the Rhino hang found while writing the tests.
 //
 // WARNING: running this with `runIt = true` blocks the UI thread of Rhino until the hidden modal dialog is closed.
@@ -9,6 +16,8 @@
 // ("block definition name already exists") because quiet=false. The box is owned by the Rhino main window, may be hidden behind it,
 // and Rhino still reports "Responding" because the message loop of the box is pumping messages. Nothing returns until it is closed.
 // Not named Test_*.fsx on purpose, so a "run everything" glob never picks it up.
+
+
 
 #load "Harness.fsx"
 open System

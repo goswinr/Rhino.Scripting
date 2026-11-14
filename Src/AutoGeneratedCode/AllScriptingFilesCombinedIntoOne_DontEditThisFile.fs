@@ -3537,7 +3537,7 @@ type RhinoScriptSyntax private () =
     static member DeleteBlock(blockName:string) : bool =
         let instDef = State.Doc.InstanceDefinitions.Find(blockName)
         if isNull instDef then  RhinoScriptingException.Raise "DeleteBlock: '%s' does not exist in InstanceDefinitionsTable" blockName
-        let  rc = State.Doc.InstanceDefinitions.Delete(instDef.Index, deleteReferences=true, quiet=false)
+        let  rc = State.Doc.InstanceDefinitions.Delete(instDef.Index, deleteReferences=true, quiet=true)
         State.Doc.Views.Redraw()
         rc
 
@@ -3684,9 +3684,9 @@ type RhinoScriptSyntax private () =
     /// <returns>(bool) True or False indicating success or failure.</returns>
     static member RenameBlock(blockName:string, newName:string) : bool =
         let instDef = State.Doc.InstanceDefinitions.Find(blockName)
-        if isNull instDef then  RhinoScriptingException.Raise "RenameBlock: '%s' does not exist in InstanceDefinitionsTable" blockName
+        if isNull instDef then RhinoScriptingException.Raise "RenameBlock: '%s' does not exist in InstanceDefinitionsTable" blockName
         let description = instDef.Description
-        State.Doc.InstanceDefinitions.Modify(instDef, newName, description, quiet=false)
+        State.Doc.InstanceDefinitions.Modify(instDef, newName, description, quiet=true)
 
 
     /// <summary>Replaces the objects inside an existing block definition.</summary>
@@ -6709,7 +6709,7 @@ type RhinoScriptSyntax private () =
             if id = Guid.Empty then RhinoScriptingException.Raise "JoinCurves: unable to add result to document; inputs were retained"
             id)
         if deleteInput then
-            for objectId in curveIds do State.Doc.Objects.Delete(objectId, quiet=false) |> ignore<bool>
+            for objectId in curveIds do State.Doc.Objects.Delete(objectId, quiet=true) |> ignore<bool>
         State.Doc.Views.Redraw()
         ids
 
@@ -7576,7 +7576,7 @@ type RhinoScriptSyntax private () =
         if isNull ds then  RhinoScriptingException.Raise "DimStyleAnglePrecision set failed. dimStyle:'%s' precision:%d" dimStyle precision
         if precision >= 0 then
             ds.AngleResolution <- precision
-            if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=false) then RhinoScriptingException.Raise "DimStyleAnglePrecision set failed. dimStyle:'%s' precision:%d" dimStyle precision
+            if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=true) then RhinoScriptingException.Raise "DimStyleAnglePrecision set failed. dimStyle:'%s' precision:%d" dimStyle precision
             State.Doc.Views.Redraw()
         else
             RhinoScriptingException.Raise "DimStyleAnglePrecision: precision must be nonnegative"
@@ -7598,7 +7598,7 @@ type RhinoScriptSyntax private () =
         if isNull ds then  RhinoScriptingException.Raise "DimStyleArrowSize set failed. dimStyle:'%s' size:'%A'" dimStyle size
         if size > 0.0 then
             ds.ArrowLength <- size
-            if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=false) then RhinoScriptingException.Raise "DimStyleArrowSize set failed. dimStyle:'%s' size: %g" dimStyle size
+            if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=true) then RhinoScriptingException.Raise "DimStyleArrowSize set failed. dimStyle:'%s' size: %g" dimStyle size
             State.Doc.Views.Redraw()
         else
             RhinoScriptingException.Raise "DimStyleArrowSize set failed. dimStyle:'%s' size:%g" dimStyle size
@@ -7628,7 +7628,7 @@ type RhinoScriptSyntax private () =
         if isNull ds then  RhinoScriptingException.Raise "DimStyleExtension set failed. dimStyle:'%s' extension:'%A'" dimStyle extension
         if extension >= 0.0 then
             ds.ExtensionLineExtension <- extension
-            if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=false) then
+            if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=true) then
                 RhinoScriptingException.Raise "DimStyleExtension failed. dimStyle:'%s' extension:'%A'" dimStyle extension
             State.Doc.Views.Redraw()
         else
@@ -7656,7 +7656,7 @@ type RhinoScriptSyntax private () =
         ds.Font <- DocObjects.Font(font) // TODO check if works OK !
         // let newIndex = State.Doc.Fonts.FindOrCreate(font, false, false) // deprecated ??
         // ds.Font <- State.Doc.Fonts.[newIndex]
-        if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=false) then
+        if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=true) then
             RhinoScriptingException.Raise "DimStyleFont set failed. dimStyle:'%s' font:'%A'" dimStyle font
         State.Doc.Views.Redraw()
 
@@ -7685,7 +7685,7 @@ type RhinoScriptSyntax private () =
         if isNull ds then  RhinoScriptingException.Raise "DimStyleLeaderArrowSize set failed. dimStyle:'%s' size:'%A'" dimStyle size
         if size >= 0.0 then
             ds.LeaderArrowLength <- size
-            if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=false) then
+            if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=true) then
                 RhinoScriptingException.Raise "DimStyleLeaderArrowSize set failed. dimStyle:'%s' size:'%A'" dimStyle size
             State.Doc.Views.Redraw()
         else
@@ -7711,7 +7711,7 @@ type RhinoScriptSyntax private () =
         let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "DimStyleLengthFactor set failed. dimStyle:'%s' factor:'%A'" dimStyle factor
         ds.LengthFactor <- factor
-        if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=false) then
+        if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=true) then
             RhinoScriptingException.Raise "DimStyleLengthFactor set failed. dimStyle:'%s' factor:'%A'" dimStyle factor
         State.Doc.Views.Redraw()
 
@@ -7734,7 +7734,7 @@ type RhinoScriptSyntax private () =
         if isNull ds then  RhinoScriptingException.Raise "DimStyleLinearPrecision set failed. dimStyle:'%s' precision: %d" dimStyle precision
         if precision >= 0 then
             ds.LengthResolution <- precision
-            if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=false) then
+            if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=true) then
                 RhinoScriptingException.Raise "DimStyleLinearPrecision set failed. dimStyle:'%s' precision: %d" dimStyle precision
             State.Doc.Views.Redraw()
         else
@@ -7789,7 +7789,7 @@ type RhinoScriptSyntax private () =
         if isNull ds then  RhinoScriptingException.Raise "DimStyleNumberFormat set failed. dimStyle:'%s' format:'%A'" dimStyle format
         if  format<0 || format>9 then  RhinoScriptingException.Raise "DimStyleNumberFormat set failed. dimStyle:'%s' format:'%A'" dimStyle format
         ds.DimensionLengthDisplay <- LanguagePrimitives.EnumOfValue format
-        if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=false) then
+        if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=true) then
             RhinoScriptingException.Raise "DimStyleNumberFormat set failed. dimStyle:'%s' format:'%A'" dimStyle format
         State.Doc.Views.Redraw()
 
@@ -7810,7 +7810,7 @@ type RhinoScriptSyntax private () =
         let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "DimStyleOffset set failed. dimStyle:'%s' offset:'%A'" dimStyle offset
         ds.ExtensionLineOffset <- offset
-        if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=false) then
+        if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=true) then
             RhinoScriptingException.Raise "DimStyleOffset set failed. dimStyle:'%s' offset:'%A'" dimStyle offset
         State.Doc.Views.Redraw()
 
@@ -7834,7 +7834,7 @@ type RhinoScriptSyntax private () =
         let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "DimStylePrefix set failed. dimStyle:'%s' prefix:'%A'" dimStyle prefix
         ds.Prefix <- prefix
-        if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=false) then
+        if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=true) then
             RhinoScriptingException.Raise "DimStylePrefix set failed. dimStyle:'%s' prefix:'%A'" dimStyle prefix
         State.Doc.Views.Redraw()
 
@@ -7855,7 +7855,7 @@ type RhinoScriptSyntax private () =
         let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "DimStyleScale set failed. dimStyle:'%s' scale:'%A'" dimStyle scale
         ds.DimensionScale <- scale
-        if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=false) then
+        if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=true) then
             RhinoScriptingException.Raise "DimStyleScale set failed. dimStyle:'%s' scale:'%A'" dimStyle scale
         State.Doc.Views.Redraw()
 
@@ -7879,7 +7879,7 @@ type RhinoScriptSyntax private () =
         if isNull ds then
             RhinoScriptingException.Raise "DimStyleSuffix set failed. dimStyle:'%s' suffix:'%A'" dimStyle suffix
         ds.Suffix <- suffix
-        if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=false) then
+        if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=true) then
             RhinoScriptingException.Raise "DimStyleSuffix set failed. dimStyle:'%s' suffix:'%A'" dimStyle suffix
         State.Doc.Views.Redraw()
 
@@ -7942,7 +7942,7 @@ type RhinoScriptSyntax private () =
             ds.DimTextLocation          <- location
             ds.DimRadialTextLocation    <- location
 
-        if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=false) then
+        if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=true) then
             RhinoScriptingException.Raise "DimStyleTextAlignment set failed. dimStyle:'%s' alignment:'%A'" dimStyle alignment
         State.Doc.Views.Redraw()
 
@@ -7964,7 +7964,7 @@ type RhinoScriptSyntax private () =
         if isNull ds then  RhinoScriptingException.Raise "DimStyleTextGap set failed. dimStyle:'%s' gap:'%A'" dimStyle gap
         if gap >= 0.0 then
             ds.TextGap <- gap
-            if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=false) then
+            if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=true) then
                 RhinoScriptingException.Raise "DimStyleTextGap set failed. dimStyle:'%s' gap:'%A'" dimStyle gap
             State.Doc.Views.Redraw()
         else
@@ -7989,7 +7989,7 @@ type RhinoScriptSyntax private () =
         if isNull ds then  RhinoScriptingException.Raise "DimStyleTextHeight set failed. dimStyle:'%s' height:'%A'" dimStyle height
         if height>0.0 then
             ds.TextHeight <- height
-            if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=false) then
+            if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=true) then
                 RhinoScriptingException.Raise "DimStyleTextHeight set failed. dimStyle:'%s' height:'%A'" dimStyle height
             State.Doc.Views.Redraw()
         else
@@ -8181,7 +8181,7 @@ type RhinoScriptSyntax private () =
         let mutable ds = State.Doc.DimStyles.FindName(oldStyle)
         if isNull ds then  RhinoScriptingException.Raise "RenameDimStyle failed.  oldStyle:'%s' newStyle:'%s'" oldStyle newStyle
         ds.Name <- newStyle
-        if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=false) then
+        if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=true) then
             RhinoScriptingException.Raise "RenameDimStyle failed.  oldStyle:'%s' newStyle:'%s'" oldStyle newStyle
     //---The functions below are part of Scripting_Document.fs: file split marker: {@$%^&*()*&^%$@}
 

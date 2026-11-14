@@ -3015,7 +3015,7 @@ module AutoOpenCurve =
             if id = Guid.Empty then RhinoScriptingException.Raise "JoinCurves: unable to add result to document; inputs were retained"
             id)
         if deleteInput then
-            for objectId in curveIds do State.Doc.Objects.Delete(objectId, quiet=false) |> ignore<bool>
+            for objectId in curveIds do State.Doc.Objects.Delete(objectId, quiet=true) |> ignore<bool>
         State.Doc.Views.Redraw()
         ids
 

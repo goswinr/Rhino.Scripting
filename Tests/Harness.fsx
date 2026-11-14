@@ -9,6 +9,9 @@
 
 module Harness
 
+#if !RHINO // so that when viewed outside of Rhino, no compiler errors show
+#r "nuget: RhinoCommon, 8.19.25132.1001"
+#endif
 #r "../bin/Release/net8.0/Rhino.Scripting.dll"
 
 open System
