@@ -6,7 +6,7 @@ This file provides guidance to AI coding agents (Claude Code, Codex, etc.) when 
 
 Rhino.Scripting is an F# translation of McNeel's IronPython [rhinoscriptsyntax](https://github.com/mcneel/rhinoscriptsyntax) for the Rhino3D CAD app, usable from F# and C#.
 All ~900 functions are static methods on one class, `Rhino.Scripting.RhinoScriptSyntax`.
-Behavior should follow the Python original unless a change is intended; such changes are recorded in CHANGELOG.md.
+Behavior should follow the Python original unless a change is intended; such changes are recorded in the docstrings of the functions or in comments.
 
 ## Build and verify
 

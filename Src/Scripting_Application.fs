@@ -13,8 +13,7 @@ module AutoOpenApplication =
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file.
     //---So that all members are visible in C# and Ironpython too.
     //---This happens as part of the <Targets> in the *.fsproj file.
-    //---End of header marker: don't change: {@$%^&*()*&^%$@}
-
+    //---The functions below are part of Scripting_Application.fs: file split marker: {@$%^&*()*&^%$@}
 
 
     /// <summary>Add new command alias to Rhino. Command aliases can be added manually by

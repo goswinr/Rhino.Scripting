@@ -13,7 +13,7 @@ module AutoOpenDimension =
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file.
     //---So that all members are visible in C# and IronPython too.
     //---This happens as part of the <Targets> in the *.fsproj file.
-    //---End of header marker: don't change: {@$%^&*()*&^%$@}
+    //---The functions below are part of Scripting_Dimension.fs: file split marker: {@$%^&*()*&^%$@}
 
 
 

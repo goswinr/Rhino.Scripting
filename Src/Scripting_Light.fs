@@ -12,7 +12,7 @@ module AutoOpenLight =
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file.
     //---So that all members are visible in C# and Ironpython too.
     //---This happens as part of the <Targets> in the *.fsproj file.
-    //---End of header marker: don't change: {@$%^&*()*&^%$@}
+    //---The functions below are part of Scripting_Light.fs: file split marker: {@$%^&*()*&^%$@}
 
     /// <summary>Adds a new directional light object to the document.</summary>
     /// <param name="startPoint">(Point3d) Starting point of the light</param>

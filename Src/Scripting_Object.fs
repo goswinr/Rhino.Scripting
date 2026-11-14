@@ -15,7 +15,7 @@ module AutoOpenObject =
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file.
     //---So that all members are visible in C# and Ironpython too.
     //---This happens as part of the <Targets> in the *.fsproj file.
-    //---End of header marker: don't change: {@$%^&*()*&^%$@}
+    //---The functions below are part of Scripting_Object.fs: file split marker: {@$%^&*()*&^%$@}
 
 
     /// Internal helper: Puts copies of grouped objects into new groups, like the native Copy command does,

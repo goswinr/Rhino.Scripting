@@ -11,7 +11,7 @@ module AutoOpenLinetype =
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file.
     //---So that all members are visible in C# and Ironpython too.
     //---This happens as part of the <Targets> in the *.fsproj file.
-    //---End of header marker: don't change: {@$%^&*()*&^%$@}
+    //---The functions below are part of Scripting_Linetype.fs: file split marker: {@$%^&*()*&^%$@}
 
 
     /// <summary>Verifies the existence of a linetype in the document. The name is not case sensitive.</summary>
