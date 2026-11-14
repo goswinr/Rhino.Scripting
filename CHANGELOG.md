@@ -31,9 +31,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Breaking: Removed the misspelled IsSurfaceFliped methods; use IsSurfaceFlipped for both object identifiers and Brep geometry.
 - Breaking: AddDimStyle uses one optional dimStyleName parameter and returns the assigned name for both named and automatically named styles; the named form previously returned unit.
 - The Python parity review in API-Table/PythonParityReview.md records retained F# API designs and the fixes made; XML docs clarify cylinder inputs, plane/sphere point results, active linetype counts and local bitmap validation.
-- IsHatch, IsBlockInstance, IsPoint, IsPointCloud, IsText, IsTextDot, IsClippingPlane, IsBrep, IsPolysurface and IsPolysurfaceClosed return false for missing object identifiers, like in RhinoPython.
+- Breaking: IsHatch, IsBlockInstance, IsPoint, IsPointCloud, IsText, IsTextDot, IsClippingPlane, IsBrep, IsPolysurface and IsPolysurfaceClosed return false for missing object identifiers, like in RhinoPython.
 - IsObjectSolid returns false for geometry that cannot be solid, like in RhinoPython.
-- GetObjectGrip and GetObjectGrips raise RhinoUserInteractionException on cancellation, and ObjectGripLocations reports a point count mismatch instead of silently doing nothing, unlike RhinoPython.
+- Breaking: GetObjectGrip and GetObjectGrips raise RhinoUserInteractionException on cancellation, and ObjectGripLocations reports a point count mismatch instead of silently doing nothing, unlike RhinoPython.
 - Breaking: Parameter names ending in Id or Ids are reserved for Guid inputs; direct geometry parameters use names such as curveGeo, surfaceGeo and geometryObject, and non-Guid coercion inputs use descriptive names.
 - The API table lists each Make factory immediately after its matching Add methods.
 - Breaking: AddHatch and AddHatches with Curve geometry, and AddPlanarSrf with a Polyline, a Curve or a Curve seq, are renamed to MakeHatch, MakeHatches and MakePlanarSrf; they added the result to the document and returned its Guid, now they return the new geometry without adding it, use e.g. rs.Add(rs.MakePlanarSrf(curve)) to add it; the Add methods with Guid inputs still add to the document.
@@ -49,8 +49,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - DimStyleTextAlignment sets the text orientation and location for radial dimensions too, like in RhinoPython
 - ShowGrid, ShowGridAxes and ShowWorldAxes get and set the grid settings of the view's display mode if it overrides the document grid settings, like in RhinoPython
 - CopyObject(s), and TransformObject(s), MirrorObject(s), RotateObject(s), ScaleObject(s) and ShearObject(s) with copy=true, put copies of grouped objects into new groups like the Copy command does, instead of adding them to the original groups, like in RhinoPython
-- IsDimension, IsLeader and the other dimension checks return false for objects that don't exist, instead of raising an exception, like in RhinoPython
-- IsCone, IsCylinder, IsPlaneSurface and IsPointLight, IsSpotLight and the other light type checks return false for objects of another type or that don't exist, instead of raising an exception, like in RhinoPython
+- Breaking: IsDimension, IsLeader and the other dimension checks return false for objects that don't exist, instead of raising an exception, like in RhinoPython
+- Breaking: IsCone, IsCylinder, IsPlaneSurface and IsPointLight, IsSpotLight and the other light type checks return false for objects of another type or that don't exist, instead of raising an exception, like in RhinoPython
 ### Fixed
 - AddLeader uses Rhino's textless overload when text is omitted or null, instead of creating empty text.
 - ViewRadius defaults the setter mode to false, like in RhinoPython.
@@ -67,32 +67,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GetObject preserves other preselected objects when select is false, like in RhinoPython.
 - Optional view names and empty view names use the active view in view operations, CreatePreviewImage and screen/world transforms, instead of raising in CoerceView.
 - SplitBrep, PullCurve, JoinCurves and MeshBooleanDifference, MeshBooleanIntersection and MeshBooleanSplit reject empty results and retain their inputs when adding results fails.
-- MakeHatches raises when no hatches can be created, instead of returning an empty list.
+- Breaking: MakeHatches raises when no hatches can be created, instead of returning an empty list.
 - Material getters and setters validate indices before indexing the material table, which otherwise silently substitutes the current material, unlike RhinoPython.
 - MatchMaterial rejects a source without an assigned material before changing destination objects, unlike RhinoPython.
 - LineTransform with copy=true preserves the original object's attributes.
 - NextObjectGrip and PrevObjectGrip raise a clear exception when there is no neighboring grip, instead of a NullReferenceException.
 - GroupObjects validates the object count before creating a group, so invalid input no longer leaves an empty group.
-- IsGroupEmpty returns true for an empty group, unlike RhinoPython.
+- Breaking: IsGroupEmpty returns true for an empty group, unlike RhinoPython.
 - EdgeAnalysisMode accepts mode 0 to show all edges.
 - PlugIns combines the requested type flags instead of treating combinations as a request for every plug-in.
 - IsPlugIn accepts a plug-in identifier string as well as a name.
-- ScreenSize returns physical pixels, accounting for the display scale.
+- Breaking: ScreenSize returns physical pixels, accounting for the display scale.
 - StatusBarProgressMeterShow, Update and Hide process UI messages so the meter repaints during UI-thread loops.
-- AddLinearLight converts its default width from inches, like in RhinoPython, instead of millimeters.
+- Breaking: AddLinearLight converts its default width from inches, like in RhinoPython, instead of millimeters.
 - PullPoints accepts plain surfaces and single-face extrusions by converting them to Breps, like in RhinoPython.
 - PointClosestObject includes extrusion caps when finding the closest point.
 - PointsAreCoplanar uses the documented default tolerance of 1e-12.
 - UnitSystem sets the model unit system, including unit system 0, and applies optional scaling; the setter previously did nothing.
 - ExtractPreviewImage uses the supplied model filename and reports missing previews and unsaved documents clearly.
 - RenderMeshSettings preserves the texture-range flag, and render mesh numeric setters accept 0 to disable a setting.
-- RenderMeshQuality rejects unsupported values instead of silently disabling the meshing style.
-- CurveDeviation returns the curve parameters and distances in their documented order.
+- Breaking: RenderMeshQuality rejects unsupported values instead of silently disabling the meshing style.
+- Breaking: CurveDeviation returns the curve parameters and distances in their documented order.
 - CurveFilletPoints evaluates the second fillet point on the second curve.
 - ConvertCurveToPolyline uses the documented default angle tolerance of 5 degrees.
-- CurveLineClosestPoint returns the curve point before the line point, as documented.
+- Breaking: CurveLineClosestPoint returns the curve point before the line point, as documented.
 - AddTweenCurves and MakeTweenCurves distinguish control-point matching from refitting and accept method 1.
-- FairCurve writes successful fairing results to the document instead of returning false on success.
+- Breaking: FairCurve writes successful fairing results to the document instead of returning false on success.
 - InsertCurveKnot returns the result of insertion and document replacement, including symmetrical insertion.
 - ChangeCurveDegree accepts degree 2 when increasing a linear curve's degree.
 - OffsetCurveOnSurfaceUV extends the offsets to the surface edges, like in RhinoPython, and curve offset methods redraw after adding results.
@@ -120,11 +120,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - IsBlockEmbedded recognizes Static definitions, which Rhino displays as embedded.
 - MeshVertices preserves double-precision vertex coordinates.
 - MeshOutline uses the active viewport when no view is supplied.
-- PlaneCurveIntersection returns the documented curve interval and plane UV coordinates, unlike RhinoPython.
+- Breaking: PlaneCurveIntersection returns the documented curve interval and plane UV coordinates, unlike RhinoPython.
 - OffsetSurface preserves tolerance 0 for loose offsets.
 - ShootRay includes the starting point when the ray hits a surface, like in RhinoPython.
-- SurfaceVolume rejects open geometry, and SurfaceEvaluate handles evaluation with no derivatives.
-- AddLoftSrf and MakeLoftSrf reject unsupported loft type 4 instead of silently creating a normal loft.
+- Breaking: SurfaceVolume rejects open geometry, and SurfaceEvaluate handles evaluation with no derivatives.
+- Breaking: AddLoftSrf and MakeLoftSrf reject unsupported loft type 4 instead of silently creating a normal loft.
 - TiltView converts the absolute angle from degrees to radians before rotating the viewport.
 - IsDetail looks for the detail name within the requested layout instead of looking it up as a model view.
 - DetailLock reports a missing detail identifier clearly instead of raising NullReferenceException.
@@ -140,7 +140,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GetLayer preselects layers by full path, and GetEdgeCurves duplicates line, arc and polycurve edges without an invalid NurbsCurve cast.
 - BrowseForFolder displays both the title and message when both are supplied.
 - IsDocumentData and IsDocumentUserText use their respective document string counts.
-- SetUserText rejects empty values before changing any object, because Rhino treats empty strings as deletion; the documentation now requires a nonempty value.
+- Breaking: SetUserText rejects empty values before changing any object, because Rhino treats empty strings as deletion; the documentation now requires a nonempty value.
 - CullDuplicatePoints uses the documented default ZeroTolerance, and ColorHLSToRGB passes saturation and luminance in the correct order.
 - CoerceColor rejects empty and whitespace-only color names, and TryCoerceArc with a curve rejects full circles as documented.
 - Add with a layer index and collapseParents collapses the parent layers instead of the target layer and resolves index -1 to the current layer.
@@ -148,18 +148,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - AddAlignedDimension uses the active construction plane when the input points are collinear, like in RhinoPython.
 - DimStyleExtension and DimStyleLeaderArrowSize accept 0, and dimension style setters report invalid negative values.
 - AddHatchPatterns honors replace in Rhino 8; Rhino 7 reports that replacing an existing pattern is unsupported instead of ignoring it, unlike RhinoPython.
-- LinetypeCount excludes deleted linetypes, unlike RhinoPython.
+- Breaking: LinetypeCount excludes deleted linetypes, unlike RhinoPython.
 - Toolbar collection open, close and save operations and toolbar show and hide operations run on the UI thread.
-- MirrorObject and MirrorObjects mirror about the vertical plane through the start and end point, like in RhinoPython, instead of about the plane perpendicular to the line between them; they raise an exception if the two points are vertically above each other
-- ExtractSurface removes the extracted faces from the Polysurface only if copy is false, like in RhinoPython, it was the other way round; if all faces are extracted the Polysurface is deleted
+- Breaking: MirrorObject and MirrorObjects mirror about the vertical plane through the start and end point, like in RhinoPython, instead of about the plane perpendicular to the line between them; they raise an exception if the two points are vertically above each other
+- Breaking: ExtractSurface removes the extracted faces from the Polysurface only if copy is false, like in RhinoPython, it was the other way round; if all faces are extracted the Polysurface is deleted
 - TextObjectStyle sets the font style of a text object, it changed nothing before
-- CurveCurveIntersection without a second curve does a self-intersection test, like in RhinoPython, instead of reporting the whole curve as an overlap with itself
-- LineTransform with copy=false transforms the line object in the document, before it returned the Guid without changing the object
-- TrimBrep replaces the object with the trimmed piece also if only one piece is retained, like in RhinoPython, instead of keeping the untrimmed object and adding the piece as a new object without its attributes
-- CurveFrame uses the segmentIndex of a PolyCurve, like in RhinoPython, it was ignored before
+- Breaking: CurveCurveIntersection without a second curve does a self-intersection test, like in RhinoPython, instead of reporting the whole curve as an overlap with itself
+- Breaking: LineTransform with copy=false transforms the line object in the document, before it returned the Guid without changing the object
+- Breaking: TrimBrep replaces the object with the trimmed piece also if only one piece is retained, like in RhinoPython, instead of keeping the untrimmed object and adding the piece as a new object without its attributes
+- Breaking: CurveFrame uses the segmentIndex of a PolyCurve, like in RhinoPython, it was ignored before
 - ShrinkTrimmedSurface checks ShrinkFaces correctly, raising on failure instead of success.
 - PointClosestObject uses the initialized result in the shared object implementation, avoiding a null-reference exception when comparing distances.
-- DimStyleTextAlignment returns the documented values 1, 2 or 3, instead of the index of the text location
+- Breaking: DimStyleTextAlignment returns the documented values 1, 2 or 3, instead of the index of the text location
 - IsLinetype returned true for any name in Rhino 8, and IsLinetypeReference used the Continuous linetype for unknown names
 - ObjectPrintColorSource accepts 2 (print color by display)
 - LayerLinetype and GetLinetype used the Continuous linetype for unknown names in Rhino 8
