@@ -1523,7 +1523,7 @@ From [Src/Scripting_Surface.fs](../../Src/Scripting_Surface.fs).
 | `BrepClosestPoint` | `objectId: Guid * point: Point3d -> Point3d * float * float * ComponentIndexType * int * Vector3d` | Returns the point on a Surface or Polysurface that is closest to a test point. |
 | `BrepClosestPoint` | `geometryObject: Brep * point: Point3d -> Point3d * float * float * ComponentIndexType * int * Vector3d` | Returns the point on a Surface or Polysurface that is closest to a test point. |
 | `CapPlanarHoles` | `surfaceId: Guid -> bool` | Caps planar holes in a Surface or Polysurface. |
-| `ChangeSurfaceDegree` | `objectId: Guid * degree: (int * int) -> bool` | Changes the degree of a Surface object. |
+| `ChangeSurfaceDegree` | `objectId: Guid * degree: (int * int) -> bool` | Raises the degree of a Surface object. |
 | `DuplicateEdgeCurves` | `objectId: Guid * ?select: bool = false -> ResizeArray<Guid>` | Duplicates the edge Curves of a Surface or Polysurface. |
 | `DuplicateEdgeCurves` | `geometryObject: Brep -> ResizeArray<Curve>` | Duplicates the edge Curves of a Surface or Polysurface. |
 | `DuplicateSurfaceBorder` | `surfaceId: Guid * ?typ: int = 0 -> ResizeArray<Guid>` | Create Curves that duplicate a Surface or Polysurface border. |

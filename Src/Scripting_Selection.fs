@@ -795,21 +795,30 @@ module AutoOpenSelection =
         if DocObjects.ObjectType.None <>(geometryfilter &&& DocObjects.ObjectType.Light ) then bLights <- true
         if DocObjects.ObjectType.None <>(geometryfilter &&& DocObjects.ObjectType.Grip ) then bGrips <- true
         if DocObjects.ObjectType.None <>(geometryfilter &&& DocObjects.ObjectType.Phantom ) then bPhantoms <- true
-        let it = DocObjects.ObjectEnumeratorSettings()
-        it.DeletedObjects <- false
-        it.ActiveObjects <- true
-        it.ReferenceObjects <- true
-        it.IncludeLights <- bLights
-        it.IncludeGrips <- bGrips
-        it.IncludePhantoms <- bPhantoms
-        if 0 <> state then
-            it.NormalObjects <- false
-            it.LockedObjects <- false
-        if (state &&& 1) <> 0 then it.NormalObjects <- true
-        if (state &&& 2) <> 0 then it.LockedObjects <- true
-        if (state &&& 4) <> 0 then it.HiddenObjects <- true
+        let settings normal locked hidden =
+            let it = DocObjects.ObjectEnumeratorSettings()
+            it.DeletedObjects <- false
+            it.ActiveObjects <- true
+            it.ReferenceObjects <- true
+            it.IncludeLights <- bLights
+            it.IncludeGrips <- bGrips
+            it.IncludePhantoms <- bPhantoms
+            it.NormalObjects <- normal
+            it.LockedObjects <- locked
+            it.HiddenObjects <- hidden
+            it
+        let ids (s:DocObjects.ObjectEnumeratorSettings) = System.Collections.Generic.HashSet<Guid>(State.Doc.Objects.GetObjectList(s) |> Seq.map _.Id)
+        let e =
+            if (state &&& 4) <> 0 && (state &&& 1) = 0 then
+                // RhinoCommon's HiddenObjects only adds hidden objects to the normal ones,
+                // so for 'hidden' without 'normal' get all objects and keep the hidden ones, and the locked ones if asked for.
+                let notHidden = ids (settings true true false)
+                let locked = if (state &&& 2) <> 0 then ids (settings false true false) else System.Collections.Generic.HashSet<Guid>()
+                State.Doc.Objects.GetObjectList(settings true true true)
+                |> Seq.filter (fun o -> not (notHidden.Contains o.Id) || locked.Contains o.Id)
+            else
+                State.Doc.Objects.GetObjectList(settings ((state &&& 1) <> 0) ((state &&& 2) <> 0) ((state &&& 4) <> 0))
         let objectIds = ResizeArray()
-        let e = State.Doc.Objects.GetObjectList(it)
         for object in e do
             let  mutable bFound = false
             let objecttyp = object.ObjectType

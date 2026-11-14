@@ -16897,21 +16897,30 @@ type RhinoScriptSyntax private () =
         if DocObjects.ObjectType.None <>(geometryfilter &&& DocObjects.ObjectType.Light ) then bLights <- true
         if DocObjects.ObjectType.None <>(geometryfilter &&& DocObjects.ObjectType.Grip ) then bGrips <- true
         if DocObjects.ObjectType.None <>(geometryfilter &&& DocObjects.ObjectType.Phantom ) then bPhantoms <- true
-        let it = DocObjects.ObjectEnumeratorSettings()
-        it.DeletedObjects <- false
-        it.ActiveObjects <- true
-        it.ReferenceObjects <- true
-        it.IncludeLights <- bLights
-        it.IncludeGrips <- bGrips
-        it.IncludePhantoms <- bPhantoms
-        if 0 <> state then
-            it.NormalObjects <- false
-            it.LockedObjects <- false
-        if (state &&& 1) <> 0 then it.NormalObjects <- true
-        if (state &&& 2) <> 0 then it.LockedObjects <- true
-        if (state &&& 4) <> 0 then it.HiddenObjects <- true
+        let settings normal locked hidden =
+            let it = DocObjects.ObjectEnumeratorSettings()
+            it.DeletedObjects <- false
+            it.ActiveObjects <- true
+            it.ReferenceObjects <- true
+            it.IncludeLights <- bLights
+            it.IncludeGrips <- bGrips
+            it.IncludePhantoms <- bPhantoms
+            it.NormalObjects <- normal
+            it.LockedObjects <- locked
+            it.HiddenObjects <- hidden
+            it
+        let ids (s:DocObjects.ObjectEnumeratorSettings) = System.Collections.Generic.HashSet<Guid>(State.Doc.Objects.GetObjectList(s) |> Seq.map _.Id)
+        let e =
+            if (state &&& 4) <> 0 && (state &&& 1) = 0 then
+                // RhinoCommon's HiddenObjects only adds hidden objects to the normal ones,
+                // so for 'hidden' without 'normal' get all objects and keep the hidden ones, and the locked ones if asked for.
+                let notHidden = ids (settings true true false)
+                let locked = if (state &&& 2) <> 0 then ids (settings false true false) else System.Collections.Generic.HashSet<Guid>()
+                State.Doc.Objects.GetObjectList(settings true true true)
+                |> Seq.filter (fun o -> not (notHidden.Contains o.Id) || locked.Contains o.Id)
+            else
+                State.Doc.Objects.GetObjectList(settings ((state &&& 1) <> 0) ((state &&& 2) <> 0) ((state &&& 4) <> 0))
         let objectIds = ResizeArray()
-        let e = State.Doc.Objects.GetObjectList(it)
         for object in e do
             let  mutable bFound = false
             let objecttyp = object.ObjectType
@@ -20766,10 +20775,12 @@ type RhinoScriptSyntax private () =
         )
 
 
-    /// <summary>Hides a previously visible toolbar group in an open toolbar collection.</summary>
+    /// <summary>Hides a previously visible toolbar group in an open toolbar collection.
+    /// Deprecated: it does not work in Rhino 8 and 9. In Rhino 8 RhinoCommon lists no toolbar groups, and in Rhino 9 a group stays visible.</summary>
     /// <param name="name">(string) Name of a currently open toolbar file</param>
     /// <param name="toolbarGroup">(string) Name of a toolbar group to hide</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
+    [<System.Obsolete("HideToolbar does not work in Rhino 8 and 9: RhinoCommon lists no toolbar groups in Rhino 8, and in Rhino 9 a toolbar group stays visible.")>]
     static member HideToolbar(name:string, toolbarGroup:string) : bool =
         RhinoSync.DoSync (fun () ->
             let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
@@ -20813,10 +20824,12 @@ type RhinoScriptSyntax private () =
         else ""
 
 
-    /// <summary>Checks if a toolbar group in an open toolbar collection is docked.</summary>
+    /// <summary>Checks if a toolbar group in an open toolbar collection is docked.
+    /// Deprecated: in Rhino 8 RhinoCommon lists no toolbar groups, so this always raises there.</summary>
     /// <param name="name">(string) Name of a currently open toolbar file</param>
     /// <param name="toolbarGroup">(string) Name of a toolbar group</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
+    [<System.Obsolete("IsToolbarDocked does not work in Rhino 8: RhinoCommon lists no toolbar groups there, so it always raises. Toolbar groups are deprecated in Rhino.Scripting.")>]
     static member IsToolbarDocked(name:string, toolbarGroup:string) : bool =
         let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
         if notNull tbfile then
@@ -20826,10 +20839,12 @@ type RhinoScriptSyntax private () =
         else RhinoScriptingException.Raise "IsToolbarDocked failed on name '%s'" name
 
 
-    /// <summary>Checks if a toolbar group in an open toolbar collection is visible.</summary>
+    /// <summary>Checks if a toolbar group in an open toolbar collection is visible.
+    /// Deprecated: in Rhino 8 RhinoCommon lists no toolbar groups, so this always raises there.</summary>
     /// <param name="name">(string) Name of a currently open toolbar file</param>
     /// <param name="toolbarGroup">(string) Name of a toolbar group</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
+    [<System.Obsolete("IsToolbarVisible does not work in Rhino 8: RhinoCommon lists no toolbar groups there, so it always raises. Toolbar groups are deprecated in Rhino.Scripting.")>]
     static member IsToolbarVisible(name:string, toolbarGroup:string) : bool =
         let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
         if notNull tbfile then
@@ -20873,10 +20888,12 @@ type RhinoScriptSyntax private () =
         )
 
 
-    /// <summary>Shows a previously hidden toolbar group in an open toolbar collection.</summary>
+    /// <summary>Shows a previously hidden toolbar group in an open toolbar collection.
+    /// Deprecated: in Rhino 8 RhinoCommon lists no toolbar groups, and in Rhino 9 a shown group can not be hidden again with HideToolbar.</summary>
     /// <param name="name">(string) Name of a currently open toolbar file</param>
     /// <param name="toolbarGroup">(string) Name of a toolbar group to show</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
+    [<System.Obsolete("ShowToolbar is unreliable in Rhino 8 and 9: RhinoCommon lists no toolbar groups in Rhino 8, and in Rhino 9 a shown toolbar group can not be hidden again.")>]
     static member ShowToolbar(name:string, toolbarGroup:string) : bool =
         RhinoSync.DoSync (fun () ->
             let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)

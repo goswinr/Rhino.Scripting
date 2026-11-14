@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - XformScale overloads with a Plane, to scale about the Plane's origin along the Plane's axes, like in RhinoPython
 - The NuGet package ships an agent skill, rhino.scripting-usage, with the API table, for installation with dotnet-package-skills.
 ### Changed
+- ShowToolbar, HideToolbar, IsToolbarVisible and IsToolbarDocked are marked obsolete: RhinoCommon lists no toolbar groups in Rhino 8, and in Rhino 9 a toolbar group can be shown but not hidden again.
 - Breaking: Removed the misspelled IsSurfaceFliped methods; use IsSurfaceFlipped for both object identifiers and Brep geometry.
 - Breaking: AddDimStyle uses one optional dimStyleName parameter and returns the assigned name for both named and automatically named styles; the named form previously returned unit.
 - The Python parity review in API-Table/PythonParityReview.md records retained F# API designs and the fixes made; XML docs clarify cylinder inputs, plane/sphere point results, active linetype counts and local bitmap validation.
@@ -52,6 +53,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Breaking: IsDimension, IsLeader and the other dimension checks return false for objects that don't exist, instead of raising an exception, like in RhinoPython
 - Breaking: IsCone, IsCylinder, IsPlaneSurface and IsPointLight, IsSpotLight and the other light type checks return false for objects of another type or that don't exist, instead of raising an exception, like in RhinoPython
 ### Fixed
+- ObjectsByType with the hidden state (4) but without the normal state (1) now returns hidden objects; before, state 4 returned nothing.
 - Breaking: Unset document notes and block descriptions return empty strings instead of null.
 - Clarified that ChangeSurfaceDegree raises degrees and SdkVersion returns Rhino's signed SDK value.
 - Breaking: String ID validation rejects empty names unless explicitly allowed; empty document user-text keys now raise.

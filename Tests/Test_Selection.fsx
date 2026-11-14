@@ -260,6 +260,8 @@ test "ObjectsByType" (fun () ->
     rs.LockObject point |> ignore
     eq "locked points (state 2)" [ point ] (List.ofSeq (rs.ObjectsByType(1, false, 2)))
     eq "normal and locked points (state 3)" [ point ] (List.ofSeq (rs.ObjectsByType(1, false, 3)))
+    eq "locked and hidden points (state 6)" (sorted [ point; hidden ]) (sorted (rs.ObjectsByType(1, false, 6)))
+    eq "normal and hidden points (state 5)" [ hidden ] (List.ofSeq (rs.ObjectsByType(1, false, 5)))
     // select
     rs.UnlockObject point |> ignore
     ok "not selected by default" (not (isSelected curve))
