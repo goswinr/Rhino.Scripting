@@ -73,6 +73,20 @@ let layerIdx = rs.AddLayer("MyLayer")
 let guid2 = rs.Add(geometry, layerIdx, "ObjectName")
 ```
 
+Create geometry without adding it to the document, then add it:
+
+```fsharp
+// Make... functions only create geometry, they leave the document unchanged
+let crv  = Circle(Plane.WorldXY, 5.0).ToNurbsCurve()
+let brep = rs.MakePlanarSrf(crv)
+let id   = rs.Add(brep, "Surfaces", "Disk")
+
+// the Add... function with a Guid input works on document objects and adds the results itself and returns a list of Guids
+let ids  = rs.AddPlanarSrf([crvId])
+```
+
+Functions taking a `Guid` (`curveId`, `objectIds`) work on document objects. Overloads with geometry (`curveGeo`, `surfaceGeo`, `geometryObject`) work on plain RhinoCommon geometry and never touch the document. Prefer the geometry overloads for intermediate results, and add only the final geometry with `rs.Add`.
+
 Iterate the objects on a layer:
 
 ```fsharp

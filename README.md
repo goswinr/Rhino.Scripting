@@ -206,6 +206,30 @@ These are implemented with 3 overloads and `Optional` and `DefaultParameterValue
 ```
 
 
+## Objects in the document or plain geometry?
+
+Most functions come in two flavors, chosen by the type of the first argument:
+
+- A `Guid` (parameters named `curveId`, `objectIds` ...) refers to an object in the Rhino document. The function reads it, changes it, or, for `AddXxx` functions, adds the result to the document and returns its `Guid`.
+- RhinoCommon geometry (parameters named `curveGeo`, `surfaceGeo`, `geometryObject` ...) is used directly. The function does not touch the document and returns new geometry or a value.
+
+Many `AddXxx` functions that create geometry from other objects therefore have a matching `MakeXxx` function.
+It does the same calculation on plain geometry, but only creates the result and does not add it to the document.
+Use `rs.Add` to put it into the document when you want it there:
+
+```fsharp
+let crv  = Circle(Plane.WorldXY, 5.0).ToNurbsCurve()
+let brep = rs.MakePlanarSrf(crv)   // only geometry, the document is unchanged
+let id   = rs.Add(brep, "Surfaces", "Disk") // now it is a document object
+
+let ids  = rs.AddPlanarSrf([crvId])  // from a curve object in the document, adds the results directly, returns a list of Guids
+```
+
+This is useful to build or test geometry in memory, to filter or transform it before adding it, and to keep temporary results out of the document.
+Functions without a `Make` counterpart, like `rs.CurveLength` or `rs.ExtendCurveLength`, have the same overload pairs: one with a `Guid` and one with geometry.
+The [API table](skills/rhino.scripting-usage/ApiTable.md) lists each `MakeXxx` function right after its matching `AddXxx` functions.
+
+
 ## Full API Documentation
 
 [goswinr.github.io/Rhino.Scripting](https://goswinr.github.io/Rhino.Scripting/reference/rhino-scripting-rhinoscriptsyntax.html)
