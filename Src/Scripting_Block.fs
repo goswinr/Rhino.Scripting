@@ -91,7 +91,7 @@ module AutoOpenBlock =
     static member BlockDescription(blockName:string) : string = //GET
         let instDef = State.Doc.InstanceDefinitions.Find(blockName)
         if isNull instDef then  RhinoScriptingException.Raise "BlockDescription: '%s' does not exist in InstanceDefinitionsTable" blockName
-        instDef.Description
+        if isNull instDef.Description then "" else instDef.Description
 
     /// <summary>Sets the description of a block definition.</summary>
     /// <param name="blockName">(string) The name of an existing block definition</param>

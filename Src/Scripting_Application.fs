@@ -490,9 +490,8 @@ module AutoOpenApplication =
         //<param name="ignoreRunners">ignoreRunners If True, script running commands, such as
         //        LoadScript, RunScript, and ReadCommandFile will not counted.
         //        If omitted the default is not to count script running command (True)</param>
-        Commands.Command.GetCommandStack()
-        //|> Array.filter (fun i -> if ignoreRunners then  Commands.Command.GetInt(i) <> 1 else true)
-        |> Array.length
+        let stack = Commands.Command.GetCommandStack()
+        if isNull stack then 0 else stack.Length
 
 
     /// <summary>The full path to Rhino's installation folder.</summary>
@@ -745,7 +744,7 @@ module AutoOpenApplication =
 
 
     /// <summary>Returns version of the Rhino SDK supported by the executing Rhino.</summary>
-    /// <returns>(int) The version of the Rhino SDK supported by the executing Rhino. Rhino SDK versions are 9 digit numbers in the form of YYYYMMDDn.</returns>
+    /// <returns>(int) The signed integer version reported by the executing Rhino SDK.</returns>
     static member SdkVersion() : int =
         RhinoApp.SdkVersion
 

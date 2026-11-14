@@ -212,8 +212,9 @@ module AutoOpenUserData =
     /// <returns>(unit) void, nothing.</returns>
     static member DeleteDocumentUserText(key:string) : unit =
         if isNull key  then RhinoScriptingException.Raise "DeleteDocumentUserText failed on for null key"
-        let p = State.Doc.Strings.SetString(key, null)
+        let p = State.Doc.Strings.GetValue(key)
         if isNull p then RhinoScriptingException.Raise "DeleteDocumentUserText failed,  key '%s' does not exist"  key
+        State.Doc.Strings.Delete(key)
 
     /// <summary>Sets a user text stored on an object. Key and value must not contain ambiguous Unicode characters.</summary>
     /// <param name="objectId">(Guid) The object's identifier</param>

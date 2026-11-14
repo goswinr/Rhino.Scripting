@@ -34,10 +34,11 @@ test "IsDocumentModified" (fun () ->
     )
 
 test "Notes" (fun () ->
+    eq "unset notes" "" (rs.Notes())
     rs.Notes "first line\r\nsecond line"
     eq "notes round trip" "first line\r\nsecond line" (rs.Notes())
     rs.Notes ""
-    ok "empty notes (null or empty)" (String.IsNullOrEmpty (rs.Notes()))
+    eq "empty notes" "" (rs.Notes())
     )
 
 test "ReadFileVersion" (fun () ->

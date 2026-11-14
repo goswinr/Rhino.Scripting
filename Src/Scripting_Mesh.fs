@@ -898,7 +898,8 @@ module AutoOpenMesh =
                                         mesh2:Mesh,
                                         [<OPT;DEF(0.0)>]tolerance:float) : Polyline array =
         let tolerance = Util.ifZero1 tolerance (State.Doc.ModelAbsoluteTolerance*Intersect.Intersection.MeshIntersectionsTolerancesCoefficient) // see https://github.com/mcneel/rhinoscriptsyntax/pull/202
-        Intersect.Intersection.MeshMeshAccurate(mesh1, mesh2, tolerance)
+        let result = Intersect.Intersection.MeshMeshAccurate(mesh1, mesh2, tolerance)
+        if isNull result then [||] else result
 
 
     /// <summary>Identifies the naked edge points of a Mesh object. This function shows
@@ -1153,7 +1154,10 @@ module AutoOpenMesh =
     /// <param name="vertexIndex">(int) Index of the Mesh vertex to find faces for</param>
     /// <returns>(int array) face indices.</returns>
     static member MeshVertexFaces(mesh:Mesh, vertexIndex:int) : int array =
-        mesh.Vertices.GetVertexFaces(vertexIndex)
+        if vertexIndex < 0 || vertexIndex >= mesh.Vertices.Count then
+            RhinoScriptingException.Raise "MeshVertexFaces: vertex index %d is outside the mesh" vertexIndex
+        let result = mesh.Vertices.GetVertexFaces(vertexIndex)
+        if isNull result then [||] else result
 
 
     /// <summary>Returns the vertex unit normal for each vertex of a Mesh.</summary>
@@ -1290,11 +1294,12 @@ module AutoOpenMesh =
     /// <param name="objectId">(Guid) Identifier of a Mesh object</param>
     /// <returns>(int) The number of faces that were modified.</returns>
     static member UnifyMeshNormals(objectId:Guid) : int =
-        let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        let mesh = RhinoScriptSyntax.CoerceMesh(objectId).DuplicateMesh()
         let rc = mesh.UnifyNormals()
         if rc>0 then
             //id = RhinoScriptSyntax.CoerceGuid(objectId)
-            State.Doc.Objects.Replace(objectId, mesh)|> ignore<bool>
+            if not (State.Doc.Objects.Replace(objectId, mesh)) then
+                RhinoScriptingException.Raise "UnifyMeshNormals: failed to replace mesh %A" objectId
             State.Doc.Views.Redraw()
         rc
 

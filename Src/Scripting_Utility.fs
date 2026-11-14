@@ -235,7 +235,8 @@ module AutoOpenUtility =
     /// <returns>(Point3d array) Array of 3D points with duplicates removed.</returns>
     static member CullDuplicatePoints(points:Point3d seq, [<OPT;DEF(0.0)>]tolerance:float) : Point3d array =
         let tol = Util.ifZero1 tolerance RhinoMath.ZeroTolerance
-        Geometry.Point3d.CullDuplicates(points, tol)
+        let result = Geometry.Point3d.CullDuplicates(points, tol)
+        if isNull result then [||] else result
 
 
     /// <summary>Measures Square distance between two 3D points. Does not validate input.</summary>

@@ -2908,9 +2908,8 @@ type RhinoScriptSyntax private () =
         //<param name="ignoreRunners">ignoreRunners If True, script running commands, such as
         //        LoadScript, RunScript, and ReadCommandFile will not counted.
         //        If omitted the default is not to count script running command (True)</param>
-        Commands.Command.GetCommandStack()
-        //|> Array.filter (fun i -> if ignoreRunners then  Commands.Command.GetInt(i) <> 1 else true)
-        |> Array.length
+        let stack = Commands.Command.GetCommandStack()
+        if isNull stack then 0 else stack.Length
 
 
     /// <summary>The full path to Rhino's installation folder.</summary>
@@ -3163,7 +3162,7 @@ type RhinoScriptSyntax private () =
 
 
     /// <summary>Returns version of the Rhino SDK supported by the executing Rhino.</summary>
-    /// <returns>(int) The version of the Rhino SDK supported by the executing Rhino. Rhino SDK versions are 9 digit numbers in the form of YYYYMMDDn.</returns>
+    /// <returns>(int) The signed integer version reported by the executing Rhino SDK.</returns>
     static member SdkVersion() : int =
         RhinoApp.SdkVersion
 
@@ -3396,7 +3395,7 @@ type RhinoScriptSyntax private () =
     static member BlockDescription(blockName:string) : string = //GET
         let instDef = State.Doc.InstanceDefinitions.Find(blockName)
         if isNull instDef then  RhinoScriptingException.Raise "BlockDescription: '%s' does not exist in InstanceDefinitionsTable" blockName
-        instDef.Description
+        if isNull instDef.Description then "" else instDef.Description
 
     /// <summary>Sets the description of a block definition.</summary>
     /// <param name="blockName">(string) The name of an existing block definition</param>
@@ -4402,7 +4401,7 @@ type RhinoScriptSyntax private () =
     ///    -1 if the Curve's orientation is clockwise
     ///     0 if unable to compute the Curve's orientation.</returns>
     static member ClosedCurveOrientation(curveGeo:Curve, [<OPT;DEF(Vector3d())>]direction:Vector3d) : int = //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
-        let direction0 =if direction.IsZero then Vector3d.Unset else direction
+        let direction0 =if direction.IsZero then Vector3d.ZAxis else direction
         let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
         if not <| curve.IsClosed then  0
         else
@@ -7642,12 +7641,12 @@ type RhinoScriptSyntax private () =
     static member DimStyleFont(dimStyle:string) : string = //GET
         let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "DimStyleFont get failed. dimStyle:'%s'" dimStyle
-        ds.Font.FaceName
+        ds.Font.QuartetName
 
 
     /// <summary>Changes the font used by a dimension style.</summary>
     /// <param name="dimStyle">(string) The name of an existing dimension style</param>
-    /// <param name="font">(string) The new font face name</param>
+    /// <param name="font">(string) The new font quartet name</param>
     /// <returns>(unit) void, nothing.</returns>
     static member DimStyleFont(dimStyle:string, font:string) : unit = //SET
         let ds = State.Doc.DimStyles.FindName(dimStyle)
@@ -8310,7 +8309,8 @@ type RhinoScriptSyntax private () =
     /// using Rhino's Notes command.</summary>
     /// <returns>(string) The current notes.</returns>
     static member Notes() : string = //GET
-        State.Doc.Notes
+        let notes = State.Doc.Notes
+        if isNull notes then "" else notes
 
     /// <summary>Sets the document's notes. Notes are generally created
     /// using Rhino's Notes command.</summary>
@@ -9120,30 +9120,13 @@ type RhinoScriptSyntax private () =
         let bold   = (1 = fontStyle || 3 = fontStyle)
         let italic = (2 = fontStyle || 3 = fontStyle)
         let ds = State.Doc.DimStyles.Current
-        let qn, quartetBoldProp , quartetItalicProp =
-            if isNull font then
-                ds.Font.QuartetName, ds.Font.Bold, ds.Font.Italic
-            else
-                font, false, false
-
-        let f = DocObjects.Font.FromQuartetProperties(qn, quartetBoldProp, quartetItalicProp)
-
+        let qn = if isNull font then ds.Font.QuartetName else font
+        let f = DocObjects.Font.FromQuartetProperties(qn, bold, italic)
         if isNull f then
-            RhinoScriptingException.Raise "AddText failed. text:'%s' plane:'%s' height:'%g' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane.Pretty height font fontStyle horizontalAlignment verticalAlignment
+            RhinoScriptingException.Raise "AddText failed to find font '%s' with the requested style" qn
         let te = TextEntity.Create(text, plane, ds, false, 0.0, 0.0)
         te.TextHeight <- height
-        if font |> notNull then
-            te.Font <- f
-        if bold <> quartetBoldProp then
-            if DocObjects.Font.FromQuartetProperties(qn, bold, false) |> isNull then
-                State.Warn "AddText: the requested font style is unavailable"
-            else
-                te.SetBold(bold)|> ignore<bool>
-        if italic <> quartetItalicProp then
-            if DocObjects.Font.FromQuartetProperties(qn, false, italic) |> isNull then
-                State.Warn "AddText: the requested font style is unavailable"
-            else
-                te.SetItalic(italic)|> ignore<bool>
+        te.Font <- f
 
         te.TextHorizontalAlignment <- LanguagePrimitives.EnumOfValue horizontalAlignment
         te.TextVerticalAlignment <- LanguagePrimitives.EnumOfValue verticalAlignment
@@ -9431,7 +9414,11 @@ type RhinoScriptSyntax private () =
     /// <returns>(Guid array) Array of outline Curves.</returns>
     static member ExplodeText(textId:Guid, [<OPT;DEF(false)>]delete:bool) : ResizeArray<Guid> =
         let textObject = RhinoScriptSyntax.CoerceRhinoObject(textId)
-        let curves = RhinoScriptSyntax.ExplodeText(textObject.Geometry :?> TextEntity)
+        let text =
+            match textObject.Geometry with
+            | :? TextEntity as t -> t
+            | _ -> RhinoScriptingException.Raise "ExplodeText: object %A is not text" textId
+        let curves = RhinoScriptSyntax.ExplodeText(text)
         let ids = curves |> RArr.mapSeq (fun curve -> State.Doc.Objects.AddCurve(curve, textObject.Attributes))
         if delete then State.Doc.Objects.Delete(textObject, quiet=true) |> ignore<bool>
         State.Doc.Views.Redraw()
@@ -10552,7 +10539,8 @@ type RhinoScriptSyntax private () =
     /// <summary>Returns the number of groups in the document.</summary>
     /// <returns>(int) The number of groups in the document.</returns>
     static member GroupCount() : int =
-        State.Doc.Groups.Count
+        let names = State.Doc.Groups.GroupNames(true)
+        if isNull names then 0 else names.Length
 
 
     /// <summary>Returns the names of all the groups in the document.
@@ -10751,6 +10739,7 @@ type RhinoScriptSyntax private () =
             let patternInstance = State.Doc.HatchPatterns.FindName(hatchPattern)
             index <-  if patternInstance|> isNull then RhinoMath.UnsetIntIndex else patternInstance.Index
             if index<0 then RhinoScriptingException.Raise "MakeHatches failed to find hatchPattern:'%s'"  hatchPattern
+        if index < 0 && State.Doc.HatchPatterns.Count > 0 then index <- 0
         let rotation = RhinoMath.ToRadians(rotation)
 
         let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance
@@ -13219,7 +13208,8 @@ type RhinoScriptSyntax private () =
                                         mesh2:Mesh,
                                         [<OPT;DEF(0.0)>]tolerance:float) : Polyline array =
         let tolerance = Util.ifZero1 tolerance (State.Doc.ModelAbsoluteTolerance*Intersect.Intersection.MeshIntersectionsTolerancesCoefficient) // see https://github.com/mcneel/rhinoscriptsyntax/pull/202
-        Intersect.Intersection.MeshMeshAccurate(mesh1, mesh2, tolerance)
+        let result = Intersect.Intersection.MeshMeshAccurate(mesh1, mesh2, tolerance)
+        if isNull result then [||] else result
 
 
     /// <summary>Identifies the naked edge points of a Mesh object. This function shows
@@ -13474,7 +13464,10 @@ type RhinoScriptSyntax private () =
     /// <param name="vertexIndex">(int) Index of the Mesh vertex to find faces for</param>
     /// <returns>(int array) face indices.</returns>
     static member MeshVertexFaces(mesh:Mesh, vertexIndex:int) : int array =
-        mesh.Vertices.GetVertexFaces(vertexIndex)
+        if vertexIndex < 0 || vertexIndex >= mesh.Vertices.Count then
+            RhinoScriptingException.Raise "MeshVertexFaces: vertex index %d is outside the mesh" vertexIndex
+        let result = mesh.Vertices.GetVertexFaces(vertexIndex)
+        if isNull result then [||] else result
 
 
     /// <summary>Returns the vertex unit normal for each vertex of a Mesh.</summary>
@@ -13611,11 +13604,12 @@ type RhinoScriptSyntax private () =
     /// <param name="objectId">(Guid) Identifier of a Mesh object</param>
     /// <returns>(int) The number of faces that were modified.</returns>
     static member UnifyMeshNormals(objectId:Guid) : int =
-        let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        let mesh = RhinoScriptSyntax.CoerceMesh(objectId).DuplicateMesh()
         let rc = mesh.UnifyNormals()
         if rc>0 then
             //id = RhinoScriptSyntax.CoerceGuid(objectId)
-            State.Doc.Objects.Replace(objectId, mesh)|> ignore<bool>
+            if not (State.Doc.Objects.Replace(objectId, mesh)) then
+                RhinoScriptingException.Raise "UnifyMeshNormals: failed to replace mesh %A" objectId
             State.Doc.Views.Redraw()
         rc
 
@@ -17087,7 +17081,9 @@ type RhinoScriptSyntax private () =
                            [<OPT;DEF(true)>]cap:bool) : Guid =
         let cone = Cone(basis, height, radius)
         let brep = Brep.CreateFromCone(cone, cap)// cone is upside down
+        if isNull brep then RhinoScriptingException.Raise "AddCone: failed to create cone"
         let rc = State.Doc.Objects.AddBrep(brep)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "AddCone: failed to add cone"
         State.Doc.Views.Redraw()
         rc
 
@@ -17106,7 +17102,9 @@ type RhinoScriptSyntax private () =
         let pl = RhinoScriptSyntax.PlaneFromNormal(tip,n)
         let cone = Cone(pl, n.Length, radius)
         let brep = Brep.CreateFromCone(cone, cap)// cone is upside down
+        if isNull brep then RhinoScriptingException.Raise "AddCone: failed to create cone"
         let rc = State.Doc.Objects.AddBrep(brep)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "AddCone: failed to add cone"
         State.Doc.Views.Redraw()
         rc
 
@@ -18038,7 +18036,9 @@ type RhinoScriptSyntax private () =
                             minorRadius:float) : Guid =
         let torus = Torus(basis, majorRadius, minorRadius)
         let revsurf = torus.ToRevSurface()
+        if isNull revsurf then RhinoScriptingException.Raise "AddTorus: failed to create torus"
         let rc = State.Doc.Objects.AddSurface(revsurf)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "AddTorus: failed to add torus"
         State.Doc.Views.Redraw()
         rc
 
@@ -19416,7 +19416,8 @@ type RhinoScriptSyntax private () =
             let nsrf = srfinst.ToNurbsSurface()
             if isNull nsrf then false
             else
-                let knots = if vDirection then nsrf.KnotsV  else nsrf.KnotsU
+                // RhinoCommon removes knots in the opposite direction to the knot list.
+                let knots = if vDirection then nsrf.KnotsU else nsrf.KnotsV
                 let success = knots.RemoveKnotsAt(nuparam, nvparam)
                 if not success then false
                 else
@@ -20730,7 +20731,7 @@ type RhinoScriptSyntax private () =
         ResizeArray(breps), following
 
 
-    /// <summary>Changes the degree of a Surface object. For more information see the Rhino help file for the ChangeDegree command.</summary>
+    /// <summary>Raises the degree of a Surface object. Lowering a degree is not supported and returns false.</summary>
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <param name="degree">(int * int) Two integers, specifying the degrees for the U  V directions</param>
     /// <returns>(bool) True of False indicating success or failure.</returns>
@@ -21454,8 +21455,9 @@ type RhinoScriptSyntax private () =
     /// <returns>(unit) void, nothing.</returns>
     static member DeleteDocumentUserText(key:string) : unit =
         if isNull key  then RhinoScriptingException.Raise "DeleteDocumentUserText failed on for null key"
-        let p = State.Doc.Strings.SetString(key, null)
+        let p = State.Doc.Strings.GetValue(key)
         if isNull p then RhinoScriptingException.Raise "DeleteDocumentUserText failed,  key '%s' does not exist"  key
+        State.Doc.Strings.Delete(key)
 
     /// <summary>Sets a user text stored on an object. Key and value must not contain ambiguous Unicode characters.</summary>
     /// <param name="objectId">(Guid) The object's identifier</param>
@@ -22965,7 +22967,8 @@ type RhinoScriptSyntax private () =
     /// <returns>(Point3d array) Array of 3D points with duplicates removed.</returns>
     static member CullDuplicatePoints(points:Point3d seq, [<OPT;DEF(0.0)>]tolerance:float) : Point3d array =
         let tol = Util.ifZero1 tolerance RhinoMath.ZeroTolerance
-        Geometry.Point3d.CullDuplicates(points, tol)
+        let result = Geometry.Point3d.CullDuplicates(points, tol)
+        if isNull result then [||] else result
 
 
     /// <summary>Measures Square distance between two 3D points. Does not validate input.</summary>
@@ -23554,7 +23557,7 @@ type RhinoScriptSyntax private () =
     /// <returns>(bool) True or False.</returns>
     static member IsWallpaper(view:string) : bool =
         let view = RhinoScriptSyntax.CoerceViewOrActive(view)
-        view.MainViewport.WallpaperFilename.Length > 0
+        not (String.IsNullOrEmpty view.MainViewport.WallpaperFilename)
 
 
     /// <summary>Toggles a view's maximized/restore window state of the specified view.</summary>
@@ -23636,9 +23639,10 @@ type RhinoScriptSyntax private () =
         let index = State.Doc.NamedViews.FindByName(namedView)
         if index<0 then RhinoScriptingException.Raise "RestoreNamedView failed.  namedView:'%A' view:'%A' restoreBitmap:'%A'" namedView view restoreBitmap
         let viewinfo = State.Doc.NamedViews.[index]
+        let viewName = view.MainViewport.Name
         if view.MainViewport.PushViewInfo(viewinfo, restoreBitmap) then
+            view.MainViewport.Name <- viewName
             view.Redraw()
-            //view.MainViewport.Name
         else
             RhinoScriptingException.Raise "RestoreNamedView failed.  namedView:'%A' view:'%A' restoreBitmap:'%A'" namedView view restoreBitmap
 

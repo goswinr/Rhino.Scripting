@@ -65,6 +65,7 @@ module AutoOpenHatch =
             let patternInstance = State.Doc.HatchPatterns.FindName(hatchPattern)
             index <-  if patternInstance|> isNull then RhinoMath.UnsetIntIndex else patternInstance.Index
             if index<0 then RhinoScriptingException.Raise "MakeHatches failed to find hatchPattern:'%s'"  hatchPattern
+        if index < 0 && State.Doc.HatchPatterns.Count > 0 then index <- 0
         let rotation = RhinoMath.ToRadians(rotation)
 
         let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance

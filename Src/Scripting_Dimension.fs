@@ -333,12 +333,12 @@ module AutoOpenDimension =
     static member DimStyleFont(dimStyle:string) : string = //GET
         let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "DimStyleFont get failed. dimStyle:'%s'" dimStyle
-        ds.Font.FaceName
+        ds.Font.QuartetName
 
 
     /// <summary>Changes the font used by a dimension style.</summary>
     /// <param name="dimStyle">(string) The name of an existing dimension style</param>
-    /// <param name="font">(string) The new font face name</param>
+    /// <param name="font">(string) The new font quartet name</param>
     /// <returns>(unit) void, nothing.</returns>
     static member DimStyleFont(dimStyle:string, font:string) : unit = //SET
         let ds = State.Doc.DimStyles.FindName(dimStyle)

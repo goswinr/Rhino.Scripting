@@ -708,7 +708,7 @@ module AutoOpenCurve =
     ///    -1 if the Curve's orientation is clockwise
     ///     0 if unable to compute the Curve's orientation.</returns>
     static member ClosedCurveOrientation(curveGeo:Curve, [<OPT;DEF(Vector3d())>]direction:Vector3d) : int = //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
-        let direction0 =if direction.IsZero then Vector3d.Unset else direction
+        let direction0 =if direction.IsZero then Vector3d.ZAxis else direction
         let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
         if not <| curve.IsClosed then  0
         else

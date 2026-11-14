@@ -80,8 +80,7 @@ test "BlockNames" (fun () ->
 
 test "BlockDescription" (fun () ->
     makeBlock "bdA" |> ignore
-    // the description is null (not "") for a block without description
-    ok "empty description at first" (String.IsNullOrEmpty (rs.BlockDescription "bdA"))
+    eq "empty description at first" "" (rs.BlockDescription "bdA")
     rs.BlockDescription("bdA", "my description")
     eq "description round trip" "my description" (rs.BlockDescription "bdA")
     throwsRs "get on an unknown block" (fun () -> rs.BlockDescription "bdUnknown")
@@ -239,8 +238,9 @@ test "RenameBlock" (fun () ->
     ok "new name exists" (rs.IsBlock "rbB")
     ok "old name is gone" (not (rs.IsBlock "rbA"))
     eq "instances follow the new name" "rbB" (rs.BlockInstanceName inst)
-    // NOT tested: renaming to an existing name. The library calls InstanceDefinitions.Modify with quiet=false,
-    // so Rhino shows a modal message box that blocks the script until a person closes it.
+    makeBlock "rbC" |> ignore
+    ok "duplicate name fails without a dialog" (not (rs.RenameBlock("rbB", "rbC")))
+    ok "original name remains" (rs.IsBlock "rbB")
     throwsRs "unknown block" (fun () -> rs.RenameBlock("rbUnknown", "rbX"))
     )
 

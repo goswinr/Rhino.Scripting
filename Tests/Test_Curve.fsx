@@ -729,7 +729,7 @@ test "ClosedCurveOrientation" (fun () ->
     eq "clockwise" -1 (rs.ClosedCurveOrientation cw)
     eq "geometry" 1 (rs.ClosedCurveOrientation (crv ccw))
     eq "seen from below the orientation is reversed" -1 (rs.ClosedCurveOrientation(ccw, vec 0. 0. -1.))
-    throwsRs "open curve" (fun () -> rs.ClosedCurveOrientation (lineC ()))
+    eq "open curve has undefined orientation" 0 (rs.ClosedCurveOrientation (lineC ()))
     )
 test "CurveArrows" (fun () ->
     let a = lineC ()

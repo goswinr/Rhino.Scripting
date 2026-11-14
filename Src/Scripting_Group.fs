@@ -83,7 +83,8 @@ module AutoOpenGroup =
     /// <summary>Returns the number of groups in the document.</summary>
     /// <returns>(int) The number of groups in the document.</returns>
     static member GroupCount() : int =
-        State.Doc.Groups.Count
+        let names = State.Doc.Groups.GroupNames(true)
+        if isNull names then 0 else names.Length
 
 
     /// <summary>Returns the names of all the groups in the document.

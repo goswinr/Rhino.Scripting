@@ -172,30 +172,13 @@ module AutoOpenGeometry =
         let bold   = (1 = fontStyle || 3 = fontStyle)
         let italic = (2 = fontStyle || 3 = fontStyle)
         let ds = State.Doc.DimStyles.Current
-        let qn, quartetBoldProp , quartetItalicProp =
-            if isNull font then
-                ds.Font.QuartetName, ds.Font.Bold, ds.Font.Italic
-            else
-                font, false, false
-
-        let f = DocObjects.Font.FromQuartetProperties(qn, quartetBoldProp, quartetItalicProp)
-
+        let qn = if isNull font then ds.Font.QuartetName else font
+        let f = DocObjects.Font.FromQuartetProperties(qn, bold, italic)
         if isNull f then
-            RhinoScriptingException.Raise "AddText failed. text:'%s' plane:'%s' height:'%g' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane.Pretty height font fontStyle horizontalAlignment verticalAlignment
+            RhinoScriptingException.Raise "AddText failed to find font '%s' with the requested style" qn
         let te = TextEntity.Create(text, plane, ds, false, 0.0, 0.0)
         te.TextHeight <- height
-        if font |> notNull then
-            te.Font <- f
-        if bold <> quartetBoldProp then
-            if DocObjects.Font.FromQuartetProperties(qn, bold, false) |> isNull then
-                State.Warn "AddText: the requested font style is unavailable"
-            else
-                te.SetBold(bold)|> ignore<bool>
-        if italic <> quartetItalicProp then
-            if DocObjects.Font.FromQuartetProperties(qn, false, italic) |> isNull then
-                State.Warn "AddText: the requested font style is unavailable"
-            else
-                te.SetItalic(italic)|> ignore<bool>
+        te.Font <- f
 
         te.TextHorizontalAlignment <- LanguagePrimitives.EnumOfValue horizontalAlignment
         te.TextVerticalAlignment <- LanguagePrimitives.EnumOfValue verticalAlignment
@@ -483,7 +466,11 @@ module AutoOpenGeometry =
     /// <returns>(Guid array) Array of outline Curves.</returns>
     static member ExplodeText(textId:Guid, [<OPT;DEF(false)>]delete:bool) : ResizeArray<Guid> =
         let textObject = RhinoScriptSyntax.CoerceRhinoObject(textId)
-        let curves = RhinoScriptSyntax.ExplodeText(textObject.Geometry :?> TextEntity)
+        let text =
+            match textObject.Geometry with
+            | :? TextEntity as t -> t
+            | _ -> RhinoScriptingException.Raise "ExplodeText: object %A is not text" textId
+        let curves = RhinoScriptSyntax.ExplodeText(text)
         let ids = curves |> RArr.mapSeq (fun curve -> State.Doc.Objects.AddCurve(curve, textObject.Attributes))
         if delete then State.Doc.Objects.Delete(textObject, quiet=true) |> ignore<bool>
         State.Doc.Views.Redraw()

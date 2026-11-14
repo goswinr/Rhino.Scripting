@@ -1,5 +1,7 @@
 # Bugs found by the test scripts, with suggested fixes
 
+> Progress: the failing cases in sections 1 and 2 and the hatch and knot cases have been fixed and checked in Rhino 9, along with the unset Notes and BlockDescription cases. RenameBlock already used quiet=true; a duplicate-name regression test now passes. LightObjects after purge was reproduced, but remains unresolved. The other observations below still need review. The historical descriptions below have not yet been reconciled.
+
 Found while writing and running the suites in this folder (Rhino 8.36, `net8.0` build). Each entry names the failing test, so
 `caddis_eval path=Tests/Test_<File>.fsx` shows the failure. The failing tests are left as they are on purpose: they pass once the bug is fixed.
 
@@ -90,6 +92,7 @@ and run `dotnet fsi API-Table/ApiTable.fsx` if a signature changed.
   Rule for all scripted code: never let RhinoCommon ask a person; use `quiet=true` and report the failure through the return value or an exception.
 
 ### LightObjects throws after Objects.Purge
+- Rhino 9.0.26300.9401: purging a light in a scratch document, disposing it, and creating another document crashed Rhino twice, even without enumerating the light table. Deleting the light instead was a successful control. See [Repro_PurgeLightCrash.fsx](Repro_PurgeLightCrash.fsx); do not purge lights in the harness.
 - Seen once during development, not covered by a test any more (the harness deletes lights with `Delete`, never `Purge`).
 - Cause: [Scripting_Light.fs](../Src/Scripting_Light.fs) walks `Doc.Lights.[i]` for `i < Lights.Count`. After `Objects.Purge` of a light the table is shorter than expected or the entry is gone.
 - Suggested fix: enumerate `State.Doc.Objects.GetObjectList(ObjectType.Light)` (or `foreach l in State.Doc.Lights` skipping null and deleted entries).

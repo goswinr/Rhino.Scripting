@@ -45,7 +45,9 @@ module AutoOpenSurface =
                            [<OPT;DEF(true)>]cap:bool) : Guid =
         let cone = Cone(basis, height, radius)
         let brep = Brep.CreateFromCone(cone, cap)// cone is upside down
+        if isNull brep then RhinoScriptingException.Raise "AddCone: failed to create cone"
         let rc = State.Doc.Objects.AddBrep(brep)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "AddCone: failed to add cone"
         State.Doc.Views.Redraw()
         rc
 
@@ -64,7 +66,9 @@ module AutoOpenSurface =
         let pl = RhinoScriptSyntax.PlaneFromNormal(tip,n)
         let cone = Cone(pl, n.Length, radius)
         let brep = Brep.CreateFromCone(cone, cap)// cone is upside down
+        if isNull brep then RhinoScriptingException.Raise "AddCone: failed to create cone"
         let rc = State.Doc.Objects.AddBrep(brep)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "AddCone: failed to add cone"
         State.Doc.Views.Redraw()
         rc
 
@@ -996,7 +1000,9 @@ module AutoOpenSurface =
                             minorRadius:float) : Guid =
         let torus = Torus(basis, majorRadius, minorRadius)
         let revsurf = torus.ToRevSurface()
+        if isNull revsurf then RhinoScriptingException.Raise "AddTorus: failed to create torus"
         let rc = State.Doc.Objects.AddSurface(revsurf)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "AddTorus: failed to add torus"
         State.Doc.Views.Redraw()
         rc
 
@@ -2374,7 +2380,8 @@ module AutoOpenSurface =
             let nsrf = srfinst.ToNurbsSurface()
             if isNull nsrf then false
             else
-                let knots = if vDirection then nsrf.KnotsV  else nsrf.KnotsU
+                // RhinoCommon removes knots in the opposite direction to the knot list.
+                let knots = if vDirection then nsrf.KnotsU else nsrf.KnotsV
                 let success = knots.RemoveKnotsAt(nuparam, nvparam)
                 if not success then false
                 else
@@ -3688,7 +3695,7 @@ module AutoOpenSurface =
         ResizeArray(breps), following
 
 
-    /// <summary>Changes the degree of a Surface object. For more information see the Rhino help file for the ChangeDegree command.</summary>
+    /// <summary>Raises the degree of a Surface object. Lowering a degree is not supported and returns false.</summary>
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <param name="degree">(int * int) Two integers, specifying the degrees for the U  V directions</param>
     /// <returns>(bool) True of False indicating success or failure.</returns>

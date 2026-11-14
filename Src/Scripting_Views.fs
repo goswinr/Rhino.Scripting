@@ -279,7 +279,7 @@ module AutoOpenViews =
     /// <returns>(bool) True or False.</returns>
     static member IsWallpaper(view:string) : bool =
         let view = RhinoScriptSyntax.CoerceViewOrActive(view)
-        view.MainViewport.WallpaperFilename.Length > 0
+        not (String.IsNullOrEmpty view.MainViewport.WallpaperFilename)
 
 
     /// <summary>Toggles a view's maximized/restore window state of the specified view.</summary>
@@ -361,9 +361,10 @@ module AutoOpenViews =
         let index = State.Doc.NamedViews.FindByName(namedView)
         if index<0 then RhinoScriptingException.Raise "RestoreNamedView failed.  namedView:'%A' view:'%A' restoreBitmap:'%A'" namedView view restoreBitmap
         let viewinfo = State.Doc.NamedViews.[index]
+        let viewName = view.MainViewport.Name
         if view.MainViewport.PushViewInfo(viewinfo, restoreBitmap) then
+            view.MainViewport.Name <- viewName
             view.Redraw()
-            //view.MainViewport.Name
         else
             RhinoScriptingException.Raise "RestoreNamedView failed.  namedView:'%A' view:'%A' restoreBitmap:'%A'" namedView view restoreBitmap
 

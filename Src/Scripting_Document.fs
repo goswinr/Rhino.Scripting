@@ -142,7 +142,8 @@ module AutoOpenDocument =
     /// using Rhino's Notes command.</summary>
     /// <returns>(string) The current notes.</returns>
     static member Notes() : string = //GET
-        State.Doc.Notes
+        let notes = State.Doc.Notes
+        if isNull notes then "" else notes
 
     /// <summary>Sets the document's notes. Notes are generally created
     /// using Rhino's Notes command.</summary>

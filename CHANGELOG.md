@@ -52,6 +52,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Breaking: IsDimension, IsLeader and the other dimension checks return false for objects that don't exist, instead of raising an exception, like in RhinoPython
 - Breaking: IsCone, IsCylinder, IsPlaneSurface and IsPointLight, IsSpotLight and the other light type checks return false for objects of another type or that don't exist, instead of raising an exception, like in RhinoPython
 ### Fixed
+- Breaking: Unset document notes and block descriptions return empty strings instead of null.
+- Clarified that ChangeSurfaceDegree raises degrees and SdkVersion returns Rhino's signed SDK value.
+- Breaking: String ID validation rejects empty names unless explicitly allowed; empty document user-text keys now raise.
+- Breaking: DimStyleFont returns the font quartet name, and empty point and mesh intersection results return empty arrays instead of null.
+- Breaking: AddCone and AddTorus raise when geometry cannot be created or added, and MeshVertexFaces raises for an invalid vertex index.
+- Fixed group counts after deletion, document user-text deletion, closed-curve orientation, text font styles, mesh normal unification, surface knot direction, hatch creation without a current pattern, named-view titles, wallpaper detection, command counts and ExplodeText error handling.
 - AddLeader uses Rhino's textless overload when text is omitted or null, instead of creating empty text.
 - ViewRadius defaults the setter mode to false, like in RhinoPython.
 - AddLinearLight distinguishes an omitted width from an explicit zero width, like in RhinoPython; the two-argument overload supplies the default.
