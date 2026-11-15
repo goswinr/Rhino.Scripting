@@ -8,6 +8,10 @@ on:
 jobs:
   publish:
     runs-on: windows-latest
+    # id-token: write lets NuGet/login exchange a GitHub OIDC token for a temporary NuGet API key (trusted publishing)
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
     - name: Checkout repository
@@ -52,9 +56,15 @@ jobs:
         echo "github.ref_name=${{ github.ref_name }}"  
         echo "Version check of git tag and CHANGELOG.md passed successfully." 
 
+    - name: NuGet login (trusted publishing, temporary API key via OIDC)
+      id: login
+      uses: NuGet/login@v1.2.0
+      with:
+        user: goswinr
+
     - name: Push NuGet package to nuget.org
       run: |
         dotnet nuget push `
         ./bin/Release/Rhino.Scripting.${{ github.ref_name }}.symbols.nupkg `
-        --api-key ${{ secrets.NUGET_API_KEY }} `
+        --api-key ${{ steps.login.outputs.NUGET_API_KEY }} `
         --source https://api.nuget.org/v3/index.json
