@@ -16,7 +16,7 @@ module AutoOpenSurface =
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file.
     //---So that all members are visible in C# and Ironpython too.
     //---This happens as part of the <Targets> in the *.fsproj file.
-    //---End of header marker: don't change: {@$%^&*()*&^%$@}
+    //---The functions below are part of Scripting_Surface.fs: file split marker: {@$%^&*()*&^%$@}
 
 
     /// <summary>Adds a box shaped Polysurface to the document.</summary>
@@ -45,7 +45,9 @@ module AutoOpenSurface =
                            [<OPT;DEF(true)>]cap:bool) : Guid =
         let cone = Cone(basis, height, radius)
         let brep = Brep.CreateFromCone(cone, cap)// cone is upside down
+        if isNull brep then RhinoScriptingException.Raise "AddCone: failed to create cone"
         let rc = State.Doc.Objects.AddBrep(brep)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "AddCone: failed to add cone"
         State.Doc.Views.Redraw()
         rc
 
@@ -64,7 +66,9 @@ module AutoOpenSurface =
         let pl = RhinoScriptSyntax.PlaneFromNormal(tip,n)
         let cone = Cone(pl, n.Length, radius)
         let brep = Brep.CreateFromCone(cone, cap)// cone is upside down
+        if isNull brep then RhinoScriptingException.Raise "AddCone: failed to create cone"
         let rc = State.Doc.Objects.AddBrep(brep)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "AddCone: failed to add cone"
         State.Doc.Views.Redraw()
         rc
 
@@ -183,15 +187,16 @@ module AutoOpenSurface =
     ///    3 = curvature</param>
     /// <param name="edgeTolerance">(float) Optional, Edge tolerance</param>
     /// <param name="interiorTolerance">(float) Optional, Interior tolerance</param>
-    /// <param name="angleTolerance">(float) Optional, Angle tolerance , in radians?</param>
+    /// <param name="angleToleranceRadians">(float) Optional, default value: <c>0.0</c>. Angle tolerance in radians, passed directly to RhinoCommon.
+    ///    Use <c>RhinoMath.ToRadians</c> to convert from degrees to radians.</param>
     /// <returns>(Guid) identifier of new object.</returns>
     static member AddNetworkSrf( curves:Guid seq,
                                  [<OPT;DEF(1)>]continuity:int,
                                  [<OPT;DEF(0.0)>]edgeTolerance:float,
                                  [<OPT;DEF(0.0)>]interiorTolerance:float,
-                                 [<OPT;DEF(0.0)>]angleTolerance:float) : Guid =
+                                 [<OPT;DEF(0.0)>]angleToleranceRadians:float) : Guid =
         let curvesGeometry = curves |> RArr.mapSeq RhinoScriptSyntax.CoerceCurve
-        let geometry = RhinoScriptSyntax.MakeNetworkSrf(curvesGeometry, continuity, edgeTolerance, interiorTolerance, angleTolerance)
+        let geometry = RhinoScriptSyntax.MakeNetworkSrf(curvesGeometry, continuity, edgeTolerance, interiorTolerance, angleToleranceRadians)
         let rc = State.Doc.Objects.AddSurface(geometry)
         State.Doc.Views.Redraw()
         rc
@@ -207,15 +212,16 @@ module AutoOpenSurface =
     ///    3 = curvature</param>
     /// <param name="edgeTolerance">(float) Optional, Edge tolerance</param>
     /// <param name="interiorTolerance">(float) Optional, Interior tolerance</param>
-    /// <param name="angleTolerance">(float) Optional, Angle tolerance , in radians?</param>
+    /// <param name="angleToleranceRadians">(float) Optional, default value: <c>0.0</c>. Angle tolerance in radians, passed directly to RhinoCommon.
+    ///    Use <c>RhinoMath.ToRadians</c> to convert from degrees to radians.</param>
     /// <returns>(NurbsSurface) Newly created geometry. The caller owns the returned objects.</returns>
     static member MakeNetworkSrf( curves:Curve seq,
                                  [<OPT;DEF(1)>]continuity:int,
                                  [<OPT;DEF(0.0)>]edgeTolerance:float,
                                  [<OPT;DEF(0.0)>]interiorTolerance:float,
-                                 [<OPT;DEF(0.0)>]angleTolerance:float) : NurbsSurface =
+                                 [<OPT;DEF(0.0)>]angleToleranceRadians:float) : NurbsSurface =
         let curves  = curves |> RArr.mapSeq (fun geometry -> geometry)
-        let surf, _ = NurbsSurface.CreateNetworkSurface(curves, continuity, edgeTolerance, interiorTolerance, angleTolerance)// 0.0 Tolerance OK ? TODO
+        let surf, _ = NurbsSurface.CreateNetworkSurface(curves, continuity, edgeTolerance, interiorTolerance, angleToleranceRadians)// 0.0 Tolerance OK ? TODO
         if notNull surf then
             surf
         else
@@ -468,8 +474,9 @@ module AutoOpenSurface =
 
     /// <summary>Creates a single walled Surface with a circular profile around a Curve.</summary>
     /// <param name="curveId">(Guid) Identifier of rail Curve</param>
-    /// <param name="parameters">(float seq) normalized Curve parameters</param>
-    /// <param name="radii">(float seq) radius values at normalized Curve parameters</param>
+    /// <param name="parameters">(float seq) normalized Curve parameters, from 0.0 to 1.0</param>
+    /// <param name="radii">(float seq) radius values at normalized Curve parameters, the same count as parameters.
+    ///    A RhinoScriptingException is raised if the counts differ.</param>
     /// <param name="blendType">(int) Optional, default value: <c>0</c>
     ///    0(local) or 1(global)</param>
     /// <param name="cap">(int) Optional, default value: <c>0</c>
@@ -492,8 +499,9 @@ module AutoOpenSurface =
 
     /// <summary>Creates a single walled Surface with a circular profile around a Curve. Returns geometry without adding it.</summary>
     /// <param name="curveGeo">(Curve) Object of rail Curve</param>
-    /// <param name="parameters">(float seq) normalized Curve parameters</param>
-    /// <param name="radii">(float seq) radius values at normalized Curve parameters</param>
+    /// <param name="parameters">(float seq) normalized Curve parameters, from 0.0 to 1.0</param>
+    /// <param name="radii">(float seq) radius values at normalized Curve parameters, the same count as parameters.
+    ///    A RhinoScriptingException is raised if the counts differ.</param>
     /// <param name="blendType">(int) Optional, default value: <c>0</c>
     ///    0(local) or 1(global)</param>
     /// <param name="cap">(int) Optional, default value: <c>0</c>
@@ -511,7 +519,15 @@ module AutoOpenSurface =
         let abstol = State.Doc.ModelAbsoluteTolerance
         let angtol = State.Doc.ModelAngleToleranceRadians
         let cap :PipeCapMode  = LanguagePrimitives.EnumOfValue  cap
-        let breps = Brep.CreatePipe(rail, parameters, radii, (blendType = 0), cap, fit, abstol, angtol)
+        let parameters = Seq.toArray parameters
+        let radii = Seq.toArray radii
+        if parameters.Length = 0 then RhinoScriptingException.Raise "MakePipe: at least one parameter and radius is needed."
+        if parameters.Length <> radii.Length then
+            RhinoScriptingException.Raise "MakePipe: there are %d parameters but %d radii, the counts must be equal." parameters.Length radii.Length
+        let breps =
+            try Brep.CreatePipe(rail, parameters, radii, (blendType = 0), cap, fit, abstol, angtol)
+            with e -> RhinoScriptingException.RaiseWith e "MakePipe failed on %s: %s" (Pretty.str curveGeo) e.Message
+        if isNull breps || breps.Length = 0 then RhinoScriptingException.Raise "MakePipe failed on %s." (Pretty.str curveGeo)
         ResizeArray(breps)
 
 
@@ -681,17 +697,17 @@ module AutoOpenSurface =
     /// <summary>Create a Surface by revolving a Curve around an axis.</summary>
     /// <param name="curveId">(Guid) Identifier of profile Curve</param>
     /// <param name="axis">(Line) Line for the rail revolve axis</param>
-    /// <param name="startAngle">(float) Optional, default value: <c>0.0</c>
-    ///    Start angles of revolve</param>
-    /// <param name="endAngle">(float) Optional, default value: <c>360.0</c>
-    ///    End angles of revolve</param>
+    /// <param name="startAngleDegrees">(float) Optional, default value: <c>0.0</c>
+    ///    Start angle of revolution in degrees</param>
+    /// <param name="endAngleDegrees">(float) Optional, default value: <c>360.0</c>
+    ///    End angle of revolution in degrees</param>
     /// <returns>(Guid) identifier of new object.</returns>
     static member AddRevSrf( curveId:Guid,
                              axis:Line,
-                             [<OPT;DEF(0.0)>]startAngle:float,
-                             [<OPT;DEF(360.0)>]endAngle:float) : Guid =
+                             [<OPT;DEF(0.0)>]startAngleDegrees:float,
+                             [<OPT;DEF(360.0)>]endAngleDegrees:float) : Guid =
         let curveIdGeometry = RhinoScriptSyntax.CoerceCurve(curveId)
-        let geometry = RhinoScriptSyntax.MakeRevSrf(curveIdGeometry, axis, startAngle, endAngle)
+        let geometry = RhinoScriptSyntax.MakeRevSrf(curveIdGeometry, axis, startAngleDegrees, endAngleDegrees)
         let rc = State.Doc.Objects.AddSurface(geometry)
         State.Doc.Views.Redraw()
         rc
@@ -700,22 +716,22 @@ module AutoOpenSurface =
     /// <summary>Create a Surface by revolving a Curve around an axis. Returns geometry without adding it.</summary>
     /// <param name="curveGeo">(Curve) Object of profile Curve</param>
     /// <param name="axis">(Line) Line for the rail revolve axis</param>
-    /// <param name="startAngle">(float) Optional, default value: <c>0.0</c>
-    ///    Start angles of revolve</param>
-    /// <param name="endAngle">(float) Optional, default value: <c>360.0</c>
-    ///    End angles of revolve</param>
+    /// <param name="startAngleDegrees">(float) Optional, default value: <c>0.0</c>
+    ///    Start angle of revolution in degrees</param>
+    /// <param name="endAngleDegrees">(float) Optional, default value: <c>360.0</c>
+    ///    End angle of revolution in degrees</param>
     /// <returns>(NurbsSurface) Newly created geometry. The caller owns the returned objects.</returns>
     static member MakeRevSrf( curveGeo:Curve,
                              axis:Line,
-                             [<OPT;DEF(0.0)>]startAngle:float,
-                             [<OPT;DEF(360.0)>]endAngle:float) : NurbsSurface =
+                             [<OPT;DEF(0.0)>]startAngleDegrees:float,
+                             [<OPT;DEF(360.0)>]endAngleDegrees:float) : NurbsSurface =
         let curve = curveGeo
-        let startAngle = toRadians(startAngle)
-        let endAngle = toRadians(endAngle)
-        let srf = RevSurface.Create(curve, axis, startAngle, endAngle)
-        if isNull srf then RhinoScriptingException.Raise "MakeRevSrf failed. curveGeo:'%s' axis:'%A' startAngle:'%A' endAngle:'%A'" (Pretty.str curveGeo) axis startAngle endAngle
+        let startAngleRadians = toRadians(startAngleDegrees)
+        let endAngleRadians = toRadians(endAngleDegrees)
+        let srf = RevSurface.Create(curve, axis, startAngleRadians, endAngleRadians)
+        if isNull srf then RhinoScriptingException.Raise "MakeRevSrf failed. curveGeo:'%s' axis:'%A' startAngleDegrees:'%A' endAngleDegrees:'%A'" (Pretty.str curveGeo) axis startAngleDegrees endAngleDegrees
         let ns = srf.ToNurbsSurface()
-        if isNull ns then RhinoScriptingException.Raise "MakeRevSrf failed. curveGeo:'%s' axis:'%A' startAngle:'%A' endAngle:'%A'" (Pretty.str curveGeo) axis startAngle endAngle
+        if isNull ns then RhinoScriptingException.Raise "MakeRevSrf failed. curveGeo:'%s' axis:'%A' startAngleDegrees:'%A' endAngleDegrees:'%A'" (Pretty.str curveGeo) axis startAngleDegrees endAngleDegrees
         ns
 
 
@@ -880,7 +896,8 @@ module AutoOpenSurface =
     /// <param name="shapes">(Guid seq) One or more cross section shape Curves</param>
     /// <param name="closed">(bool) Optional, default value: <c>false</c>
     ///    If True, then create a closed Surface</param>
-    /// <returns>(Guid ResizeArray) List of new Surface objects.</returns>
+    /// <returns>(Guid ResizeArray) List of new Surface objects.
+    ///    An empty list if RhinoCommon finds no result, this is not an error.</returns>
     static member AddSweep1( rail:Guid,
                              shapes:Guid seq,
                              [<OPT;DEF(false)>]closed:bool) : Guid ResizeArray =
@@ -898,7 +915,8 @@ module AutoOpenSurface =
     /// <param name="shapes">(Curve seq) One or more cross section shape Curves</param>
     /// <param name="closed">(bool) Optional, default value: <c>false</c>
     ///    If True, then create a closed Surface</param>
-    /// <returns>(Brep ResizeArray) Newly created geometry. The caller owns the returned objects.</returns>
+    /// <returns>(Brep ResizeArray) Newly created geometry. The caller owns the returned objects.
+    ///    An empty list if RhinoCommon finds no result, this is not an error.</returns>
     static member MakeSweep1( rail:Curve,
                              shapes:Curve seq,
                              [<OPT;DEF(false)>]closed:bool) : Brep ResizeArray =
@@ -916,7 +934,8 @@ module AutoOpenSurface =
     /// <param name="shapes">(Guid seq) One or more cross section shape Curves</param>
     /// <param name="closed">(bool) Optional, default value: <c>false</c>
     ///    If True, then create a closed Surface</param>
-    /// <returns>(Guid ResizeArray) List of new Surface objects.</returns>
+    /// <returns>(Guid ResizeArray) List of new Surface objects.
+    ///    An empty list if RhinoCommon finds no result, this is not an error.</returns>
     static member AddSweep2( rails:Guid * Guid,
                              shapes:Guid seq,
                              [<OPT;DEF(false)>]closed:bool) : Guid ResizeArray =
@@ -934,7 +953,8 @@ module AutoOpenSurface =
     /// <param name="shapes">(Curve seq) One or more cross section shape Curves</param>
     /// <param name="closed">(bool) Optional, default value: <c>false</c>
     ///    If True, then create a closed Surface</param>
-    /// <returns>(Brep ResizeArray) Newly created geometry. The caller owns the returned objects.</returns>
+    /// <returns>(Brep ResizeArray) Newly created geometry. The caller owns the returned objects.
+    ///    An empty list if RhinoCommon finds no result, this is not an error.</returns>
     static member MakeSweep2( rails:Curve * Curve,
                              shapes:Curve seq,
                              [<OPT;DEF(false)>]closed:bool) : Brep ResizeArray =
@@ -996,7 +1016,9 @@ module AutoOpenSurface =
                             minorRadius:float) : Guid =
         let torus = Torus(basis, majorRadius, minorRadius)
         let revsurf = torus.ToRevSurface()
+        if isNull revsurf then RhinoScriptingException.Raise "AddTorus: failed to create torus"
         let rc = State.Doc.Objects.AddSurface(revsurf)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "AddTorus: failed to add torus"
         State.Doc.Views.Redraw()
         rc
 
@@ -1047,7 +1069,8 @@ module AutoOpenSurface =
     /// <param name="input1">(Guid seq) List of Surfaces</param>
     /// <param name="deleteInput">(bool) Optional, default value: <c>true</c>
     ///    Delete all input objects</param>
-    /// <returns>(Guid ResizeArray) List of identifiers of newly created objects .</returns>
+    /// <returns>(Guid ResizeArray) List of identifiers of newly created objects.
+    ///    An empty list if the inputs do not overlap. Then the inputs are still deleted if deleteInput is true, like in RhinoPython.</returns>
     static member BooleanIntersection( input0:Guid seq,
                                        input1:Guid seq,
                                        [<OPT;DEF(true)>]deleteInput:bool) : Guid ResizeArray =
@@ -1069,7 +1092,8 @@ module AutoOpenSurface =
     ///    the Rhino help file. Returns geometry without adding it.</summary>
     /// <param name="input0">(Brep seq) List of Surfaces</param>
     /// <param name="input1">(Brep seq) List of Surfaces</param>
-    /// <returns>(Brep ResizeArray) Newly created geometry. The caller owns the returned objects.</returns>
+    /// <returns>(Brep ResizeArray) Newly created geometry. The caller owns the returned objects.
+    ///    An empty list if the inputs do not overlap.</returns>
     static member BooleanIntersection( input0:Brep seq,
                                        input1:Brep seq) : Brep ResizeArray =
         let breps0 = input0 |> Seq.toArray
@@ -1156,16 +1180,13 @@ module AutoOpenSurface =
     ///      5        Vector3d        The normal to the brepFace, or the tangent to the brepEdge.</returns>
     static member BrepClosestPoint(geometryObject:Brep, point:Point3d) : Point3d * float * float * ComponentIndexType * int * Vector3d =
         let brep = geometryObject
-        let clpt = ref Point3d.Origin
-        let ci = ref ComponentIndex.Unset
-        let s = ref 0.0
-        let t = ref 0.0
-        let n = ref Vector3d.Zero
-        let ok = brep.ClosestPoint(point, clpt, ci, s, t, 0.0, n)
-        if ok then
-            let typ = (!ci).ComponentIndexType
-            let idx = (!ci).Index
-            !clpt,!s,!t, typ, idx, !n
+        let mutable clpt = Point3d.Origin
+        let mutable ci = ComponentIndex.Unset
+        let mutable s = 0.0
+        let mutable t = 0.0
+        let mutable n = Vector3d.Zero
+        if brep.ClosestPoint(point, &clpt, &ci, &s, &t, 0.0, &n) then
+            clpt, s, t, ci.ComponentIndexType, ci.Index, n
         else
             RhinoScriptingException.Raise "BrepClosestPoint failed for %A and %A" (Pretty.str geometryObject) point
 
@@ -1552,7 +1573,8 @@ module AutoOpenSurface =
     /// <param name="uvparam0">(Point2d) Optional, A u, v Surface parameter of Surface0 near where the fillet
     ///    is expected to hit the Surface</param>
     /// <param name="uvparam1">(Point2d) Optional, Same as uvparam0, but for Surface1</param>
-    /// <returns>(Guid ResizeArray) ids of Surfaces created .</returns>
+    /// <returns>(Guid ResizeArray) ids of Surfaces created.
+    ///    An empty list if no fillet could be made, this is not an error.</returns>
     static member FilletSurfaces( surface0:Guid,
                                   surface1:Guid,
                                   radius:float,
@@ -1574,7 +1596,8 @@ module AutoOpenSurface =
     /// <param name="uvparam0">(Point2d) Optional, A u, v Surface parameter of Surface0 near where the fillet
     ///    is expected to hit the Surface</param>
     /// <param name="uvparam1">(Point2d) Optional, Same as uvparam0, but for Surface1</param>
-    /// <returns>(Surface ResizeArray) Newly created geometry. The caller owns the returned objects.</returns>
+    /// <returns>(Surface ResizeArray) Newly created geometry. The caller owns the returned objects.
+    ///    An empty list if no fillet could be made, this is not an error.</returns>
     static member FilletSurfaces( surface0:Surface,
                                   surface1:Surface,
                                   radius:float,
@@ -1836,7 +1859,8 @@ module AutoOpenSurface =
         | _ -> RhinoScriptingException.Raise "IsPointInSurface does not work  on %s %A" (Pretty.str geometryObject) geometryObject
 
 
-    /// <summary>Checks if a point lies on a Surface.</summary>
+    /// <summary>Checks if a point lies on a Surface.
+    ///    A Polysurface with a single face is accepted, a Polysurface with several faces raises a RhinoScriptingException, like in RhinoPython.</summary>
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <param name="point">(Point3d) The test, or sampling point</param>
     /// <returns>(bool) True , otherwise False.</returns>
@@ -1844,7 +1868,8 @@ module AutoOpenSurface =
         let geometry = RhinoScriptSyntax.CoerceGeometry(objectId)
         RhinoScriptSyntax.IsPointOnSurface(geometry, point)
 
-    /// <summary>Checks if a point lies on a Surface. Uses the supplied objects directly.</summary>
+    /// <summary>Checks if a point lies on a Surface. Uses the supplied objects directly.
+    ///    A Polysurface with a single face is accepted, a Polysurface with several faces raises a RhinoScriptingException, like in RhinoPython.</summary>
     /// <param name="geometryObject">(GeometryBase) The object</param>
     /// <param name="point">(Point3d) The test, or sampling point</param>
     /// <returns>(bool) True , otherwise False.</returns>
@@ -2146,9 +2171,8 @@ module AutoOpenSurface =
     static member SurfaceSphere(surfaceGeo:Surface) : Plane * float =
         let surface = surfaceGeo
         let tol = State.Doc.ModelAbsoluteTolerance
-        let sphere = ref Sphere.Unset
-        let issphere = surface.TryGetSphere(sphere, tol)
-        if issphere then (!sphere).EquatorialPlane, (!sphere).Radius
+        let mutable sphere = Sphere.Unset
+        if surface.TryGetSphere(&sphere, tol) then sphere.EquatorialPlane, sphere.Radius
         else RhinoScriptingException.Raise "SurfaceSphere input is not a sphere %A"surfaceGeo
 
 
@@ -2378,7 +2402,8 @@ module AutoOpenSurface =
             let nsrf = srfinst.ToNurbsSurface()
             if isNull nsrf then false
             else
-                let knots = if vDirection then nsrf.KnotsV  else nsrf.KnotsU
+                // RhinoCommon removes knots in the opposite direction to the knot list.
+                let knots = if vDirection then nsrf.KnotsU else nsrf.KnotsV
                 let success = knots.RemoveKnotsAt(nuparam, nvparam)
                 if not success then false
                 else
@@ -2413,7 +2438,8 @@ module AutoOpenSurface =
     /// <param name="direction">(Vector3d) Vector identifying the direction of the ray</param>
     /// <param name="reflections">(int) Optional, default value: <c>10</c>
     ///    The maximum number of times the ray will be reflected</param>
-    /// <returns>(Point3d array) Array of reflection points.</returns>
+    /// <returns>(Point3d array) The start point, followed by the reflection points, like in RhinoPython.
+    ///    An empty array if the ray hits nothing.</returns>
     static member ShootRay( surfaceIds:Guid seq,
                             startPoint:Point3d,
                             direction:Vector3d,
@@ -2427,7 +2453,8 @@ module AutoOpenSurface =
     /// <param name="direction">(Vector3d) Vector identifying the direction of the ray</param>
     /// <param name="reflections">(int) Optional, default value: <c>10</c>
     ///    The maximum number of times the ray will be reflected</param>
-    /// <returns>(Point3d array) Array of reflection points.</returns>
+    /// <returns>(Point3d array) The start point, followed by the reflection points, like in RhinoPython.
+    ///    An empty array if the ray hits nothing.</returns>
     static member ShootRay( surfaceGeos:Brep seq,
                             startPoint:Point3d,
                             direction:Vector3d,
@@ -2482,30 +2509,34 @@ module AutoOpenSurface =
     ///    boundaries. See the ShrinkTrimmedSrf command in the Rhino help.</summary>
     /// <param name="objectId">(Guid) The Surface's identifier</param>
     /// <param name="createCopy">(bool) Optional, default value: <c>false</c>
-    ///    If True, the original Surface is not deleted</param>
-    /// <returns>(Guid) If createCopy is true the new Guid, else the input Guid.</returns>
-    static member ShrinkTrimmedSurface(objectId:Guid, [<OPT;DEF(false)>]createCopy:bool) : Guid =
+    ///    If True, the shrunk Surface is added as a new object and the original Surface is kept.
+    ///    The new object's identifier is not returned, use LastCreatedObjects to find it.</param>
+    /// <returns>(bool) True if the Surface was shrunk (in place, or as a new copy).
+    ///    False if there was nothing to shrink, then the document is not changed, like in RhinoPython.</returns>
+    static member ShrinkTrimmedSurface(objectId:Guid, [<OPT;DEF(false)>]createCopy:bool) : bool =
         let objectIdGeometry = RhinoScriptSyntax.CoerceBrep(objectId)
-        let brep = RhinoScriptSyntax.ShrinkTrimmedSurface(objectIdGeometry)
-        let id =
+        match RhinoScriptSyntax.ShrinkTrimmedSurface(objectIdGeometry) with
+        | None -> false
+        | Some brep ->
             if createCopy then
                 let attributes = (RhinoScriptSyntax.CoerceRhinoObject(objectId)).Attributes
-                State.Doc.Objects.AddBrep(brep, attributes)
+                if State.Doc.Objects.AddBrep(brep, attributes) = Guid.Empty then
+                    RhinoScriptingException.Raise "ShrinkTrimmedSurface: unable to add the shrunk copy of %s to the document." (Pretty.str objectId)
             else
-                State.Doc.Objects.Replace(objectId, brep) |> ignore<bool>
-                objectId
-        State.Doc.Views.Redraw()
-        id
+                if not (State.Doc.Objects.Replace(objectId, brep)) then
+                    RhinoScriptingException.Raise "ShrinkTrimmedSurface: unable to replace %s in the document." (Pretty.str objectId)
+            State.Doc.Views.Redraw()
+            true
 
 
     /// <summary>Shrinks the underlying untrimmed Surfaces near to the trimming
     ///    boundaries. See the ShrinkTrimmedSrf command in the Rhino help. Returns geometry without adding it.</summary>
     /// <param name="geometryObject">(Brep) The Surface</param>
-    /// <returns>(Brep) Newly created geometry. The caller owns the returned objects.</returns>
-    static member ShrinkTrimmedSurface(geometryObject:Brep) : Brep =
+    /// <returns>(Brep option) A shrunk copy of the input, the caller owns it.
+    ///    None if there was nothing to shrink.</returns>
+    static member ShrinkTrimmedSurface(geometryObject:Brep) : Brep option =
         let brep = geometryObject.DuplicateBrep()
-        if not (brep.Faces.ShrinkFaces()) then RhinoScriptingException.Raise "ShrinkTrimmedSurface failed."
-        brep
+        if brep.Faces.ShrinkFaces() then Some brep else None
 
 
     /// <summary>Splits a brep.</summary>
@@ -2609,6 +2640,7 @@ module AutoOpenSurface =
 
 
     /// <summary>Calculates area moments of inertia of a Surface or Polysurface object.
+    ///    Returns 14 tuples: seven values, each followed by its error bound.
     ///    See the Rhino help for "Mass Properties calculation details".</summary>
     /// <param name="surfaceId">(Guid) The Surface's identifier</param>
     /// <returns>((float*float*float) ResizeArray ) of moments and error bounds in tuples(X, Y, Z) - see help topic
@@ -2633,6 +2665,7 @@ module AutoOpenSurface =
         | None -> RhinoScriptingException.Raise "SurfaceAreaMoments failed on %A" surfaceId
 
     /// <summary>Calculates area moments of inertia of a Surface or Polysurface object.
+    ///    Returns 14 tuples: seven values, each followed by its error bound.
     ///    See the Rhino help for "Mass Properties calculation details". Uses the supplied objects directly.</summary>
     /// <param name="surfaceGeo">(GeometryBase) The Surface</param>
     /// <returns>((float*float*float) ResizeArray ) of moments and error bounds in tuples(X, Y, Z) - see help topic
@@ -2799,10 +2832,8 @@ module AutoOpenSurface =
     static member SurfaceCylinder(surfaceGeo:Surface) : Plane * float * float =
         let surface = surfaceGeo
         let tol = State.Doc.ModelAbsoluteTolerance
-        let cy = ref Cylinder.Unset
-        let rc = surface.TryGetFiniteCylinder(cy, tol)
-        if rc  then
-            let cylinder = !cy
+        let mutable cylinder = Cylinder.Unset
+        if surface.TryGetFiniteCylinder(&cylinder, tol) then
             cylinder.BasePlane, cylinder.TotalHeight, cylinder.Radius
         else
             RhinoScriptingException.Raise "SurfaceCylinder failed on %A" surfaceGeo
@@ -3339,6 +3370,7 @@ module AutoOpenSurface =
 
 
     /// <summary>Calculates volume moments of inertia of a Surface or Polysurface object.
+    ///    Returns 14 tuples: seven values, each followed by its error bound.
     ///    For more information, see Rhino help for "Mass Properties calculation details".</summary>
     /// <param name="objectId">(Guid) The Surface's identifier</param>
     /// <returns>((float*float*float) ResizeArray) A List of moments and error bounds in tuple(X, Y, Z) - see help topic
@@ -3364,6 +3396,7 @@ module AutoOpenSurface =
         | None -> RhinoScriptingException.Raise "SurfaceVolumeMoments failed on %A" (Pretty.str objectId)
 
     /// <summary>Calculates volume moments of inertia of a Surface or Polysurface object.
+    ///    Returns 14 tuples: seven values, each followed by its error bound.
     ///    For more information, see Rhino help for "Mass Properties calculation details". Uses the supplied objects directly.</summary>
     /// <param name="geometryObject">(GeometryBase) The Surface</param>
     /// <returns>((float*float*float) ResizeArray) A List of moments and error bounds in tuple(X, Y, Z) - see help topic
@@ -3694,7 +3727,7 @@ module AutoOpenSurface =
         ResizeArray(breps), following
 
 
-    /// <summary>Changes the degree of a Surface object. For more information see the Rhino help file for the ChangeDegree command.</summary>
+    /// <summary>Raises the degree of a Surface object. Lowering a degree is not supported and returns false.</summary>
     /// <param name="objectId">(Guid) The object's identifier</param>
     /// <param name="degree">(int * int) Two integers, specifying the degrees for the U  V directions</param>
     /// <returns>(bool) True of False indicating success or failure.</returns>

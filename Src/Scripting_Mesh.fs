@@ -15,7 +15,29 @@ module AutoOpenMesh =
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file.
     //---So that all members are visible in C# and Ironpython too.
     //---This happens as part of the <Targets> in the *.fsproj file.
-    //---End of header marker: don't change: {@$%^&*()*&^%$@}
+    //---The functions below are part of Scripting_Mesh.fs: file split marker: {@$%^&*()*&^%$@}
+
+
+    /// <summary>Adds the result Meshes of a mesh boolean to the document.
+    ///    All results are checked before any is added, so on failure nothing is added and the inputs are retained.</summary>
+    /// <param name="functionName">(string) Name of the calling function, for the error message</param>
+    /// <param name="meshes">(Mesh seq) The result Meshes</param>
+    /// <returns>(Guid ResizeArray) identifiers of the new Meshes.</returns>
+    static member private AddMeshBooleanResults(functionName:string, meshes:Mesh seq) : Guid ResizeArray =
+        let meshes = ResizeArray(meshes)
+        meshes |> Seq.iteri (fun i mesh ->
+            let mutable log = ""
+            if not (mesh.IsValidWithLog(&log)) then
+                RhinoScriptingException.Raise "%s: RhinoCommon returned an invalid result mesh (%d of %d), so nothing was added and the inputs were retained. Coplanar or overlapping faces in the inputs often cause this. Mesh log: %s" functionName (i+1) meshes.Count (log.Trim())
+            )
+        let rc = ResizeArray<Guid>()
+        for mesh in meshes do
+            let objectId = State.Doc.Objects.AddMesh(mesh)
+            if objectId = Guid.Empty then
+                for added in rc do State.Doc.Objects.Delete(added, true) |> ignore<bool>
+                RhinoScriptingException.Raise "%s: unable to add a result mesh to the document, so nothing was added and the inputs were retained." functionName
+            rc.Add(objectId)
+        rc
 
 
     /// <summary>Adds a Mesh object to the document.</summary>
@@ -373,8 +395,8 @@ module AutoOpenMesh =
                                     [<OPT;DEF(0.0)>]tolerance:float) : bool =
 
         let maxDistance = Util.ifZero1 tolerance RhinoMath.SqrtEpsilon
-        let pt = ref Point3d.Origin
-        let face = mesh.ClosestPoint(point, pt, maxDistance)
+        let mutable pt = Point3d.Origin
+        let face = mesh.ClosestPoint(point, &pt, maxDistance)
         face>=0
 
 
@@ -468,11 +490,7 @@ module AutoOpenMesh =
         let meshes0 = input0 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
         let meshes1 = input1 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
         let newmeshes = RhinoScriptSyntax.MeshBooleanDifference(meshes0, meshes1)
-        let rc = ResizeArray()
-        for mesh in newmeshes do
-            let objectId = State.Doc.Objects.AddMesh(mesh)
-            if objectId = Guid.Empty then RhinoScriptingException.Raise "MeshBooleanDifference: unable to add result to document; inputs were retained"
-            rc.Add(objectId)
+        let rc = RhinoScriptSyntax.AddMeshBooleanResults("MeshBooleanDifference", newmeshes)
         if deleteInput then
             for objectId in Seq.append input0 input1 do State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
         State.Doc.Views.Redraw()
@@ -507,11 +525,7 @@ module AutoOpenMesh =
         let meshes0 = input0 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
         let meshes1 = input1 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
         let newmeshes = RhinoScriptSyntax.MeshBooleanIntersection(meshes0, meshes1)
-        let rc = ResizeArray()
-        for mesh in newmeshes do
-            let objectId = State.Doc.Objects.AddMesh(mesh)
-            if objectId = Guid.Empty then RhinoScriptingException.Raise "MeshBooleanIntersection: unable to add result to document; inputs were retained"
-            rc.Add(objectId)
+        let rc = RhinoScriptSyntax.AddMeshBooleanResults("MeshBooleanIntersection", newmeshes)
         if deleteInput then
             for objectId in Seq.append input0 input1 do State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
         State.Doc.Views.Redraw()
@@ -546,11 +560,7 @@ module AutoOpenMesh =
         let meshes0 = input0 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
         let meshes1 = input1 |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
         let newmeshes = RhinoScriptSyntax.MeshBooleanSplit(meshes0, meshes1)
-        let rc = ResizeArray()
-        for mesh in newmeshes do
-            let objectId = State.Doc.Objects.AddMesh(mesh)
-            if objectId = Guid.Empty then RhinoScriptingException.Raise "MeshBooleanSplit: unable to add result to document; inputs were retained"
-            rc.Add(objectId)
+        let rc = RhinoScriptSyntax.AddMeshBooleanResults("MeshBooleanSplit", newmeshes)
         if deleteInput then
             for objectId in Seq.append input0 input1 do State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
         State.Doc.Views.Redraw()
@@ -581,10 +591,7 @@ module AutoOpenMesh =
         if meshIds.Count < 2 then RhinoScriptingException.Raise "MeshBooleanUnion: MeshIds must contain at least 2 meshes."
         let meshes = meshIds |> RArr.mapSeq RhinoScriptSyntax.CoerceMesh
         let newmeshes = RhinoScriptSyntax.MeshBooleanUnion(meshes)
-        let rc = ResizeArray()
-        for mesh in newmeshes do
-            let objectId = State.Doc.Objects.AddMesh(mesh)
-            if objectId <> Guid.Empty then rc.Add(objectId)
+        let rc = RhinoScriptSyntax.AddMeshBooleanResults("MeshBooleanUnion", newmeshes)
         if rc.Count > 0 && deleteInput then
             for objectId in meshIds do State.Doc.Objects.Delete(objectId, true) |> ignore<bool>
         State.Doc.Views.Redraw()
@@ -633,10 +640,10 @@ module AutoOpenMesh =
     static member MeshClosestPoint( mesh:Mesh,
                                     point:Point3d,
                                     [<OPT;DEF(0.0)>]maximumDistance:float) : Point3d * int =
-        let pt = ref Point3d.Origin
-        let face = mesh.ClosestPoint(point, pt, maximumDistance)
+        let mutable pt = Point3d.Origin
+        let face = mesh.ClosestPoint(point, &pt, maximumDistance)
         if face<0 then RhinoScriptingException.Raise "MeshClosestPoint failed.  mesh:'%s' point:'%A' maximumDistance:'%A'" (Pretty.str mesh) point maximumDistance
-        !pt, face
+        pt, face
 
 
     /// <summary>Returns the center of each face of the Mesh object.</summary>
@@ -898,7 +905,8 @@ module AutoOpenMesh =
                                         mesh2:Mesh,
                                         [<OPT;DEF(0.0)>]tolerance:float) : Polyline array =
         let tolerance = Util.ifZero1 tolerance (State.Doc.ModelAbsoluteTolerance*Intersect.Intersection.MeshIntersectionsTolerancesCoefficient) // see https://github.com/mcneel/rhinoscriptsyntax/pull/202
-        Intersect.Intersection.MeshMeshAccurate(mesh1, mesh2, tolerance)
+        let result = Intersect.Intersection.MeshMeshAccurate(mesh1, mesh2, tolerance)
+        if isNull result then [||] else result
 
 
     /// <summary>Identifies the naked edge points of a Mesh object. This function shows
@@ -1153,7 +1161,10 @@ module AutoOpenMesh =
     /// <param name="vertexIndex">(int) Index of the Mesh vertex to find faces for</param>
     /// <returns>(int array) face indices.</returns>
     static member MeshVertexFaces(mesh:Mesh, vertexIndex:int) : int array =
-        mesh.Vertices.GetVertexFaces(vertexIndex)
+        if vertexIndex < 0 || vertexIndex >= mesh.Vertices.Count then
+            RhinoScriptingException.Raise "MeshVertexFaces: vertex index %d is outside the mesh" vertexIndex
+        let result = mesh.Vertices.GetVertexFaces(vertexIndex)
+        if isNull result then [||] else result
 
 
     /// <summary>Returns the vertex unit normal for each vertex of a Mesh.</summary>
@@ -1290,11 +1301,12 @@ module AutoOpenMesh =
     /// <param name="objectId">(Guid) Identifier of a Mesh object</param>
     /// <returns>(int) The number of faces that were modified.</returns>
     static member UnifyMeshNormals(objectId:Guid) : int =
-        let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        let mesh = RhinoScriptSyntax.CoerceMesh(objectId).DuplicateMesh()
         let rc = mesh.UnifyNormals()
         if rc>0 then
             //id = RhinoScriptSyntax.CoerceGuid(objectId)
-            State.Doc.Objects.Replace(objectId, mesh)|> ignore<bool>
+            if not (State.Doc.Objects.Replace(objectId, mesh)) then
+                RhinoScriptingException.Raise "UnifyMeshNormals: failed to replace mesh %A" objectId
             State.Doc.Views.Redraw()
         rc
 

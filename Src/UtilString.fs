@@ -23,7 +23,7 @@ module internal Util =
     /// <returns>(bool) true if the string is a valid name.</returns>
     let isASCIIStringId( name:string, allowEmpty:bool) : bool = 
         if isNull name then false
-        elif allowEmpty && name = "" then true
+        elif name = "" then allowEmpty
         else
             let tr = name.Trim()
             if tr.Length <> name.Length then false
@@ -46,7 +46,7 @@ module internal Util =
     /// <returns>(bool) true if the string is a valid name.</returns>
     let isGoodStringId( name:string, allowEmpty:bool) : bool = 
         if isNull name then false
-        elif allowEmpty && name = "" then true
+        elif name = "" then allowEmpty
         else
             let tr = name.Trim()
             if tr.Length <> name.Length then false
@@ -110,7 +110,7 @@ module internal Util =
     /// <returns>(bool) true if the string is a valid name.</returns>
     let isAcceptableStringId(name:string, allowEmpty:bool ) : bool = 
         if isNull name then false
-        elif allowEmpty && name = "" then true
+        elif name = "" then allowEmpty
         else
             let tr = name.Trim()
             if tr.Length <> name.Length then false

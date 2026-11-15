@@ -15,7 +15,7 @@ module AutoOpenObject =
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file.
     //---So that all members are visible in C# and Ironpython too.
     //---This happens as part of the <Targets> in the *.fsproj file.
-    //---End of header marker: don't change: {@$%^&*()*&^%$@}
+    //---The functions below are part of Scripting_Object.fs: file split marker: {@$%^&*()*&^%$@}
 
 
     /// Internal helper: Puts copies of grouped objects into new groups, like the native Copy command does,
@@ -72,8 +72,8 @@ module AutoOpenObject =
             else
                 //Orient2Pt
                 let xformMove = Rhino.Geometry.Transform.Translation( targetPts.[0]-referencePts.[0] )
-                let v0 = referencePts.[1] - referencePts.[0]
-                let v1 = targetPts.[1] - targetPts.[0]
+                let mutable v0 = referencePts.[1] - referencePts.[0]
+                let mutable v1 = targetPts.[1] - targetPts.[0]
                 let xformScale =
                     if scale then
                         let len0 = v0.Length
@@ -100,10 +100,10 @@ module AutoOpenObject =
         let mutable frame = Plane(plane)
         frame.Origin <- origin
         frame.ZAxis <- plane.Normal
-        let yAxis = referencePoint-origin
+        let mutable yAxis = referencePoint-origin
         yAxis.Unitize() |> ignore<bool>
         frame.YAxis <- yAxis
-        let xAxis = Vector3d.CrossProduct(frame.ZAxis, frame.YAxis)
+        let mutable xAxis = Vector3d.CrossProduct(frame.ZAxis, frame.YAxis)
         xAxis.Unitize() |> ignore<bool>
         frame.XAxis <- xAxis
         let worldPlane = Plane.WorldXY
@@ -126,7 +126,7 @@ module AutoOpenObject =
 
 
     /// <summary>Moves, scales, or rotates a list of objects given a 4x4 transformation
-    ///    matrix. The matrix acts on the left. Use the geometry overload to return transformed duplicates without modifying document objects.</summary>
+    ///    matrix. The matrix acts on the left. Use the geometry overload to return transformed duplicates without modifying document objects. With copy=false the objects in the document are transformed in place and keep their Guids, with copy=true the originals are left unchanged and transformed copies are added to the document. The geometry overload returns transformed duplicates instead and does not touch the document.</summary>
     /// <param name="objectIds">(Guid seq) List of object identifiers</param>
     /// <param name="matrix">(Transform) The transformation matrix (4x4 array of numbers)</param>
     /// <param name="copy">(bool) Optional, default value: <c>false</c>
@@ -163,7 +163,7 @@ module AutoOpenObject =
 
 
     /// <summary>Moves, scales, or rotates an object given a 4x4 transformation matrix.
-    ///    The matrix acts on the left. Use the geometry overload to return transformed duplicates without modifying document objects.</summary>
+    ///    The matrix acts on the left. Use the geometry overload to return transformed duplicates without modifying document objects. With copy=false the object in the document is transformed in place and keeps its Guid, with copy=true the original is left unchanged and a transformed copy is added to the document. The geometry overload returns a transformed duplicate instead and does not touch the document.</summary>
     /// <param name="objectId">(Guid) The identifier of the object</param>
     /// <param name="matrix">(Transform) The transformation matrix (4x4 array of numbers)</param>
     /// <param name="copy">(bool) Optional, default value: <c>false</c>
@@ -199,7 +199,7 @@ module AutoOpenObject =
 
 
     /// <summary>Copies an object from one location to another, or in-place.
-    /// The copy of a grouped object is put into a new group.</summary>
+    /// The copy of a grouped object is put into a new group. The original is left unchanged and the copy is added to the document. The geometry overload returns a transformed duplicate instead and does not touch the document.</summary>
     /// <param name="objectId">(Guid) Object to copy</param>
     /// <param name="translation">(Vector3d) Optional, additional translation vector to apply</param>
     /// <returns>(Guid) objectId for the copy.</returns>
@@ -230,7 +230,7 @@ module AutoOpenObject =
 
 
     /// <summary>Copies one or more objects from one location to another, or in-place.
-    /// Copies of grouped objects are put into new groups.</summary>
+    /// Copies of grouped objects are put into new groups. The originals are left unchanged and the copies are added to the document. The geometry overload returns transformed duplicates instead and does not touch the document.</summary>
     /// <param name="objectIds">(Guid seq) List of objects to copy</param>
     /// <param name="translation">(Vector3d) Optional, translation vector to apply to copied set</param>
     /// <returns>(Guid ResizeArray) Identifiers for the copies.</returns>
@@ -529,7 +529,7 @@ module AutoOpenObject =
         rc
 
 
-    /// <summary>Mirrors a single object on World XY Plane.</summary>
+    /// <summary>Mirrors a single object on World XY Plane. With copy=false the object in the document is transformed in place and keeps its Guid, with copy=true the original is left unchanged and a transformed copy is added to the document. The geometry overload returns a transformed duplicate instead and does not touch the document.</summary>
     /// <param name="objectId">(Guid) The identifier of an object to mirror</param>
     /// <param name="startPoint">(Point3d) Start of the mirror Plane</param>
     /// <param name="endPoint">(Point3d) End of the mirror Plane</param>
@@ -560,7 +560,7 @@ module AutoOpenObject =
         RhinoScriptSyntax.TransformObject(geometry, xf)
 
 
-    /// <summary>Mirrors a list of objects on World XY Plane.</summary>
+    /// <summary>Mirrors a list of objects on World XY Plane. With copy=false the objects in the document are transformed in place and keep their Guids, with copy=true the originals are left unchanged and transformed copies are added to the document. The geometry overload returns transformed duplicates instead and does not touch the document.</summary>
     /// <param name="objectIds">(Guid seq) Identifiers of objects to mirror</param>
     /// <param name="startPoint">(Point3d) Start of the mirror Plane</param>
     /// <param name="endPoint">(Point3d) End of the mirror Plane</param>
@@ -593,7 +593,7 @@ module AutoOpenObject =
         RhinoScriptSyntax.TransformObjects(geometries, xf)
 
 
-    /// <summary>Moves a single object.</summary>
+    /// <summary>Moves a single object. The object in the document is moved in place and keeps its Guid, no copy is made. Use CopyObject to move a copy.</summary>
     /// <param name="objectId">(Guid) The identifier of an object to move</param>
     /// <param name="translation">(Vector3d) Vector3d</param>
     /// <returns>(unit) void, nothing.</returns>
@@ -604,7 +604,7 @@ module AutoOpenObject =
         State.Doc.Views.Redraw()
         //if objectId <> res
 
-    /// <summary>Moves one or more objects.</summary>
+    /// <summary>Moves one or more objects. The objects in the document are moved in place and keep their Guids, no copies are made. Use CopyObjects to move copies.</summary>
     /// <param name="objectIds">(Guid seq) The identifiers objects to move</param>
     /// <param name="translation">(Vector3d)Vector3d</param>
     /// <returns>(unit) void, nothing.</returns>
@@ -1255,7 +1255,7 @@ module AutoOpenObject =
     /// function similar to Rhino's Orient command.
     /// If more than two 3-D points are specified,
     /// then the function will orient similar to Rhino's Orient3Pt command.
-    /// </summary>
+    /// Without the copy flag the object in the document is transformed in place and keeps its Guid, with the copy flag the original is left unchanged and a transformed copy is added to the document. The geometry overload returns a transformed duplicate instead and does not touch the document.</summary>
     /// <param name="objectId">(Guid) Identifier of object</param>
     /// <param name="referencePts">(IList of Point3d) list of 3D reference points.</param>
     /// <param name="targetPts">(IList of Point3d) list of 3D target points.</param>
@@ -1287,24 +1287,24 @@ module AutoOpenObject =
         RhinoScriptSyntax.TransformObject(geometry, xform)
 
 
-    /// <summary>Rotates a single object.</summary>
+    /// <summary>Rotates a single object. With copy=false the object in the document is transformed in place and keeps its Guid, with copy=true the original is left unchanged and a transformed copy is added to the document. The geometry overload returns a transformed duplicate instead and does not touch the document.</summary>
     /// <param name="objectId">(Guid) The identifier of an object to rotate</param>
     /// <param name="centerPoint">(Point3d) The center of rotation</param>
-    /// <param name="rotationAngle">(float) In degrees</param>
+    /// <param name="rotationAngleDegrees">(float) In degrees</param>
     /// <param name="axis">(Vector3d) Optional, default value: <c>Vector3d.ZAxis</c>
     ///    Axis of rotation, If omitted, the Vector3d.ZAxis is used as the rotation axis</param>
     /// <param name="copy">(bool) Optional, default value: <c>false</c>. Copy the object. Copies of grouped objects are put into new groups</param>
     /// <returns>(Guid) Identifier of the rotated object.</returns>
     static member RotateObject( objectId:Guid,
                                 centerPoint:Point3d,
-                                rotationAngle:float,
+                                rotationAngleDegrees:float,
                                 [<OPT;DEF(Vector3d())>]axis:Vector3d,
                                 [<OPT;DEF(false)>]copy:bool) : Guid =
         let axis = if axis.IsZero then Vector3d.ZAxis else axis
-        let rotationAngle = RhinoMath.ToRadians(rotationAngle)
-        let xf = Transform.Rotation(rotationAngle, axis, centerPoint)
+        let rotationAngleRadians = RhinoMath.ToRadians(rotationAngleDegrees)
+        let xf = Transform.Rotation(rotationAngleRadians, axis, centerPoint)
         let res = State.Doc.Objects.Transform(objectId, xf, not copy)
-        if res = Guid.Empty then RhinoScriptingException.Raise "RotateObject failed.  objectId:'%s' centerPoint:'%A' rotationAngle:'%A' axis:'%A' copy:'%A'" (Pretty.str objectId) centerPoint rotationAngle axis copy
+        if res = Guid.Empty then RhinoScriptingException.Raise "RotateObject failed.  objectId:'%s' centerPoint:'%A' rotationAngleDegrees:'%A' axis:'%A' copy:'%A'" (Pretty.str objectId) centerPoint rotationAngleDegrees axis copy
         if copy then RhinoScriptSyntax.putCopiesInNewGroups [res]
         State.Doc.Views.Redraw()
         res
@@ -1313,40 +1313,40 @@ module AutoOpenObject =
     /// <summary>Returns a transformed duplicate of the input geometry. The input is unchanged and the result is not added to a document.</summary>
     /// <param name="geometry">(GeometryBase) Input geometry to duplicate and transform.</param>
     /// <param name="centerPoint">(Point3d) The center of rotation</param>
-    /// <param name="rotationAngle">(float) In degrees</param>
+    /// <param name="rotationAngleDegrees">(float) In degrees</param>
     /// <param name="axis">(Vector3d) Optional, default value: <c>Vector3d.ZAxis</c>
     ///    Axis of rotation, If omitted, the Vector3d.ZAxis is used as the rotation axis</param>
     /// <returns>(GeometryBase) The transformed geometry duplicate.</returns>
     static member RotateObject( geometry:GeometryBase,
                                 centerPoint:Point3d,
-                                rotationAngle:float,
+                                rotationAngleDegrees:float,
                                 [<OPT;DEF(Vector3d())>]axis:Vector3d) : GeometryBase =
         let axis = if axis.IsZero then Vector3d.ZAxis else axis
-        let rotationAngle = RhinoMath.ToRadians(rotationAngle)
-        let xf = Transform.Rotation(rotationAngle, axis, centerPoint)
+        let rotationAngleRadians = RhinoMath.ToRadians(rotationAngleDegrees)
+        let xf = Transform.Rotation(rotationAngleRadians, axis, centerPoint)
         RhinoScriptSyntax.TransformObject(geometry, xf)
 
 
-    /// <summary>Rotates multiple objects.</summary>
+    /// <summary>Rotates multiple objects. With copy=false the objects in the document are transformed in place and keep their Guids, with copy=true the originals are left unchanged and transformed copies are added to the document. The geometry overload returns transformed duplicates instead and does not touch the document.</summary>
     /// <param name="objectIds">(Guid seq) Identifiers of objects to rotate</param>
     /// <param name="centerPoint">(Point3d) The center of rotation</param>
-    /// <param name="rotationAngle">(float) In degrees</param>
+    /// <param name="rotationAngleDegrees">(float) In degrees</param>
     /// <param name="axis">(Vector3d) Optional, default value: <c>Vector3d.ZAxis</c>
     ///    Axis of rotation, If omitted, the Vector3d.ZAxis is used as the rotation axis</param>
     /// <param name="copy">(bool) Optional, default value: <c>false</c>. Copy the object. Copies of grouped objects are put into new groups</param>
     /// <returns>(Guid ResizeArray) identifiers of the rotated objects.</returns>
     static member RotateObjects( objectIds:Guid seq,
                                  centerPoint:Point3d,
-                                 rotationAngle:float,
+                                 rotationAngleDegrees:float,
                                  [<OPT;DEF(Vector3d())>]axis:Vector3d,
                                  [<OPT;DEF(false)>]copy:bool) : Guid ResizeArray = //PLURAL
         let axis = if axis.IsZero then Vector3d.ZAxis else axis
-        let rotationAngle = RhinoMath.ToRadians(rotationAngle)
-        let xf = Transform.Rotation(rotationAngle, axis, centerPoint)
+        let rotationAngleRadians = RhinoMath.ToRadians(rotationAngleDegrees)
+        let xf = Transform.Rotation(rotationAngleRadians, axis, centerPoint)
         let rc = ResizeArray()
         for objectId in objectIds do
             let res = State.Doc.Objects.Transform(objectId, xf, not copy)
-            if res = Guid.Empty then RhinoScriptingException.Raise "RotateObjects failed.  objectId:'%s' centerPoint:'%A' rotationAngle:'%A' axis:'%A' copy:'%A'" (Pretty.str objectId) centerPoint rotationAngle axis copy
+            if res = Guid.Empty then RhinoScriptingException.Raise "RotateObjects failed.  objectId:'%s' centerPoint:'%A' rotationAngleDegrees:'%A' axis:'%A' copy:'%A'" (Pretty.str objectId) centerPoint rotationAngleDegrees axis copy
             rc.Add res
         if copy then RhinoScriptSyntax.putCopiesInNewGroups rc
         rc
@@ -1355,22 +1355,22 @@ module AutoOpenObject =
     /// <summary>Returns transformed duplicates of the input geometries. The input is unchanged and the result is not added to a document.</summary>
     /// <param name="geometries">(GeometryBase seq) Input geometry to duplicate and transform.</param>
     /// <param name="centerPoint">(Point3d) The center of rotation</param>
-    /// <param name="rotationAngle">(float) In degrees</param>
+    /// <param name="rotationAngleDegrees">(float) In degrees</param>
     /// <param name="axis">(Vector3d) Optional, default value: <c>Vector3d.ZAxis</c>
     ///    Axis of rotation, If omitted, the Vector3d.ZAxis is used as the rotation axis</param>
     /// <returns>(GeometryBase ResizeArray) The transformed geometry duplicates.</returns>
     static member RotateObjects( geometries:GeometryBase seq,
                                  centerPoint:Point3d,
-                                 rotationAngle:float,
+                                 rotationAngleDegrees:float,
                                  [<OPT;DEF(Vector3d())>]axis:Vector3d) : GeometryBase ResizeArray = //PLURAL
         let axis = if axis.IsZero then Vector3d.ZAxis else axis
-        let rotationAngle = RhinoMath.ToRadians(rotationAngle)
-        let xf = Transform.Rotation(rotationAngle, axis, centerPoint)
+        let rotationAngleRadians = RhinoMath.ToRadians(rotationAngleDegrees)
+        let xf = Transform.Rotation(rotationAngleRadians, axis, centerPoint)
         RhinoScriptSyntax.TransformObjects(geometries, xf)
 
 
     /// <summary>Scales a single object. Can be used to perform a uniform or non-uniform
-    ///    scale transformation. Scaling is based on the WorldXY Plane.</summary>
+    ///    scale transformation. Scaling is based on the WorldXY Plane. With copy=false the object in the document is transformed in place and keeps its Guid, with copy=true the original is left unchanged and a transformed copy is added to the document. The geometry overload returns a transformed duplicate instead and does not touch the document.</summary>
     /// <param name="objectId">(Guid) The identifier of an object</param>
     /// <param name="origin">(Point3d) The origin of the scale transformation</param>
     /// <param name="scale">(float*float*float) Three numbers that identify the X, Y, and Z axis scale factors to apply</param>
@@ -1406,7 +1406,7 @@ module AutoOpenObject =
         RhinoScriptSyntax.TransformObject(geometry, xf)
 
 
-    /// <summary>Scales a single object. Uniform scale transformation. Scaling is based on the WorldXY Plane.</summary>
+    /// <summary>Scales a single object. Uniform scale transformation. Scaling is based on the WorldXY Plane. With copy=false the object in the document is transformed in place and keeps its Guid, with copy=true the original is left unchanged and a transformed copy is added to the document. The geometry overload returns a transformed duplicate instead and does not touch the document.</summary>
     /// <param name="objectId">(Guid) The identifier of an object</param>
     /// <param name="origin">(Point3d) The origin of the scale transformation</param>
     /// <param name="scale">(float) One numbers that identify the X, Y, and Z axis scale factors to apply</param>
@@ -1441,7 +1441,7 @@ module AutoOpenObject =
 
 
     /// <summary>Scales one or more objects. Can be used to perform a uniform or non-
-    ///    uniform scale transformation. Scaling is based on the WorldXY Plane.</summary>
+    ///    uniform scale transformation. Scaling is based on the WorldXY Plane. With copy=false the objects in the document are transformed in place and keep their Guids, with copy=true the originals are left unchanged and transformed copies are added to the document. The geometry overload returns transformed duplicates instead and does not touch the document.</summary>
     /// <param name="objectIds">(Guid seq) Identifiers of objects to scale</param>
     /// <param name="origin">(Point3d) The origin of the scale transformation</param>
     /// <param name="scale">(float*float*float) Three numbers that identify the X, Y, and Z axis scale factors to apply</param>
@@ -1479,7 +1479,7 @@ module AutoOpenObject =
         RhinoScriptSyntax.TransformObjects(geometries, xf)
 
 
-    /// <summary>Scales one or more objects. Uniform scale transformation. Scaling is based on the WorldXY Plane.</summary>
+    /// <summary>Scales one or more objects. Uniform scale transformation. Scaling is based on the WorldXY Plane. With copy=false the objects in the document are transformed in place and keep their Guids, with copy=true the originals are left unchanged and transformed copies are added to the document. The geometry overload returns transformed duplicates instead and does not touch the document.</summary>
     /// <param name="objectIds">(Guid seq) Identifiers of objects to scale</param>
     /// <param name="origin">(Point3d) The origin of the scale transformation</param>
     /// <param name="scale">(float) One numbers that identify the X, Y, and Z axis scale factors to apply</param>
@@ -1590,7 +1590,7 @@ module AutoOpenObject =
             )
 
 
-    /// <summary>Perform a shear transformation on a single object.</summary>
+    /// <summary>Perform a shear transformation on a single object. With copy=false the object in the document is transformed in place and keeps its Guid, with copy=true the original is left unchanged and a transformed copy is added to the document. The geometry overload returns a transformed duplicate instead and does not touch the document.</summary>
     /// <param name="objectId">(Guid) The identifier of an object</param>
     /// <param name="origin">(Point3d) Origin point of the shear transformation</param>
     /// <param name="referencePoint">(Point3d) Reference point of the shear transformation</param>
@@ -1629,7 +1629,7 @@ module AutoOpenObject =
         RhinoScriptSyntax.TransformObject(geometry, xf)
 
 
-    /// <summary>Shears one or more objects.</summary>
+    /// <summary>Shears one or more objects. With copy=false the objects in the document are transformed in place and keep their Guids, with copy=true the originals are left unchanged and transformed copies are added to the document. The geometry overload returns transformed duplicates instead and does not touch the document.</summary>
     /// <param name="objectIds">(Guid seq) The identifiers objects to shear</param>
     /// <param name="origin">(Point3d) Origin point of the shear transformation</param>
     /// <param name="referencePoint">(Point3d) Reference point of the shear transformation</param>

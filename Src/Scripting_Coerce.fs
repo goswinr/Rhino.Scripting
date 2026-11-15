@@ -13,7 +13,7 @@ module AutoOpenCoerce =
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file.
     //---So that all members are visible in C# and Ironpython too.
     //---This happens as part of the <Targets> in the *.fsproj file.
-    //---End of header marker: don't change: {@$%^&*()*&^%$@}
+    //---The functions below are part of Scripting_Coerce.fs: file split marker: {@$%^&*()*&^%$@}
 
 
 
@@ -28,6 +28,14 @@ module AutoOpenCoerce =
     /// <returns>A Guid option. None if the Guid is empty.</returns>
     static member TryCoerceGuid (objectId:Guid) : Guid option =
         if Guid.Empty = objectId then None else Some objectId
+
+    /// <summary>Attempt to get a Guid that is not empty out of a Guid option, as returned by the UI functions.</summary>
+    /// <param name="objectId">(Guid option) The optional Guid.</param>
+    /// <returns>A Guid option. None if the input is None or contains the empty Guid.</returns>
+    static member TryCoerceGuid (objectId:Guid option) : Guid option =
+        match objectId with
+        | Some g when g <> Guid.Empty -> Some g
+        | _ -> None
 
     /// <summary>Attempt to parse a Guid from a string.</summary>
     /// <param name="input">(string) The Guid as a string.</param>
@@ -55,6 +63,14 @@ module AutoOpenCoerce =
     static member CoerceGuid(objectId:Guid) : Guid =
         if Guid.Empty = objectId then RhinoScriptingException.Raise "CoerceGuid: Guid is Empty"
         objectId
+
+    /// <summary>Gets the Guid out of a Guid option, as returned by the UI functions.</summary>
+    /// <param name="objectId">(Guid option) The optional Guid.</param>
+    /// <returns>(Guid) The Guid. Raises a RhinoScriptingException if the option is None or contains the empty Guid.</returns>
+    static member CoerceGuid(objectId:Guid option) : Guid =
+        match objectId with
+        | Some g when g <> Guid.Empty -> g
+        | _ -> RhinoScriptingException.Raise "CoerceGuid: Guid option is None or contains the empty Guid: %A" objectId
 
     /// <summary>Parses a Guid from a string.</summary>
     /// <param name="input">(string) The Guid as a string.</param>
@@ -315,8 +331,8 @@ module AutoOpenCoerce =
         if isNull curve then
             None
         else
-            let a = ref (new Arc())
-            if curve.TryGetArc(a, State.Doc.ModelAbsoluteTolerance) && not a.Value.IsCircle then Some a.Value
+            let mutable a = Arc.Unset
+            if curve.TryGetArc(&a, State.Doc.ModelAbsoluteTolerance) && not a.IsCircle then Some a
             else None
 
     /// <summary>Attempt to get an Arc from a curve object using the current Documents Absolute Tolerance.
@@ -365,8 +381,8 @@ module AutoOpenCoerce =
         if isNull curve then
             None
         else
-            let a = ref (new Circle())
-            if curve.TryGetCircle(a, State.Doc.ModelAbsoluteTolerance) then Some a.Value
+            let mutable c = Circle.Unset
+            if curve.TryGetCircle(&c, State.Doc.ModelAbsoluteTolerance) then Some c
             else None
 
     /// <summary>Attempt to get a Circle from a curve object using the current Documents Absolute Tolerance.</summary>
@@ -412,8 +428,8 @@ module AutoOpenCoerce =
         if isNull curve then
             None
         else
-            let a = ref (new Ellipse())
-            if curve.TryGetEllipse(a, State.Doc.ModelAbsoluteTolerance) then Some a.Value
+            let mutable e = Ellipse()
+            if curve.TryGetEllipse(&e, State.Doc.ModelAbsoluteTolerance) then Some e
             else None
 
     /// <summary>Attempt to get an Ellipse from a curve object using the current Documents Absolute Tolerance.</summary>
@@ -460,8 +476,8 @@ module AutoOpenCoerce =
         | null -> None
         | :? PolylineCurve as crv -> Some <| crv.ToPolyline()
         | crv ->
-            let a : ref<Polyline> = ref null
-            if crv.TryGetPolyline(a) then Some a.Value
+            let mutable pl : Polyline = null
+            if crv.TryGetPolyline(&pl) then Some pl
             else None
 
     /// <summary>Attempt to get a Polyline from a curve object.</summary>

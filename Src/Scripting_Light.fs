@@ -12,7 +12,7 @@ module AutoOpenLight =
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file.
     //---So that all members are visible in C# and Ironpython too.
     //---This happens as part of the <Targets> in the *.fsproj file.
-    //---End of header marker: don't change: {@$%^&*()*&^%$@}
+    //---The functions below are part of Scripting_Light.fs: file split marker: {@$%^&*()*&^%$@}
 
     /// <summary>Adds a new directional light object to the document.</summary>
     /// <param name="startPoint">(Point3d) Starting point of the light</param>
@@ -51,7 +51,7 @@ module AutoOpenLight =
         light.Length <- light.Direction
         light.Width <- -light.Width
         let mutable plane = Plane(light.Location, light.Direction)
-        let xAxis = plane.XAxis
+        let mutable xAxis = plane.XAxis
         xAxis.Unitize() |> ignore<bool>
         plane.XAxis <- xAxis
         light.Width <- xAxis * ( min width ( v.Length/20.0))
@@ -99,7 +99,7 @@ module AutoOpenLight =
         let pty =  heightPoint
         let length = pty-origin
         let width = ptx-origin
-        let normal = Vector3d.CrossProduct(width, length)
+        let mutable normal = Vector3d.CrossProduct(width, length)
         normal.Unitize() |> ignore<bool>
         let light = new Light()
         light.LightStyle <- LightStyle.WorldRectangular

@@ -11,7 +11,7 @@ module AutoOpenGroup =
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file.
     //---So that all members are visible in C# and Ironpython too.
     //---This happens as part of the <Targets> in the *.fsproj file.
-    //---End of header marker: don't change: {@$%^&*()*&^%$@}
+    //---The functions below are part of Scripting_Group.fs: file split marker: {@$%^&*()*&^%$@}
 
 
 
@@ -83,7 +83,8 @@ module AutoOpenGroup =
     /// <summary>Returns the number of groups in the document.</summary>
     /// <returns>(int) The number of groups in the document.</returns>
     static member GroupCount() : int =
-        State.Doc.Groups.Count
+        let names = State.Doc.Groups.GroupNames(true)
+        if isNull names then 0 else names.Length
 
 
     /// <summary>Returns the names of all the groups in the document.

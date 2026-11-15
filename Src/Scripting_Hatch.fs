@@ -13,7 +13,7 @@ module AutoOpenHatch =
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file.
     //---So that all members are visible in C# and Ironpython too.
     //---This happens as part of the <Targets> in the *.fsproj file.
-    //---End of header marker: don't change: {@$%^&*()*&^%$@}
+    //---The functions below are part of Scripting_Hatch.fs: file split marker: {@$%^&*()*&^%$@}
 
 
     static member private InitHatchPatterns() : unit = // TODO, optimize so that this init is ony done once ?
@@ -51,13 +51,13 @@ module AutoOpenHatch =
     /// <param name="curves">(Curve seq) Geometry of the closed planar Curves that define the boundary of the Hatch objects</param>
     /// <param name="hatchPattern">(string) Optional. Name of the Hatch pattern to be used by the Hatch object. If omitted, the current Hatch pattern will be used.</param>
     /// <param name="scale">(float) Optional, default value: <c>1.0</c>. Hatch pattern scale factor.</param>
-    /// <param name="rotation">(float) Optional, default value: <c>0.0</c>. Hatch pattern rotation angle in degrees.</param>
+    /// <param name="rotationDegrees">(float) Optional, default value: <c>0.0</c>. Hatch pattern rotation angle in degrees.</param>
     /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>. Tolerance for Hatch fills.</param>
     /// <returns>(Hatch ResizeArray) Hatch geometry, without adding it to the document.</returns>
     static member MakeHatches( curves:Curve seq,
                               [<OPT;DEF(null:string)>]hatchPattern:string,
                               [<OPT;DEF(1.0)>]scale:float,
-                              [<OPT;DEF(0.0)>]rotation:float,
+                              [<OPT;DEF(0.0)>]rotationDegrees:float,
                               [<OPT;DEF(0.0)>]tolerance:float) : Hatch ResizeArray =
         RhinoScriptSyntax.InitHatchPatterns()
         let mutable index = State.Doc.HatchPatterns.CurrentHatchPatternIndex
@@ -65,10 +65,11 @@ module AutoOpenHatch =
             let patternInstance = State.Doc.HatchPatterns.FindName(hatchPattern)
             index <-  if patternInstance|> isNull then RhinoMath.UnsetIntIndex else patternInstance.Index
             if index<0 then RhinoScriptingException.Raise "MakeHatches failed to find hatchPattern:'%s'"  hatchPattern
-        let rotation = RhinoMath.ToRadians(rotation)
+        if index < 0 && State.Doc.HatchPatterns.Count > 0 then index <- 0
+        let rotationRadians = RhinoMath.ToRadians(rotationDegrees)
 
         let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance
-        let hatches = Hatch.Create(curves, index, rotation, scale, tolerance)
+        let hatches = Hatch.Create(curves, index, rotationRadians, scale, tolerance)
         if isNull hatches || hatches.Length = 0 then
             RhinoScriptingException.Raise "MakeHatches failed to create hatch from %d curves, not closed: %d, not planar %d, tolerance:'%g' "
                 (Seq.length curves)
@@ -82,18 +83,18 @@ module AutoOpenHatch =
     /// <param name="curveIds">(Guid seq) Identifiers of the closed planar Curves that define the boundary of the Hatch objects</param>
     /// <param name="hatchPattern">(string) Optional. Name of the Hatch pattern to be used by the Hatch object. If omitted, the current Hatch pattern will be used.</param>
     /// <param name="scale">(float) Optional, default value: <c>1.0</c>. Hatch pattern scale factor.</param>
-    /// <param name="rotation">(float) Optional, default value: <c>0.0</c>. Hatch pattern rotation angle in degrees.</param>
+    /// <param name="rotationDegrees">(float) Optional, default value: <c>0.0</c>. Hatch pattern rotation angle in degrees.</param>
     /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>. Tolerance for Hatch fills.</param>
     /// <returns>(Guid ResizeArray) Identifiers of the newly created Hatches.</returns>
     static member AddHatches(  curveIds:Guid seq,
                               [<OPT;DEF(null:string)>]hatchPattern:string,
                               [<OPT;DEF(1.0)>]scale:float,
-                              [<OPT;DEF(0.0)>]rotation:float,
+                              [<OPT;DEF(0.0)>]rotationDegrees:float,
                               [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray =
         let curves  = curveIds |> RArr.mapSeq RhinoScriptSyntax.CoerceCurve
         try
             let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance
-            let hatches = RhinoScriptSyntax.MakeHatches(curves, hatchPattern, scale, rotation, tolerance)
+            let hatches = RhinoScriptSyntax.MakeHatches(curves, hatchPattern, scale, rotationDegrees, tolerance)
             let ids = ResizeArray()
             for hatch in hatches do
                 let objectId = State.Doc.Objects.AddHatch(hatch)
@@ -114,15 +115,15 @@ module AutoOpenHatch =
     /// <param name="curve">(Curve) Geometry of the closed planar Curve that defines the boundary of the Hatch object</param>
     /// <param name="hatchPattern">(string) Optional. Name of the Hatch pattern to be used by the Hatch object. If omitted, the current Hatch pattern will be used.</param>
     /// <param name="scale">(float) Optional, default value: <c>1.0</c>. Hatch pattern scale factor.</param>
-    /// <param name="rotation">(float) Optional, default value: <c>0.0</c>. Hatch pattern rotation angle in degrees.</param>
+    /// <param name="rotationDegrees">(float) Optional, default value: <c>0.0</c>. Hatch pattern rotation angle in degrees.</param>
     /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>. Tolerance for Hatch fills.</param>
     /// <returns>(Hatch) Hatch geometry, without adding it to the document.</returns>
     static member MakeHatch(   curve:Curve,
                               [<OPT;DEF(null:string)>]hatchPattern:string,
                               [<OPT;DEF(1.0)>]scale:float,
-                              [<OPT;DEF(0.0)>]rotation:float,
+                              [<OPT;DEF(0.0)>]rotationDegrees:float,
                               [<OPT;DEF(0.0)>]tolerance:float) : Hatch =
-        let rc = RhinoScriptSyntax.MakeHatches([curve], hatchPattern, scale, rotation,tolerance) // gives a good error message already
+        let rc = RhinoScriptSyntax.MakeHatches([curve], hatchPattern, scale, rotationDegrees,tolerance) // gives a good error message already
         if rc.Count = 1 then rc.[0]
         else RhinoScriptingException.Raise "MakeHatch failed to create exactly one hatch from curve. It created %d Hatches"  rc.Count
 
@@ -130,16 +131,16 @@ module AutoOpenHatch =
     /// <param name="curveId">(Guid) Identifier of the closed planar Curve that defines the boundary of the Hatch object</param>
     /// <param name="hatchPattern">(string) Optional. Name of the Hatch pattern to be used by the Hatch object. If omitted, the current Hatch pattern will be used.</param>
     /// <param name="scale">(float) Optional, default value: <c>1.0</c>. Hatch pattern scale factor.</param>
-    /// <param name="rotation">(float) Optional, default value: <c>0.0</c>. Hatch pattern rotation angle in degrees.</param>
+    /// <param name="rotationDegrees">(float) Optional, default value: <c>0.0</c>. Hatch pattern rotation angle in degrees.</param>
     /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>. Tolerance for Hatch fills.</param>
     /// <returns>(Guid) Identifier of the newly created Hatch.</returns>
     static member AddHatch( curveId:Guid,
                             [<OPT;DEF(null:string)>]hatchPattern:string,
                             [<OPT;DEF(1.0)>]scale:float,
-                            [<OPT;DEF(0.0)>]rotation:float,
+                            [<OPT;DEF(0.0)>]rotationDegrees:float,
                             [<OPT;DEF(0.0)>]tolerance:float) : Guid =
         try
-            let ids = RhinoScriptSyntax.AddHatches([curveId], hatchPattern, scale, rotation, tolerance)
+            let ids = RhinoScriptSyntax.AddHatches([curveId], hatchPattern, scale, rotationDegrees, tolerance)
             if ids.Count = 1 then ids.[0]
             else RhinoScriptingException.Raise "AddHatch failed to create exactly one hatch from curve. It created %d Hatches" ids.Count
         with e->
@@ -326,10 +327,10 @@ module AutoOpenHatch =
         rc
 
 
-    /// <summary>Returns the rotation applied to the Hatch pattern when
+    /// <summary>Returns the rotation in degrees applied to the Hatch pattern when
     /// it is mapped to the Hatch's Plane.</summary>
     /// <param name="hatchId">(Guid) Identifier of a Hatch object</param>
-    /// <returns>(float) if rotation is not defined, the current rotation angle.</returns>
+    /// <returns>(float) The current hatch pattern rotation angle in degrees.</returns>
     static member HatchRotation(hatchId:Guid) : float = //GET
         let hatchObj = RhinoScriptSyntax.CoerceHatchObject(hatchId)
         let rc = hatchObj.HatchGeometry.PatternRotation
@@ -339,14 +340,14 @@ module AutoOpenHatch =
     /// <summary>Modifies the rotation applied to the Hatch pattern when
     /// it is mapped to the Hatch's Plane.</summary>
     /// <param name="hatchId">(Guid) Identifier of a Hatch object</param>
-    /// <param name="rotation">(float) Rotation angle in degrees</param>
+    /// <param name="rotationDegrees">(float) Rotation angle in degrees</param>
     /// <returns>(unit) void, nothing.</returns>
-    static member HatchRotation(hatchId:Guid, rotation:float) : unit = //SET
+    static member HatchRotation(hatchId:Guid, rotationDegrees:float) : unit = //SET
         let hatchObj = RhinoScriptSyntax.CoerceHatchObject(hatchId)
         let currentRotationRadians = hatchObj.HatchGeometry.PatternRotation
         let currentRotationDegrees = RhinoMath.ToDegrees(currentRotationRadians)
-        if rotation <> currentRotationDegrees then
-            let rotationRadians = RhinoMath.ToRadians(rotation)
+        if rotationDegrees <> currentRotationDegrees then
+            let rotationRadians = RhinoMath.ToRadians(rotationDegrees)
             hatchObj.HatchGeometry.PatternRotation <- rotationRadians
             hatchObj.CommitChanges() |> ignore<bool>
             State.Doc.Views.Redraw()
@@ -354,24 +355,24 @@ module AutoOpenHatch =
     /// <summary>Modifies the rotation applied to the Hatch pattern when
     /// it is mapped to the Hatch's Plane.</summary>
     /// <param name="hatchIds">(Guid seq) Identifiers of multiple Hatch objects</param>
-    /// <param name="rotation">(float) Rotation angle in degrees</param>
+    /// <param name="rotationDegrees">(float) Rotation angle in degrees</param>
     /// <returns>(unit) void, nothing.</returns>
-    static member HatchRotation(hatchIds:Guid seq, rotation:float) : unit = //MULTISET
+    static member HatchRotation(hatchIds:Guid seq, rotationDegrees:float) : unit = //MULTISET
         for hatchId in hatchIds do
             let hatchObj = RhinoScriptSyntax.CoerceHatchObject(hatchId)
             let mutable rc = hatchObj.HatchGeometry.PatternRotation
             rc <- RhinoMath.ToDegrees(rc)
-            if rotation <> rc then
-                let rotation = RhinoMath.ToRadians(rotation)
-                hatchObj.HatchGeometry.PatternRotation <- rotation
+            if rotationDegrees <> rc then
+                let rotationRadians = RhinoMath.ToRadians(rotationDegrees)
+                hatchObj.HatchGeometry.PatternRotation <- rotationRadians
                 hatchObj.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
 
-    /// <summary>Returns the rotation applied to the Hatch pattern when
+    /// <summary>Returns the rotation in degrees applied to the Hatch pattern when
     /// it is mapped to the Hatch's Plane.</summary>
     /// <param name="hatchGeo">(Hatch) The Hatch geometry</param>
-    /// <returns>(float) if rotation is not defined, the current rotation angle.</returns>
+    /// <returns>(float) The current hatch pattern rotation angle in degrees.</returns>
     static member HatchRotation(hatchGeo:Hatch) : float = //GET
         let rc = hatchGeo.PatternRotation
         RhinoMath.ToDegrees(rc)

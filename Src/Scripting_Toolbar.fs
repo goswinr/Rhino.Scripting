@@ -13,7 +13,7 @@ module AutoOpenToolbar =
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file.
     //---So that all members are visible in C# and Ironpython too.
     //---This happens as part of the <Targets> in the *.fsproj file.
-    //---End of header marker: don't change: {@$%^&*()*&^%$@}
+    //---The functions below are part of Scripting_Toolbar.fs: file split marker: {@$%^&*()*&^%$@}
 
 
     /// <summary>Closes a currently open toolbar collection.</summary>
@@ -30,10 +30,12 @@ module AutoOpenToolbar =
         )
 
 
-    /// <summary>Hides a previously visible toolbar group in an open toolbar collection.</summary>
+    /// <summary>Hides a previously visible toolbar group in an open toolbar collection.
+    /// Deprecated: it does not work in Rhino 8 and 9. In Rhino 8 RhinoCommon lists no toolbar groups, and in Rhino 9 a group stays visible.</summary>
     /// <param name="name">(string) Name of a currently open toolbar file</param>
     /// <param name="toolbarGroup">(string) Name of a toolbar group to hide</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
+    [<System.Obsolete("HideToolbar does not work in Rhino 8 and 9: RhinoCommon lists no toolbar groups in Rhino 8, and in Rhino 9 a toolbar group stays visible.")>]
     static member HideToolbar(name:string, toolbarGroup:string) : bool =
         RhinoSync.DoSync (fun () ->
             let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
@@ -77,10 +79,12 @@ module AutoOpenToolbar =
         else ""
 
 
-    /// <summary>Checks if a toolbar group in an open toolbar collection is docked.</summary>
+    /// <summary>Checks if a toolbar group in an open toolbar collection is docked.
+    /// Deprecated: in Rhino 8 RhinoCommon lists no toolbar groups, so this always raises there.</summary>
     /// <param name="name">(string) Name of a currently open toolbar file</param>
     /// <param name="toolbarGroup">(string) Name of a toolbar group</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
+    [<System.Obsolete("IsToolbarDocked does not work in Rhino 8: RhinoCommon lists no toolbar groups there, so it always raises. Toolbar groups are deprecated in Rhino.Scripting.")>]
     static member IsToolbarDocked(name:string, toolbarGroup:string) : bool =
         let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
         if notNull tbfile then
@@ -90,10 +94,12 @@ module AutoOpenToolbar =
         else RhinoScriptingException.Raise "IsToolbarDocked failed on name '%s'" name
 
 
-    /// <summary>Checks if a toolbar group in an open toolbar collection is visible.</summary>
+    /// <summary>Checks if a toolbar group in an open toolbar collection is visible.
+    /// Deprecated: in Rhino 8 RhinoCommon lists no toolbar groups, so this always raises there.</summary>
     /// <param name="name">(string) Name of a currently open toolbar file</param>
     /// <param name="toolbarGroup">(string) Name of a toolbar group</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
+    [<System.Obsolete("IsToolbarVisible does not work in Rhino 8: RhinoCommon lists no toolbar groups there, so it always raises. Toolbar groups are deprecated in Rhino.Scripting.")>]
     static member IsToolbarVisible(name:string, toolbarGroup:string) : bool =
         let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
         if notNull tbfile then
@@ -137,10 +143,12 @@ module AutoOpenToolbar =
         )
 
 
-    /// <summary>Shows a previously hidden toolbar group in an open toolbar collection.</summary>
+    /// <summary>Shows a previously hidden toolbar group in an open toolbar collection.
+    /// Deprecated: in Rhino 8 RhinoCommon lists no toolbar groups, and in Rhino 9 a shown group can not be hidden again with HideToolbar.</summary>
     /// <param name="name">(string) Name of a currently open toolbar file</param>
     /// <param name="toolbarGroup">(string) Name of a toolbar group to show</param>
     /// <returns>(bool) True or False indicating success or failure.</returns>
+    [<System.Obsolete("ShowToolbar is unreliable in Rhino 8 and 9: RhinoCommon lists no toolbar groups in Rhino 8, and in Rhino 9 a shown toolbar group can not be hidden again.")>]
     static member ShowToolbar(name:string, toolbarGroup:string) : bool =
         RhinoSync.DoSync (fun () ->
             let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)

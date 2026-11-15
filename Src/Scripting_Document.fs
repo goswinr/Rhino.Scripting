@@ -15,7 +15,7 @@ module AutoOpenDocument =
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file.
     //---So that all members are visible in C# and Ironpython too.
     //---This happens as part of the <Targets> in the *.fsproj file.
-    //---End of header marker: don't change: {@$%^&*()*&^%$@}
+    //---The functions below are part of Scripting_Document.fs: file split marker: {@$%^&*()*&^%$@}
 
 
     /// <summary>Creates a bitmap preview image of the current model.</summary>
@@ -142,7 +142,8 @@ module AutoOpenDocument =
     /// using Rhino's Notes command.</summary>
     /// <returns>(string) The current notes.</returns>
     static member Notes() : string = //GET
-        State.Doc.Notes
+        let notes = State.Doc.Notes
+        if isNull notes then "" else notes
 
     /// <summary>Sets the document's notes. Notes are generally created
     /// using Rhino's Notes command.</summary>
@@ -247,9 +248,9 @@ module AutoOpenDocument =
             State.Doc.MeshingParameterStyle <- Rhino.Geometry.MeshingParameterStyle.Custom
 
 
-    /// <summary>Returns the render Mesh maximum angle property of the active document.
+    /// <summary>Returns the render Mesh maximum angle in degrees of the active document.
     /// For more information on render Meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
-    /// <returns>(float) The current maximum angle.</returns>
+    /// <returns>(float) The current maximum angle in degrees.</returns>
     static member RenderMeshMaxAngle() : float = //GET
         let current = State.Doc.GetMeshingParameters(State.Doc.MeshingParameterStyle)
         toDegrees(current.RefineAngle)
@@ -489,17 +490,17 @@ module AutoOpenDocument =
 
 
 
-    /// <summary>Return the document's angle tolerance. Angle tolerance is
+    /// <summary>Return the document's angle tolerance in degrees. Angle tolerance is
     /// measured in degrees. See Rhino's DocumentProperties command
     /// (Units and Page Units Window) for details.</summary>
-    /// <returns>(float) The current angle tolerance.</returns>
+    /// <returns>(float) The current angle tolerance in degrees.</returns>
     static member UnitAngleTolerance() : float = //GET
         State.Doc.ModelAngleToleranceDegrees
 
     /// <summary>Set the document's angle tolerance. Angle tolerance is
     /// measured in degrees. See Rhino's DocumentProperties command
     /// (Units and Page Units Window) for details.</summary>
-    /// <param name="angleToleranceDegrees">(float) The angle tolerance to set</param>
+    /// <param name="angleToleranceDegrees">(float) The angle tolerance to set in degrees</param>
     /// <returns>(unit) void, nothing.</returns>
     static member UnitAngleTolerance(angleToleranceDegrees:float) : unit = //SET
             if angleToleranceDegrees > 0. then
@@ -711,7 +712,7 @@ module AutoOpenDocument =
         elif tolerance > 0.0 then State.Doc.PageAbsoluteTolerance <- tolerance
         else RhinoScriptingException.Raise "UnitAbsoluteTolerance: tolerance must be positive, got %g" tolerance
 
-    /// <summary>Returns the angle tolerance for model or page units.</summary>
+    /// <summary>Returns the angle tolerance in degrees for model or page units.</summary>
     /// <param name="modelUnits">(bool) True for model units; False for page units.</param>
     /// <returns>(float) The angle tolerance in degrees.</returns>
     static member UnitAngleTolerance(modelUnits:bool) : float = //GET

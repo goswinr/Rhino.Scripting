@@ -14,7 +14,7 @@ module AutoOpenUtility =
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file.
     //---So that all members are visible in C# and Ironpython too.
     //---This happens as part of the <Targets> in the *.fsproj file.
-    //---End of header marker: don't change: {@$%^&*()*&^%$@}
+    //---The functions below are part of Scripting_Utility.fs: file split marker: {@$%^&*()*&^%$@}
 
 
 
@@ -41,14 +41,14 @@ module AutoOpenUtility =
         | null -> false
         | frames -> Array.exists isGrasshopper frames
 
-    /// <summary>Measures the angle between two points.</summary>
+    /// <summary>Measures the XY and elevation angles in degrees between two points.</summary>
     /// <param name="point1">(Point3d) Point1 of input points</param>
     /// <param name="point2">(Point3d) Point2 of input points</param>
     /// <param name="plane">(Plane) Optional, default value: <c>Plane.WorldXY</c>
     ///    If a Plane is provided, angle calculation is with respect to this Plane</param>
     /// <returns>(float * float * float * float * float) containing the following elements:
     ///    element 0 = the X, Y angle in degrees
-    ///    element 1 = the elevation
+    ///    element 1 = the elevation angle in degrees
     ///    element 2 = delta in the X direction
     ///    element 3 = delta in the Y direction
     ///    element 4 = delta in the Z direction.
@@ -70,7 +70,7 @@ module AutoOpenUtility =
         angleXY, elevation, x, y, z
 
 
-    /// <summary>Measures the angle between two lines.</summary>
+    /// <summary>Measures the angle and reflex angle in degrees between two lines.</summary>
     /// <param name="line1">(Line) List of 6 numbers or 2 Point3d</param>
     /// <param name="line2">(Line) List of 6 numbers or 2 Point3d</param>
     /// <returns>(float * float) containing the following elements:
@@ -78,8 +78,8 @@ module AutoOpenUtility =
     ///    1 = The reflex angle in degrees.
     /// </returns>
     static member Angle2(line1:Line, line2:Line) : float * float =
-        let vec0 = line1.To - line1.From
-        let vec1 = line2.To - line2.From
+        let mutable vec0 = line1.To - line1.From
+        let mutable vec1 = line2.To - line2.From
         if not <| vec0.Unitize() || not <| vec1.Unitize() then  RhinoScriptingException.Raise "Angle2 two failed on %A and %A" line1 line2
         let mutable dot = vec0 * vec1
         dot <- max -1.0 (min 1.0 dot) // clamp for math errors
@@ -235,7 +235,8 @@ module AutoOpenUtility =
     /// <returns>(Point3d array) Array of 3D points with duplicates removed.</returns>
     static member CullDuplicatePoints(points:Point3d seq, [<OPT;DEF(0.0)>]tolerance:float) : Point3d array =
         let tol = Util.ifZero1 tolerance RhinoMath.ZeroTolerance
-        Geometry.Point3d.CullDuplicates(points, tol)
+        let result = Geometry.Point3d.CullDuplicates(points, tol)
+        if isNull result then [||] else result
 
 
     /// <summary>Measures Square distance between two 3D points. Does not validate input.</summary>
@@ -271,7 +272,7 @@ module AutoOpenUtility =
         let mutable offset = plane.XAxis
         offset.Unitize() |> ignore<bool>
         offset <- distance * offset
-        let rc = point + offset
+        let mutable rc = point + offset
         let xForm = Transform.Rotation(angle, plane.ZAxis, point)
         rc.Transform(xForm)
         rc

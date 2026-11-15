@@ -15,7 +15,7 @@ module AutoOpenGeometry =
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file.
     //---So that all members are visible in C# and Ironpython too.
     //---This happens as part of the <Targets> in the *.fsproj file.
-    //---End of header marker: don't change: {@$%^&*()*&^%$@}
+    //---The functions below are part of Scripting_Geometry.fs: file split marker: {@$%^&*()*&^%$@}
 
 
     /// <summary>Create a clipping Plane for visibly clipping away geometry in a specific view. Clipping Planes are infinite.</summary>
@@ -172,30 +172,13 @@ module AutoOpenGeometry =
         let bold   = (1 = fontStyle || 3 = fontStyle)
         let italic = (2 = fontStyle || 3 = fontStyle)
         let ds = State.Doc.DimStyles.Current
-        let qn, quartetBoldProp , quartetItalicProp =
-            if isNull font then
-                ds.Font.QuartetName, ds.Font.Bold, ds.Font.Italic
-            else
-                font, false, false
-
-        let f = DocObjects.Font.FromQuartetProperties(qn, quartetBoldProp, quartetItalicProp)
-
+        let qn = if isNull font then ds.Font.QuartetName else font
+        let f = DocObjects.Font.FromQuartetProperties(qn, bold, italic)
         if isNull f then
-            RhinoScriptingException.Raise "AddText failed. text:'%s' plane:'%s' height:'%g' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane.Pretty height font fontStyle horizontalAlignment verticalAlignment
+            RhinoScriptingException.Raise "AddText failed to find font '%s' with the requested style" qn
         let te = TextEntity.Create(text, plane, ds, false, 0.0, 0.0)
         te.TextHeight <- height
-        if font |> notNull then
-            te.Font <- f
-        if bold <> quartetBoldProp then
-            if DocObjects.Font.FromQuartetProperties(qn, bold, false) |> isNull then
-                State.Warn "AddText: the requested font style is unavailable"
-            else
-                te.SetBold(bold)|> ignore<bool>
-        if italic <> quartetItalicProp then
-            if DocObjects.Font.FromQuartetProperties(qn, false, italic) |> isNull then
-                State.Warn "AddText: the requested font style is unavailable"
-            else
-                te.SetItalic(italic)|> ignore<bool>
+        te.Font <- f
 
         te.TextHorizontalAlignment <- LanguagePrimitives.EnumOfValue horizontalAlignment
         te.TextVerticalAlignment <- LanguagePrimitives.EnumOfValue verticalAlignment
@@ -410,7 +393,7 @@ module AutoOpenGeometry =
 
         if  inWorldCoords then
             let planetoworld = Transform.ChangeBasis(plane, Plane.WorldXY)
-            let box = Box(bbox)
+            let mutable box = Box(bbox)
             box.Transform(planetoworld) |> RhinoScriptingException.FailIfFalse "plane Transform in rs.BoundingBox()"
             box
         else
@@ -437,7 +420,7 @@ module AutoOpenGeometry =
     /// <param name="amount">(float) amount in model units to expand</param>
     /// <returns>(Geometry.BoundingBox) The new Box.</returns>
     static member BoundingBoxInflate(bbox:BoundingBox, amount:float) : BoundingBox =
-        let b = BoundingBox(bbox.Min,bbox.Max)
+        let mutable b = BoundingBox(bbox.Min,bbox.Max)
         b.Inflate(amount)
         if not b.IsValid then RhinoScriptingException.Raise "BoundingBoxInflate Invalid BoundingBox from rs.BoundingBoxInflate by %f on %s" amount bbox.Pretty
         b
@@ -452,7 +435,7 @@ module AutoOpenGeometry =
     /// <param name="amountZ">(float) amount on X Axis in model units to expand</param>
     /// <returns>(Geometry.BoundingBox) The new Box.</returns>
     static member BoundingBoxInflate(bbox:BoundingBox, amountX:float, amountY:float, amountZ:float) : BoundingBox =
-        let b = BoundingBox(bbox.Min,bbox.Max)
+        let mutable b = BoundingBox(bbox.Min,bbox.Max)
         b.Inflate(amountX, amountY, amountZ)
         if not b.IsValid then RhinoScriptingException.Raise "BoundingBoxInflate Invalid BoundingBox from rs.BoundingBoxInflate by x:%f, y:%f, z:%f, on %s" amountX amountY amountZ bbox.Pretty
         b
@@ -483,7 +466,11 @@ module AutoOpenGeometry =
     /// <returns>(Guid array) Array of outline Curves.</returns>
     static member ExplodeText(textId:Guid, [<OPT;DEF(false)>]delete:bool) : ResizeArray<Guid> =
         let textObject = RhinoScriptSyntax.CoerceRhinoObject(textId)
-        let curves = RhinoScriptSyntax.ExplodeText(textObject.Geometry :?> TextEntity)
+        let text =
+            match textObject.Geometry with
+            | :? TextEntity as t -> t
+            | _ -> RhinoScriptingException.Raise "ExplodeText: object %A is not text" textId
+        let curves = RhinoScriptSyntax.ExplodeText(text)
         let ids = curves |> RArr.mapSeq (fun curve -> State.Doc.Objects.AddCurve(curve, textObject.Attributes))
         if delete then State.Doc.Objects.Delete(textObject, quiet=true) |> ignore<bool>
         State.Doc.Views.Redraw()

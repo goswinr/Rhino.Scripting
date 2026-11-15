@@ -15,7 +15,7 @@ module AutoOpenUserInterface =
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file.
     //---So that all members are visible in C# and Ironpython too.
     //---This happens as part of the <Targets> in the *.fsproj file.
-    //---End of header marker: don't change: {@$%^&*()*&^%$@}
+    //---The functions below are part of Scripting_UserInterface.fs: file split marker: {@$%^&*()*&^%$@}
 
 
     /// <summary>Display browse-for-folder dialog allowing the user to select a folder.</summary>
@@ -108,14 +108,14 @@ module AutoOpenUserInterface =
         RhinoSync.DoSync getKeepEditor
 
 
-    /// <summary>Pause for user input of an angle.</summary>
+    /// <summary>Pause for user input of an angle in degrees.</summary>
     /// <param name="point">(Point3d) Optional, default value: <c>Point3d.Unset</c>
     ///    Starting, or base point</param>
     /// <param name="referencePoint">(Point3d) Optional, default value: <c>Point3d.Unset</c>
     ///    If specified, the reference angle is calculated from it and the base point</param>
-    /// <param name="defaultValAngleDegrees">(float) Optional, A default angle value specified</param>
+    /// <param name="defaultValAngleDegrees">(float) Optional, default value: <c>0.0</c>. The default angle in degrees</param>
     /// <param name="message">(string) Optional, A prompt to display</param>
-    /// <returns>(float) Option of angle in degree.
+    /// <returns>(float) The selected angle in degrees.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetAngle( [<OPT;DEF(Point3d())>]point:Point3d, //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
                             [<OPT;DEF(Point3d())>]referencePoint:Point3d,
@@ -199,9 +199,9 @@ module AutoOpenUserInterface =
                 |4 -> Input.GetBoxMode.Center
                 |_ -> RhinoScriptingException.Raise "GetBox:Bad mode %A" mode
 
-            let box = ref (Box())
-            let rc= Input.RhinoGet.GetBox(box, m, basePoint, prompt1, prompt2, prompt3)
-            if rc = Commands.Result.Success then (box.Value.GetCorners())
+            let mutable box = Box()
+            let rc = Input.RhinoGet.GetBox(&box, m, basePoint, prompt1, prompt2, prompt3)
+            if rc = Commands.Result.Success then (box.GetCorners())
             else RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetBox()"
         RhinoSync.DoSyncRedrawHideEditor get
 
@@ -245,7 +245,7 @@ module AutoOpenUserInterface =
             let clientPt = view.ScreenToClient(screenPt)
             let viewport = view.ActiveViewport
             let xf = viewport.GetTransform(DocObjects.CoordinateSystem.Screen, DocObjects.CoordinateSystem.World)
-            let worldPt = Point3d(clientPt.X, clientPt.Y, 0.0)
+            let mutable worldPt = Point3d(clientPt.X, clientPt.Y, 0.0)
             worldPt.Transform(xf)
             worldPt, screenPt, viewport.Id, clientPt
         RhinoSync.DoSyncRedrawHideEditor get
@@ -389,14 +389,15 @@ module AutoOpenUserInterface =
                             [<OPT;DEF(false)>]showNewButton:bool,
                             [<OPT;DEF(false)>]showSetCurrent:bool) : string =
         let getKeepEditor () =
-            let layerindex = ref State.Doc.Layers.CurrentLayerIndex
+            let mutable layerindex = State.Doc.Layers.CurrentLayerIndex
             if notNull layer then
                 let layerinstance = RhinoScriptSyntax.CoerceLayer(layer)
-                layerindex := layerinstance.Index
-            let rc = UI.Dialogs.ShowSelectLayerDialog(layerindex, title, showNewButton, showSetCurrent, ref true)
+                layerindex <- layerinstance.Index
+            let mutable initialLayer = true
+            let rc = UI.Dialogs.ShowSelectLayerDialog(&layerindex, title, showNewButton, showSetCurrent, &initialLayer)
             if not rc then RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetLayer()"
             else
-                let layer = State.Doc.Layers.[!layerindex]
+                let layer = State.Doc.Layers.[layerindex]
                 layer.FullPath
         RhinoSync.DoSync getKeepEditor
 
@@ -1139,12 +1140,12 @@ module AutoOpenUserInterface =
                            [<OPT;DEF(7e89)>]minimum:float,
                            [<OPT;DEF(7e89)>]maximum:float) : float =
         let get () =
-            let defaultValNumber = ref <| if defaultValNumber = 7e89 then RhinoMath.UnsetValue else defaultValNumber
+            let mutable defaultValNumber = if defaultValNumber = 7e89 then RhinoMath.UnsetValue else defaultValNumber
             let minimum = if minimum = 7e89 then RhinoMath.UnsetValue else minimum
             let maximum = if maximum = 7e89 then RhinoMath.UnsetValue else maximum
 
-            let rc = UI.Dialogs.ShowNumberBox(title, message, defaultValNumber, minimum, maximum)
-            if  rc then (defaultValNumber.Value)
+            let rc = UI.Dialogs.ShowNumberBox(title, message, &defaultValNumber, minimum, maximum)
+            if  rc then defaultValNumber
             else RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.RealBox()"
 
         RhinoSync.DoSyncRedrawHideEditor get

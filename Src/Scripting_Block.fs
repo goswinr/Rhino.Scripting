@@ -14,7 +14,7 @@ module AutoOpenBlock =
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file.
     //---So that all members are visible in C# and Ironpython too.
     //---This happens as part of the <Targets> in the *.fsproj file.
-    //---End of header marker: don't change: {@$%^&*()*&^%$@}
+    //---The functions below are part of Scripting_Block.fs: file split marker: {@$%^&*()*&^%$@}
 
 
 
@@ -91,7 +91,7 @@ module AutoOpenBlock =
     static member BlockDescription(blockName:string) : string = //GET
         let instDef = State.Doc.InstanceDefinitions.Find(blockName)
         if isNull instDef then  RhinoScriptingException.Raise "BlockDescription: '%s' does not exist in InstanceDefinitionsTable" blockName
-        instDef.Description
+        if isNull instDef.Description then "" else instDef.Description
 
     /// <summary>Sets the description of a block definition.</summary>
     /// <param name="blockName">(string) The name of an existing block definition</param>
@@ -125,7 +125,7 @@ module AutoOpenBlock =
     static member BlockInstanceInsertPoint(objectId:Guid) : Point3d =
         let  instance = RhinoScriptSyntax.CoerceBlockInstanceObject(objectId)
         let  xf = instance.InstanceXform
-        let  pt = Point3d(0. , 0. , 0.)
+        let mutable  pt = Point3d(0. , 0. , 0.)
         pt.Transform(xf)
         pt
 
@@ -232,7 +232,7 @@ module AutoOpenBlock =
     static member DeleteBlock(blockName:string) : bool =
         let instDef = State.Doc.InstanceDefinitions.Find(blockName)
         if isNull instDef then  RhinoScriptingException.Raise "DeleteBlock: '%s' does not exist in InstanceDefinitionsTable" blockName
-        let  rc = State.Doc.InstanceDefinitions.Delete(instDef.Index, deleteReferences=true, quiet=false)
+        let  rc = State.Doc.InstanceDefinitions.Delete(instDef.Index, deleteReferences=true, quiet=true)
         State.Doc.Views.Redraw()
         rc
 
@@ -379,9 +379,9 @@ module AutoOpenBlock =
     /// <returns>(bool) True or False indicating success or failure.</returns>
     static member RenameBlock(blockName:string, newName:string) : bool =
         let instDef = State.Doc.InstanceDefinitions.Find(blockName)
-        if isNull instDef then  RhinoScriptingException.Raise "RenameBlock: '%s' does not exist in InstanceDefinitionsTable" blockName
+        if isNull instDef then RhinoScriptingException.Raise "RenameBlock: '%s' does not exist in InstanceDefinitionsTable" blockName
         let description = instDef.Description
-        State.Doc.InstanceDefinitions.Modify(instDef, newName, description, quiet=false)
+        State.Doc.InstanceDefinitions.Modify(instDef, newName, description, quiet=true) // if the new name already exists, Rhino will not show a modal dialog due to quiet=true, this caused the automated tests to crash
 
 
     /// <summary>Replaces the objects inside an existing block definition.</summary>
