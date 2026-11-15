@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.16.0] - 2026-11-15
 ### Added
 - Overloads taking a plug-in Guid for EnablePlugIn (get and set), GetPlugInObject, IsPlugIn and DefaultRenderer, next to the existing overloads taking a plug-in name.
 - UnitSystem setters accept Rhino.UnitSystem enum values for model and page units, preserving the existing integer overloads and validation.
@@ -301,7 +303,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - First public release
 
-[Unreleased]: https://github.com/goswinr/Rhino.Scripting/compare/0.15.0...HEAD
+[Unreleased]: https://github.com/goswinr/Rhino.Scripting/compare/0.16.0...HEAD
+[0.16.0]: https://github.com/goswinr/Rhino.Scripting/compare/0.15.0...0.16.0
 [0.15.0]: https://github.com/goswinr/Rhino.Scripting/compare/0.14.0...0.15.0
 [0.14.0]: https://github.com/goswinr/Rhino.Scripting/compare/0.13.0...0.14.0
 [0.13.0]: https://github.com/goswinr/Rhino.Scripting/compare/0.12.1...0.13.0
