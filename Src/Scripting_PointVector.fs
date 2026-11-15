@@ -22,30 +22,30 @@ module AutoOpenPointVector =
     /// <summary>Compares two vectors to see if they are parallel within one degree or custom tolerance.</summary>
     /// <param name="vector1">(Vector3d) First of the vectors to compare</param>
     /// <param name="vector2">(Vector3d) Second of the vectors to compare</param>
-    /// <param name="toleranceDegree">(float) Optional, default value: <c>1.0</c>
-    ///    Angle tolerance in degrees</param>
+    /// <param name="toleranceDegrees">(float) Optional, default value: <c>0.0</c>
+    ///    Angle tolerance in degrees; 0.0 uses RhinoCommon's default of 1.0 degree</param>
     /// <returns>(int) The value represents
     ///     -1 = the vectors are anti-parallel
     ///      0 = the vectors are not parallel
     ///      1 = the vectors are parallel.</returns>
     static member IsVectorParallelTo(   vector1:Vector3d,
                                         vector2:Vector3d,
-                                        [<OPT;DEF(0.0)>]toleranceDegree:float) : int =
-        if toleranceDegree = 0.0 then vector1.IsParallelTo(vector2)
-        else vector1.IsParallelTo(vector2, toRadians(toleranceDegree))
+                                        [<OPT;DEF(0.0)>]toleranceDegrees:float) : int =
+        if toleranceDegrees = 0.0 then vector1.IsParallelTo(vector2)
+        else vector1.IsParallelTo(vector2, toRadians(toleranceDegrees))
 
 
     /// <summary>Compares two vectors to see if they are perpendicular.</summary>
     /// <param name="vector1">(Vector3d) First of the vectors to compare</param>
     /// <param name="vector2">(Vector3d) Second of the vectors to compare</param>
-    /// <param name="toleranceDegree">(float) Optional, default value: <c>1.0</c>
-    ///    Angle tolerance in degrees</param>
+    /// <param name="toleranceDegrees">(float) Optional, default value: <c>0.0</c>
+    ///    Angle tolerance in degrees; 0.0 uses RhinoCommon's default of 1.0 degree</param>
     /// <returns>(bool) True if vectors are perpendicular, otherwise False.</returns>
     static member IsVectorPerpendicularTo(  vector1:Vector3d,
                                             vector2:Vector3d,
-                                            [<OPT;DEF(0.0)>]toleranceDegree:float) : bool =
-        if toleranceDegree = 0.0 then vector1.IsPerpendicularTo(vector2)
-        else vector1.IsPerpendicularTo(vector2, toRadians(toleranceDegree))
+                                            [<OPT;DEF(0.0)>]toleranceDegrees:float) : bool =
+        if toleranceDegrees = 0.0 then vector1.IsPerpendicularTo(vector2)
+        else vector1.IsPerpendicularTo(vector2, toRadians(toleranceDegrees))
 
 
 
@@ -417,7 +417,7 @@ module AutoOpenPointVector =
 
     /// <summary>Rotates a 3D vector. The input vector is not modified, a new Vector3d is returned.</summary>
     /// <param name="vector">(Vector3d) The vector to rotate</param>
-    /// <param name="angleDegrees">(float) Rotation angle</param>
+    /// <param name="angleDegrees">(float) Rotation angle in degrees</param>
     /// <param name="axis">(Vector3d) Axis of rotation</param>
     /// <returns>(Vector3d) rotated vector.</returns>
     static member VectorRotate( vector:Vector3d,

@@ -187,15 +187,16 @@ module AutoOpenSurface =
     ///    3 = curvature</param>
     /// <param name="edgeTolerance">(float) Optional, Edge tolerance</param>
     /// <param name="interiorTolerance">(float) Optional, Interior tolerance</param>
-    /// <param name="angleTolerance">(float) Optional, Angle tolerance , in radians?</param>
+    /// <param name="angleToleranceRadians">(float) Optional, default value: <c>0.0</c>. Angle tolerance in radians, passed directly to RhinoCommon.
+    ///    Use <c>RhinoMath.ToRadians</c> to convert from degrees to radians.</param>
     /// <returns>(Guid) identifier of new object.</returns>
     static member AddNetworkSrf( curves:Guid seq,
                                  [<OPT;DEF(1)>]continuity:int,
                                  [<OPT;DEF(0.0)>]edgeTolerance:float,
                                  [<OPT;DEF(0.0)>]interiorTolerance:float,
-                                 [<OPT;DEF(0.0)>]angleTolerance:float) : Guid =
+                                 [<OPT;DEF(0.0)>]angleToleranceRadians:float) : Guid =
         let curvesGeometry = curves |> RArr.mapSeq RhinoScriptSyntax.CoerceCurve
-        let geometry = RhinoScriptSyntax.MakeNetworkSrf(curvesGeometry, continuity, edgeTolerance, interiorTolerance, angleTolerance)
+        let geometry = RhinoScriptSyntax.MakeNetworkSrf(curvesGeometry, continuity, edgeTolerance, interiorTolerance, angleToleranceRadians)
         let rc = State.Doc.Objects.AddSurface(geometry)
         State.Doc.Views.Redraw()
         rc
@@ -211,15 +212,16 @@ module AutoOpenSurface =
     ///    3 = curvature</param>
     /// <param name="edgeTolerance">(float) Optional, Edge tolerance</param>
     /// <param name="interiorTolerance">(float) Optional, Interior tolerance</param>
-    /// <param name="angleTolerance">(float) Optional, Angle tolerance , in radians?</param>
+    /// <param name="angleToleranceRadians">(float) Optional, default value: <c>0.0</c>. Angle tolerance in radians, passed directly to RhinoCommon.
+    ///    Use <c>RhinoMath.ToRadians</c> to convert from degrees to radians.</param>
     /// <returns>(NurbsSurface) Newly created geometry. The caller owns the returned objects.</returns>
     static member MakeNetworkSrf( curves:Curve seq,
                                  [<OPT;DEF(1)>]continuity:int,
                                  [<OPT;DEF(0.0)>]edgeTolerance:float,
                                  [<OPT;DEF(0.0)>]interiorTolerance:float,
-                                 [<OPT;DEF(0.0)>]angleTolerance:float) : NurbsSurface =
+                                 [<OPT;DEF(0.0)>]angleToleranceRadians:float) : NurbsSurface =
         let curves  = curves |> RArr.mapSeq (fun geometry -> geometry)
-        let surf, _ = NurbsSurface.CreateNetworkSurface(curves, continuity, edgeTolerance, interiorTolerance, angleTolerance)// 0.0 Tolerance OK ? TODO
+        let surf, _ = NurbsSurface.CreateNetworkSurface(curves, continuity, edgeTolerance, interiorTolerance, angleToleranceRadians)// 0.0 Tolerance OK ? TODO
         if notNull surf then
             surf
         else
@@ -695,17 +697,17 @@ module AutoOpenSurface =
     /// <summary>Create a Surface by revolving a Curve around an axis.</summary>
     /// <param name="curveId">(Guid) Identifier of profile Curve</param>
     /// <param name="axis">(Line) Line for the rail revolve axis</param>
-    /// <param name="startAngle">(float) Optional, default value: <c>0.0</c>
-    ///    Start angles of revolve</param>
-    /// <param name="endAngle">(float) Optional, default value: <c>360.0</c>
-    ///    End angles of revolve</param>
+    /// <param name="startAngleDegrees">(float) Optional, default value: <c>0.0</c>
+    ///    Start angle of revolution in degrees</param>
+    /// <param name="endAngleDegrees">(float) Optional, default value: <c>360.0</c>
+    ///    End angle of revolution in degrees</param>
     /// <returns>(Guid) identifier of new object.</returns>
     static member AddRevSrf( curveId:Guid,
                              axis:Line,
-                             [<OPT;DEF(0.0)>]startAngle:float,
-                             [<OPT;DEF(360.0)>]endAngle:float) : Guid =
+                             [<OPT;DEF(0.0)>]startAngleDegrees:float,
+                             [<OPT;DEF(360.0)>]endAngleDegrees:float) : Guid =
         let curveIdGeometry = RhinoScriptSyntax.CoerceCurve(curveId)
-        let geometry = RhinoScriptSyntax.MakeRevSrf(curveIdGeometry, axis, startAngle, endAngle)
+        let geometry = RhinoScriptSyntax.MakeRevSrf(curveIdGeometry, axis, startAngleDegrees, endAngleDegrees)
         let rc = State.Doc.Objects.AddSurface(geometry)
         State.Doc.Views.Redraw()
         rc
@@ -714,22 +716,22 @@ module AutoOpenSurface =
     /// <summary>Create a Surface by revolving a Curve around an axis. Returns geometry without adding it.</summary>
     /// <param name="curveGeo">(Curve) Object of profile Curve</param>
     /// <param name="axis">(Line) Line for the rail revolve axis</param>
-    /// <param name="startAngle">(float) Optional, default value: <c>0.0</c>
-    ///    Start angles of revolve</param>
-    /// <param name="endAngle">(float) Optional, default value: <c>360.0</c>
-    ///    End angles of revolve</param>
+    /// <param name="startAngleDegrees">(float) Optional, default value: <c>0.0</c>
+    ///    Start angle of revolution in degrees</param>
+    /// <param name="endAngleDegrees">(float) Optional, default value: <c>360.0</c>
+    ///    End angle of revolution in degrees</param>
     /// <returns>(NurbsSurface) Newly created geometry. The caller owns the returned objects.</returns>
     static member MakeRevSrf( curveGeo:Curve,
                              axis:Line,
-                             [<OPT;DEF(0.0)>]startAngle:float,
-                             [<OPT;DEF(360.0)>]endAngle:float) : NurbsSurface =
+                             [<OPT;DEF(0.0)>]startAngleDegrees:float,
+                             [<OPT;DEF(360.0)>]endAngleDegrees:float) : NurbsSurface =
         let curve = curveGeo
-        let startAngle = toRadians(startAngle)
-        let endAngle = toRadians(endAngle)
-        let srf = RevSurface.Create(curve, axis, startAngle, endAngle)
-        if isNull srf then RhinoScriptingException.Raise "MakeRevSrf failed. curveGeo:'%s' axis:'%A' startAngle:'%A' endAngle:'%A'" (Pretty.str curveGeo) axis startAngle endAngle
+        let startAngleRadians = toRadians(startAngleDegrees)
+        let endAngleRadians = toRadians(endAngleDegrees)
+        let srf = RevSurface.Create(curve, axis, startAngleRadians, endAngleRadians)
+        if isNull srf then RhinoScriptingException.Raise "MakeRevSrf failed. curveGeo:'%s' axis:'%A' startAngleDegrees:'%A' endAngleDegrees:'%A'" (Pretty.str curveGeo) axis startAngleDegrees endAngleDegrees
         let ns = srf.ToNurbsSurface()
-        if isNull ns then RhinoScriptingException.Raise "MakeRevSrf failed. curveGeo:'%s' axis:'%A' startAngle:'%A' endAngle:'%A'" (Pretty.str curveGeo) axis startAngle endAngle
+        if isNull ns then RhinoScriptingException.Raise "MakeRevSrf failed. curveGeo:'%s' axis:'%A' startAngleDegrees:'%A' endAngleDegrees:'%A'" (Pretty.str curveGeo) axis startAngleDegrees endAngleDegrees
         ns
 
 

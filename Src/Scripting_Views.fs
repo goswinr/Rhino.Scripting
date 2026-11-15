@@ -377,19 +377,19 @@ module AutoOpenViews =
     ///    1 = left
     ///    2 = down
     ///    3 = up</param>
-    /// <param name="angle">(float) The angle to rotate</param>
+    /// <param name="angleDegrees">(float) The angle to rotate in degrees</param>
     /// <param name="view">(string) Optional, Title of the view. If omitted, current active view is used</param>
     /// <returns>(unit) void, nothing.</returns>
     static member RotateCamera( direction:int,
-                                angle:float,
+                                angleDegrees:float,
                                 [<OPT;DEF("")>]view:string) : unit =
         let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         let viewport = view.ActiveViewport
         if direction < 0 || direction > 3 then RhinoScriptingException.Raise "RotateCamera: direction must be 0, 1, 2 or 3"
-        let mutable angle = RhinoMath.ToRadians( abs(angle))
+        let mutable angleRadians = RhinoMath.ToRadians( abs(angleDegrees))
         let targetdistance = (viewport.CameraLocation-viewport.CameraTarget)*viewport.CameraZ
         let mutable axis = viewport.CameraY
-        if direction = 0 || direction = 2 then angle <- -angle
+        if direction = 0 || direction = 2 then angleRadians <- -angleRadians
         if direction = 0 || direction = 1 then
             if ApplicationSettings.ViewSettings.RotateToView then
                 axis <- viewport.CameraY
@@ -398,8 +398,8 @@ module AutoOpenViews =
         elif direction = 2 || direction = 3 then
             axis <- viewport.CameraX
 
-        if ApplicationSettings.ViewSettings.RotateReverseKeyboard then angle<- -angle
-        let rot = Transform.Rotation(angle, axis, Point3d.Origin)
+        if ApplicationSettings.ViewSettings.RotateReverseKeyboard then angleRadians<- -angleRadians
+        let rot = Transform.Rotation(angleRadians, axis, Point3d.Origin)
         let camUp = rot * viewport.CameraY
         let camDir = -(rot * viewport.CameraZ)
         let target = viewport.CameraLocation + targetdistance*camDir
@@ -415,22 +415,20 @@ module AutoOpenViews =
     ///    1 = left
     ///    2 = down
     ///    3 = up</param>
-    /// <param name="angle">(float) Angle to rotate. If omitted, the angle of rotation is specified
-    ///    by the "Increment in divisions of a circle" parameter specified in
-    ///    Options command's View tab</param>
+    /// <param name="angleDegrees">(float) The angle to rotate in degrees.</param>
     /// <param name="view">(string) Optional, Title of the view. If omitted, the current active view is used</param>
     /// <returns>(unit) void, nothing.</returns>
     static member RotateView( direction:int,
-                              angle:float,
+                              angleDegrees:float,
                               [<OPT;DEF("")>]view:string) : unit =
         let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         let viewport = view.ActiveViewport
-        let mutable angle =  RhinoMath.ToRadians( abs(angle))
-        if ApplicationSettings.ViewSettings.RotateReverseKeyboard then angle <- -angle
-        if direction = 0 then viewport.KeyboardRotate(true, angle)       |> ignore<bool>
-        elif direction = 1 then viewport.KeyboardRotate(true, -angle)    |> ignore<bool>
-        elif direction = 2 then viewport.KeyboardRotate(false, -angle)   |> ignore<bool>
-        elif direction = 3 then viewport.KeyboardRotate(false, angle)    |> ignore<bool>
+        let mutable angleRadians =  RhinoMath.ToRadians( abs(angleDegrees))
+        if ApplicationSettings.ViewSettings.RotateReverseKeyboard then angleRadians <- -angleRadians
+        if direction = 0 then viewport.KeyboardRotate(true, angleRadians)       |> ignore<bool>
+        elif direction = 1 then viewport.KeyboardRotate(true, -angleRadians)    |> ignore<bool>
+        elif direction = 2 then viewport.KeyboardRotate(false, -angleRadians)   |> ignore<bool>
+        elif direction = 3 then viewport.KeyboardRotate(false, angleRadians)    |> ignore<bool>
         view.Redraw()
 
 
@@ -575,19 +573,19 @@ module AutoOpenViews =
     /// <param name="direction">(int) The direction to rotate the view where
     ///    0 = right
     ///    1 = left</param>
-    /// <param name="angle">(float) The angle in degrees to rotate</param>
+    /// <param name="angleDegrees">(float) The angle in degrees to rotate</param>
     /// <param name="view">(string) Optional, Title of the view. If omitted, the current active view is used</param>
     /// <returns>(unit) void, nothing.</returns>
     static member TiltView( direction:int,
-                            angle:float,
+                            angleDegrees:float,
                             [<OPT;DEF("")>]view:string) : unit =
         let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         let viewport = view.ActiveViewport
-        let mutable angle = RhinoMath.ToRadians(abs angle)
-        if ApplicationSettings.ViewSettings.RotateReverseKeyboard then angle <- -angle
+        let mutable angleRadians = RhinoMath.ToRadians(abs angleDegrees)
+        if ApplicationSettings.ViewSettings.RotateReverseKeyboard then angleRadians <- -angleRadians
         let axis = viewport.CameraLocation - viewport.CameraTarget
-        if direction = 0 then viewport.Rotate(angle, axis, viewport.CameraLocation) |> ignore<bool>
-        elif direction = 1 then viewport.Rotate(-angle, axis, viewport.CameraLocation)   |> ignore<bool>
+        if direction = 0 then viewport.Rotate(angleRadians, axis, viewport.CameraLocation) |> ignore<bool>
+        elif direction = 1 then viewport.Rotate(-angleRadians, axis, viewport.CameraLocation)   |> ignore<bool>
         view.Redraw()
 
 

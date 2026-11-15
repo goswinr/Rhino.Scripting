@@ -381,8 +381,8 @@ From [Src/Scripting_Curve.fs](../../Src/Scripting_Curve.fs).
 | `MakeSubCrv` | `curveGeo: Curve * param0: float * param1: float -> Curve` | Computes MakeSubCrv from geometry without modifying the document. |
 | `AddTweenCurves` | `fromCurveId: Guid * toCurveId: Guid * ?numberOfCurves: int = 1 * ?method: int = 0 * ?sampleNumber: int = 10 -> ResizeArray<Guid>` | Creates Curves between two open or closed input Curves. |
 | `MakeTweenCurves` | `fromCurve: Curve * toCurve: Curve * ?numberOfCurves: int = 1 * ?method: int = 0 * ?sampleNumber: int = 10 -> ResizeArray<Curve>` | Computes MakeTweenCurves from geometry without modifying the document. |
-| `ArcAngle` | `curveId: Guid * ?segmentIndex: int = -1 -> float` | Returns the angle of an arc Curve object. |
-| `ArcAngle` | `curveGeo: Curve * ?segmentIndex: int = -1 -> float` | Returns the angle of an arc Curve object. |
+| `ArcAngle` | `curveId: Guid * ?segmentIndex: int = -1 -> float` | Returns the angle in degrees of an arc Curve object. |
+| `ArcAngle` | `curveGeo: Curve * ?segmentIndex: int = -1 -> float` | Returns the angle in degrees of an arc Curve object. |
 | `ArcCenterPoint` | `curveId: Guid * ?segmentIndex: int = -1 -> Point3d` | Returns the center point of an arc Curve object. |
 | `ArcCenterPoint` | `curveGeo: Curve * ?segmentIndex: int = -1 -> Point3d` | Returns the center point of an arc Curve object. |
 | `ArcMidPoint` | `curveId: Guid * ?segmentIndex: int = -1 -> Point3d` | Returns the mid point of an arc Curve object. |
@@ -402,8 +402,8 @@ From [Src/Scripting_Curve.fs](../../Src/Scripting_Curve.fs).
 | `CloseCurve` | `curveGeo: Curve * ?tolerance: float = 0.0 -> Curve` | Computes CloseCurve from geometry without modifying the document. |
 | `ClosedCurveOrientation` | `curveId: Guid * ?direction: Vector3d = Vector3d() -> int` | Determine the orientation (counter-clockwise or clockwise) of a closed, planar Curve. |
 | `ClosedCurveOrientation` | `curveGeo: Curve * ?direction: Vector3d = Vector3d() -> int` | Determine the orientation (counter-clockwise or clockwise) of a closed, planar Curve. |
-| `ConvertCurveToPolyline` | `curveId: Guid * ?angleTolerance: float = 0.0 * ?tolerance: float = 0.0 * ?deleteInput: bool = false * ?minEdgeLength: float = 0.0 * ?maxEdgeLength: float = 0.0 -> Guid` | Convert Curve to a Polyline Curve. |
-| `ConvertCurveToPolyline` | `curveGeo: Curve * ?angleTolerance: float = 0.0 * ?tolerance: float = 0.0 * ?minEdgeLength: float = 0.0 * ?maxEdgeLength: float = 0.0 -> PolylineCurve` | Computes ConvertCurveToPolyline from geometry without modifying the document. |
+| `ConvertCurveToPolyline` | `curveId: Guid * ?angleToleranceDegrees: float = 0.0 * ?tolerance: float = 0.0 * ?deleteInput: bool = false * ?minEdgeLength: float = 0.0 * ?maxEdgeLength: float = 0.0 -> Guid` | Convert Curve to a Polyline Curve. |
+| `ConvertCurveToPolyline` | `curveGeo: Curve * ?angleToleranceDegrees: float = 0.0 * ?tolerance: float = 0.0 * ?minEdgeLength: float = 0.0 * ?maxEdgeLength: float = 0.0 -> PolylineCurve` | Computes ConvertCurveToPolyline from geometry without modifying the document. |
 | `CreateNurbsCurve` | `points: Point3d seq * knots: float seq * degree: int * ?weights: float seq = null -> NurbsCurve` | Creates a NURBS Curve geometry, but does not add or draw it to the document. |
 | `CurveArcLengthPoint` | `curveId: Guid * length: float * ?fromStart: bool = true -> Point3d` | Returns the point on the Curve that is a specified arc length from the start of the Curve. |
 | `CurveArcLengthPoint` | `curveGeo: Curve * length: float * ?fromStart: bool = true -> Point3d` | Returns the point on the Curve that is a specified arc length from the start of the Curve. |
@@ -495,8 +495,8 @@ From [Src/Scripting_Curve.fs](../../Src/Scripting_Curve.fs).
 | `CurveStartPoint` | `curveId: Guid * point: Point3d -> unit` | Sets the start point of a Curve object. |
 | `CurveStartTangent` | `curveId: Guid * ?segmentIndex: int = -1 -> Vector3d` | Returns the tangent at start point of a Curve object pointing in direction of the Curve . |
 | `CurveStartTangent` | `curveGeo: Curve * ?segmentIndex: int = -1 -> Vector3d` | Returns the tangent at start point of a Curve object pointing in direction of the Curve . |
-| `CurveSurfaceIntersection` | `curveId: Guid * surfaceId: Guid * ?tolerance: float = 0.0 * ?angleTolerance: float = 0.0 -> ResizeArray<int * Point3d * Point3d * Point3d * Point3d * float * float * float * float * float * float>` | Calculates intersection of a Curve object with a Surface object. |
-| `CurveSurfaceIntersection` | `curveGeo: Curve * surfaceGeo: Surface * ?tolerance: float = 0.0 * ?angleTolerance: float = 0.0 -> ResizeArray<int * Point3d * Point3d * Point3d * Point3d * float * float * float * float * float * float>` | Calculates intersection of a Curve object with a Surface object. |
+| `CurveSurfaceIntersection` | `curveId: Guid * surfaceId: Guid * ?tolerance: float = 0.0 * ?angleToleranceDegrees: float = 0.0 -> ResizeArray<int * Point3d * Point3d * Point3d * Point3d * float * float * float * float * float * float>` | Calculates intersection of a Curve object with a Surface object. |
+| `CurveSurfaceIntersection` | `curveGeo: Curve * surfaceGeo: Surface * ?tolerance: float = 0.0 * ?angleToleranceDegrees: float = 0.0 -> ResizeArray<int * Point3d * Point3d * Point3d * Point3d * float * float * float * float * float * float>` | Calculates intersection of a Curve object with a Surface object. |
 | `CurveTangent` | `curveId: Guid * parameter: float * ?segmentIndex: int = -1 -> Vector3d` | Returns a 3D vector that is the tangent to a Curve at a parameter. |
 | `CurveTangent` | `curveGeo: Curve * parameter: float * ?segmentIndex: int = -1 -> Vector3d` | Returns a 3D vector that is the tangent to a Curve at a parameter. |
 | `CurveWeights` | `curveId: Guid * ?segmentIndex: int = -1 -> ResizeArray<float>` | Returns list of weights that are assigned to the control points of a Curve. |
@@ -528,8 +528,8 @@ From [Src/Scripting_Curve.fs](../../Src/Scripting_Curve.fs).
 | `ExtendCurvePoint` | `curveId: Guid * side: int * point: Point3d * ?extensionType: int = -1 -> Guid` | Extends a non-closed Curve by smooth extension to a point. |
 | `ExtendCurvePoint` | `curveGeo: Curve * side: int * point: Point3d * ?extensionType: int = -1 -> Curve` | Computes ExtendCurvePoint from geometry without modifying the document. |
 | `FairCurve` | `curveId: Guid * tolerance: float -> bool` | Fairs a Curve. |
-| `FitCurve` | `curveId: Guid * ?degree: int = 3 * ?distanceTolerance: float = 0.0 * ?angleTolerance: float = -1.0 -> Guid` | Reduces number of Curve control points while maintaining the Curve's same general shape. |
-| `FitCurve` | `curveGeo: Curve * ?degree: int = 3 * ?distanceTolerance: float = 0.0 * ?angleTolerance: float = -1.0 -> Curve` | Computes FitCurve from geometry without modifying the document. |
+| `FitCurve` | `curveId: Guid * ?degree: int = 3 * ?distanceTolerance: float = 0.0 * ?angleToleranceDegrees: float = -1.0 -> Guid` | Reduces number of Curve control points while maintaining the Curve's same general shape. |
+| `FitCurve` | `curveGeo: Curve * ?degree: int = 3 * ?distanceTolerance: float = 0.0 * ?angleToleranceDegrees: float = -1.0 -> Curve` | Computes FitCurve from geometry without modifying the document. |
 | `InsertCurveKnot` | `curveId: Guid * parameter: float * ?symmetrical: bool = false -> bool` | Inserts a knot into a Curve object. |
 | `IsArc` | `curveId: Guid * ?tolerance: float = 0.0 * ?segmentIndex: int = -1 -> bool` | Checks if an object is an open arc Curve. |
 | `IsArc` | `curveGeo: GeometryBase * ?tolerance: float = 0.0 * ?segmentIndex: int = -1 -> bool` | Checks if an object is an open arc Curve. |
@@ -566,8 +566,8 @@ From [Src/Scripting_Curve.fs](../../Src/Scripting_Curve.fs).
 | `LineFitFromPoints` | `points: Point3d seq -> Line` | Returns a line that was fit through an array of 3D points. |
 | `MakeCurveNonPeriodic` | `curveId: Guid * ?deleteInput: bool = false -> Guid` | Makes a periodic Curve non-periodic. |
 | `MakeCurveNonPeriodic` | `curveGeo: Curve -> NurbsCurve` | Computes MakeCurveNonPeriodic from geometry without modifying the document. |
-| `MeanCurve` | `curve0: Guid * curve1: Guid * ?tolerance: float = 0.0 -> Guid` | Creates an average Curve from two Curves. |
-| `MeanCurve` | `curve0: Curve * curve1: Curve * ?tolerance: float = 0.0 -> Curve` | Computes MeanCurve from geometry without modifying the document. |
+| `MeanCurve` | `curve0: Guid * curve1: Guid * ?angleToleranceRadians: float = 0.0 -> Guid` | Creates an average Curve from two Curves. |
+| `MeanCurve` | `curve0: Curve * curve1: Curve * ?angleToleranceRadians: float = 0.0 -> Curve` | Computes MeanCurve from geometry without modifying the document. |
 | `MeshPolyline` | `polylineId: Guid -> Guid` | Creates a polygon Mesh object based on a closed Polyline Curve object. |
 | `MeshPolyline` | `polylineInput: Curve -> Mesh` | Computes MeshPolyline from geometry without modifying the document. |
 | `OffsetCurve` | `curveId: Guid * direction: Point3d * distance: float * ?normal: Vector3d = Vector3d() * ?style: int = 1 -> ResizeArray<Guid>` | Offsets a Curve by a distance. |
@@ -701,7 +701,7 @@ From [Src/Scripting_Document.fs](../../Src/Scripting_Document.fs).
 | `RenderColor` | `item: int * color: Color -> unit` | Sets the render ambient light or background color. |
 | `RenderMeshDensity` | `unit -> float` | Returns the render Mesh density property of the active document. |
 | `RenderMeshDensity` | `density: float -> unit` | Sets the render Mesh density property of the active document. |
-| `RenderMeshMaxAngle` | `unit -> float` | Returns the render Mesh maximum angle property of the active document. |
+| `RenderMeshMaxAngle` | `unit -> float` | Returns the render Mesh maximum angle in degrees of the active document. |
 | `RenderMeshMaxAngle` | `angleDegrees: float -> unit` | Sets the render Mesh maximum angle property of the active document. |
 | `RenderMeshMaxAspectRatio` | `unit -> float` | Returns the render Mesh maximum aspect ratio property of the active document. |
 | `RenderMeshMaxAspectRatio` | `ratio: float -> unit` | Sets the render Mesh maximum aspect ratio property of the active document. |
@@ -725,9 +725,9 @@ From [Src/Scripting_Document.fs](../../Src/Scripting_Document.fs).
 | `UnitAbsoluteTolerance` | `tolerance: float -> unit` | Sets the document's absolute tolerance. |
 | `UnitAbsoluteTolerance` | `modelUnits: bool -> float` | Returns the absolute tolerance for model or page units. |
 | `UnitAbsoluteTolerance` | `tolerance: float * modelUnits: bool -> unit` | Sets the absolute tolerance for model or page units. |
-| `UnitAngleTolerance` | `unit -> float` | Return the document's angle tolerance. |
+| `UnitAngleTolerance` | `unit -> float` | Return the document's angle tolerance in degrees. |
 | `UnitAngleTolerance` | `angleToleranceDegrees: float -> unit` | Set the document's angle tolerance. |
-| `UnitAngleTolerance` | `modelUnits: bool -> float` | Returns the angle tolerance for model or page units. |
+| `UnitAngleTolerance` | `modelUnits: bool -> float` | Returns the angle tolerance in degrees for model or page units. |
 | `UnitAngleTolerance` | `angleToleranceDegrees: float * modelUnits: bool -> unit` | Sets the angle tolerance for model or page units. |
 | `UnitDistanceDisplayPrecision` | `unit -> int` | Return the document's distance display precision. |
 | `UnitDistanceDisplayPrecision` | `precision: int -> unit` | Set the document's distance display precision. |
@@ -916,10 +916,10 @@ From [Src/Scripting_Hatch.fs](../../Src/Scripting_Hatch.fs).
 
 | Name | Signature | Summary |
 |:--|:--|:--|
-| `AddHatch` | `curveId: Guid * ?hatchPattern: string = null * ?scale: float = 1.0 * ?rotation: float = 0.0 * ?tolerance: float = 0.0 -> Guid` | Creates a new Hatch object from a closed planar Curve object. |
-| `MakeHatch` | `curve: Curve * ?hatchPattern: string = null * ?scale: float = 1.0 * ?rotation: float = 0.0 * ?tolerance: float = 0.0 -> Hatch` | Creates one Hatch object from one closed planar Curve. |
-| `AddHatches` | `curveIds: Guid seq * ?hatchPattern: string = null * ?scale: float = 1.0 * ?rotation: float = 0.0 * ?tolerance: float = 0.0 -> ResizeArray<Guid>` | Creates one or more new Hatch objects from a list of closed planar Curves. |
-| `MakeHatches` | `curves: Curve seq * ?hatchPattern: string = null * ?scale: float = 1.0 * ?rotation: float = 0.0 * ?tolerance: float = 0.0 -> ResizeArray<Hatch>` | Creates one or more new Hatch objects from a list of closed planar Curves. |
+| `AddHatch` | `curveId: Guid * ?hatchPattern: string = null * ?scale: float = 1.0 * ?rotationDegrees: float = 0.0 * ?tolerance: float = 0.0 -> Guid` | Creates a new Hatch object from a closed planar Curve object. |
+| `MakeHatch` | `curve: Curve * ?hatchPattern: string = null * ?scale: float = 1.0 * ?rotationDegrees: float = 0.0 * ?tolerance: float = 0.0 -> Hatch` | Creates one Hatch object from one closed planar Curve. |
+| `AddHatches` | `curveIds: Guid seq * ?hatchPattern: string = null * ?scale: float = 1.0 * ?rotationDegrees: float = 0.0 * ?tolerance: float = 0.0 -> ResizeArray<Guid>` | Creates one or more new Hatch objects from a list of closed planar Curves. |
+| `MakeHatches` | `curves: Curve seq * ?hatchPattern: string = null * ?scale: float = 1.0 * ?rotationDegrees: float = 0.0 * ?tolerance: float = 0.0 -> ResizeArray<Hatch>` | Creates one or more new Hatch objects from a list of closed planar Curves. |
 | `AddHatchPatterns` | `filename: string * ?replace: bool = false -> ResizeArray<string>` | Adds Hatch patterns to the document by importing Hatch pattern definitions from a pattern file. |
 | `CurrentHatchPattern` | `unit -> string` | Returns the current Hatch pattern file. |
 | `CurrentHatchPattern` | `hatchPattern: string -> unit` | Sets the current Hatch pattern file. |
@@ -933,10 +933,10 @@ From [Src/Scripting_Hatch.fs](../../Src/Scripting_Hatch.fs).
 | `HatchPatternDescription` | `hatchPattern: string -> string` | Returns the description of a Hatch pattern. |
 | `HatchPatternFillType` | `hatchPattern: string -> int` | Returns the fill type of a Hatch pattern. |
 | `HatchPatternNames` | `unit -> ResizeArray<string>` | Returns the names of all of the Hatch patterns in the document. |
-| `HatchRotation` | `hatchId: Guid -> float` | Returns the rotation applied to the Hatch pattern when it is mapped to the Hatch's Plane. |
-| `HatchRotation` | `hatchId: Guid * rotation: float -> unit` | Modifies the rotation applied to the Hatch pattern when it is mapped to the Hatch's Plane. |
-| `HatchRotation` | `hatchIds: Guid seq * rotation: float -> unit` | Modifies the rotation applied to the Hatch pattern when it is mapped to the Hatch's Plane. |
-| `HatchRotation` | `hatchGeo: Hatch -> float` | Returns the rotation applied to the Hatch pattern when it is mapped to the Hatch's Plane. |
+| `HatchRotation` | `hatchId: Guid -> float` | Returns the rotation in degrees applied to the Hatch pattern when it is mapped to the Hatch's Plane. |
+| `HatchRotation` | `hatchId: Guid * rotationDegrees: float -> unit` | Modifies the rotation applied to the Hatch pattern when it is mapped to the Hatch's Plane. |
+| `HatchRotation` | `hatchIds: Guid seq * rotationDegrees: float -> unit` | Modifies the rotation applied to the Hatch pattern when it is mapped to the Hatch's Plane. |
+| `HatchRotation` | `hatchGeo: Hatch -> float` | Returns the rotation in degrees applied to the Hatch pattern when it is mapped to the Hatch's Plane. |
 | `HatchScale` | `hatchId: Guid -> float` | Returns the scale applied to the Hatch pattern when it is mapped to the Hatch's Plane. |
 | `HatchScale` | `hatchId: Guid * scale: float -> unit` | Modifies the scale applied to the Hatch pattern when it is mapped to the Hatch's Plane. |
 | `HatchScale` | `hatchIds: Guid seq * scale: float -> unit` | Modifies the scale applied to the Hatch pattern when it is mapped to the Hatch's Plane. |
@@ -1332,10 +1332,10 @@ From [Src/Scripting_Object.fs](../../Src/Scripting_Object.fs).
 | `ObjectType` | `objectId: Guid -> int` | Returns the object type. |
 | `OrientObject` | `objectId: Guid * referencePts: IList<Point3d> * targetPts: IList<Point3d> * ?flags: int = 0 -> Guid` | Orients a single object based on input points. |
 | `OrientObject` | `geometry: GeometryBase * referencePts: IList<Point3d> * targetPts: IList<Point3d> * ?scale: bool = false -> GeometryBase` | Returns a transformed duplicate of the input geometry. |
-| `RotateObject` | `objectId: Guid * centerPoint: Point3d * rotationAngle: float * ?axis: Vector3d = Vector3d() * ?copy: bool = false -> Guid` | Rotates a single object. |
-| `RotateObject` | `geometry: GeometryBase * centerPoint: Point3d * rotationAngle: float * ?axis: Vector3d = Vector3d() -> GeometryBase` | Returns a transformed duplicate of the input geometry. |
-| `RotateObjects` | `objectIds: Guid seq * centerPoint: Point3d * rotationAngle: float * ?axis: Vector3d = Vector3d() * ?copy: bool = false -> ResizeArray<Guid>` | Rotates multiple objects. |
-| `RotateObjects` | `geometries: GeometryBase seq * centerPoint: Point3d * rotationAngle: float * ?axis: Vector3d = Vector3d() -> ResizeArray<GeometryBase>` | Returns transformed duplicates of the input geometries. |
+| `RotateObject` | `objectId: Guid * centerPoint: Point3d * rotationAngleDegrees: float * ?axis: Vector3d = Vector3d() * ?copy: bool = false -> Guid` | Rotates a single object. |
+| `RotateObject` | `geometry: GeometryBase * centerPoint: Point3d * rotationAngleDegrees: float * ?axis: Vector3d = Vector3d() -> GeometryBase` | Returns a transformed duplicate of the input geometry. |
+| `RotateObjects` | `objectIds: Guid seq * centerPoint: Point3d * rotationAngleDegrees: float * ?axis: Vector3d = Vector3d() * ?copy: bool = false -> ResizeArray<Guid>` | Rotates multiple objects. |
+| `RotateObjects` | `geometries: GeometryBase seq * centerPoint: Point3d * rotationAngleDegrees: float * ?axis: Vector3d = Vector3d() -> ResizeArray<GeometryBase>` | Returns transformed duplicates of the input geometries. |
 | `ScaleObject` | `objectId: Guid * origin: Point3d * scale: (float * float * float) * ?copy: bool = false -> Guid` | Scales a single object. |
 | `ScaleObject` | `geometry: GeometryBase * origin: Point3d * scale: (float * float * float) -> GeometryBase` | Returns a transformed duplicate of the input geometry. |
 | `ScaleObject` | `objectId: Guid * origin: Point3d * scale: float * ?copy: bool = false -> Guid` | Scales a single object. |
@@ -1395,8 +1395,8 @@ From [Src/Scripting_PointVector.fs](../../Src/Scripting_PointVector.fs).
 
 | Name | Signature | Summary |
 |:--|:--|:--|
-| `IsVectorParallelTo` | `vector1: Vector3d * vector2: Vector3d * ?toleranceDegree: float = 0.0 -> int` | Compares two vectors to see if they are parallel within one degree or custom tolerance. |
-| `IsVectorPerpendicularTo` | `vector1: Vector3d * vector2: Vector3d * ?toleranceDegree: float = 0.0 -> bool` | Compares two vectors to see if they are perpendicular. |
+| `IsVectorParallelTo` | `vector1: Vector3d * vector2: Vector3d * ?toleranceDegrees: float = 0.0 -> int` | Compares two vectors to see if they are parallel within one degree or custom tolerance. |
+| `IsVectorPerpendicularTo` | `vector1: Vector3d * vector2: Vector3d * ?toleranceDegrees: float = 0.0 -> bool` | Compares two vectors to see if they are perpendicular. |
 | `IsVectorTiny` | `vector: Vector3d -> bool` | Checks if a vector is very short. |
 | `IsVectorZero` | `vector: Vector3d -> bool` | Checks if a vector is zero. |
 | `PointAdd` | `point1: Point3d * point2: Point3d -> Point3d` | Adds a 3D point or a 3D vector to a 3D point. |
@@ -1482,8 +1482,8 @@ From [Src/Scripting_Surface.fs](../../Src/Scripting_Surface.fs).
 | `MakeEdgeSrf` | `curveGeos: Curve seq -> Brep` | Creates a Surface from 2, 3, or 4 edge Curves. |
 | `AddLoftSrf` | `objectIds: Guid seq * ?start: Point3d = Point3d() * ?ende: Point3d = Point3d() * ?loftType: int = 0 * ?rebuild: int = 0 * ?refit: float = 0.0 * ?closed: bool = false -> ResizeArray<Guid>` | Adds a Surface created by lofting Curves to the document. - no Curve sorting performed. pass in Curves in the order you want them sorted - directions of open Curves not adjusted. |
 | `MakeLoftSrf` | `geometryObjects: Curve seq * ?start: Point3d = Point3d() * ?ende: Point3d = Point3d() * ?loftType: int = 0 * ?rebuild: int = 0 * ?refit: float = 0.0 * ?closed: bool = false -> ResizeArray<Brep>` | Creates a Surface created by lofting Curves. - no Curve sorting performed. pass in Curves in the order you want them sorted - directions of open Curves not adjusted. |
-| `AddNetworkSrf` | `curves: Guid seq * ?continuity: int = 1 * ?edgeTolerance: float = 0.0 * ?interiorTolerance: float = 0.0 * ?angleTolerance: float = 0.0 -> Guid` | Creates a Surface from a network of crossing Curves. |
-| `MakeNetworkSrf` | `curves: Curve seq * ?continuity: int = 1 * ?edgeTolerance: float = 0.0 * ?interiorTolerance: float = 0.0 * ?angleTolerance: float = 0.0 -> NurbsSurface` | Creates a Surface from a network of crossing Curves. |
+| `AddNetworkSrf` | `curves: Guid seq * ?continuity: int = 1 * ?edgeTolerance: float = 0.0 * ?interiorTolerance: float = 0.0 * ?angleToleranceRadians: float = 0.0 -> Guid` | Creates a Surface from a network of crossing Curves. |
+| `MakeNetworkSrf` | `curves: Curve seq * ?continuity: int = 1 * ?edgeTolerance: float = 0.0 * ?interiorTolerance: float = 0.0 * ?angleToleranceRadians: float = 0.0 -> NurbsSurface` | Creates a Surface from a network of crossing Curves. |
 | `AddNurbsSurface` | `pointCount: (int * int) * points: IList<Point3d> * knotsU: float seq * knotsV: float seq * degree: (int * int) * ?weights: IList<float> = null -> Guid` | Adds a NURBS Surface object to the document. |
 | `AddPatch` | `objectIds: Guid seq * startSurfaceId: Guid * ?tolerance: float = 0.0 * ?trim: bool = true * ?pointSpacing: float = 0.1 * ?flexibility: float = 1.0 * ?surfacePull: float = 1.0 * ?fixEdges: bool = false -> Guid` | Fits a Surface through Curve, point, point cloud, and Mesh objects. |
 | `AddPatch` | `objectIds: Guid seq * uvSpans: (int * int) * ?tolerance: float = 0.0 * ?trim: bool = true * ?pointSpacing: float = 0.1 * ?flexibility: float = 1.0 * ?surfacePull: float = 1.0 * ?fixEdges: bool = false -> Guid` | Fits a Surface through Curve, point, point cloud, and Mesh objects. |
@@ -1498,8 +1498,8 @@ From [Src/Scripting_Surface.fs](../../Src/Scripting_Surface.fs).
 | `AddPlaneSurface` | `plane: Plane * uDir: float * vDir: float -> Guid` | Create a Plane Surface and add it to the document. |
 | `AddRailRevSrf` | `profile: Guid * rail: Guid * axis: Line * ?scaleHeight: bool = false -> Guid` | Adds a Surface created through profile Curves that define the Surface shape and two Curves that defines a Surface edge. |
 | `MakeRailRevSrf` | `profile: Curve * rail: Curve * axis: Line * ?scaleHeight: bool = false -> NurbsSurface` | Creates a Surface created through profile Curves that define the Surface shape and two Curves that defines a Surface edge. |
-| `AddRevSrf` | `curveId: Guid * axis: Line * ?startAngle: float = 0.0 * ?endAngle: float = 360.0 -> Guid` | Create a Surface by revolving a Curve around an axis. |
-| `MakeRevSrf` | `curveGeo: Curve * axis: Line * ?startAngle: float = 0.0 * ?endAngle: float = 360.0 -> NurbsSurface` | Create a Surface by revolving a Curve around an axis. |
+| `AddRevSrf` | `curveId: Guid * axis: Line * ?startAngleDegrees: float = 0.0 * ?endAngleDegrees: float = 360.0 -> Guid` | Create a Surface by revolving a Curve around an axis. |
+| `MakeRevSrf` | `curveGeo: Curve * axis: Line * ?startAngleDegrees: float = 0.0 * ?endAngleDegrees: float = 360.0 -> NurbsSurface` | Create a Surface by revolving a Curve around an axis. |
 | `AddSphere` | `center: Point3d * radius: float -> Guid` | Add a spherical Surface to the document. |
 | `AddSrfContourCrvs` | `objectId: Guid * plane: Plane -> ResizeArray<Guid>` | Adds a spaced series of planar Curves resulting from the intersection of defined cutting Planes through a Surface or Polysurface. |
 | `AddSrfContourCrvs` | `objectId: Guid * startPoint: Point3d * endPoint: Point3d * interval: float -> ResizeArray<Guid>` | Adds a spaced series of planar Curves resulting from the intersection of defined cutting Planes through a Surface or Polysurface. |
@@ -1781,7 +1781,7 @@ From [Src/Scripting_UserInterface.fs](../../Src/Scripting_UserInterface.fs).
 | `CheckListBox` | `items: (string * bool) seq * ?message: string = null * ?title: string = null -> ResizeArray<string * bool>` | Displays a list of items in a checkable-style list dialog box. |
 | `ComboListBox` | `items: string seq * ?message: string = null * ?title: string = null -> string` | Displays a list of items in a combo-style list box dialog. |
 | `EditBox` | `?defaultValString: string = null * ?message: string = null * ?title: string = null -> string` | Display dialog prompting the user to enter a string. |
-| `GetAngle` | `?point: Point3d = Point3d() * ?referencePoint: Point3d = Point3d() * ?defaultValAngleDegrees: float = 0.0 * ?message: string = null -> float` | Pause for user input of an angle. |
+| `GetAngle` | `?point: Point3d = Point3d() * ?referencePoint: Point3d = Point3d() * ?defaultValAngleDegrees: float = 0.0 * ?message: string = null -> float` | Pause for user input of an angle in degrees. |
 | `GetBoolean` | `message: string * items: (string * string * string) array * defaultVals: bool array -> ResizeArray<bool>` | Pauses for user input of one or more boolean values. |
 | `GetBox` | `?mode: int = 0 * ?basePoint: Point3d = Point3d() * ?prompt1: string = null * ?prompt2: string = null * ?prompt3: string = null -> Point3d array` | Pauses for user input of a box. |
 | `GetColor` | `?color: Color = Drawing.Color() -> Color` | Display the Rhino color picker dialog allowing the user to select an RGB color. |
@@ -1826,8 +1826,8 @@ From [Src/Scripting_Utility.fs](../../Src/Scripting_Utility.fs).
 
 | Name | Signature | Summary |
 |:--|:--|:--|
-| `Angle` | `point1: Point3d * point2: Point3d * ?plane: Plane = Plane() -> float * float * float * float * float` | Measures the angle between two points. |
-| `Angle2` | `line1: Line * line2: Line -> float * float` | Measures the angle between two lines. |
+| `Angle` | `point1: Point3d * point2: Point3d * ?plane: Plane = Plane() -> float * float * float * float * float` | Measures the XY and elevation angles in degrees between two points. |
+| `Angle2` | `line1: Line * line2: Line -> float * float` | Measures the angle and reflex angle in degrees between two lines. |
 | `ClipboardText` | `unit -> string` | Gets the text string in the Windows clipboard. |
 | `ClipboardText` | `text: string -> unit` | Sets a text string to the Windows clipboard. |
 | `ColorAdjustLuma` | `rgb: Color * luminance: float * ?isScaleRelative: bool = false -> Color` | Changes the luminance of a red-green-blue value. |
@@ -1905,8 +1905,8 @@ From [Src/Scripting_Views.fs](../../Src/Scripting_Views.fs).
 | `RenameView` | `oldTitle: string * newTitle: string -> unit` | Changes the title of the specified view. |
 | `RestoreNamedCPlane` | `cplaneName: string * ?view: string = "" -> string` | Restores a named construction Plane to the specified view. |
 | `RestoreNamedView` | `namedView: string * ?view: string = "" * ?restoreBitmap: bool = false -> unit` | Restores a named view to the specified view. |
-| `RotateCamera` | `direction: int * angle: float * ?view: string = "" -> unit` | Rotates a perspective-projection view's camera. |
-| `RotateView` | `direction: int * angle: float * ?view: string = "" -> unit` | Rotates a view. |
+| `RotateCamera` | `direction: int * angleDegrees: float * ?view: string = "" -> unit` | Rotates a perspective-projection view's camera. |
+| `RotateView` | `direction: int * angleDegrees: float * ?view: string = "" -> unit` | Rotates a view. |
 | `ShowGrid` | `view: string -> bool` | Get status of a view's construction Plane grid. |
 | `ShowGrid` | `view: string * show: bool -> unit` | Shows or hides a view's construction Plane grid. |
 | `ShowGridAxes` | `view: string -> bool` | Get status of a view's construction Plane grid axes. |
@@ -1915,7 +1915,7 @@ From [Src/Scripting_Views.fs](../../Src/Scripting_Views.fs).
 | `ShowViewTitle` | `view: string * show: bool -> unit` | Shows or hides the title window of a view. |
 | `ShowWorldAxes` | `view: string -> bool` | Get status of a view's world axis icon. |
 | `ShowWorldAxes` | `view: string * show: bool -> unit` | Shows or hides a view's world axis icon. |
-| `TiltView` | `direction: int * angle: float * ?view: string = "" -> unit` | Tilts a view by rotating the camera up vector. |
+| `TiltView` | `direction: int * angleDegrees: float * ?view: string = "" -> unit` | Tilts a view by rotating the camera up vector. |
 | `ViewCamera` | `view: string -> Point3d` | Returns the camera location of the specified view. |
 | `ViewCamera` | `view: string * cameraLocation: Point3d -> unit` | Sets the camera location of the specified view. |
 | `ViewCameraLens` | `view: string -> float` | Returns the 35mm camera lens length of the specified perspective projection view. |

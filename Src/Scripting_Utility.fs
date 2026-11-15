@@ -41,14 +41,14 @@ module AutoOpenUtility =
         | null -> false
         | frames -> Array.exists isGrasshopper frames
 
-    /// <summary>Measures the angle between two points.</summary>
+    /// <summary>Measures the XY and elevation angles in degrees between two points.</summary>
     /// <param name="point1">(Point3d) Point1 of input points</param>
     /// <param name="point2">(Point3d) Point2 of input points</param>
     /// <param name="plane">(Plane) Optional, default value: <c>Plane.WorldXY</c>
     ///    If a Plane is provided, angle calculation is with respect to this Plane</param>
     /// <returns>(float * float * float * float * float) containing the following elements:
     ///    element 0 = the X, Y angle in degrees
-    ///    element 1 = the elevation
+    ///    element 1 = the elevation angle in degrees
     ///    element 2 = delta in the X direction
     ///    element 3 = delta in the Y direction
     ///    element 4 = delta in the Z direction.
@@ -70,7 +70,7 @@ module AutoOpenUtility =
         angleXY, elevation, x, y, z
 
 
-    /// <summary>Measures the angle between two lines.</summary>
+    /// <summary>Measures the angle and reflex angle in degrees between two lines.</summary>
     /// <param name="line1">(Line) List of 6 numbers or 2 Point3d</param>
     /// <param name="line2">(Line) List of 6 numbers or 2 Point3d</param>
     /// <returns>(float * float) containing the following elements:

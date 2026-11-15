@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - XformScale overloads with a Plane, to scale about the Plane's origin along the Plane's axes, like in RhinoPython
 - The NuGet package ships an agent skill, rhino.scripting-usage, with the API table, for installation with dotnet-package-skills.
 ### Changed
+- Breaking: Angle parameters consistently use Degrees or Radians suffixes, including rotation angles and angular tolerances; update named arguments accordingly. XML docs explicitly state input and return units and clarify default tolerances, with no change to angle calculations.
 - Breaking: ShrinkTrimmedSurface returns a bool, false when there is nothing to shrink, like in RhinoPython; before, it raised, and returned the input or copy Guid on success. The Brep overload returns a Brep option, None when there is nothing to shrink.
 - Breaking: MeshBooleanDifference, MeshBooleanIntersection, MeshBooleanSplit and MeshBooleanUnion check all result meshes before adding any; an invalid result raises with the Rhino mesh log in the message, and nothing is added. MeshBooleanUnion used to skip results it could not add silently.
 - Documented that ShootRay returns the start point first, that SurfaceAreaMoments and SurfaceVolumeMoments return 14 tuples, that IsPointOnSurface raises for polysurfaces with several faces, and that BooleanIntersection, AddSweep1, AddSweep2 and FilletSurfaces return an empty list when there is no result.

@@ -108,14 +108,14 @@ module AutoOpenUserInterface =
         RhinoSync.DoSync getKeepEditor
 
 
-    /// <summary>Pause for user input of an angle.</summary>
+    /// <summary>Pause for user input of an angle in degrees.</summary>
     /// <param name="point">(Point3d) Optional, default value: <c>Point3d.Unset</c>
     ///    Starting, or base point</param>
     /// <param name="referencePoint">(Point3d) Optional, default value: <c>Point3d.Unset</c>
     ///    If specified, the reference angle is calculated from it and the base point</param>
-    /// <param name="defaultValAngleDegrees">(float) Optional, A default angle value specified</param>
+    /// <param name="defaultValAngleDegrees">(float) Optional, default value: <c>0.0</c>. The default angle in degrees</param>
     /// <param name="message">(string) Optional, A prompt to display</param>
-    /// <returns>(float) Option of angle in degree.
+    /// <returns>(float) The selected angle in degrees.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetAngle( [<OPT;DEF(Point3d())>]point:Point3d, //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
                             [<OPT;DEF(Point3d())>]referencePoint:Point3d,

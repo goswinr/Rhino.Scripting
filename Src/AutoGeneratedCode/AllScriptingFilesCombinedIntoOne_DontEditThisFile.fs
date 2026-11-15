@@ -4206,14 +4206,14 @@ type RhinoScriptSyntax private () =
         if isNull trimcurve then RhinoScriptingException.Raise "MakeSubCrv: Unable to trim curve. curveGeo:'%s' param0:'%A' param1:'%A'" (Pretty.str curveGeo) param0 param1
         trimcurve
 
-    /// <summary>Returns the angle of an arc Curve object.</summary>
+    /// <summary>Returns the angle in degrees of an arc Curve object.</summary>
     /// <param name="curveId">(Guid) Identifier of a Curve object</param>
     /// <param name="segmentIndex">(int) Optional, Identifies the Curve segment if CurveId identifies a poly-curve.</param>
     /// <returns>(float) The angle in degrees.</returns>
     static member ArcAngle(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : float =
         RhinoScriptSyntax.ArcAngle(RhinoScriptSyntax.CoerceCurve(curveId), segmentIndex)
 
-    /// <summary>Returns the angle of an arc Curve object. Uses the supplied geometry directly.</summary>
+    /// <summary>Returns the angle in degrees of an arc Curve object. Uses the supplied geometry directly.</summary>
     /// <param name="curveGeo">(Curve) The input geometry.</param>
     /// <param name="segmentIndex">(int) Optional, Identifies the Curve segment if CurveId identifies a poly-curve.</param>
     /// <returns>(float) The angle in degrees.</returns>
@@ -4411,8 +4411,8 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Convert Curve to a Polyline Curve.</summary>
     /// <param name="curveId">(Guid) Identifier of a Curve object</param>
-    /// <param name="angleTolerance">(float) Optional, default value: <c>5.0</c>
-    ///    The maximum angle between Curve tangents at line endpoints.</param>
+    /// <param name="angleToleranceDegrees">(float) Optional, default value: <c>0.0</c>
+    ///    The maximum angle in degrees between Curve tangents at line endpoints; 0.0 uses 5.0 degrees.</param>
     /// <param name="tolerance">(float) Optional, default value: <c>0.01</c>
     ///    The distance tolerance at segment midpoints.</param>
     /// <param name="deleteInput">(bool) Optional, default value: <c>false</c>
@@ -4421,12 +4421,12 @@ type RhinoScriptSyntax private () =
     /// <param name="maxEdgeLength">(float) Optional, Maximum segment length</param>
     /// <returns>(Guid) The new Curve.</returns>
     static member ConvertCurveToPolyline(   curveId:Guid,
-                                            [<OPT;DEF(0.0)>]angleTolerance:float,
+                                            [<OPT;DEF(0.0)>]angleToleranceDegrees:float,
                                             [<OPT;DEF(0.0)>]tolerance:float,
                                             [<OPT;DEF(false)>]deleteInput:bool,
                                             [<OPT;DEF(0.0)>]minEdgeLength:float,
                                             [<OPT;DEF(0.0)>]maxEdgeLength:float) : Guid =
-        let polyline = RhinoScriptSyntax.ConvertCurveToPolyline(RhinoScriptSyntax.CoerceCurve(curveId), angleTolerance, tolerance, minEdgeLength, maxEdgeLength)
+        let polyline = RhinoScriptSyntax.ConvertCurveToPolyline(RhinoScriptSyntax.CoerceCurve(curveId), angleToleranceDegrees, tolerance, minEdgeLength, maxEdgeLength)
         if deleteInput then
             if not (State.Doc.Objects.Replace(curveId, polyline)) then RhinoScriptingException.Raise "ConvertCurveToPolyline: Unable to replace curve %O" curveId
             curveId
@@ -4437,22 +4437,22 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Computes ConvertCurveToPolyline from geometry without modifying the document. Inputs are not modified.</summary>
     /// <param name="curveGeo">(Curve) The input curve geometry.</param>
-    /// <param name="angleTolerance">(float) Optional, default value: <c>5.0</c>
-    ///    The maximum angle between Curve tangents at line endpoints.</param>
+    /// <param name="angleToleranceDegrees">(float) Optional, default value: <c>0.0</c>
+    ///    The maximum angle in degrees between Curve tangents at line endpoints; 0.0 uses 5.0 degrees.</param>
     /// <param name="tolerance">(float) Optional, default value: <c>0.01</c>
     ///    The distance tolerance at segment midpoints.</param>
     /// <param name="minEdgeLength">(float) Optional, Minimum segment length</param>
     /// <param name="maxEdgeLength">(float) Optional, Maximum segment length</param>
     /// <returns>(PolylineCurve) The resulting geometry; it is not added to a document.</returns>
     static member ConvertCurveToPolyline(   curveGeo:Curve,
-                                            [<OPT;DEF(0.0)>]angleTolerance:float,
+                                            [<OPT;DEF(0.0)>]angleToleranceDegrees:float,
                                             [<OPT;DEF(0.0)>]tolerance:float,
                                             [<OPT;DEF(0.0)>]minEdgeLength:float,
                                             [<OPT;DEF(0.0)>]maxEdgeLength:float) : PolylineCurve =
         let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
-        let angleTolerance0 = toRadians (Util.ifZero1 angleTolerance 5.0)
+        let angleToleranceRadians = toRadians (Util.ifZero1 angleToleranceDegrees 5.0)
         let tolerance0 = Util.ifZero1 tolerance 0.01
-        let polyline = curve.ToPolyline(0, 0, angleTolerance0, 0.0, 0.0, tolerance0, minEdgeLength, maxEdgeLength, keepStartPoint=true)
+        let polyline = curve.ToPolyline(0, 0, angleToleranceRadians, 0.0, 0.0, tolerance0, minEdgeLength, maxEdgeLength, keepStartPoint=true)
         if isNull polyline then RhinoScriptingException.Raise "ConvertCurveToPolyline: Unable to convert curve"
         polyline
 
@@ -5735,8 +5735,8 @@ type RhinoScriptSyntax private () =
     ///    the a self-intersection test will be performed on Curve</param>
     /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
     ///    The absolute tolerance in drawing units.</param>
-    /// <param name="angleTolerance">(float) Optional, default value: <c>State.Doc.ModelAngleToleranceRadians</c>
-    ///    Angle tolerance in degrees. The angle
+    /// <param name="angleToleranceDegrees">(float) Optional, default value: <c>0.0</c>
+    ///    Angle tolerance in degrees; 0.0 uses the document angle tolerance. The angle
     ///    tolerance is used to determine when the Curve is tangent to the
     ///    Surface.</param>
     /// <returns>(ResizeArray of int*Point3d*Point3d*Point3d*Point3d*float*float*float*float) of intersection information .
@@ -5773,8 +5773,8 @@ type RhinoScriptSyntax private () =
     ///      [n][10] Number   If the event type is Point(1), then the V Surface parameter.
     ///        If the event type is Overlap(2), then the V Surface parameter
     ///        for Curve at (n, 6).</returns>
-    static member CurveSurfaceIntersection(curveId:Guid, surfaceId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(0.0)>]angleTolerance:float) : (int*Point3d*Point3d*Point3d*Point3d*float*float*float*float*float*float) ResizeArray =
-        RhinoScriptSyntax.CurveSurfaceIntersection(RhinoScriptSyntax.CoerceCurve(curveId), RhinoScriptSyntax.CoerceSurface(surfaceId), tolerance, angleTolerance)
+    static member CurveSurfaceIntersection(curveId:Guid, surfaceId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(0.0)>]angleToleranceDegrees:float) : (int*Point3d*Point3d*Point3d*Point3d*float*float*float*float*float*float) ResizeArray =
+        RhinoScriptSyntax.CurveSurfaceIntersection(RhinoScriptSyntax.CoerceCurve(curveId), RhinoScriptSyntax.CoerceSurface(surfaceId), tolerance, angleToleranceDegrees)
 
     /// <summary>Calculates intersection of a Curve object with a Surface object.
     ///    Note, this function works on the untrimmed portion of the Surface. Uses the supplied geometry directly.</summary>
@@ -5782,8 +5782,8 @@ type RhinoScriptSyntax private () =
     /// <param name="surfaceGeo">(Surface) The input geometry.</param>
     /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
     ///    The absolute tolerance in drawing units.</param>
-    /// <param name="angleTolerance">(float) Optional, default value: <c>State.Doc.ModelAngleToleranceRadians</c>
-    ///    Angle tolerance in degrees. The angle
+    /// <param name="angleToleranceDegrees">(float) Optional, default value: <c>0.0</c>
+    ///    Angle tolerance in degrees; 0.0 uses the document angle tolerance. The angle
     ///    tolerance is used to determine when the Curve is tangent to the
     ///    Surface.</param>
     /// <returns>(ResizeArray of int*Point3d*Point3d*Point3d*Point3d*float*float*float*float) of intersection information .
@@ -5820,13 +5820,13 @@ type RhinoScriptSyntax private () =
     ///      [n][10] Number   If the event type is Point(1), then the V Surface parameter.
     ///        If the event type is Overlap(2), then the V Surface parameter
     ///        for Curve at (n, 6).</returns>
-    static member CurveSurfaceIntersection(curveGeo:Curve, surfaceGeo:Surface, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(0.0)>]angleTolerance:float) : (int*Point3d*Point3d*Point3d*Point3d*float*float*float*float*float*float) ResizeArray =
+    static member CurveSurfaceIntersection(curveGeo:Curve, surfaceGeo:Surface, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(0.0)>]angleToleranceDegrees:float) : (int*Point3d*Point3d*Point3d*Point3d*float*float*float*float*float*float) ResizeArray =
         let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
         let surface = (surfaceGeo)
         let tolerance0 = Util.ifZero1 tolerance State.Doc.ModelAbsoluteTolerance
-        let angleTolerance0 = Util.ifZero1 (toRadians(angleTolerance)) State.Doc.ModelAngleToleranceRadians
-        let  rc = Intersect.Intersection.CurveSurface(curve, surface, tolerance0, angleTolerance0)
-        if isNull rc then RhinoScriptingException.Raise "CurveSurfaceIntersection failed. (surfaceGeo:%A) (curveGeo:%A) (angleTolerance:%f) (tolerance:%f) " surfaceGeo curveGeo angleTolerance tolerance
+        let angleToleranceRadians = Util.ifZero1 (toRadians(angleToleranceDegrees)) State.Doc.ModelAngleToleranceRadians
+        let  rc = Intersect.Intersection.CurveSurface(curve, surface, tolerance0, angleToleranceRadians)
+        if isNull rc then RhinoScriptingException.Raise "CurveSurfaceIntersection failed. (surfaceGeo:%A) (curveGeo:%A) (angleToleranceDegrees:%f) (tolerance:%f) " surfaceGeo curveGeo angleToleranceDegrees tolerance
         let events = ResizeArray()
         for i = 0 to rc.Count - 1 do
             let eventType = if rc.[i].IsOverlap then 2 else 1
@@ -6297,19 +6297,19 @@ type RhinoScriptSyntax private () =
     ///    The default is 3</param>
     /// <param name="distanceTolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
     ///    The fitting tolerance.</param>
-    /// <param name="angleTolerance">(float) Optional, default value: <c>State.Doc.ModelAngleToleranceRadians</c>
+    /// <param name="angleToleranceDegrees">(float) Optional, default value: <c>-1.0</c>
     ///    The kink smoothing tolerance in degrees. If
-    ///    angleTolerance is 0.0, all kinks are smoothed. If angleTolerance
-    ///    is bigger than  0.0, kinks smaller than angleTolerance are smoothed. If
-    ///    angleTolerance is not specified or smaller than 0.0, the document angle
+    ///    angleToleranceDegrees is 0.0, all kinks are smoothed. If angleToleranceDegrees
+    ///    is bigger than  0.0, kinks smaller than angleToleranceDegrees are smoothed. If
+    ///    angleToleranceDegrees is not specified or smaller than 0.0, the document angle
     ///    tolerance is used for the kink smoothing</param>
     /// <returns>(Guid) The identifier of the new object.</returns>
     static member FitCurve( curveId:Guid,
                             [<OPT;DEF(3)>]degree:int,
                             [<OPT;DEF(0.0)>]distanceTolerance:float,
-                            [<OPT;DEF(-1.0)>]angleTolerance:float) : Guid =
+                            [<OPT;DEF(-1.0)>]angleToleranceDegrees:float) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
-        let fitted = RhinoScriptSyntax.FitCurve(curve, degree, distanceTolerance, angleTolerance)
+        let fitted = RhinoScriptSyntax.FitCurve(curve, degree, distanceTolerance, angleToleranceDegrees)
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(curveId)
         let rc = State.Doc.Objects.AddCurve(fitted, rhobj.Attributes)
         if rc = Guid.Empty then RhinoScriptingException.Raise "FitCurve: Unable to add curve to document"
@@ -6323,21 +6323,21 @@ type RhinoScriptSyntax private () =
     ///    The default is 3</param>
     /// <param name="distanceTolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
     ///    The fitting tolerance.</param>
-    /// <param name="angleTolerance">(float) Optional, default value: <c>State.Doc.ModelAngleToleranceRadians</c>
+    /// <param name="angleToleranceDegrees">(float) Optional, default value: <c>-1.0</c>
     ///    The kink smoothing tolerance in degrees. If
-    ///    angleTolerance is 0.0, all kinks are smoothed. If angleTolerance
-    ///    is bigger than  0.0, kinks smaller than angleTolerance are smoothed. If
-    ///    angleTolerance is not specified or smaller than 0.0, the document angle
+    ///    angleToleranceDegrees is 0.0, all kinks are smoothed. If angleToleranceDegrees
+    ///    is bigger than  0.0, kinks smaller than angleToleranceDegrees are smoothed. If
+    ///    angleToleranceDegrees is not specified or smaller than 0.0, the document angle
     ///    tolerance is used for the kink smoothing</param>
     /// <returns>(Curve) The resulting geometry; it is not added to a document.</returns>
     static member FitCurve( curveGeo:Curve,
                             [<OPT;DEF(3)>]degree:int,
                             [<OPT;DEF(0.0)>]distanceTolerance:float,
-                            [<OPT;DEF(-1.0)>]angleTolerance:float) : Curve =
+                            [<OPT;DEF(-1.0)>]angleToleranceDegrees:float) : Curve =
         let curve = RhinoScriptSyntax.DirectCurveInput(curveGeo, -1)
         let distanceTolerance0 = Util.ifZero1 distanceTolerance State.Doc.ModelAbsoluteTolerance
-        let angleTolerance0 = if angleTolerance < 0.0 then State.Doc.ModelAngleToleranceRadians else toRadians angleTolerance
-        let fitted = curve.Fit(degree, distanceTolerance0, angleTolerance0)
+        let angleToleranceRadians = if angleToleranceDegrees < 0.0 then State.Doc.ModelAngleToleranceRadians else toRadians angleToleranceDegrees
+        let fitted = curve.Fit(degree, distanceTolerance0, angleToleranceRadians)
         if isNull fitted then RhinoScriptingException.Raise "FitCurve: Unable to fit curve"
         fitted
 
@@ -6769,11 +6769,12 @@ type RhinoScriptSyntax private () =
     /// <summary>Creates an average Curve from two Curves.</summary>
     /// <param name="curve0">(Guid) identifiers of first Curve</param>
     /// <param name="curve1">(Guid) identifiers of second Curve</param>
-    /// <param name="tolerance">(float) Optional, default value: <c>0.0</c>.
-    ///    Angle tolerance in radians used to match kinks between Curves; 0.0 uses RhinoCommon's default (RhinoMath.UnsetValue).</param>
+    /// <param name="angleToleranceRadians">(float) Optional, default value: <c>0.0</c>.
+    ///    Angle tolerance in radians used to match kinks between Curves; 0.0 uses RhinoCommon's default (RhinoMath.UnsetValue).
+    ///    Use <c>RhinoMath.ToRadians</c> to convert from degrees to radians.</param>
     /// <returns>(Guid) objectId of the new or modified Curve.</returns>
-    static member MeanCurve(curve0:Guid, curve1:Guid, [<OPT;DEF(0.0)>]tolerance:float) : Guid =
-        let curve = RhinoScriptSyntax.MeanCurve(RhinoScriptSyntax.CoerceCurve(curve0), RhinoScriptSyntax.CoerceCurve(curve1), tolerance)
+    static member MeanCurve(curve0:Guid, curve1:Guid, [<OPT;DEF(0.0)>]angleToleranceRadians:float) : Guid =
+        let curve = RhinoScriptSyntax.MeanCurve(RhinoScriptSyntax.CoerceCurve(curve0), RhinoScriptSyntax.CoerceCurve(curve1), angleToleranceRadians)
         let rc = State.Doc.Objects.AddCurve(curve)
         State.Doc.Views.Redraw()
         rc
@@ -6781,14 +6782,15 @@ type RhinoScriptSyntax private () =
     /// <summary>Computes MeanCurve from geometry without modifying the document. Inputs are not modified.</summary>
     /// <param name="curve0">(Curve) The input geometry.</param>
     /// <param name="curve1">(Curve) The input geometry.</param>
-    /// <param name="tolerance">(float) Optional, default value: <c>0.0</c>.
-    ///    Angle tolerance in radians used to match kinks between Curves; 0.0 uses RhinoCommon's default (RhinoMath.UnsetValue).</param>
+    /// <param name="angleToleranceRadians">(float) Optional, default value: <c>0.0</c>.
+    ///    Angle tolerance in radians used to match kinks between Curves; 0.0 uses RhinoCommon's default (RhinoMath.UnsetValue).
+    ///    Use <c>RhinoMath.ToRadians</c> to convert from degrees to radians.</param>
     /// <returns>(Curve) The resulting geometry; it is not added to a document.</returns>
-    static member MeanCurve(curve0:Curve, curve1:Curve, [<OPT;DEF(0.0)>]tolerance:float) : Curve =
+    static member MeanCurve(curve0:Curve, curve1:Curve, [<OPT;DEF(0.0)>]angleToleranceRadians:float) : Curve =
         let curve0 = RhinoScriptSyntax.DirectCurveInput(curve0, -1)
         let curve1 = RhinoScriptSyntax.DirectCurveInput(curve1, -1)
-        let tolerance = if tolerance = 0.0 then RhinoMath.UnsetValue else abs tolerance
-        let curve = Curve.CreateMeanCurve(curve0, curve1, tolerance)
+        let angleToleranceRadians = if angleToleranceRadians = 0.0 then RhinoMath.UnsetValue else abs angleToleranceRadians
+        let curve = Curve.CreateMeanCurve(curve0, curve1, angleToleranceRadians)
         if isNull curve then RhinoScriptingException.Raise "MeanCurve: Unable to create mean curve"
         curve
 
@@ -8415,9 +8417,9 @@ type RhinoScriptSyntax private () =
             State.Doc.MeshingParameterStyle <- Rhino.Geometry.MeshingParameterStyle.Custom
 
 
-    /// <summary>Returns the render Mesh maximum angle property of the active document.
+    /// <summary>Returns the render Mesh maximum angle in degrees of the active document.
     /// For more information on render Meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
-    /// <returns>(float) The current maximum angle.</returns>
+    /// <returns>(float) The current maximum angle in degrees.</returns>
     static member RenderMeshMaxAngle() : float = //GET
         let current = State.Doc.GetMeshingParameters(State.Doc.MeshingParameterStyle)
         toDegrees(current.RefineAngle)
@@ -8657,17 +8659,17 @@ type RhinoScriptSyntax private () =
 
 
 
-    /// <summary>Return the document's angle tolerance. Angle tolerance is
+    /// <summary>Return the document's angle tolerance in degrees. Angle tolerance is
     /// measured in degrees. See Rhino's DocumentProperties command
     /// (Units and Page Units Window) for details.</summary>
-    /// <returns>(float) The current angle tolerance.</returns>
+    /// <returns>(float) The current angle tolerance in degrees.</returns>
     static member UnitAngleTolerance() : float = //GET
         State.Doc.ModelAngleToleranceDegrees
 
     /// <summary>Set the document's angle tolerance. Angle tolerance is
     /// measured in degrees. See Rhino's DocumentProperties command
     /// (Units and Page Units Window) for details.</summary>
-    /// <param name="angleToleranceDegrees">(float) The angle tolerance to set</param>
+    /// <param name="angleToleranceDegrees">(float) The angle tolerance to set in degrees</param>
     /// <returns>(unit) void, nothing.</returns>
     static member UnitAngleTolerance(angleToleranceDegrees:float) : unit = //SET
             if angleToleranceDegrees > 0. then
@@ -8879,7 +8881,7 @@ type RhinoScriptSyntax private () =
         elif tolerance > 0.0 then State.Doc.PageAbsoluteTolerance <- tolerance
         else RhinoScriptingException.Raise "UnitAbsoluteTolerance: tolerance must be positive, got %g" tolerance
 
-    /// <summary>Returns the angle tolerance for model or page units.</summary>
+    /// <summary>Returns the angle tolerance in degrees for model or page units.</summary>
     /// <param name="modelUnits">(bool) True for model units; False for page units.</param>
     /// <returns>(float) The angle tolerance in degrees.</returns>
     static member UnitAngleTolerance(modelUnits:bool) : float = //GET
@@ -10725,13 +10727,13 @@ type RhinoScriptSyntax private () =
     /// <param name="curves">(Curve seq) Geometry of the closed planar Curves that define the boundary of the Hatch objects</param>
     /// <param name="hatchPattern">(string) Optional. Name of the Hatch pattern to be used by the Hatch object. If omitted, the current Hatch pattern will be used.</param>
     /// <param name="scale">(float) Optional, default value: <c>1.0</c>. Hatch pattern scale factor.</param>
-    /// <param name="rotation">(float) Optional, default value: <c>0.0</c>. Hatch pattern rotation angle in degrees.</param>
+    /// <param name="rotationDegrees">(float) Optional, default value: <c>0.0</c>. Hatch pattern rotation angle in degrees.</param>
     /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>. Tolerance for Hatch fills.</param>
     /// <returns>(Hatch ResizeArray) Hatch geometry, without adding it to the document.</returns>
     static member MakeHatches( curves:Curve seq,
                               [<OPT;DEF(null:string)>]hatchPattern:string,
                               [<OPT;DEF(1.0)>]scale:float,
-                              [<OPT;DEF(0.0)>]rotation:float,
+                              [<OPT;DEF(0.0)>]rotationDegrees:float,
                               [<OPT;DEF(0.0)>]tolerance:float) : Hatch ResizeArray =
         RhinoScriptSyntax.InitHatchPatterns()
         let mutable index = State.Doc.HatchPatterns.CurrentHatchPatternIndex
@@ -10740,10 +10742,10 @@ type RhinoScriptSyntax private () =
             index <-  if patternInstance|> isNull then RhinoMath.UnsetIntIndex else patternInstance.Index
             if index<0 then RhinoScriptingException.Raise "MakeHatches failed to find hatchPattern:'%s'"  hatchPattern
         if index < 0 && State.Doc.HatchPatterns.Count > 0 then index <- 0
-        let rotation = RhinoMath.ToRadians(rotation)
+        let rotationRadians = RhinoMath.ToRadians(rotationDegrees)
 
         let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance
-        let hatches = Hatch.Create(curves, index, rotation, scale, tolerance)
+        let hatches = Hatch.Create(curves, index, rotationRadians, scale, tolerance)
         if isNull hatches || hatches.Length = 0 then
             RhinoScriptingException.Raise "MakeHatches failed to create hatch from %d curves, not closed: %d, not planar %d, tolerance:'%g' "
                 (Seq.length curves)
@@ -10757,18 +10759,18 @@ type RhinoScriptSyntax private () =
     /// <param name="curveIds">(Guid seq) Identifiers of the closed planar Curves that define the boundary of the Hatch objects</param>
     /// <param name="hatchPattern">(string) Optional. Name of the Hatch pattern to be used by the Hatch object. If omitted, the current Hatch pattern will be used.</param>
     /// <param name="scale">(float) Optional, default value: <c>1.0</c>. Hatch pattern scale factor.</param>
-    /// <param name="rotation">(float) Optional, default value: <c>0.0</c>. Hatch pattern rotation angle in degrees.</param>
+    /// <param name="rotationDegrees">(float) Optional, default value: <c>0.0</c>. Hatch pattern rotation angle in degrees.</param>
     /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>. Tolerance for Hatch fills.</param>
     /// <returns>(Guid ResizeArray) Identifiers of the newly created Hatches.</returns>
     static member AddHatches(  curveIds:Guid seq,
                               [<OPT;DEF(null:string)>]hatchPattern:string,
                               [<OPT;DEF(1.0)>]scale:float,
-                              [<OPT;DEF(0.0)>]rotation:float,
+                              [<OPT;DEF(0.0)>]rotationDegrees:float,
                               [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray =
         let curves  = curveIds |> RArr.mapSeq RhinoScriptSyntax.CoerceCurve
         try
             let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance
-            let hatches = RhinoScriptSyntax.MakeHatches(curves, hatchPattern, scale, rotation, tolerance)
+            let hatches = RhinoScriptSyntax.MakeHatches(curves, hatchPattern, scale, rotationDegrees, tolerance)
             let ids = ResizeArray()
             for hatch in hatches do
                 let objectId = State.Doc.Objects.AddHatch(hatch)
@@ -10789,15 +10791,15 @@ type RhinoScriptSyntax private () =
     /// <param name="curve">(Curve) Geometry of the closed planar Curve that defines the boundary of the Hatch object</param>
     /// <param name="hatchPattern">(string) Optional. Name of the Hatch pattern to be used by the Hatch object. If omitted, the current Hatch pattern will be used.</param>
     /// <param name="scale">(float) Optional, default value: <c>1.0</c>. Hatch pattern scale factor.</param>
-    /// <param name="rotation">(float) Optional, default value: <c>0.0</c>. Hatch pattern rotation angle in degrees.</param>
+    /// <param name="rotationDegrees">(float) Optional, default value: <c>0.0</c>. Hatch pattern rotation angle in degrees.</param>
     /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>. Tolerance for Hatch fills.</param>
     /// <returns>(Hatch) Hatch geometry, without adding it to the document.</returns>
     static member MakeHatch(   curve:Curve,
                               [<OPT;DEF(null:string)>]hatchPattern:string,
                               [<OPT;DEF(1.0)>]scale:float,
-                              [<OPT;DEF(0.0)>]rotation:float,
+                              [<OPT;DEF(0.0)>]rotationDegrees:float,
                               [<OPT;DEF(0.0)>]tolerance:float) : Hatch =
-        let rc = RhinoScriptSyntax.MakeHatches([curve], hatchPattern, scale, rotation,tolerance) // gives a good error message already
+        let rc = RhinoScriptSyntax.MakeHatches([curve], hatchPattern, scale, rotationDegrees,tolerance) // gives a good error message already
         if rc.Count = 1 then rc.[0]
         else RhinoScriptingException.Raise "MakeHatch failed to create exactly one hatch from curve. It created %d Hatches"  rc.Count
 
@@ -10805,16 +10807,16 @@ type RhinoScriptSyntax private () =
     /// <param name="curveId">(Guid) Identifier of the closed planar Curve that defines the boundary of the Hatch object</param>
     /// <param name="hatchPattern">(string) Optional. Name of the Hatch pattern to be used by the Hatch object. If omitted, the current Hatch pattern will be used.</param>
     /// <param name="scale">(float) Optional, default value: <c>1.0</c>. Hatch pattern scale factor.</param>
-    /// <param name="rotation">(float) Optional, default value: <c>0.0</c>. Hatch pattern rotation angle in degrees.</param>
+    /// <param name="rotationDegrees">(float) Optional, default value: <c>0.0</c>. Hatch pattern rotation angle in degrees.</param>
     /// <param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>. Tolerance for Hatch fills.</param>
     /// <returns>(Guid) Identifier of the newly created Hatch.</returns>
     static member AddHatch( curveId:Guid,
                             [<OPT;DEF(null:string)>]hatchPattern:string,
                             [<OPT;DEF(1.0)>]scale:float,
-                            [<OPT;DEF(0.0)>]rotation:float,
+                            [<OPT;DEF(0.0)>]rotationDegrees:float,
                             [<OPT;DEF(0.0)>]tolerance:float) : Guid =
         try
-            let ids = RhinoScriptSyntax.AddHatches([curveId], hatchPattern, scale, rotation, tolerance)
+            let ids = RhinoScriptSyntax.AddHatches([curveId], hatchPattern, scale, rotationDegrees, tolerance)
             if ids.Count = 1 then ids.[0]
             else RhinoScriptingException.Raise "AddHatch failed to create exactly one hatch from curve. It created %d Hatches" ids.Count
         with e->
@@ -11001,10 +11003,10 @@ type RhinoScriptSyntax private () =
         rc
 
 
-    /// <summary>Returns the rotation applied to the Hatch pattern when
+    /// <summary>Returns the rotation in degrees applied to the Hatch pattern when
     /// it is mapped to the Hatch's Plane.</summary>
     /// <param name="hatchId">(Guid) Identifier of a Hatch object</param>
-    /// <returns>(float) if rotation is not defined, the current rotation angle.</returns>
+    /// <returns>(float) The current hatch pattern rotation angle in degrees.</returns>
     static member HatchRotation(hatchId:Guid) : float = //GET
         let hatchObj = RhinoScriptSyntax.CoerceHatchObject(hatchId)
         let rc = hatchObj.HatchGeometry.PatternRotation
@@ -11014,14 +11016,14 @@ type RhinoScriptSyntax private () =
     /// <summary>Modifies the rotation applied to the Hatch pattern when
     /// it is mapped to the Hatch's Plane.</summary>
     /// <param name="hatchId">(Guid) Identifier of a Hatch object</param>
-    /// <param name="rotation">(float) Rotation angle in degrees</param>
+    /// <param name="rotationDegrees">(float) Rotation angle in degrees</param>
     /// <returns>(unit) void, nothing.</returns>
-    static member HatchRotation(hatchId:Guid, rotation:float) : unit = //SET
+    static member HatchRotation(hatchId:Guid, rotationDegrees:float) : unit = //SET
         let hatchObj = RhinoScriptSyntax.CoerceHatchObject(hatchId)
         let currentRotationRadians = hatchObj.HatchGeometry.PatternRotation
         let currentRotationDegrees = RhinoMath.ToDegrees(currentRotationRadians)
-        if rotation <> currentRotationDegrees then
-            let rotationRadians = RhinoMath.ToRadians(rotation)
+        if rotationDegrees <> currentRotationDegrees then
+            let rotationRadians = RhinoMath.ToRadians(rotationDegrees)
             hatchObj.HatchGeometry.PatternRotation <- rotationRadians
             hatchObj.CommitChanges() |> ignore<bool>
             State.Doc.Views.Redraw()
@@ -11029,24 +11031,24 @@ type RhinoScriptSyntax private () =
     /// <summary>Modifies the rotation applied to the Hatch pattern when
     /// it is mapped to the Hatch's Plane.</summary>
     /// <param name="hatchIds">(Guid seq) Identifiers of multiple Hatch objects</param>
-    /// <param name="rotation">(float) Rotation angle in degrees</param>
+    /// <param name="rotationDegrees">(float) Rotation angle in degrees</param>
     /// <returns>(unit) void, nothing.</returns>
-    static member HatchRotation(hatchIds:Guid seq, rotation:float) : unit = //MULTISET
+    static member HatchRotation(hatchIds:Guid seq, rotationDegrees:float) : unit = //MULTISET
         for hatchId in hatchIds do
             let hatchObj = RhinoScriptSyntax.CoerceHatchObject(hatchId)
             let mutable rc = hatchObj.HatchGeometry.PatternRotation
             rc <- RhinoMath.ToDegrees(rc)
-            if rotation <> rc then
-                let rotation = RhinoMath.ToRadians(rotation)
-                hatchObj.HatchGeometry.PatternRotation <- rotation
+            if rotationDegrees <> rc then
+                let rotationRadians = RhinoMath.ToRadians(rotationDegrees)
+                hatchObj.HatchGeometry.PatternRotation <- rotationRadians
                 hatchObj.CommitChanges() |> ignore<bool>
         State.Doc.Views.Redraw()
 
 
-    /// <summary>Returns the rotation applied to the Hatch pattern when
+    /// <summary>Returns the rotation in degrees applied to the Hatch pattern when
     /// it is mapped to the Hatch's Plane.</summary>
     /// <param name="hatchGeo">(Hatch) The Hatch geometry</param>
-    /// <returns>(float) if rotation is not defined, the current rotation angle.</returns>
+    /// <returns>(float) The current hatch pattern rotation angle in degrees.</returns>
     static member HatchRotation(hatchGeo:Hatch) : float = //GET
         let rc = hatchGeo.PatternRotation
         RhinoMath.ToDegrees(rc)
@@ -14897,21 +14899,21 @@ type RhinoScriptSyntax private () =
     /// <summary>Rotates a single object. With copy=false the object in the document is transformed in place and keeps its Guid, with copy=true the original is left unchanged and a transformed copy is added to the document. The geometry overload returns a transformed duplicate instead and does not touch the document.</summary>
     /// <param name="objectId">(Guid) The identifier of an object to rotate</param>
     /// <param name="centerPoint">(Point3d) The center of rotation</param>
-    /// <param name="rotationAngle">(float) In degrees</param>
+    /// <param name="rotationAngleDegrees">(float) In degrees</param>
     /// <param name="axis">(Vector3d) Optional, default value: <c>Vector3d.ZAxis</c>
     ///    Axis of rotation, If omitted, the Vector3d.ZAxis is used as the rotation axis</param>
     /// <param name="copy">(bool) Optional, default value: <c>false</c>. Copy the object. Copies of grouped objects are put into new groups</param>
     /// <returns>(Guid) Identifier of the rotated object.</returns>
     static member RotateObject( objectId:Guid,
                                 centerPoint:Point3d,
-                                rotationAngle:float,
+                                rotationAngleDegrees:float,
                                 [<OPT;DEF(Vector3d())>]axis:Vector3d,
                                 [<OPT;DEF(false)>]copy:bool) : Guid =
         let axis = if axis.IsZero then Vector3d.ZAxis else axis
-        let rotationAngle = RhinoMath.ToRadians(rotationAngle)
-        let xf = Transform.Rotation(rotationAngle, axis, centerPoint)
+        let rotationAngleRadians = RhinoMath.ToRadians(rotationAngleDegrees)
+        let xf = Transform.Rotation(rotationAngleRadians, axis, centerPoint)
         let res = State.Doc.Objects.Transform(objectId, xf, not copy)
-        if res = Guid.Empty then RhinoScriptingException.Raise "RotateObject failed.  objectId:'%s' centerPoint:'%A' rotationAngle:'%A' axis:'%A' copy:'%A'" (Pretty.str objectId) centerPoint rotationAngle axis copy
+        if res = Guid.Empty then RhinoScriptingException.Raise "RotateObject failed.  objectId:'%s' centerPoint:'%A' rotationAngleDegrees:'%A' axis:'%A' copy:'%A'" (Pretty.str objectId) centerPoint rotationAngleDegrees axis copy
         if copy then RhinoScriptSyntax.putCopiesInNewGroups [res]
         State.Doc.Views.Redraw()
         res
@@ -14920,40 +14922,40 @@ type RhinoScriptSyntax private () =
     /// <summary>Returns a transformed duplicate of the input geometry. The input is unchanged and the result is not added to a document.</summary>
     /// <param name="geometry">(GeometryBase) Input geometry to duplicate and transform.</param>
     /// <param name="centerPoint">(Point3d) The center of rotation</param>
-    /// <param name="rotationAngle">(float) In degrees</param>
+    /// <param name="rotationAngleDegrees">(float) In degrees</param>
     /// <param name="axis">(Vector3d) Optional, default value: <c>Vector3d.ZAxis</c>
     ///    Axis of rotation, If omitted, the Vector3d.ZAxis is used as the rotation axis</param>
     /// <returns>(GeometryBase) The transformed geometry duplicate.</returns>
     static member RotateObject( geometry:GeometryBase,
                                 centerPoint:Point3d,
-                                rotationAngle:float,
+                                rotationAngleDegrees:float,
                                 [<OPT;DEF(Vector3d())>]axis:Vector3d) : GeometryBase =
         let axis = if axis.IsZero then Vector3d.ZAxis else axis
-        let rotationAngle = RhinoMath.ToRadians(rotationAngle)
-        let xf = Transform.Rotation(rotationAngle, axis, centerPoint)
+        let rotationAngleRadians = RhinoMath.ToRadians(rotationAngleDegrees)
+        let xf = Transform.Rotation(rotationAngleRadians, axis, centerPoint)
         RhinoScriptSyntax.TransformObject(geometry, xf)
 
 
     /// <summary>Rotates multiple objects. With copy=false the objects in the document are transformed in place and keep their Guids, with copy=true the originals are left unchanged and transformed copies are added to the document. The geometry overload returns transformed duplicates instead and does not touch the document.</summary>
     /// <param name="objectIds">(Guid seq) Identifiers of objects to rotate</param>
     /// <param name="centerPoint">(Point3d) The center of rotation</param>
-    /// <param name="rotationAngle">(float) In degrees</param>
+    /// <param name="rotationAngleDegrees">(float) In degrees</param>
     /// <param name="axis">(Vector3d) Optional, default value: <c>Vector3d.ZAxis</c>
     ///    Axis of rotation, If omitted, the Vector3d.ZAxis is used as the rotation axis</param>
     /// <param name="copy">(bool) Optional, default value: <c>false</c>. Copy the object. Copies of grouped objects are put into new groups</param>
     /// <returns>(Guid ResizeArray) identifiers of the rotated objects.</returns>
     static member RotateObjects( objectIds:Guid seq,
                                  centerPoint:Point3d,
-                                 rotationAngle:float,
+                                 rotationAngleDegrees:float,
                                  [<OPT;DEF(Vector3d())>]axis:Vector3d,
                                  [<OPT;DEF(false)>]copy:bool) : Guid ResizeArray = //PLURAL
         let axis = if axis.IsZero then Vector3d.ZAxis else axis
-        let rotationAngle = RhinoMath.ToRadians(rotationAngle)
-        let xf = Transform.Rotation(rotationAngle, axis, centerPoint)
+        let rotationAngleRadians = RhinoMath.ToRadians(rotationAngleDegrees)
+        let xf = Transform.Rotation(rotationAngleRadians, axis, centerPoint)
         let rc = ResizeArray()
         for objectId in objectIds do
             let res = State.Doc.Objects.Transform(objectId, xf, not copy)
-            if res = Guid.Empty then RhinoScriptingException.Raise "RotateObjects failed.  objectId:'%s' centerPoint:'%A' rotationAngle:'%A' axis:'%A' copy:'%A'" (Pretty.str objectId) centerPoint rotationAngle axis copy
+            if res = Guid.Empty then RhinoScriptingException.Raise "RotateObjects failed.  objectId:'%s' centerPoint:'%A' rotationAngleDegrees:'%A' axis:'%A' copy:'%A'" (Pretty.str objectId) centerPoint rotationAngleDegrees axis copy
             rc.Add res
         if copy then RhinoScriptSyntax.putCopiesInNewGroups rc
         rc
@@ -14962,17 +14964,17 @@ type RhinoScriptSyntax private () =
     /// <summary>Returns transformed duplicates of the input geometries. The input is unchanged and the result is not added to a document.</summary>
     /// <param name="geometries">(GeometryBase seq) Input geometry to duplicate and transform.</param>
     /// <param name="centerPoint">(Point3d) The center of rotation</param>
-    /// <param name="rotationAngle">(float) In degrees</param>
+    /// <param name="rotationAngleDegrees">(float) In degrees</param>
     /// <param name="axis">(Vector3d) Optional, default value: <c>Vector3d.ZAxis</c>
     ///    Axis of rotation, If omitted, the Vector3d.ZAxis is used as the rotation axis</param>
     /// <returns>(GeometryBase ResizeArray) The transformed geometry duplicates.</returns>
     static member RotateObjects( geometries:GeometryBase seq,
                                  centerPoint:Point3d,
-                                 rotationAngle:float,
+                                 rotationAngleDegrees:float,
                                  [<OPT;DEF(Vector3d())>]axis:Vector3d) : GeometryBase ResizeArray = //PLURAL
         let axis = if axis.IsZero then Vector3d.ZAxis else axis
-        let rotationAngle = RhinoMath.ToRadians(rotationAngle)
-        let xf = Transform.Rotation(rotationAngle, axis, centerPoint)
+        let rotationAngleRadians = RhinoMath.ToRadians(rotationAngleDegrees)
+        let xf = Transform.Rotation(rotationAngleRadians, axis, centerPoint)
         RhinoScriptSyntax.TransformObjects(geometries, xf)
 
 
@@ -15665,30 +15667,30 @@ type RhinoScriptSyntax private () =
     /// <summary>Compares two vectors to see if they are parallel within one degree or custom tolerance.</summary>
     /// <param name="vector1">(Vector3d) First of the vectors to compare</param>
     /// <param name="vector2">(Vector3d) Second of the vectors to compare</param>
-    /// <param name="toleranceDegree">(float) Optional, default value: <c>1.0</c>
-    ///    Angle tolerance in degrees</param>
+    /// <param name="toleranceDegrees">(float) Optional, default value: <c>0.0</c>
+    ///    Angle tolerance in degrees; 0.0 uses RhinoCommon's default of 1.0 degree</param>
     /// <returns>(int) The value represents
     ///     -1 = the vectors are anti-parallel
     ///      0 = the vectors are not parallel
     ///      1 = the vectors are parallel.</returns>
     static member IsVectorParallelTo(   vector1:Vector3d,
                                         vector2:Vector3d,
-                                        [<OPT;DEF(0.0)>]toleranceDegree:float) : int =
-        if toleranceDegree = 0.0 then vector1.IsParallelTo(vector2)
-        else vector1.IsParallelTo(vector2, toRadians(toleranceDegree))
+                                        [<OPT;DEF(0.0)>]toleranceDegrees:float) : int =
+        if toleranceDegrees = 0.0 then vector1.IsParallelTo(vector2)
+        else vector1.IsParallelTo(vector2, toRadians(toleranceDegrees))
 
 
     /// <summary>Compares two vectors to see if they are perpendicular.</summary>
     /// <param name="vector1">(Vector3d) First of the vectors to compare</param>
     /// <param name="vector2">(Vector3d) Second of the vectors to compare</param>
-    /// <param name="toleranceDegree">(float) Optional, default value: <c>1.0</c>
-    ///    Angle tolerance in degrees</param>
+    /// <param name="toleranceDegrees">(float) Optional, default value: <c>0.0</c>
+    ///    Angle tolerance in degrees; 0.0 uses RhinoCommon's default of 1.0 degree</param>
     /// <returns>(bool) True if vectors are perpendicular, otherwise False.</returns>
     static member IsVectorPerpendicularTo(  vector1:Vector3d,
                                             vector2:Vector3d,
-                                            [<OPT;DEF(0.0)>]toleranceDegree:float) : bool =
-        if toleranceDegree = 0.0 then vector1.IsPerpendicularTo(vector2)
-        else vector1.IsPerpendicularTo(vector2, toRadians(toleranceDegree))
+                                            [<OPT;DEF(0.0)>]toleranceDegrees:float) : bool =
+        if toleranceDegrees = 0.0 then vector1.IsPerpendicularTo(vector2)
+        else vector1.IsPerpendicularTo(vector2, toRadians(toleranceDegrees))
 
 
 
@@ -16060,7 +16062,7 @@ type RhinoScriptSyntax private () =
 
     /// <summary>Rotates a 3D vector. The input vector is not modified, a new Vector3d is returned.</summary>
     /// <param name="vector">(Vector3d) The vector to rotate</param>
-    /// <param name="angleDegrees">(float) Rotation angle</param>
+    /// <param name="angleDegrees">(float) Rotation angle in degrees</param>
     /// <param name="axis">(Vector3d) Axis of rotation</param>
     /// <returns>(Vector3d) rotated vector.</returns>
     static member VectorRotate( vector:Vector3d,
@@ -17239,15 +17241,16 @@ type RhinoScriptSyntax private () =
     ///    3 = curvature</param>
     /// <param name="edgeTolerance">(float) Optional, Edge tolerance</param>
     /// <param name="interiorTolerance">(float) Optional, Interior tolerance</param>
-    /// <param name="angleTolerance">(float) Optional, Angle tolerance , in radians?</param>
+    /// <param name="angleToleranceRadians">(float) Optional, default value: <c>0.0</c>. Angle tolerance in radians, passed directly to RhinoCommon.
+    ///    Use <c>RhinoMath.ToRadians</c> to convert from degrees to radians.</param>
     /// <returns>(Guid) identifier of new object.</returns>
     static member AddNetworkSrf( curves:Guid seq,
                                  [<OPT;DEF(1)>]continuity:int,
                                  [<OPT;DEF(0.0)>]edgeTolerance:float,
                                  [<OPT;DEF(0.0)>]interiorTolerance:float,
-                                 [<OPT;DEF(0.0)>]angleTolerance:float) : Guid =
+                                 [<OPT;DEF(0.0)>]angleToleranceRadians:float) : Guid =
         let curvesGeometry = curves |> RArr.mapSeq RhinoScriptSyntax.CoerceCurve
-        let geometry = RhinoScriptSyntax.MakeNetworkSrf(curvesGeometry, continuity, edgeTolerance, interiorTolerance, angleTolerance)
+        let geometry = RhinoScriptSyntax.MakeNetworkSrf(curvesGeometry, continuity, edgeTolerance, interiorTolerance, angleToleranceRadians)
         let rc = State.Doc.Objects.AddSurface(geometry)
         State.Doc.Views.Redraw()
         rc
@@ -17263,15 +17266,16 @@ type RhinoScriptSyntax private () =
     ///    3 = curvature</param>
     /// <param name="edgeTolerance">(float) Optional, Edge tolerance</param>
     /// <param name="interiorTolerance">(float) Optional, Interior tolerance</param>
-    /// <param name="angleTolerance">(float) Optional, Angle tolerance , in radians?</param>
+    /// <param name="angleToleranceRadians">(float) Optional, default value: <c>0.0</c>. Angle tolerance in radians, passed directly to RhinoCommon.
+    ///    Use <c>RhinoMath.ToRadians</c> to convert from degrees to radians.</param>
     /// <returns>(NurbsSurface) Newly created geometry. The caller owns the returned objects.</returns>
     static member MakeNetworkSrf( curves:Curve seq,
                                  [<OPT;DEF(1)>]continuity:int,
                                  [<OPT;DEF(0.0)>]edgeTolerance:float,
                                  [<OPT;DEF(0.0)>]interiorTolerance:float,
-                                 [<OPT;DEF(0.0)>]angleTolerance:float) : NurbsSurface =
+                                 [<OPT;DEF(0.0)>]angleToleranceRadians:float) : NurbsSurface =
         let curves  = curves |> RArr.mapSeq (fun geometry -> geometry)
-        let surf, _ = NurbsSurface.CreateNetworkSurface(curves, continuity, edgeTolerance, interiorTolerance, angleTolerance)// 0.0 Tolerance OK ? TODO
+        let surf, _ = NurbsSurface.CreateNetworkSurface(curves, continuity, edgeTolerance, interiorTolerance, angleToleranceRadians)// 0.0 Tolerance OK ? TODO
         if notNull surf then
             surf
         else
@@ -17747,17 +17751,17 @@ type RhinoScriptSyntax private () =
     /// <summary>Create a Surface by revolving a Curve around an axis.</summary>
     /// <param name="curveId">(Guid) Identifier of profile Curve</param>
     /// <param name="axis">(Line) Line for the rail revolve axis</param>
-    /// <param name="startAngle">(float) Optional, default value: <c>0.0</c>
-    ///    Start angles of revolve</param>
-    /// <param name="endAngle">(float) Optional, default value: <c>360.0</c>
-    ///    End angles of revolve</param>
+    /// <param name="startAngleDegrees">(float) Optional, default value: <c>0.0</c>
+    ///    Start angle of revolution in degrees</param>
+    /// <param name="endAngleDegrees">(float) Optional, default value: <c>360.0</c>
+    ///    End angle of revolution in degrees</param>
     /// <returns>(Guid) identifier of new object.</returns>
     static member AddRevSrf( curveId:Guid,
                              axis:Line,
-                             [<OPT;DEF(0.0)>]startAngle:float,
-                             [<OPT;DEF(360.0)>]endAngle:float) : Guid =
+                             [<OPT;DEF(0.0)>]startAngleDegrees:float,
+                             [<OPT;DEF(360.0)>]endAngleDegrees:float) : Guid =
         let curveIdGeometry = RhinoScriptSyntax.CoerceCurve(curveId)
-        let geometry = RhinoScriptSyntax.MakeRevSrf(curveIdGeometry, axis, startAngle, endAngle)
+        let geometry = RhinoScriptSyntax.MakeRevSrf(curveIdGeometry, axis, startAngleDegrees, endAngleDegrees)
         let rc = State.Doc.Objects.AddSurface(geometry)
         State.Doc.Views.Redraw()
         rc
@@ -17766,22 +17770,22 @@ type RhinoScriptSyntax private () =
     /// <summary>Create a Surface by revolving a Curve around an axis. Returns geometry without adding it.</summary>
     /// <param name="curveGeo">(Curve) Object of profile Curve</param>
     /// <param name="axis">(Line) Line for the rail revolve axis</param>
-    /// <param name="startAngle">(float) Optional, default value: <c>0.0</c>
-    ///    Start angles of revolve</param>
-    /// <param name="endAngle">(float) Optional, default value: <c>360.0</c>
-    ///    End angles of revolve</param>
+    /// <param name="startAngleDegrees">(float) Optional, default value: <c>0.0</c>
+    ///    Start angle of revolution in degrees</param>
+    /// <param name="endAngleDegrees">(float) Optional, default value: <c>360.0</c>
+    ///    End angle of revolution in degrees</param>
     /// <returns>(NurbsSurface) Newly created geometry. The caller owns the returned objects.</returns>
     static member MakeRevSrf( curveGeo:Curve,
                              axis:Line,
-                             [<OPT;DEF(0.0)>]startAngle:float,
-                             [<OPT;DEF(360.0)>]endAngle:float) : NurbsSurface =
+                             [<OPT;DEF(0.0)>]startAngleDegrees:float,
+                             [<OPT;DEF(360.0)>]endAngleDegrees:float) : NurbsSurface =
         let curve = curveGeo
-        let startAngle = toRadians(startAngle)
-        let endAngle = toRadians(endAngle)
-        let srf = RevSurface.Create(curve, axis, startAngle, endAngle)
-        if isNull srf then RhinoScriptingException.Raise "MakeRevSrf failed. curveGeo:'%s' axis:'%A' startAngle:'%A' endAngle:'%A'" (Pretty.str curveGeo) axis startAngle endAngle
+        let startAngleRadians = toRadians(startAngleDegrees)
+        let endAngleRadians = toRadians(endAngleDegrees)
+        let srf = RevSurface.Create(curve, axis, startAngleRadians, endAngleRadians)
+        if isNull srf then RhinoScriptingException.Raise "MakeRevSrf failed. curveGeo:'%s' axis:'%A' startAngleDegrees:'%A' endAngleDegrees:'%A'" (Pretty.str curveGeo) axis startAngleDegrees endAngleDegrees
         let ns = srf.ToNurbsSurface()
-        if isNull ns then RhinoScriptingException.Raise "MakeRevSrf failed. curveGeo:'%s' axis:'%A' startAngle:'%A' endAngle:'%A'" (Pretty.str curveGeo) axis startAngle endAngle
+        if isNull ns then RhinoScriptingException.Raise "MakeRevSrf failed. curveGeo:'%s' axis:'%A' startAngleDegrees:'%A' endAngleDegrees:'%A'" (Pretty.str curveGeo) axis startAngleDegrees endAngleDegrees
         ns
 
 
@@ -21688,14 +21692,14 @@ type RhinoScriptSyntax private () =
         RhinoSync.DoSync getKeepEditor
 
 
-    /// <summary>Pause for user input of an angle.</summary>
+    /// <summary>Pause for user input of an angle in degrees.</summary>
     /// <param name="point">(Point3d) Optional, default value: <c>Point3d.Unset</c>
     ///    Starting, or base point</param>
     /// <param name="referencePoint">(Point3d) Optional, default value: <c>Point3d.Unset</c>
     ///    If specified, the reference angle is calculated from it and the base point</param>
-    /// <param name="defaultValAngleDegrees">(float) Optional, A default angle value specified</param>
+    /// <param name="defaultValAngleDegrees">(float) Optional, default value: <c>0.0</c>. The default angle in degrees</param>
     /// <param name="message">(string) Optional, A prompt to display</param>
-    /// <returns>(float) Option of angle in degree.
+    /// <returns>(float) The selected angle in degrees.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetAngle( [<OPT;DEF(Point3d())>]point:Point3d, //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
                             [<OPT;DEF(Point3d())>]referencePoint:Point3d,
@@ -22827,14 +22831,14 @@ type RhinoScriptSyntax private () =
         | null -> false
         | frames -> Array.exists isGrasshopper frames
 
-    /// <summary>Measures the angle between two points.</summary>
+    /// <summary>Measures the XY and elevation angles in degrees between two points.</summary>
     /// <param name="point1">(Point3d) Point1 of input points</param>
     /// <param name="point2">(Point3d) Point2 of input points</param>
     /// <param name="plane">(Plane) Optional, default value: <c>Plane.WorldXY</c>
     ///    If a Plane is provided, angle calculation is with respect to this Plane</param>
     /// <returns>(float * float * float * float * float) containing the following elements:
     ///    element 0 = the X, Y angle in degrees
-    ///    element 1 = the elevation
+    ///    element 1 = the elevation angle in degrees
     ///    element 2 = delta in the X direction
     ///    element 3 = delta in the Y direction
     ///    element 4 = delta in the Z direction.
@@ -22856,7 +22860,7 @@ type RhinoScriptSyntax private () =
         angleXY, elevation, x, y, z
 
 
-    /// <summary>Measures the angle between two lines.</summary>
+    /// <summary>Measures the angle and reflex angle in degrees between two lines.</summary>
     /// <param name="line1">(Line) List of 6 numbers or 2 Point3d</param>
     /// <param name="line2">(Line) List of 6 numbers or 2 Point3d</param>
     /// <returns>(float * float) containing the following elements:
@@ -23709,19 +23713,19 @@ type RhinoScriptSyntax private () =
     ///    1 = left
     ///    2 = down
     ///    3 = up</param>
-    /// <param name="angle">(float) The angle to rotate</param>
+    /// <param name="angleDegrees">(float) The angle to rotate in degrees</param>
     /// <param name="view">(string) Optional, Title of the view. If omitted, current active view is used</param>
     /// <returns>(unit) void, nothing.</returns>
     static member RotateCamera( direction:int,
-                                angle:float,
+                                angleDegrees:float,
                                 [<OPT;DEF("")>]view:string) : unit =
         let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         let viewport = view.ActiveViewport
         if direction < 0 || direction > 3 then RhinoScriptingException.Raise "RotateCamera: direction must be 0, 1, 2 or 3"
-        let mutable angle = RhinoMath.ToRadians( abs(angle))
+        let mutable angleRadians = RhinoMath.ToRadians( abs(angleDegrees))
         let targetdistance = (viewport.CameraLocation-viewport.CameraTarget)*viewport.CameraZ
         let mutable axis = viewport.CameraY
-        if direction = 0 || direction = 2 then angle <- -angle
+        if direction = 0 || direction = 2 then angleRadians <- -angleRadians
         if direction = 0 || direction = 1 then
             if ApplicationSettings.ViewSettings.RotateToView then
                 axis <- viewport.CameraY
@@ -23730,8 +23734,8 @@ type RhinoScriptSyntax private () =
         elif direction = 2 || direction = 3 then
             axis <- viewport.CameraX
 
-        if ApplicationSettings.ViewSettings.RotateReverseKeyboard then angle<- -angle
-        let rot = Transform.Rotation(angle, axis, Point3d.Origin)
+        if ApplicationSettings.ViewSettings.RotateReverseKeyboard then angleRadians<- -angleRadians
+        let rot = Transform.Rotation(angleRadians, axis, Point3d.Origin)
         let camUp = rot * viewport.CameraY
         let camDir = -(rot * viewport.CameraZ)
         let target = viewport.CameraLocation + targetdistance*camDir
@@ -23747,22 +23751,20 @@ type RhinoScriptSyntax private () =
     ///    1 = left
     ///    2 = down
     ///    3 = up</param>
-    /// <param name="angle">(float) Angle to rotate. If omitted, the angle of rotation is specified
-    ///    by the "Increment in divisions of a circle" parameter specified in
-    ///    Options command's View tab</param>
+    /// <param name="angleDegrees">(float) The angle to rotate in degrees.</param>
     /// <param name="view">(string) Optional, Title of the view. If omitted, the current active view is used</param>
     /// <returns>(unit) void, nothing.</returns>
     static member RotateView( direction:int,
-                              angle:float,
+                              angleDegrees:float,
                               [<OPT;DEF("")>]view:string) : unit =
         let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         let viewport = view.ActiveViewport
-        let mutable angle =  RhinoMath.ToRadians( abs(angle))
-        if ApplicationSettings.ViewSettings.RotateReverseKeyboard then angle <- -angle
-        if direction = 0 then viewport.KeyboardRotate(true, angle)       |> ignore<bool>
-        elif direction = 1 then viewport.KeyboardRotate(true, -angle)    |> ignore<bool>
-        elif direction = 2 then viewport.KeyboardRotate(false, -angle)   |> ignore<bool>
-        elif direction = 3 then viewport.KeyboardRotate(false, angle)    |> ignore<bool>
+        let mutable angleRadians =  RhinoMath.ToRadians( abs(angleDegrees))
+        if ApplicationSettings.ViewSettings.RotateReverseKeyboard then angleRadians <- -angleRadians
+        if direction = 0 then viewport.KeyboardRotate(true, angleRadians)       |> ignore<bool>
+        elif direction = 1 then viewport.KeyboardRotate(true, -angleRadians)    |> ignore<bool>
+        elif direction = 2 then viewport.KeyboardRotate(false, -angleRadians)   |> ignore<bool>
+        elif direction = 3 then viewport.KeyboardRotate(false, angleRadians)    |> ignore<bool>
         view.Redraw()
 
 
@@ -23907,19 +23909,19 @@ type RhinoScriptSyntax private () =
     /// <param name="direction">(int) The direction to rotate the view where
     ///    0 = right
     ///    1 = left</param>
-    /// <param name="angle">(float) The angle in degrees to rotate</param>
+    /// <param name="angleDegrees">(float) The angle in degrees to rotate</param>
     /// <param name="view">(string) Optional, Title of the view. If omitted, the current active view is used</param>
     /// <returns>(unit) void, nothing.</returns>
     static member TiltView( direction:int,
-                            angle:float,
+                            angleDegrees:float,
                             [<OPT;DEF("")>]view:string) : unit =
         let view = RhinoScriptSyntax.CoerceViewOrActive(view)
         let viewport = view.ActiveViewport
-        let mutable angle = RhinoMath.ToRadians(abs angle)
-        if ApplicationSettings.ViewSettings.RotateReverseKeyboard then angle <- -angle
+        let mutable angleRadians = RhinoMath.ToRadians(abs angleDegrees)
+        if ApplicationSettings.ViewSettings.RotateReverseKeyboard then angleRadians <- -angleRadians
         let axis = viewport.CameraLocation - viewport.CameraTarget
-        if direction = 0 then viewport.Rotate(angle, axis, viewport.CameraLocation) |> ignore<bool>
-        elif direction = 1 then viewport.Rotate(-angle, axis, viewport.CameraLocation)   |> ignore<bool>
+        if direction = 0 then viewport.Rotate(angleRadians, axis, viewport.CameraLocation) |> ignore<bool>
+        elif direction = 1 then viewport.Rotate(-angleRadians, axis, viewport.CameraLocation)   |> ignore<bool>
         view.Redraw()
 
 

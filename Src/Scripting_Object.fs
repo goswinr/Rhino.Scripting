@@ -1290,21 +1290,21 @@ module AutoOpenObject =
     /// <summary>Rotates a single object. With copy=false the object in the document is transformed in place and keeps its Guid, with copy=true the original is left unchanged and a transformed copy is added to the document. The geometry overload returns a transformed duplicate instead and does not touch the document.</summary>
     /// <param name="objectId">(Guid) The identifier of an object to rotate</param>
     /// <param name="centerPoint">(Point3d) The center of rotation</param>
-    /// <param name="rotationAngle">(float) In degrees</param>
+    /// <param name="rotationAngleDegrees">(float) In degrees</param>
     /// <param name="axis">(Vector3d) Optional, default value: <c>Vector3d.ZAxis</c>
     ///    Axis of rotation, If omitted, the Vector3d.ZAxis is used as the rotation axis</param>
     /// <param name="copy">(bool) Optional, default value: <c>false</c>. Copy the object. Copies of grouped objects are put into new groups</param>
     /// <returns>(Guid) Identifier of the rotated object.</returns>
     static member RotateObject( objectId:Guid,
                                 centerPoint:Point3d,
-                                rotationAngle:float,
+                                rotationAngleDegrees:float,
                                 [<OPT;DEF(Vector3d())>]axis:Vector3d,
                                 [<OPT;DEF(false)>]copy:bool) : Guid =
         let axis = if axis.IsZero then Vector3d.ZAxis else axis
-        let rotationAngle = RhinoMath.ToRadians(rotationAngle)
-        let xf = Transform.Rotation(rotationAngle, axis, centerPoint)
+        let rotationAngleRadians = RhinoMath.ToRadians(rotationAngleDegrees)
+        let xf = Transform.Rotation(rotationAngleRadians, axis, centerPoint)
         let res = State.Doc.Objects.Transform(objectId, xf, not copy)
-        if res = Guid.Empty then RhinoScriptingException.Raise "RotateObject failed.  objectId:'%s' centerPoint:'%A' rotationAngle:'%A' axis:'%A' copy:'%A'" (Pretty.str objectId) centerPoint rotationAngle axis copy
+        if res = Guid.Empty then RhinoScriptingException.Raise "RotateObject failed.  objectId:'%s' centerPoint:'%A' rotationAngleDegrees:'%A' axis:'%A' copy:'%A'" (Pretty.str objectId) centerPoint rotationAngleDegrees axis copy
         if copy then RhinoScriptSyntax.putCopiesInNewGroups [res]
         State.Doc.Views.Redraw()
         res
@@ -1313,40 +1313,40 @@ module AutoOpenObject =
     /// <summary>Returns a transformed duplicate of the input geometry. The input is unchanged and the result is not added to a document.</summary>
     /// <param name="geometry">(GeometryBase) Input geometry to duplicate and transform.</param>
     /// <param name="centerPoint">(Point3d) The center of rotation</param>
-    /// <param name="rotationAngle">(float) In degrees</param>
+    /// <param name="rotationAngleDegrees">(float) In degrees</param>
     /// <param name="axis">(Vector3d) Optional, default value: <c>Vector3d.ZAxis</c>
     ///    Axis of rotation, If omitted, the Vector3d.ZAxis is used as the rotation axis</param>
     /// <returns>(GeometryBase) The transformed geometry duplicate.</returns>
     static member RotateObject( geometry:GeometryBase,
                                 centerPoint:Point3d,
-                                rotationAngle:float,
+                                rotationAngleDegrees:float,
                                 [<OPT;DEF(Vector3d())>]axis:Vector3d) : GeometryBase =
         let axis = if axis.IsZero then Vector3d.ZAxis else axis
-        let rotationAngle = RhinoMath.ToRadians(rotationAngle)
-        let xf = Transform.Rotation(rotationAngle, axis, centerPoint)
+        let rotationAngleRadians = RhinoMath.ToRadians(rotationAngleDegrees)
+        let xf = Transform.Rotation(rotationAngleRadians, axis, centerPoint)
         RhinoScriptSyntax.TransformObject(geometry, xf)
 
 
     /// <summary>Rotates multiple objects. With copy=false the objects in the document are transformed in place and keep their Guids, with copy=true the originals are left unchanged and transformed copies are added to the document. The geometry overload returns transformed duplicates instead and does not touch the document.</summary>
     /// <param name="objectIds">(Guid seq) Identifiers of objects to rotate</param>
     /// <param name="centerPoint">(Point3d) The center of rotation</param>
-    /// <param name="rotationAngle">(float) In degrees</param>
+    /// <param name="rotationAngleDegrees">(float) In degrees</param>
     /// <param name="axis">(Vector3d) Optional, default value: <c>Vector3d.ZAxis</c>
     ///    Axis of rotation, If omitted, the Vector3d.ZAxis is used as the rotation axis</param>
     /// <param name="copy">(bool) Optional, default value: <c>false</c>. Copy the object. Copies of grouped objects are put into new groups</param>
     /// <returns>(Guid ResizeArray) identifiers of the rotated objects.</returns>
     static member RotateObjects( objectIds:Guid seq,
                                  centerPoint:Point3d,
-                                 rotationAngle:float,
+                                 rotationAngleDegrees:float,
                                  [<OPT;DEF(Vector3d())>]axis:Vector3d,
                                  [<OPT;DEF(false)>]copy:bool) : Guid ResizeArray = //PLURAL
         let axis = if axis.IsZero then Vector3d.ZAxis else axis
-        let rotationAngle = RhinoMath.ToRadians(rotationAngle)
-        let xf = Transform.Rotation(rotationAngle, axis, centerPoint)
+        let rotationAngleRadians = RhinoMath.ToRadians(rotationAngleDegrees)
+        let xf = Transform.Rotation(rotationAngleRadians, axis, centerPoint)
         let rc = ResizeArray()
         for objectId in objectIds do
             let res = State.Doc.Objects.Transform(objectId, xf, not copy)
-            if res = Guid.Empty then RhinoScriptingException.Raise "RotateObjects failed.  objectId:'%s' centerPoint:'%A' rotationAngle:'%A' axis:'%A' copy:'%A'" (Pretty.str objectId) centerPoint rotationAngle axis copy
+            if res = Guid.Empty then RhinoScriptingException.Raise "RotateObjects failed.  objectId:'%s' centerPoint:'%A' rotationAngleDegrees:'%A' axis:'%A' copy:'%A'" (Pretty.str objectId) centerPoint rotationAngleDegrees axis copy
             rc.Add res
         if copy then RhinoScriptSyntax.putCopiesInNewGroups rc
         rc
@@ -1355,17 +1355,17 @@ module AutoOpenObject =
     /// <summary>Returns transformed duplicates of the input geometries. The input is unchanged and the result is not added to a document.</summary>
     /// <param name="geometries">(GeometryBase seq) Input geometry to duplicate and transform.</param>
     /// <param name="centerPoint">(Point3d) The center of rotation</param>
-    /// <param name="rotationAngle">(float) In degrees</param>
+    /// <param name="rotationAngleDegrees">(float) In degrees</param>
     /// <param name="axis">(Vector3d) Optional, default value: <c>Vector3d.ZAxis</c>
     ///    Axis of rotation, If omitted, the Vector3d.ZAxis is used as the rotation axis</param>
     /// <returns>(GeometryBase ResizeArray) The transformed geometry duplicates.</returns>
     static member RotateObjects( geometries:GeometryBase seq,
                                  centerPoint:Point3d,
-                                 rotationAngle:float,
+                                 rotationAngleDegrees:float,
                                  [<OPT;DEF(Vector3d())>]axis:Vector3d) : GeometryBase ResizeArray = //PLURAL
         let axis = if axis.IsZero then Vector3d.ZAxis else axis
-        let rotationAngle = RhinoMath.ToRadians(rotationAngle)
-        let xf = Transform.Rotation(rotationAngle, axis, centerPoint)
+        let rotationAngleRadians = RhinoMath.ToRadians(rotationAngleDegrees)
+        let xf = Transform.Rotation(rotationAngleRadians, axis, centerPoint)
         RhinoScriptSyntax.TransformObjects(geometries, xf)
 
 
